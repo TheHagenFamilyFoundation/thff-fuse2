@@ -2,8 +2,10 @@
     <div class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none sm:bg-card">
         <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
             <!-- Logo -->
-            <div class="w-12">
-                <img src="assets/images/logo/logo.svg">
+            <div>
+                <div align="center" class="left">
+                    <img [src]="fullImagePath" width="150px" height="150px" />
+                </div>
             </div>
 
             <!-- Title -->
@@ -16,16 +18,7 @@
                 </a>
             </div>
 
-            <!-- Alert -->
-            <fuse-alert
-                class="mt-8 -mb-4"
-                *ngIf="showAlert"
-                [appearance]="'outline'"
-                [showIcon]="false"
-                [type]="alert.type"
-                [@shake]="alert.type === 'error'">
-                {{alert.message}}
-            </fuse-alert>
+ 
 
             <!-- Sign in form -->
             <form
@@ -78,11 +71,11 @@
 
                 <!-- Actions -->
                 <div class="inline-flex items-end justify-between w-full mt-1.5">
-                    <mat-checkbox
+                    <!-- <mat-checkbox
                         [color]="'primary'"
                         [formControlName]="'rememberMe'">
                         Remember me
-                    </mat-checkbox>
+                    </mat-checkbox> -->
                     <a
                         class="text-md font-medium text-primary-500 hover:underline"
                         [routerLink]="['/forgot-password']">Forgot password?
@@ -95,7 +88,7 @@
                     mat-flat-button
                     [color]="'primary'"
                     [disabled]="signInForm.disabled"
-                    (click)="signIn()">
+                    (click)="signIn()"> 
                     <span *ngIf="!signInForm.disabled">
                         Sign in
                     </span>
@@ -105,41 +98,19 @@
                         [mode]="'indeterminate'"></mat-progress-spinner>
                 </button>
 
-                <!-- Separator -->
-                <div class="flex items-center mt-8">
-                    <div class="flex-auto mt-px border-t"></div>
-                    <div class="mx-2 text-secondary">Or continue with</div>
-                    <div class="flex-auto mt-px border-t"></div>
-                </div>
-
-                <!-- Single sign-on buttons -->
-                <div class="flex items-center mt-8 space-x-4">
-                    <button
-                        class="flex-auto"
-                        type="button"
-                        mat-stroked-button>
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'feather:facebook'"></mat-icon>
-                    </button>
-                    <button
-                        class="flex-auto"
-                        type="button"
-                        mat-stroked-button>
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'feather:twitter'"></mat-icon>
-                    </button>
-                    <button
-                        class="flex-auto"
-                        type="button"
-                        mat-stroked-button>
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'feather:github'"></mat-icon>
-                    </button>
-                </div>
             </form>
+
+           <!-- Alert -->
+           <fuse-alert
+           class="mt-8 -mb-4"
+           *ngIf="showAlert"
+           [appearance]="'outline'"
+           [showIcon]="false"
+           [type]="alert.type"
+           [@shake]="alert.type === 'error'">
+           {{alert.message}}
+       </fuse-alert>
+
         </div>
     </div>
     <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-800 dark:border-l">
@@ -173,7 +144,7 @@
                 Fuse helps developers to build organized and well coded dashboards full of beautiful and rich modules.
                 Join us and start building your application today.
             </div>
-            <div class="flex items-center mt-8">
+            <!-- <div class="flex items-center mt-8">
                 <div class="flex flex-0 items-center -space-x-1.5">
                     <img
                         class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
@@ -189,7 +160,7 @@
                         src="assets/images/avatars/male-16.jpg">
                 </div>
                 <div class="ml-4 font-medium tracking-tight text-gray-400">More than 17k people joined us, it's your turn</div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

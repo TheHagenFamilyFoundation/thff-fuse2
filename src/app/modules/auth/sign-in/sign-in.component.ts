@@ -22,6 +22,8 @@ export class AuthSignInComponent implements OnInit
     signInForm: FormGroup;
     showAlert: boolean = false;
 
+    fullImagePath = '../assets/images/logo/logo_2020_9.svg';
+
     /**
      * Constructor
      */
@@ -45,8 +47,8 @@ export class AuthSignInComponent implements OnInit
     {
         // Create the form
         this.signInForm = this._formBuilder.group({
-            email     : ['hughes.brian@company.com', [Validators.required, Validators.email]],
-            password  : ['admin', Validators.required],
+            email     : ['example@email.com', [Validators.required, Validators.email]],
+            password  : ['example', Validators.required],
             rememberMe: ['']
         });
     }

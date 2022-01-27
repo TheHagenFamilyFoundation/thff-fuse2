@@ -1,7 +1,13 @@
 <!doctype html>
 <html lang="en">
+    <script>
+        var host = "www.hagenfamilyfoundation.org";
+        if ((host == window.location.host) && (window.location.protocol != "https:")){
+        window.location.protocol = "https";
+        }
+        </script>
     <head>
-        <title>Fuse Angular - Angular Template and Starter Kit</title>
+        <title>The Hagen Family Foundation</title>
         <meta charset="utf-8">
         <meta
             name="description"
@@ -16,6 +22,10 @@
         <base href="/">
 
         <!-- Favicon -->
+        <!-- <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico"> -->
         <link
             rel="icon"
             type="image/png"
@@ -54,7 +64,7 @@
         <!-- Splash screen -->
         <fuse-splash-screen>
             <img
-                src="assets/images/logo/logo.svg"
+                src="assets/images/logo/image2vector.svg"
                 alt="Fuse logo">
             <div class="spinner">
                 <div class="bounce1"></div>
