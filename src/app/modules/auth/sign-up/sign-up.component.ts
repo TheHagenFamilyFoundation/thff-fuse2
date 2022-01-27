@@ -22,6 +22,8 @@ export class AuthSignUpComponent implements OnInit
     signUpForm: FormGroup;
     showAlert: boolean = false;
 
+    fullImagePath = '../assets/images/logo/logo_2020_9.svg';
+
     /**
      * Constructor
      */
@@ -47,8 +49,8 @@ export class AuthSignUpComponent implements OnInit
                 name      : ['', Validators.required],
                 email     : ['', [Validators.required, Validators.email]],
                 password  : ['', Validators.required],
-                company   : [''],
-                agreements: ['', Validators.requiredTrue]
+                // company   : [''],
+                // agreements: ['', Validators.requiredTrue]
             }
         );
     }

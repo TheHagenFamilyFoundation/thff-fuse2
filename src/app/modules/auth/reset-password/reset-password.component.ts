@@ -23,6 +23,8 @@ export class AuthResetPasswordComponent implements OnInit
     resetPasswordForm: FormGroup;
     showAlert: boolean = false;
 
+    fullImagePath = '../assets/images/logo/logo_2020_9.svg';
+
     /**
      * Constructor
      */
