@@ -60,6 +60,7 @@ export const appRoutes: Route[] = [
             layout: 'empty'
         },
         children   : [
+            //TODO update path
             {path: 'home', loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)},
         ]
     },
