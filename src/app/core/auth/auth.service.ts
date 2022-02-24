@@ -3,11 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class AuthService
 {
     private _authenticated: boolean = false;
+
+    private apiUrl: string;
 
     /**
      * Constructor
@@ -17,6 +20,16 @@ export class AuthService
         private _userService: UserService
     )
     {
+        console.log('auth service constructor');
+        console.log('auth service - environment', environment);
+
+        if (!environment.production) {
+            console.log('production env', environment.production);
+            this.apiUrl = environment.apiUrl;
+        } else {
+            this.apiUrl = this.getBackendURL();
+            console.log('auth-service - this.apiUrl', this.apiUrl);
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -73,7 +86,7 @@ export class AuthService
             return throwError('User is already logged in.');
         }
 
-        return this._httpClient.post('api/auth/sign-in', credentials).pipe(
+        return this._httpClient.put(`${this.apiUrl}/login`, credentials).pipe(
             switchMap((response: any) => {
 
                 // Store the access token in the local storage
@@ -182,5 +195,17 @@ export class AuthService
 
         // If the access token exists and it didn't expire, sign in using it
         return this.signInUsingToken();
+    }
+
+    getBackendURL(): string {
+        return sessionStorage.getItem('backend_url');
+    }
+
+    initializeBackendURL(): Observable<any> {
+        if (environment.production === true) {
+            console.log('getting backend URL', `${window.location.origin}/backend`);
+
+            return this._httpClient.get(`${window.location.origin}/backend`);
+        }
     }
 }
