@@ -89,8 +89,10 @@ export class AuthService
         return this._httpClient.put(`${this.apiUrl}/login`, credentials).pipe(
             switchMap((response: any) => {
 
+                console.log('response',response);
+
                 // Store the access token in the local storage
-                this.accessToken = response.accessToken;
+                this.accessToken = response.token;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
