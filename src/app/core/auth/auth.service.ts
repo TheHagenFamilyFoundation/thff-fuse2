@@ -163,6 +163,21 @@ export class AuthService {
     }
 
     /**
+     * Sign up
+     *
+     * @param userCode object
+     */
+    confirmUser(code: string): Observable<any> {
+        const userCode = {
+            confirmCode: code,
+        };
+        return this._httpClient.post(
+            `${this.apiUrl}/auth/confirm-user`,
+            userCode
+        );
+    }
+
+    /**
      * Unlock session
      *
      * @param credentials
