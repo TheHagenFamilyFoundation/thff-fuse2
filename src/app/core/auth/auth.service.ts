@@ -154,12 +154,12 @@ export class AuthService {
      * @param user
      */
     signUp(user: {
-        name: string;
+        // name: string;
         email: string;
         password: string;
-        company: string;
+        // company: string;
     }): Observable<any> {
-        return this._httpClient.post('api/auth/sign-up', user);
+        return this._httpClient.post(`${this.apiUrl}/auth/sign-up`, user);
     }
 
     /**
