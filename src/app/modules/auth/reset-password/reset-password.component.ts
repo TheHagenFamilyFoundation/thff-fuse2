@@ -100,61 +100,6 @@ export class AuthResetPasswordComponent implements OnInit {
             np: this.resetPasswordForm.get('password').value,
             rc: this.resetCode,
         };
-
-        // const observer = {
-        //     next: (x) => {
-        //         console.log('Observer got a next value: ');
-        //         console.log(x);
-        //     },
-        //     error: (err) => {
-        //         console.error('Observer got an error: ' + err);
-        //         this._router.navigate(['sign-in']);
-        //     },
-        //     complete: () => {
-        //         console.log('Observer got a complete notification');
-        //     },
-        // };
-
-        // this._authService.resetPassword(passwordPayload).subscribe(observer);
-
-        // let reset = false;
-
-        // this.validPasswordReset = this._authService
-        //     .resetPassword(passwordPayload)
-        //     .subscribe(
-        //         (data) => {
-        //             console.log('new password set');
-        //             console.log('data');
-        //             console.log(data);
-
-        //             reset = data.reset;
-        //             const { message } = data;
-
-        //             if (message) {
-        //                 this.alert = {
-        //                     type: 'success',
-        //                     message: 'Your password has been reset.',
-        //                 };
-        //             }
-
-        //             if (reset) {
-        //                 const snackBarRef = this.snackBar.open(message, 'OK', {
-        //                     duration: 5000,
-        //                 });
-
-        //                 this._router.navigate(['sign-in']);
-        //             } else {
-        //                 // error message
-
-        //                 console.log(`Error: ${reset}`);
-        //                 // this.CanSetNewPassword = false;
-        //             }
-        //         },
-        //         (err) => {
-        //             console.error('error');
-        //         }
-        //     );
-
         // Send the request to the server
         this._authService
             .resetPassword(passwordPayload)
@@ -169,9 +114,17 @@ export class AuthResetPasswordComponent implements OnInit {
                     // Show the alert
                     this.showAlert = true;
 
-                    // console.log('routing to sign-in');
-
-                    // this._router.navigate(['sign-in']);
+                    // Redirect after the countdown
+                    timer(1000, 1000)
+                        .pipe(
+                            finalize(() => {
+                                this._router.navigate(['sign-in']);
+                            }),
+                            takeWhile(() => this.countdown > 0),
+                            takeUntil(this._unsubscribeAll),
+                            tap(() => this.countdown--)
+                        )
+                        .subscribe();
                 })
             )
             .subscribe(
@@ -190,18 +143,6 @@ export class AuthResetPasswordComponent implements OnInit {
                         type: 'error',
                         message: response.error.message,
                     };
-
-                    // Redirect after the countdown
-                    timer(1000, 1000)
-                        .pipe(
-                            finalize(() => {
-                                this._router.navigate(['sign-in']);
-                            }),
-                            takeWhile(() => this.countdown > 0),
-                            takeUntil(this._unsubscribeAll),
-                            tap(() => this.countdown--)
-                        )
-                        .subscribe();
                 }
             );
     }
