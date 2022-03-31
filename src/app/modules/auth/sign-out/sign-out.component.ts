@@ -14,6 +14,9 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
         '=1': '# second',
         other: '# seconds',
     };
+
+    fullImagePath = '../assets/images/logo/logo_2020_9.svg';
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
