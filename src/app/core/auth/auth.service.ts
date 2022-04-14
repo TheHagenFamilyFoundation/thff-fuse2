@@ -45,6 +45,17 @@ export class AuthService {
     get accessToken(): string {
         return localStorage.getItem('accessToken') ?? '';
     }
+    /**
+     * Setter & getter for current user
+     */
+    set currentUser(currentUser: any) {
+        console.log('storing currentUser', currentUser);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    get currentUser(): any {
+        return localStorage.getItem('currentUser') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -90,6 +101,8 @@ export class AuthService {
             .put(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
+                    console.log('user', response.user);
+
                     // Store the access token in the local storage
                     this.accessToken = response.token;
 
@@ -97,7 +110,7 @@ export class AuthService {
                     this._authenticated = true;
 
                     // Store the user on the user service
-                    this._userService.user = response.user;
+                    this.currentUser = response.user;
 
                     // Return a new observable with the response
                     return of(response);

@@ -1,3 +1,4 @@
+/* eslint-disable arrow-parens */
 import { Route } from '@angular/router';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
@@ -118,6 +119,25 @@ export const appRoutes: Route[] = [
             },
         ],
     },
+    // Authenticated routes
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: InitialDataResolver,
+        },
+        children: [
+            {
+                path: 'example',
+                loadChildren: () =>
+                    import('app/modules/admin/example/example.module').then(
+                        (m) => m.ExampleModule
+                    ),
+            },
+        ],
+    },
 
     // Admin routes
     {
@@ -130,7 +150,7 @@ export const appRoutes: Route[] = [
         },
         children: [
             {
-                path: 'example',
+                path: 'admin',
                 loadChildren: () =>
                     import('app/modules/admin/example/example.module').then(
                         (m) => m.ExampleModule

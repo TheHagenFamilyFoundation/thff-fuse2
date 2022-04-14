@@ -3,10 +3,10 @@
     mat-icon-button
     [matMenuTriggerFor]="userActions">
     <span class="relative">
-        <img
+        <!-- <img
             class="w-7 h-7 rounded-full"
             *ngIf="showAvatar && user.avatar"
-            [src]="user.avatar">
+            [src]="user.avatar"> -->
         <mat-icon
             *ngIf="!showAvatar || !user.avatar"
             [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
