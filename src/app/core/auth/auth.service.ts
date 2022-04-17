@@ -1,16 +1,27 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import {
+    BehaviorSubject,
+    catchError,
+    Observable,
+    of,
+    switchMap,
+    throwError,
+} from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { environment } from '../../../environments/environment';
-
+import { User } from 'app/core/user/user.types';
 @Injectable()
 export class AuthService {
     private _authenticated: boolean = false;
 
     private apiUrl: string;
+
+    private currentUserSubject: BehaviorSubject<User>;
+
+    public currentUser: Observable<User>;
 
     /**
      * Constructor
@@ -29,6 +40,15 @@ export class AuthService {
             this.apiUrl = this.getBackendURL();
             console.log('auth-service - this.apiUrl', this.apiUrl);
         }
+
+        this.currentUserSubject = new BehaviorSubject<User>(
+            JSON.parse(localStorage.getItem('currentUser'))
+        );
+        this.currentUser = this.currentUserSubject.asObservable();
+    }
+
+    public get currentUserValue(): any {
+        return this.currentUserSubject.value;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -45,17 +65,17 @@ export class AuthService {
     get accessToken(): string {
         return localStorage.getItem('accessToken') ?? '';
     }
-    /**
-     * Setter & getter for current user
-     */
-    set currentUser(currentUser: any) {
-        console.log('storing currentUser', currentUser);
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    }
+    // /**
+    //  * Setter & getter for current user
+    //  */
+    // set currentUser(currentUser: any) {
+    //     console.log('storing currentUser', currentUser);
+    //     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // }
 
-    get currentUser(): any {
-        return localStorage.getItem('currentUser') ?? '';
-    }
+    // get currentUser(): any {
+    //     return localStorage.getItem('currentUser') ?? '';
+    // }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -109,8 +129,14 @@ export class AuthService {
                     // Set the authenticated flag to true
                     this._authenticated = true;
 
-                    // Store the user on the user service
-                    this.currentUser = response.user;
+                    // // Store the user on the user service
+                    // this.currentUser = response.user;
+
+                    localStorage.setItem(
+                        'currrentUser',
+                        JSON.stringify(response.user)
+                    );
+                    this.currentUserSubject.next(response.user);
 
                     // Return a new observable with the response
                     return of(response);
@@ -154,6 +180,7 @@ export class AuthService {
     signOut(): Observable<any> {
         // Remove the access token from the local storage
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
 
         // Set the authenticated flag to false
         this._authenticated = false;

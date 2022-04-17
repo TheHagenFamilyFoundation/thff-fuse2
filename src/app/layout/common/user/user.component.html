@@ -7,17 +7,17 @@
             class="w-7 h-7 rounded-full"
             *ngIf="showAvatar && user.avatar"
             [src]="user.avatar"> -->
-        <mat-icon
+        <!-- <mat-icon
             *ngIf="!showAvatar || !user.avatar"
-            [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-        <span
+            [svgIcon]="'heroicons_outline:user-circle'"></mat-icon> -->
+            <mat-icon>account_circle</mat-icon>
+        <!-- <span
             class="absolute right-0 bottom-0 w-2 h-2 rounded-full"
-            [ngClass]="{'mr-px mb-px': !showAvatar || !user.avatar,
-                          'bg-green-500': user.status === 'online',
+            [ngClass]="{  'bg-green-500': user.status === 'online',
                           'bg-amber-500': user.status === 'away',
                           'bg-red-500': user.status === 'busy',
                           'bg-gray-400': user.status === 'not-visible'}"
-        ></span>
+        ></span> -->
     </span>
 </button>
 
@@ -39,12 +39,12 @@
         <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
         <span>Settings</span>
     </button>
-    <button
+    <!-- <button
         mat-menu-item
         [matMenuTriggerFor]="userStatus">
         <mat-icon [svgIcon]="'heroicons_outline:dots-circle-horizontal'"></mat-icon>
         <span>Status</span>
-    </button>
+    </button> -->
     <mat-divider class="my-2"></mat-divider>
     <button
         mat-menu-item
@@ -54,7 +54,7 @@
     </button>
 </mat-menu>
 
-<mat-menu
+<!-- <mat-menu
     class="user-status-menu"
     #userStatus="matMenu">
     <button
@@ -81,4 +81,4 @@
         <span class="w-4 h-4 mr-3 rounded-full bg-gray-400"></span>
         <span>Invisible</span>
     </button>
-</mat-menu>
+</mat-menu> -->
