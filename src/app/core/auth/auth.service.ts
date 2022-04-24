@@ -98,7 +98,8 @@ export class AuthService {
             .put(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
-                    console.log('response', response);
+                    //debug
+                    // console.log('response', response);
 
                     // Store the access token in the local storage
                     this.accessToken = response.token;
@@ -107,13 +108,13 @@ export class AuthService {
                     //TODO: debug can remove
                     // console.log(
                     //     'currentUser - user',
-                    //     JSON.parse(this.currentUser).email
+                    //     JSON.parse(this.currentUser)
                     // );
 
                     // Set the authenticated flag to true
                     this._authenticated = true;
 
-                    // Store the user on the user service
+                    // // Store the user on the user service
                     this._userService.user = response.user;
 
                     // Return a new observable with the response
