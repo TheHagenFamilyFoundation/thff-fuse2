@@ -46,6 +46,14 @@ export class AuthService {
         return localStorage.getItem('accessToken') ?? '';
     }
 
+    set currentUser(user: string) {
+        localStorage.setItem('currentUser', user);
+    }
+
+    get currentUser(): string {
+        return localStorage.getItem('currentUser') ?? '';
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -90,8 +98,17 @@ export class AuthService {
             .put(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
+                    console.log('response', response);
+
                     // Store the access token in the local storage
                     this.accessToken = response.token;
+                    this.currentUser = JSON.stringify(response.user);
+
+                    //TODO: debug can remove
+                    // console.log(
+                    //     'currentUser - user',
+                    //     JSON.parse(this.currentUser).email
+                    // );
 
                     // Set the authenticated flag to true
                     this._authenticated = true;
