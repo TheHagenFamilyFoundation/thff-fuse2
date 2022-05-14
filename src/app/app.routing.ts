@@ -119,7 +119,7 @@ export const appRoutes: Route[] = [
         ],
     },
 
-    // Admin routes
+    // Authenticated routes
     {
         path: '',
         canActivate: [AuthGuard],
@@ -134,6 +134,13 @@ export const appRoutes: Route[] = [
                 loadChildren: () =>
                     import('app/modules/admin/example/example.module').then(
                         (m) => m.ExampleModule
+                    ),
+            },
+            {
+                path: 'user',
+                loadChildren: () =>
+                    import('app/modules/user/user.module').then(
+                        (m) => m.UserModule
                     ),
             },
         ],
