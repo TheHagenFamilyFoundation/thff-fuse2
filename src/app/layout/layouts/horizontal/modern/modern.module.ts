@@ -18,11 +18,13 @@ import { UserModule } from 'app/layout/common/user/user.module';
 import { SharedModule } from 'app/shared/shared.module';
 import { ModernLayoutComponent } from 'app/layout/layouts/horizontal/modern/modern.component';
 
+import { GetUserService } from '../../../../core/services/user/get-user.service';
+import { InOrgService } from '../../../../core/services/user/in-org.service';
+import { DirectorService } from '../../../../core/services/user/director.service';
+
 @NgModule({
-    declarations: [
-        ModernLayoutComponent
-    ],
-    imports     : [
+    declarations: [ModernLayoutComponent],
+    imports: [
         HttpClientModule,
         RouterModule,
         MatButtonModule,
@@ -39,12 +41,9 @@ import { ModernLayoutComponent } from 'app/layout/layouts/horizontal/modern/mode
         SearchModule,
         ShortcutsModule,
         UserModule,
-        SharedModule
+        SharedModule,
     ],
-    exports     : [
-        ModernLayoutComponent
-    ]
+    providers: [GetUserService, InOrgService, DirectorService],
+    exports: [ModernLayoutComponent],
 })
-export class ModernLayoutModule
-{
-}
+export class ModernLayoutModule {}

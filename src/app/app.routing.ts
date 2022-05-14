@@ -136,6 +136,29 @@ export const appRoutes: Route[] = [
                         (m) => m.ExampleModule
                     ),
             },
+
+            // Pages
+            {
+                path: 'pages',
+                children: [
+                    // Profile
+                    {
+                        path: 'profile',
+                        loadChildren: () =>
+                            import(
+                                'app/modules/admin/pages/profile/profile.module'
+                            ).then((m) => m.ProfileModule),
+                    },
+                    // Settings
+                    {
+                        path: 'settings',
+                        loadChildren: () =>
+                            import(
+                                'app/modules/admin/pages/settings/settings.module'
+                            ).then((m) => m.SettingsModule),
+                    },
+                ],
+            },
         ],
     },
 ];

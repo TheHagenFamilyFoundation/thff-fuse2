@@ -43,12 +43,45 @@
                 <button mat-button>
                     <mat-icon>home</mat-icon>
                 </button>
-                <button mat-button>
-                    Organizations
-                </button>
-                <button mat-button>
-                    Directors
-                </button>
+                <div *ngIf="isLoggedIn">
+                    <div *ngIf="!inOrganization">
+                        <button
+                            mat-button
+                            routerLink="pages/create-organization"
+                            fxHide="false"
+                        >
+                            Create Organization
+                        </button>
+                    </div>
+                    <div *ngIf="inOrganization">
+                        <button mat-button [matMenuTriggerFor]="orgMenu">
+                            Organizations
+                        </button>
+                        <mat-menu #orgMenu="matMenu">
+                            <button mat-menu-item (click)="viewOrgs()">
+                                View Organizations
+                            </button>
+                            <button mat-menu-item (click)="createOrg()">
+                                Create Organization
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+                <div
+                    *ngIf="
+                        isLoggedIn && _directorService.isDirector()
+                    "
+                >
+                    <!-- <div *ngIf="IsDirector"> -->
+                    <button
+                        mat-button
+                        (click)="routeToDirectorsPage()"
+                        fxHide="false"
+                    >
+                        Directors
+                    </button>
+                    <!-- </div> -->
+                </div>
             </div>
             <!-- Horizontal navigation -->
             <!-- <fuse-horizontal-navigation

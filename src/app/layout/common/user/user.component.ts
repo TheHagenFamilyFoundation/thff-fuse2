@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { BooleanInput } from '@angular/cdk/coercion';
 import { Subject, BehaviorSubject, Observable, takeUntil } from 'rxjs';
 import { User } from 'app/core/user/user.types';
-import { UserService } from 'app/core/user/user.service';
+import { UserService } from 'app/core/services/user/user.service';
 
 @Component({
     selector: 'user',
