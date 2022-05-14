@@ -136,13 +136,6 @@ export const appRoutes: Route[] = [
                         (m) => m.ExampleModule
                     ),
             },
-            {
-                path: 'user',
-                loadChildren: () =>
-                    import('app/modules/user/user.module').then(
-                        (m) => m.UserModule
-                    ),
-            },
         ],
     },
 ];
