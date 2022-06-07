@@ -3,22 +3,25 @@ import {
     Component,
     OnInit,
     ViewEncapsulation,
+    OnDestroy,
 } from '@angular/core';
-
+import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
+import { FuseConfigService } from '@fuse/services/config';
+import { Subject, takeUntil } from 'rxjs';
 @Component({
     selector: 'settings-app',
     templateUrl: './app-settings.component.html',
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsAppComponent implements OnInit {
-    members: any[];
-    roles: any[];
-
+export class SettingsAppComponent implements OnInit, OnDestroy {
+    config: AppConfig;
+    scheme: 'dark' | 'light';
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     /**
      * Constructor
      */
-    constructor() {}
+    constructor(private _fuseConfigService: FuseConfigService) {}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -28,73 +31,22 @@ export class SettingsAppComponent implements OnInit {
      * On init
      */
     ngOnInit(): void {
-        // Setup the team members
-        this.members = [
-            {
-                avatar: 'assets/images/avatars/male-01.jpg',
-                name: 'Dejesus Michael',
-                email: 'dejesusmichael@mail.org',
-                role: 'admin',
-            },
-            {
-                avatar: 'assets/images/avatars/male-03.jpg',
-                name: 'Mclaughlin Steele',
-                email: 'mclaughlinsteele@mail.me',
-                role: 'admin',
-            },
-            {
-                avatar: 'assets/images/avatars/female-02.jpg',
-                name: 'Laverne Dodson',
-                email: 'lavernedodson@mail.ca',
-                role: 'write',
-            },
-            {
-                avatar: 'assets/images/avatars/female-03.jpg',
-                name: 'Trudy Berg',
-                email: 'trudyberg@mail.us',
-                role: 'read',
-            },
-            {
-                avatar: 'assets/images/avatars/male-07.jpg',
-                name: 'Lamb Underwood',
-                email: 'lambunderwood@mail.me',
-                role: 'read',
-            },
-            {
-                avatar: 'assets/images/avatars/male-08.jpg',
-                name: 'Mcleod Wagner',
-                email: 'mcleodwagner@mail.biz',
-                role: 'read',
-            },
-            {
-                avatar: 'assets/images/avatars/female-07.jpg',
-                name: 'Shannon Kennedy',
-                email: 'shannonkennedy@mail.ca',
-                role: 'read',
-            },
-        ];
+        // Subscribe to config changes
+        this._fuseConfigService.config$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((config: AppConfig) => {
+                // Store the config
+                this.config = config;
+            });
+    }
 
-        // Setup the roles
-        this.roles = [
-            {
-                label: 'Read',
-                value: 'read',
-                description:
-                    'Can read and clone this repository. Can also open and comment on issues and pull requests.',
-            },
-            {
-                label: 'Write',
-                value: 'write',
-                description:
-                    'Can read, clone, and push to this repository. Can also manage issues and pull requests.',
-            },
-            {
-                label: 'Admin',
-                value: 'admin',
-                description:
-                    'Can read, clone, and push to this repository. Can also manage issues, pull requests, and repository settings, including adding collaborators.',
-            },
-        ];
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -102,12 +54,11 @@ export class SettingsAppComponent implements OnInit {
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Track by function for ngFor loops
+     * Set the scheme on the config
      *
-     * @param index
-     * @param item
+     * @param scheme
      */
-    trackByFn(index: number, item: any): any {
-        return item.id || index;
+    setScheme(scheme: Scheme): void {
+        this._fuseConfigService.config = { scheme };
     }
 }
