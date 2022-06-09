@@ -2,8 +2,23 @@
 
     <!-- Scheme -->
     <div class="text-md font-semibold text-secondary">SCHEME</div>
-    <div class="grid grid-cols-3 gap-3 justify-items-start mt-6">
-        <!-- Auto -->
+
+    <!-- Form -->
+    <!-- <form [formGroup]="accountForm"> -->
+    <form>
+
+        <!-- Section -->
+        <div class="w-full">
+            <div class="text-xl">Personal Information</div>
+            <div class="text-secondary">Communication details in case we want to connect with you. These will be kept private.</div>
+        </div>
+       
+        <div class="grid grid-cols-3 gap-3 justify-items-start mt-6">
+
+        <!-- Divider -->
+        <!-- <div class="mt-11 mb-10 border-t"></div> -->
+ 
+       <!-- Auto -->
         <!-- <div
             class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
             [class.ring-2]="config.scheme === 'auto'"
@@ -52,6 +67,40 @@
                 Light
             </div>
         </div>
-    </div>
 
+        <!-- Divider -->
+        <div class="mt-11 mb-10 border-t"></div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end">
+            <button
+                mat-stroked-button
+                type="button">
+                Cancel
+            </button>
+            <button
+                class="ml-4"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Save
+            </button>
+        </div>
+        </div>
+    </form>
+
+
+
+    <!-- <form [formGroup]="accountForm"> -->
+    <!-- <form>
+    <div class="grid grid-cols-3 gap-3 justify-items-start mt-6"> -->
+
+
+
+
+
+
+ 
+
+    <!-- </div>
+</form> -->
 </div>
