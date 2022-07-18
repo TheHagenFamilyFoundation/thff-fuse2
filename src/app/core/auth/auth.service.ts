@@ -5,13 +5,10 @@ import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/services/user/user.service';
 import { environment } from '../../../environments/environment';
-
 @Injectable()
 export class AuthService {
     private _authenticated: boolean = false;
-
     private apiUrl: string;
-
     /**
      * Constructor
      */
@@ -99,7 +96,7 @@ export class AuthService {
             .pipe(
                 switchMap((response: any) => {
                     //debug
-                    // console.log('response', response);
+                    console.log('response', response);
 
                     // Store the access token in the local storage
                     this.accessToken = response.token;

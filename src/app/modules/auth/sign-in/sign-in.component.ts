@@ -1,9 +1,19 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnInit,
+    ViewChild,
+    ViewEncapsulation,
+    OnDestroy,
+} from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
+import { FuseConfigService } from '@fuse/services/config';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'auth-sign-in',
@@ -11,7 +21,7 @@ import { AuthService } from 'app/core/auth/auth.service';
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
 })
-export class AuthSignInComponent implements OnInit {
+export class AuthSignInComponent implements OnInit, OnDestroy {
     @ViewChild('signInNgForm') signInNgForm: NgForm;
 
     alert: { type: FuseAlertType; message: string } = {
@@ -23,6 +33,10 @@ export class AuthSignInComponent implements OnInit {
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
+    config: AppConfig;
+    scheme: 'dark' | 'light';
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
@@ -30,7 +44,8 @@ export class AuthSignInComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _fuseConfigService: FuseConfigService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -50,6 +65,13 @@ export class AuthSignInComponent implements OnInit {
             password: ['example', Validators.required],
             rememberMe: [''],
         });
+
+        this._fuseConfigService.config$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((config: AppConfig) => {
+                // Store the config
+                this.config = config;
+            });
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -73,7 +95,11 @@ export class AuthSignInComponent implements OnInit {
 
         // Sign in
         this._authService.signIn(this.signInForm.value).subscribe(
-            () => {
+            (response) => {
+                console.log('sign-in - redirecting', response);
+
+                this.setScheme(response.settings.theme);
+
                 // Set the redirect url.
                 // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
                 // to the correct page after a successful sign in. This way, that url can be set via
@@ -87,7 +113,7 @@ export class AuthSignInComponent implements OnInit {
                 this._router.navigateByUrl(redirectURL);
             },
             (response) => {
-                console.log('response', response);
+                console.log('sign-in - response', response);
 
                 // Re-enable the form
                 this.signInForm.enable();
@@ -105,5 +131,27 @@ export class AuthSignInComponent implements OnInit {
                 this.showAlert = true;
             }
         );
+    }
+
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Set the scheme on the config
+     *
+     * @param scheme
+     */
+    setScheme(scheme: Scheme): void {
+        this._fuseConfigService.config = { scheme };
     }
 }
