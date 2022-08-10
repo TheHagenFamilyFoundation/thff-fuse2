@@ -73,17 +73,30 @@
 
         <!-- Actions -->
         <div class="flex items-center justify-end">
-            <button
+            <!-- <button
                 mat-stroked-button
                 type="button">
                 Cancel
-            </button>
+            </button> -->
             <button
                 class="ml-4"
                 mat-flat-button
                 type="button"
-                [color]="'primary'">Save
+                [color]="'primary'"
+                (click)="saveScheme()">Save
             </button>
+
+           <!-- Alert -->
+           <fuse-alert
+           class="mt-8 -mb-4"
+           *ngIf="showAlert"
+           [appearance]="'outline'"
+           [showIcon]="false"
+           [type]="alert.type"
+           [@shake]="alert.type === 'error'">
+           {{alert.message}}
+       </fuse-alert>
+
         </div>
         </div>
     </form>

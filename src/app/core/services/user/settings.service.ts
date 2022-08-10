@@ -25,7 +25,6 @@ export class SettingsService {
         }
     }
 
-    // maybe make a getUser by ID
     getSettingsByUserID(userID: string): Observable<any> {
         this.getBackendURL();
 
@@ -34,7 +33,6 @@ export class SettingsService {
         return this.http.get(urlString);
     }
 
-    // maybe make a getUser by ID
     saveSettings(payload: Settings): Observable<any> {
         this.getBackendURL();
 

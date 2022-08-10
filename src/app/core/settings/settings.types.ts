@@ -1,4 +1,4 @@
 export interface Settings {
-    id: string;
-    theme: string;
+    userID: string;
+    scheme: string; //dark | light
 }
