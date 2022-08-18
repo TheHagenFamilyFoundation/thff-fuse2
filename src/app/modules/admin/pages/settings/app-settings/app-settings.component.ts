@@ -2,21 +2,27 @@ import {
     ChangeDetectionStrategy,
     Component,
     OnInit,
+    ViewChild,
     ViewEncapsulation,
     OnDestroy,
 } from '@angular/core';
 import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
+import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { FuseConfigService } from '@fuse/services/config';
+import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { SettingsService } from 'app/core/services/user/settings.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 @Component({
     selector: 'settings-app',
     templateUrl: './app-settings.component.html',
     encapsulation: ViewEncapsulation.None,
+    animations: fuseAnimations,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsAppComponent implements OnInit, OnDestroy {
+    @ViewChild('saveSettingsNgForm') saveSettingsNgForm: NgForm;
+
     config: AppConfig;
     scheme: 'dark' | 'light';
     settingsScheme: string;
@@ -24,9 +30,9 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
 
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
-        message: '',
+        message: 'default',
     };
-
+    saveSettingsForm: FormGroup;
     showAlert: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -35,7 +41,8 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
      */
     constructor(
         private _fuseConfigService: FuseConfigService,
-        private _settingsService: SettingsService
+        private _settingsService: SettingsService,
+        private _formBuilder: FormBuilder
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -53,6 +60,11 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
                 // Store the config
                 this.config = config;
             });
+
+        // Create the form
+        this.saveSettingsForm = this._formBuilder.group({
+            scheme: ['', []],
+        });
     }
 
     /**
@@ -80,49 +92,109 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     saveScheme(): void {
         console.log(this.settingsScheme);
 
+        // Return if the form is invalid
+        if (this.saveSettingsForm.invalid) {
+            return;
+        }
+
+        // Disable the form
+        this.saveSettingsForm.disable();
+
+        // Hide the alert
+        this.showAlert = false;
+        console.log('hiding alert');
+
+        // Re-enable the form
+        this.saveSettingsForm.enable();
+        // Reset the form
+        this.saveSettingsNgForm.resetForm();
+
+        console.log('showing alert');
+
+        this.alert = {
+            type: 'success',
+            message: 'settings updated',
+        };
+
+        // Show the alert
+        this.showAlert = true;
+        console.log('alert = ', this.alert);
+
+        setTimeout(() => {
+            this.showAlert = false;
+        }, 3000);
+
+        // const myTimeout = setTimeout(() => {
+        //     // Disable the form
+        //     this.saveSettingsForm.disable();
+
+        //     // Hide the alert
+        //     this.showAlert = false;
+        //     console.log('hiding alert');
+
+        //     // Re-enable the form
+        //     this.saveSettingsForm.enable();
+        //     console.log('this.showAlert is false');
+        // }, 5000);
+
         //create payload
         //need scheme - this.settingsScheme
         //need userID - from currentUser object from localStorage
 
-        if (localStorage.getItem('currentUser')) {
-            this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            console.log('app-settings - ', this.currentUser);
+        // if (localStorage.getItem('currentUser')) {
+        //     this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        //     console.log('app-settings - ', this.currentUser);
 
-            const payload = {
-                scheme: this.settingsScheme,
-                userID: this.currentUser.id,
-            };
+        //     const payload = {
+        //         scheme: this.settingsScheme,
+        //         userID: this.currentUser.id,
+        //     };
 
-            console.log('payload', payload);
+        //     console.log('payload', payload);
 
-            //make a call to the service
-            this._settingsService.saveSettings(payload).subscribe(
-                (response) => {
-                    console.log('saving setting', response);
+        //     //make a call to the service
+        //     this._settingsService
+        //         .saveSettings(payload)
+        //         .pipe(
+        //             finalize(() => {
+        //                 // Re-enable the form
+        //                 this.saveSettingsForm.enable();
+        //                 // Reset the form
+        //                 this.saveSettingsNgForm.resetForm();
 
-                    // Set the alert
-                    this.alert = {
-                        type: 'success',
-                        message: response.message,
-                    };
-                    // Show the alert
-                    this.showAlert = true;
-                },
-                (response) => {
-                    console.log('sign-in - response', response);
+        //                 console.log('showing alert');
 
-                    // Set the alert
-                    this.alert = {
-                        type: 'error',
-                        message: response.error.message,
-                    };
+        //                 // Show the alert
+        //                 this.showAlert = true;
+        //                 console.log('alert = ', this.alert);
+        //             })
+        //         )
+        //         .subscribe(
+        //             (response) => {
+        //                 console.log('saving setting', response);
 
-                    // Show the alert
-                    this.showAlert = true;
-                }
-            );
-        } else {
-            //logout as there is no currentUser
-        }
+        //                 // Set the alert
+        //                 this.alert = {
+        //                     type: 'success',
+        //                     message: response.message,
+        //                 };
+
+        //                 console.log('inside success - alert = ', this.alert);
+        //             },
+        //             (response) => {
+        //                 console.log('sign-in - response', response);
+
+        //                 // Set the alert
+        //                 this.alert = {
+        //                     type: 'error',
+        //                     message: response.error.message,
+        //                 };
+
+        //                 console.log('inside error - alert = ', this.alert);
+        //             }
+        //         );
+        // } else {
+        //     //logout as there is no currentUser
+        // }
     }
 }

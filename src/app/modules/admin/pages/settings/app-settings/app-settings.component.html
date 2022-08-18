@@ -3,10 +3,28 @@
     <!-- Scheme -->
     <div class="text-md font-semibold text-secondary">SCHEME</div>
 
+    <div *ngIf="showAlert">
+        {{alert.message}}
+    </div>
+
+          <!-- Alert -->
+          <fuse-alert
+          class="mt-8 -mb-4"
+          *ngIf="showAlert"
+          [appearance]="'outline'"
+          [showIcon]="false"
+          [type]="alert.type"
+          [@shake]="alert.type === 'error'">
+          {{alert.message}}
+      </fuse-alert>
+
     <!-- Form -->
     <!-- <form [formGroup]="accountForm"> -->
-    <form>
-
+    <form
+        class="mt-8"
+        [formGroup]="saveSettingsForm"
+        #saveSettingsNgForm="ngForm"
+        >
         <!-- Section -->
         <div class="w-full">
             <div class="text-xl">Personal Information</div>
@@ -73,47 +91,24 @@
 
         <!-- Actions -->
         <div class="flex items-center justify-end">
-            <!-- <button
-                mat-stroked-button
-                type="button">
-                Cancel
-            </button> -->
             <button
                 class="ml-4"
                 mat-flat-button
                 type="button"
                 [color]="'primary'"
-                (click)="saveScheme()">Save
-            </button>
-
-           <!-- Alert -->
-           <fuse-alert
-           class="mt-8 -mb-4"
-           *ngIf="showAlert"
-           [appearance]="'outline'"
-           [showIcon]="false"
-           [type]="alert.type"
-           [@shake]="alert.type === 'error'">
-           {{alert.message}}
-       </fuse-alert>
-
+                [disabled]="saveSettingsForm.disabled"
+                (click)="saveScheme()">
+           
+            <span *ngIf="!saveSettingsForm.disabled">
+                Save
+            </span>
+            <mat-progress-spinner
+            *ngIf="saveSettingsForm.disabled"
+            [diameter]="24"
+            [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
         </div>
         </div>
     </form>
 
-
-
-    <!-- <form [formGroup]="accountForm"> -->
-    <!-- <form>
-    <div class="grid grid-cols-3 gap-3 justify-items-start mt-6"> -->
-
-
-
-
-
-
- 
-
-    <!-- </div>
-</form> -->
 </div>
