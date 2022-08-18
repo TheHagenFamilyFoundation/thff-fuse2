@@ -7,7 +7,13 @@ import {
     OnDestroy,
 } from '@angular/core';
 import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
-import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import {
+    FormBuilder,
+    FormGroup,
+    NgForm,
+    Validators,
+    FormControl,
+} from '@angular/forms';
 import { FuseConfigService } from '@fuse/services/config';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
@@ -32,10 +38,15 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
         type: 'success',
         message: 'default',
     };
-    saveSettingsForm: FormGroup;
+    // saveSettingsForm: FormGroup;
     showAlert: boolean = false;
 
+    saveSettingsForm = new FormGroup({
+        scheme: new FormControl('', Validators.required),
+    });
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
@@ -44,6 +55,16 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
         private _settingsService: SettingsService,
         private _formBuilder: FormBuilder
     ) {}
+
+    // // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    // get f() {
+    //     return this.saveSettingsForm.controls;
+    // }
+
+    // // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    // submit() {
+    //     console.log(this.saveSettingsForm.value);
+    // }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -63,7 +84,7 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
 
         // Create the form
         this.saveSettingsForm = this._formBuilder.group({
-            scheme: ['', []],
+            scheme: ['', [Validators.required]],
         });
     }
 
@@ -80,49 +101,51 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Set the scheme on the config
-     *
-     * @param scheme
-     */
+    // /**
+    //  * Set the scheme on the config
+    //  *
+    //  * @param scheme
+    //  */
     setScheme(scheme: Scheme): void {
         this._fuseConfigService.config = { scheme };
         this.settingsScheme = scheme;
     }
     saveScheme(): void {
-        console.log(this.settingsScheme);
-
-        // Return if the form is invalid
-        if (this.saveSettingsForm.invalid) {
-            return;
+        if (this.saveSettingsForm.valid) {
+            console.log('settings form data :: ', this.saveSettingsForm.value);
         }
 
-        // Disable the form
-        this.saveSettingsForm.disable();
+        // // Return if the form is invalid
+        // if (this.saveSettingsForm.invalid) {
+        //     return;
+        // }
 
-        // Hide the alert
-        this.showAlert = false;
-        console.log('hiding alert');
+        // // Disable the form
+        // this.saveSettingsForm.disable();
 
-        // Re-enable the form
-        this.saveSettingsForm.enable();
-        // Reset the form
-        this.saveSettingsNgForm.resetForm();
+        // // Hide the alert
+        // this.showAlert = false;
+        // console.log('hiding alert');
 
-        console.log('showing alert');
+        // // Re-enable the form
+        // this.saveSettingsForm.enable();
+        // // Reset the form
+        // this.saveSettingsNgForm.resetForm();
 
-        this.alert = {
-            type: 'success',
-            message: 'settings updated',
-        };
+        // console.log('showing alert');
 
-        // Show the alert
-        this.showAlert = true;
-        console.log('alert = ', this.alert);
+        // this.alert = {
+        //     type: 'success',
+        //     message: 'settings updated',
+        // };
 
-        setTimeout(() => {
-            this.showAlert = false;
-        }, 3000);
+        // // Show the alert
+        // this.showAlert = true;
+        // console.log('alert = ', this.alert);
+
+        // setTimeout(() => {
+        //     this.showAlert = false;
+        // }, 3000);
 
         // const myTimeout = setTimeout(() => {
         //     // Disable the form

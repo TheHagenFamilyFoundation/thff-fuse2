@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExtraOptions, PreloadAllModules, RouterModule } from '@angular/router';
 import { MarkdownModule } from 'ngx-markdown';
 import { FuseModule } from '@fuse';
@@ -14,17 +15,19 @@ import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
 
 const routerConfig: ExtraOptions = {
-    preloadingStrategy       : PreloadAllModules,
-    scrollPositionRestoration: 'enabled'
+    preloadingStrategy: PreloadAllModules,
+    scrollPositionRestoration: 'enabled',
 };
 
 @NgModule({
-    declarations: [
-        AppComponent
-    ],
-    imports     : [
+    declarations: [AppComponent],
+    imports: [
         BrowserModule,
         BrowserAnimationsModule,
+
+        FormsModule,
+        ReactiveFormsModule,
+
         RouterModule.forRoot(appRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI
@@ -39,12 +42,8 @@ const routerConfig: ExtraOptions = {
         LayoutModule,
 
         // 3rd party modules that require global configuration via forRoot
-        MarkdownModule.forRoot({})
+        MarkdownModule.forRoot({}),
     ],
-    bootstrap   : [
-        AppComponent
-    ]
+    bootstrap: [AppComponent],
 })
-export class AppModule
-{
-}
+export class AppModule {}
