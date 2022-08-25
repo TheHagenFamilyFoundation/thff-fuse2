@@ -31,8 +31,8 @@
         > -->
         <!-- Section -->
         <div class="w-full">
-            <div class="text-xl">Personal Information</div>
-            <div class="text-secondary">Communication details in case we want to connect with you. These will be kept private.</div>
+            <div class="text-xl">Dark Mode Toggle</div>
+            <!-- <div class="text-secondary">Communication details in case we want to connect with you. These will be kept private.</div> -->
         </div>
        
         <div class="grid grid-cols-3 gap-3 justify-items-start mt-6">
@@ -125,7 +125,7 @@
                 mat-flat-button
                 type="button"
                 [color]="'primary'"
-                [disabled]="saveSettingsForm.disabled"
+                [disabled]="!toggledScheme"
                 (click)="saveScheme()">
            Save
             <!-- <span *ngIf="!saveSettingsForm.disabled">

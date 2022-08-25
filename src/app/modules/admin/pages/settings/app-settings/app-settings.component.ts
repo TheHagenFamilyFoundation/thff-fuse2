@@ -115,11 +115,13 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
         this._fuseConfigService.config = { scheme };
         this.showAlert = false;
         this.settingsScheme = scheme;
+        this.toggledScheme = true;
     }
     saveScheme(): void {
         console.log('saveScheme');
         this.alert.message = 'saving';
         this.showAlert = true;
+        this.toggledScheme = false;
         // this.openSnackBar();
         // setTimeout(() => {
         //     this.clearAlertMessage();
