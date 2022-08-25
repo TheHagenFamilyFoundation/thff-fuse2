@@ -17,11 +17,13 @@ import {
 import { FuseConfigService } from '@fuse/services/config';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService } from 'app/core/services/user/settings.service';
 import { Subject, takeUntil, finalize } from 'rxjs';
 @Component({
     selector: 'settings-app',
     templateUrl: './app-settings.component.html',
+    styleUrls: ['./app-settings.component.scss'],
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,13 +36,15 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     settingsScheme: string;
     currentUser: any;
 
+    toggledScheme: boolean = false;
+
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
         message: 'default',
     };
     // saveSettingsForm: FormGroup;
     showAlert: boolean = false;
-
+    durationInSeconds: number = 3;
     saveSettingsForm = new FormGroup({
         scheme: new FormControl('', Validators.required),
     });
@@ -53,7 +57,8 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     constructor(
         private _fuseConfigService: FuseConfigService,
         private _settingsService: SettingsService,
-        private _formBuilder: FormBuilder
+        private _formBuilder: FormBuilder,
+        private _snackBar: MatSnackBar
     ) {}
 
     // // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -108,116 +113,120 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     //  */
     setScheme(scheme: Scheme): void {
         this._fuseConfigService.config = { scheme };
+        this.showAlert = false;
         this.settingsScheme = scheme;
     }
     saveScheme(): void {
-        if (this.saveSettingsForm.valid) {
-            console.log('settings form data :: ', this.saveSettingsForm.value);
-        }
+        console.log('saveScheme');
+        this.alert.message = 'saving';
+        this.showAlert = true;
+        // this.openSnackBar();
+        // setTimeout(() => {
+        //     this.clearAlertMessage();
+        // }, 3000);
 
+        // if (this.saveSettingsForm.valid) {
+        //     console.log('settings form data :: ', this.saveSettingsForm.value);
+        //     console.log(
+        //         'settings form data sheme :: ',
+        //         this.saveSettingsForm.value.scheme
+        //     );
+        // }
         // // Return if the form is invalid
         // if (this.saveSettingsForm.invalid) {
         //     return;
         // }
-
         // // Disable the form
         // this.saveSettingsForm.disable();
-
         // // Hide the alert
         // this.showAlert = false;
         // console.log('hiding alert');
-
         // // Re-enable the form
         // this.saveSettingsForm.enable();
         // // Reset the form
         // this.saveSettingsNgForm.resetForm();
-
         // console.log('showing alert');
-
         // this.alert = {
         //     type: 'success',
         //     message: 'settings updated',
         // };
-
         // // Show the alert
         // this.showAlert = true;
         // console.log('alert = ', this.alert);
-
         // setTimeout(() => {
         //     this.showAlert = false;
         // }, 3000);
-
         // const myTimeout = setTimeout(() => {
         //     // Disable the form
         //     this.saveSettingsForm.disable();
-
         //     // Hide the alert
         //     this.showAlert = false;
         //     console.log('hiding alert');
-
         //     // Re-enable the form
         //     this.saveSettingsForm.enable();
         //     console.log('this.showAlert is false');
         // }, 5000);
-
         //create payload
         //need scheme - this.settingsScheme
         //need userID - from currentUser object from localStorage
+        if (localStorage.getItem('currentUser')) {
+            this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            console.log('app-settings - ', this.currentUser);
+            const payload = {
+                scheme: this.settingsScheme,
+                userID: this.currentUser.id,
+            };
+            console.log('payload', payload);
+            //make a call to the service
+            this._settingsService
+                .saveSettings(payload)
+                .pipe(
+                    finalize(() => {
+                        // // Re-enable the form
+                        // this.saveSettingsForm.enable();
+                        // // Reset the form
+                        // this.saveSettingsNgForm.resetForm();
+                        // console.log('showing alert');
+                        // // Show the alert
+                        // this.showAlert = true;
+                        // console.log('alert = ', this.alert);
+                        this.openSnackBar(this.alert);
+                    })
+                )
+                .subscribe(
+                    (response) => {
+                        console.log('saving setting', response);
+                        // Set the alert
+                        this.alert = {
+                            type: 'success',
+                            message: response.message,
+                        };
+                        console.log('inside success - alert = ', this.alert);
 
-        // if (localStorage.getItem('currentUser')) {
-        //     this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        //     console.log('app-settings - ', this.currentUser);
+                        // this.openSnackBar(this.alert);
+                    },
+                    (response) => {
+                        console.log('sign-in - response', response);
+                        // Set the alert
+                        this.alert = {
+                            type: 'error',
+                            message: response.error.message,
+                        };
+                        console.log('inside error - alert = ', this.alert);
+                        // this.openSnackBar(this.alert);
+                    }
+                );
+        } else {
+            //logout as there is no currentUser
+        }
+    }
+    // clearAlertMessage(): void {
+    //     this.showAlert = false;
+    // }
 
-        //     const payload = {
-        //         scheme: this.settingsScheme,
-        //         userID: this.currentUser.id,
-        //     };
-
-        //     console.log('payload', payload);
-
-        //     //make a call to the service
-        //     this._settingsService
-        //         .saveSettings(payload)
-        //         .pipe(
-        //             finalize(() => {
-        //                 // Re-enable the form
-        //                 this.saveSettingsForm.enable();
-        //                 // Reset the form
-        //                 this.saveSettingsNgForm.resetForm();
-
-        //                 console.log('showing alert');
-
-        //                 // Show the alert
-        //                 this.showAlert = true;
-        //                 console.log('alert = ', this.alert);
-        //             })
-        //         )
-        //         .subscribe(
-        //             (response) => {
-        //                 console.log('saving setting', response);
-
-        //                 // Set the alert
-        //                 this.alert = {
-        //                     type: 'success',
-        //                     message: response.message,
-        //                 };
-
-        //                 console.log('inside success - alert = ', this.alert);
-        //             },
-        //             (response) => {
-        //                 console.log('sign-in - response', response);
-
-        //                 // Set the alert
-        //                 this.alert = {
-        //                     type: 'error',
-        //                     message: response.error.message,
-        //                 };
-
-        //                 console.log('inside error - alert = ', this.alert);
-        //             }
-        //         );
-        // } else {
-        //     //logout as there is no currentUser
-        // }
+    openSnackBar(alert): void {
+        this._snackBar.open(alert.message, 'OK', {
+            duration: this.durationInSeconds * 1000,
+        });
     }
 }

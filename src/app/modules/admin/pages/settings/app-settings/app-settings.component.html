@@ -2,21 +2,25 @@
 
     <!-- Scheme -->
     <div class="text-md font-semibold text-secondary">SCHEME</div>
-
-    <div *ngIf="showAlert">
+    <div id="alert" *ngIf="showAlert">
+        <!-- {{alert.message}} -->
+<!-- 
+        <fuse-alert
+        class="mt-8 -mb-4"
+        *ngIf="showAlert"
+        [appearance]="'outline'"
+        [showIcon]="false"
+        [type]="alert.type"
+        [@shake]="alert.type === 'error'">
         {{alert.message}}
+    </fuse-alert> -->
+
+
+
     </div>
 
           <!-- Alert -->
-          <!-- <fuse-alert
-          class="mt-8 -mb-4"
-          *ngIf="showAlert"
-          [appearance]="'outline'"
-          [showIcon]="false"
-          [type]="alert.type"
-          [@shake]="alert.type === 'error'">
-          {{alert.message}}
-      </fuse-alert> -->
+
 
     <!-- Form -->
     <!-- <form [formGroup]="accountForm"> -->
@@ -34,27 +38,29 @@
         <div class="grid grid-cols-3 gap-3 justify-items-start mt-6">
 
 
-            <form [formGroup]="saveSettingsForm" (ngSubmit)="saveScheme()">
+            <!-- <form [formGroup]="saveSettingsForm" (ngSubmit)="saveScheme()">
            
                 <div class="form-group">
                     <label for="scheme">Scheme:</label>
 
-                    <mat-radio-group formControlName="scheme" class="margin-left">
+                    <mat-radio-group formControlName="scheme">
                         <mat-radio-button value="light" [checked]="config.scheme === 'light'"> Light </mat-radio-button>
                         <mat-radio-button value="dark" [checked]="config.scheme === 'dark'"> Dark </mat-radio-button>
                       </mat-radio-group>
 
-                </div>
-                
+                </div> -->
+<!--                 
                 <button
                 class="ml-4"
                 mat-flat-button
                 type="submit"
                 [color]="'primary'"
-                [disabled]="saveSettingsForm.disabled">Save Scheme</button>
+                [disabled]="saveSettingsForm.disabled">Save Scheme</button> -->
 
-            </form>
+            <!-- </form> -->
 
+            <!-- </div>
+            <div class="grid grid-cols-3 gap-3 justify-items-start mt-6"> -->
 
         <!-- Divider -->
         <!-- <div class="mt-11 mb-10 border-t"></div> -->
@@ -110,10 +116,10 @@
         </div>
 
         <!-- Divider -->
-        <!-- <div class="mt-11 mb-10 border-t"></div> -->
+        <div class="mt-11 mb-10 border-t"></div>
 
         <!-- Actions -->
-        <!-- <div class="flex items-center justify-end">
+        <div class="flex items-center justify-end">
             <button
                 class="ml-4"
                 mat-flat-button
@@ -121,17 +127,17 @@
                 [color]="'primary'"
                 [disabled]="saveSettingsForm.disabled"
                 (click)="saveScheme()">
-           Save -->
+           Save
             <!-- <span *ngIf="!saveSettingsForm.disabled">
                 Save
             </span> -->
-            <!-- <mat-progress-spinner
+            <mat-progress-spinner
             *ngIf="saveSettingsForm.disabled"
             [diameter]="24"
-            [mode]="'indeterminate'"></mat-progress-spinner> -->
-        <!-- </button>
+            [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
         </div>
-        </div> -->
+        <!-- </div> -->
     <!-- </form> -->
 
 </div>
