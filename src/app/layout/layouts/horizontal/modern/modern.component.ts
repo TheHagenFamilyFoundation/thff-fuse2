@@ -25,7 +25,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
     // currentUser: User;
     currentUser: any;
     user: any;
-    userName: string;
+    email: string;
     accessLevel: number;
     isDirector: boolean;
     organizations: any;
@@ -101,7 +101,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                     localStorage.getItem('currentUser')
                 );
                 console.log('toolbar - ', this.currentUser);
-                this.userName = this.currentUser.username;
+                this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
 
                 console.log('toolbar - this.accessLevel', this.accessLevel);
@@ -142,7 +142,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                     localStorage.getItem('currentUser')
                 ); // contains token
                 console.log('toolbar - username ', this.currentUser.username);
-                this.userName = this.currentUser.username;
+                this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
 
                 if (this.accessLevel > 1) {
@@ -196,7 +196,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
 
     // check if user is in an organization
     getOrganizations(): void {
-        console.log('modern - get organizations', this.userName);
+        console.log('modern - get organizations', this.email);
 
         this._getUserService
             .getUserbyID(this.currentUser.id)

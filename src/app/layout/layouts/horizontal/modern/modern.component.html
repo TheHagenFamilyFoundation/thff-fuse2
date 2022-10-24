@@ -40,8 +40,10 @@
                         src="assets/images/logo/logo-text-on-dark.svg">
                 </div> -->
                 <!-- <button mat-button routerLink="/home"> -->
-                <button mat-button>
+                <button mat-button routerLink="/welcome"
+                fxHide="false">
                     <mat-icon>home</mat-icon>
+                    
                 </button>
                 <div *ngIf="isLoggedIn">
                     <div *ngIf="!inOrganization">

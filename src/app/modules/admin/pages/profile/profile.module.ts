@@ -5,6 +5,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseCardModule } from '@fuse/components/card';
@@ -12,11 +14,11 @@ import { SharedModule } from 'app/shared/shared.module';
 import { ProfileComponent } from 'app/modules/admin/pages/profile/profile.component';
 import { profileRoutes } from 'app/modules/admin/pages/profile/profile.routing';
 
+import { UserOrganizationComponent } from './user-organization/user-organization.component';
+import { SelectedOrganizationComponent } from './user-organization/selected-organization/selected-organization.component';
 @NgModule({
-    declarations: [
-        ProfileComponent
-    ],
-    imports     : [
+    declarations: [ProfileComponent, UserOrganizationComponent],
+    imports: [
         RouterModule.forChild(profileRoutes),
         MatButtonModule,
         MatDividerModule,
@@ -25,10 +27,14 @@ import { profileRoutes } from 'app/modules/admin/pages/profile/profile.routing';
         MatInputModule,
         MatMenuModule,
         MatTooltipModule,
+        MatTableModule,
+        MatPaginatorModule,
         FuseCardModule,
-        SharedModule
-    ]
+        SharedModule,
+    ],
+    entryComponents: [
+        // SelectedLetterOfIntentComponent,
+        SelectedOrganizationComponent,
+    ],
 })
-export class ProfileModule
-{
-}
+export class ProfileModule {}
