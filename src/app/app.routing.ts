@@ -155,6 +155,22 @@ export const appRoutes: Route[] = [
                                 'app/modules/admin/pages/profile/profile.module'
                             ).then((m) => m.ProfileModule),
                     },
+                    // // Organization
+                    // {
+                    //     path: 'organization/:id',
+                    //     loadChildren: () =>
+                    //         import(
+                    //             'app/modules/admin/pages/organization/organization.module'
+                    //         ).then((m) => m.OrganizationModule),
+                    // },
+                    // Project
+                    {
+                        path: 'organization/:id',
+                        loadChildren: () =>
+                            import(
+                                'app/modules/admin/pages/organization/organization.module'
+                            ).then((m) => m.OrganizationModule),
+                    },
                     // Settings
                     {
                         path: 'settings',
