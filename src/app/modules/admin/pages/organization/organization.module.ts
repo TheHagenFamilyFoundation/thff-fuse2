@@ -11,16 +11,25 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+
 import { TranslocoModule } from '@ngneat/transloco';
+
 import { NgApexchartsModule } from 'ng-apexcharts';
+
 import { SharedModule } from 'app/shared/shared.module';
+
 import { OrganizationComponent } from './organization.component';
 import { organizationRoutes } from './organization.routing';
+
+import { OrganizationInfoComponent } from './organization-info/organization-info.component';
+
+//services
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 
 @NgModule({
     declarations: [
-        OrganizationComponent
+        OrganizationComponent,
+        OrganizationInfoComponent,
     ],
     providers: [GetOrganizationService],
     imports     : [

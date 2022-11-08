@@ -1,0 +1,24 @@
+.example-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .example-container > * {
+    width: 90%;
+  }
+
+  .year-founded-width {
+    width: 100px;
+  }
+
+  .titles-gray {
+    color: gray;
+  }
+
+  .org-info {
+    width: 900px;
+  }
+
+  .zip-width {
+    width: 60px;
+  }

@@ -95,8 +95,21 @@
                 <!-- Home -->
                 <mat-tab label="Home">
                     <ng-template matTabContent>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
-                            <!-- Summary -->
+                        <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <!-- <div class="flex flex-col sm:flex-row items-start justify-between">
+                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Organization Information</div>
+                            </div>
+                            <div class="flex flex-col items-center mt-2"> -->
+                                <div *ngIf="org">
+                                    <app-organization-info [org]="org"></app-organization-info>
+                                </div>
+
+                            <!-- </div> -->
+                        </div>
+
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 w-full min-w-0">
+                            <!-- Org Info -->
                             <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex items-start justify-between">
                                     <div class="text-lg font-medium tracking-tight leading-6 truncate">Summary</div>
