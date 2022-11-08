@@ -36,14 +36,14 @@
             >
                 <a class="font-medium" [routerLink]="['./']"> Home </a>
                 <!-- if user is in an organization-->
-                <div *ngIf="inOrganization">
+                <!-- <div *ngIf="inOrganization">
                     <a
                         class="text-secondary"
                         [routerLink]="['/pages/organizations']"
                     >
                         Organizations
                     </a>
-                </div>
+                </div> -->
                 <a class="text-secondary" [routerLink]="['/pages/settings']">
                     Settings
                 </a>
@@ -62,9 +62,6 @@
                     <app-user-organization *ngIf="organizations"
                     [user]="user" [organizations]="organizations"
                 ></app-user-organization>
-                <!-- user - {{user}}
-                organizations - {{organizations}} -->
-                    <!-- <app-user-org></app-user-org> -->
                 </div>
             </fuse-card>
         </div>
