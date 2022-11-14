@@ -11,6 +11,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { TranslocoModule } from '@ngneat/transloco';
 
@@ -45,6 +47,8 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
         MatSortModule,
         MatTableModule,
         MatTabsModule,
+        MatFormFieldModule,
+        MatInputModule,
         NgApexchartsModule,
         TranslocoModule,
         SharedModule
