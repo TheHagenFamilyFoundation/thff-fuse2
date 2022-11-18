@@ -53,18 +53,20 @@
                         Legal Name
                     </label>
                     <input
-                        class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
+                    #toggleButton
+                        class="appearance-none block w-full text-gray-700  rounded py-3 px-4 mb-3 leading-tight foucs:border focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-legal-name"
                         placeholder="Legal Name"
                         value="{{ legalName }}"
-                        readonly
+                        [readonly]="isReadOnly"
+                        (click)="editLegalName()"
                     />
                 </div>
             </div>
             <div class="flex flex-wrap -mx-3 mb-6">
                 <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label
-                        class="block tracking-wide text-gray-700 text-sm mb-2"
+                        class="block tracking-wide text-sm mb-2"
                         for="grid-year-founded"
                     >
                         Year Founded
@@ -72,8 +74,8 @@
                     <input
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-year-founded"
-                        type="text"
-                        placeholder="{{ yearFounded }}"
+                        placeholder="Year Founded"
+                        value="{{ yearFounded }}"
                         readonly
                     />
                 </div>
@@ -88,7 +90,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-current-operating-budget"
                         type="text"
-                        placeholder="{{ currentOperatingBudget | currency }}"
+                        placeholder="Current Operating Budget"
+                        value="{{ currentOperatingBudget | currency }}"
                         readonly
                     />
                 </div>
@@ -105,7 +108,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-executive-director"
                         type="text"
-                        placeholder="{{ director }}"
+                        placeholder="Executive Director"
+                        value="{{ director }}"
                         readonly
                     />
                 </div>
@@ -120,7 +124,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-phone"
                         type="text"
-                        placeholder="{{ phone }}"
+                        placeholder="Phone Number"
+                        value="{{ phone }}"
                         readonly
                     />
                 </div>
@@ -140,7 +145,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-executive-director"
                         type="text"
-                        placeholder="{{ contactPersonTitle }}"
+                        placeholder="Contact Person Title"
+                        value="{{ contactPersonTitle }}"
                         readonly
                     />
                 </div>
@@ -155,7 +161,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-contact-person-phone-number"
                         type="text"
-                        placeholder="{{ contactPersonPhoneNumber }}"
+                        placeholder="Contact Person Number"
+                        value="{{ contactPersonPhoneNumber }}"
                         readonly
                     />
                 </div>
@@ -172,7 +179,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-email"
                         type="text"
-                        placeholder="{{ email }}"
+                        placeholder="Email"
+                        value="{{ email }}"
                         readonly
                     />
                 </div>
@@ -209,7 +217,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-city"
                         type="text"
-                        placeholder="{{ city }}"
+                        placeholder="City"
+                        value="{{ city }}"
                         readonly
                     />
                 </div>
@@ -224,7 +233,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-state"
                         type="text"
-                        placeholder="{{ state }}"
+                        placeholder="State"
+                        value="{{ state }}"
                         readonly
                     />
                 </div>
@@ -239,7 +249,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-zip"
                         type="text"
-                        placeholder="{{ zip }}"
+                        placeholder="Zip"
+                        value="{{ zip }}"
                         readonly
                     />
                 </div>
@@ -256,7 +267,8 @@
                         class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-fax"
                         type="text"
-                        placeholder="{{ fax }}"
+                        placeholder="Fax"
+                        value="{{ fax }}"
                         readonly
                     />
                 </div>

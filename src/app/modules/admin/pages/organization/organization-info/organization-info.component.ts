@@ -1,4 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    Input,
+    Renderer2,
+    ViewChild,
+    ElementRef,
+} from '@angular/core';
 import {
     FormBuilder,
     FormGroup,
@@ -31,6 +38,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class OrganizationInfoComponent implements OnInit {
     @Input()
     org: any;
+
+    /**
+     * This is the toogle button elemenbt, look at HTML and see its defination
+     */
+    @ViewChild('toggleButton') toggleButton: ElementRef;
 
     apiUrl: string;
 
@@ -69,6 +81,8 @@ export class OrganizationInfoComponent implements OnInit {
     fax$ = new Subject<string>();
 
     testphone$ = new Subject<string>();
+
+    isReadOnly: boolean = true;
 
     legalName: string;
 
@@ -151,7 +165,8 @@ export class OrganizationInfoComponent implements OnInit {
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
         private authService: AuthService,
-        fb: FormBuilder
+        fb: FormBuilder,
+        private renderer: Renderer2
     ) {
         this.formContactPerson = fb.group({
             contactPersonPhoneNumber: new FormControl('', Validators.required),
@@ -290,6 +305,22 @@ export class OrganizationInfoComponent implements OnInit {
         }
 
         console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
+
+        /**
+         * This events get called by all clicks on the page
+         */
+        this.renderer.listen('window', 'click', (e: Event) => {
+            /**
+             * Only run when toggleButton is not clicked
+             * If we don't check this, all clicks (even on the toggle button) gets into this
+             * section which in the result we might never see the menu open!
+             * And the menu itself is checked here, and it's where we check just outside of
+             * the menu and button the condition abbove must close the menu
+             */
+            if (e.target !== this.toggleButton.nativeElement) {
+                this.isReadOnly = false;
+            }
+        });
     } // end of constructor
 
     defaultValues(): void {
@@ -611,5 +642,12 @@ export class OrganizationInfoComponent implements OnInit {
         console.log('faxChange');
 
         this.showMessage = false;
+    }
+
+    editLegalName(): void {
+        console.log('editing legal name');
+
+        //check for change
+        this.isReadOnly = !this.isReadOnly;
     }
 }
