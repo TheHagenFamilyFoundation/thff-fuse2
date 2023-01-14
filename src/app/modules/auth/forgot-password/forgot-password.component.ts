@@ -96,10 +96,11 @@ export class AuthForgotPasswordComponent implements OnInit
                 },
                 (response) => {
 
+                    //TODO: figure out a clearer message
                     // Set the alert
                     this.alert = {
                         type   : 'error',
-                        message: 'Email does not found! Are you sure you are already a member?'
+                        message: 'Email not found! Are you sure you have an account with that email?'
                     };
                 }
             );
