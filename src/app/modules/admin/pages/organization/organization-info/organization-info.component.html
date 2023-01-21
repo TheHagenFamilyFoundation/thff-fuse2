@@ -12,7 +12,7 @@
             <button *ngIf="canSave" mat-raised-button (click)="save()">
                 Save
             </button>
-            <button mat-raised-button (click)="cancel()">Cancel</button>
+            <button mat-raised-button (click)="mainCancel()">Cancel</button>
         </div>
         <!-- <mat-button-toggle-group
                 value="this-week"
@@ -52,7 +52,7 @@
                     >
                         Legal Name
                     </label>
-                    <input
+                    <!-- <input
                     #toggleButton
                         class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500"
                         id="grid-legal-name"
@@ -60,7 +60,36 @@
                         value="{{ legalName }}"
                         [readonly]="isReadOnly"
                         (click)="editLegalName()"
-                    />
+                    /> -->
+                    <editable
+                        [fieldNameValue]="legalName"
+                        (outputFromChild)="receiveChildData($event)"
+                    ></editable>
+                    <div
+                        #toggleButton
+                        *ngIf="!editingLegalName"
+                        id="grid-legal-name"
+                        class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500"
+                        (click)="editLegalName()"
+                    >
+                        {{ legalName }}
+                    </div>
+                    <div
+                        #toggleButton2
+                        *ngIf="editingLegalName"
+                        id="grid-edit-legal-name"
+                    >
+                        <input
+                            placeholder="Legal Name"
+                            value="{{ legalName }}"
+                        />
+                    </div>
+                    <button *ngIf="editingLegalName" (click)="saveLegalName()">
+                        Save
+                    </button>
+                    <button *ngIf="editingLegalName" (click)="cancel()">
+                        Cancel
+                    </button>
                 </div>
             </div>
             <div class="flex flex-wrap -mx-3 mb-6">

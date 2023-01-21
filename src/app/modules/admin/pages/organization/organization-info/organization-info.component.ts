@@ -40,15 +40,22 @@ export class OrganizationInfoComponent implements OnInit {
     org: any;
 
     /**
-     * This is the toogle button elemenbt, look at HTML and see its defination
+     * This is the toggle button element, look at HTML and see its definition
      */
     @ViewChild('toggleButton') toggleButton: ElementRef;
+
+    @ViewChild('toggleButton2') toggleButton2: ElementRef;
 
     apiUrl: string;
 
     orgID: any;
 
     orgInfo: any;
+
+    //TODO: figure out a better way to handle the field names
+    //field names
+    fnLegalName: string = 'Legal Name';
+
 
     legalName$ = new Subject<string>();
 
@@ -57,8 +64,6 @@ export class OrganizationInfoComponent implements OnInit {
     currentOperatingBudget$ = new Subject<string>();
 
     director$ = new Subject<string>();
-
-    legalNphoneame$ = new Subject<string>();
 
     phone$ = new Subject<string>();
 
@@ -138,6 +143,7 @@ export class OrganizationInfoComponent implements OnInit {
     currentOperatingBudgetMessage: any;
 
     editing = false;
+    editingLegalName: boolean = false;
 
     formContactPerson: FormGroup;
 
@@ -306,21 +312,31 @@ export class OrganizationInfoComponent implements OnInit {
 
         console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
 
-        /**
-         * This events get called by all clicks on the page
-         */
-        this.renderer.listen('window', 'click', (e: Event) => {
-            /**
-             * Only run when toggleButton is not clicked
-             * If we don't check this, all clicks (even on the toggle button) gets into this
-             * section which in the result we might never see the menu open!
-             * And the menu itself is checked here, and it's where we check just outside of
-             * the menu and button the condition abbove must close the menu
-             */
-            if (e.target !== this.toggleButton.nativeElement) {
-                this.isReadOnly = false;
-            }
-        });
+        // /**
+        //  * This events get called by all clicks on the page
+        //  */
+        // this.renderer.listen('window', 'click', (e: Event) => {
+        //     /**
+        //      * Only run when toggleButton is not clicked
+        //      * If we don't check this, all clicks (even on the toggle button) gets into this
+        //      * section which in the result we might never see the menu open!
+        //      * And the menu itself is checked here, and it's where we check just outside of
+        //      * the menu and button the condition above must close the menu
+        //      */
+        //     // if(this.editingLegalName) {
+        //     //     this.editingLegalName = false;
+        //     // }
+        //     console.log('e',e);
+        //     if(this.editingLegalName){
+        //         console.log('editing legal name');
+        //     }
+
+        //     // if (this.toggleButton2 && e.target !== this.toggleButton2.nativeElement && this.editingLegalName) {
+        //     //     this.editingLegalName = false;
+        //     // }
+
+
+        // });
     } // end of constructor
 
     defaultValues(): void {
@@ -540,7 +556,7 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     // cancel changes, retrieve the old from the db
-    cancel(): void {
+    mainCancel(): void {
         this.editing = false;
 
         this.getOrganizationInfo();
@@ -644,10 +660,30 @@ export class OrganizationInfoComponent implements OnInit {
         this.showMessage = false;
     }
 
-    editLegalName(): void {
-        console.log('editing legal name');
+    receiveChildData(data): void {
+        console.log(data);
+    }
 
-        //check for change
-        this.isReadOnly = !this.isReadOnly;
+    editLegalName(): void {
+        console.log('editLegalName - editing legal name');
+
+        this.editingLegalName = true;
+
+        // //check for change
+        // this.isReadOnly = !this.isReadOnly;
+    }
+
+    saveLegalName(): void {
+        console.log('saving legal name');
+
+    //done editing
+        this.editingLegalName = false;
+    }
+
+    cancel(): void {
+        this.editingLegalName = false;
+        //and many more
+
+
     }
 }

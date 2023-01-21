@@ -25,6 +25,8 @@ import { organizationRoutes } from './organization.routing';
 
 import { OrganizationInfoComponent } from './organization-info/organization-info.component';
 
+import { EditableComponent } from 'app/common/components/editable/editable.component';
+
 //services
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 
@@ -32,6 +34,7 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
     declarations: [
         OrganizationComponent,
         OrganizationInfoComponent,
+        EditableComponent,
     ],
     providers: [GetOrganizationService],
     imports     : [
