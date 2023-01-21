@@ -7,6 +7,7 @@ import {
     ElementRef,
 } from '@angular/core';
 import {
+    AbstractControl, FormArray,
     FormBuilder,
     FormGroup,
     FormControl,
@@ -14,6 +15,7 @@ import {
     NgForm,
     Validators,
 } from '@angular/forms';
+
 import { ErrorStateMatcher } from '@angular/material/core';
 
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -165,6 +167,10 @@ export class OrganizationInfoComponent implements OnInit {
     zipFormControl = new FormControl('', [Validators.required]);
 
     faxFormControl = new FormControl('', [Validators.required]);
+
+    public inputText = 'foo';
+    public inputControl: FormControl = new FormControl(this.inputText);
+
 
     constructor(
         private createOrganizationInfoService: CreateOrganizationInfoService,
@@ -683,7 +689,17 @@ export class OrganizationInfoComponent implements OnInit {
     cancel(): void {
         this.editingLegalName = false;
         //and many more
-
-
     }
+
+    updateSingleField(prop: any, control: any): void {
+        console.log('org info - updateSingleField', this[control].value);
+        this[prop] = this[control].value;
+        console.log('prop = ',this[prop]);
+      }
+
+      cancelSingleField(prop: string, control: any): void {
+        console.log('org info - cancelSingleField', this[control].value);
+        (this[control] as AbstractControl).setValue(this[prop]);
+      }
+
 }

@@ -25,6 +25,7 @@
         "@angular/platform-browser": "13.1.1",
         "@angular/platform-browser-dynamic": "13.1.1",
         "@angular/router": "13.1.1",
+        "@ngneat/edit-in-place": "^1.6.1",
         "@ngneat/transloco": "3.1.1",
         "apexcharts": "3.32.1",
         "crypto-js": "3.3.0",
@@ -81,5 +82,5 @@
     "engines": {
         "node": "16.15.1",
         "npm": "8.11.0"
-      }
+    }
 }

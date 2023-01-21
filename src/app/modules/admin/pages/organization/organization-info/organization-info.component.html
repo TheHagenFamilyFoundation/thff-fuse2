@@ -61,10 +61,34 @@
                         [readonly]="isReadOnly"
                         (click)="editLegalName()"
                     /> -->
-                    <editable
+                    <!-- custom -->
+                    <!-- <editable
                         [fieldNameValue]="legalName"
                         (outputFromChild)="receiveChildData($event)"
-                    ></editable>
+                    ></editable> -->
+                    <editable
+                        data-testid="sample-input-click"
+                        (save)="updateSingleField('inputText', 'inputControl')"
+                        (cancel)="
+                            cancelSingleField('inputText', 'inputControl')
+                        "
+                    >
+                        <ng-template viewMode>
+                            {{ inputText }}
+                        </ng-template>
+                        <ng-template editMode>
+                            <div class="form-group">
+                                <input
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500"
+                                    data-testid="sample-input-click-edit"
+                                    placeholder="Title"
+                                    type="text"
+                                    [formControl]="inputControl"
+                                />
+                            </div>
+                        </ng-template>
+                    </editable>
+
                     <div
                         #toggleButton
                         *ngIf="!editingLegalName"

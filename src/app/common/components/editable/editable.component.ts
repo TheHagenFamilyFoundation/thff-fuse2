@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
-  selector: 'editable',
+  selector: 'custom-editable',
   templateUrl: './editable.component.html',
   styleUrls: ['./editable.component.scss']
 })
