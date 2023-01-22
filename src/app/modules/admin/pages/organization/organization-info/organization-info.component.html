@@ -4,73 +4,108 @@
     (save)="updateGroupedEdition()"
     (cancel)="cancelGroupedEdition()"
 >
-    <h4>Grouped inputs</h4>
-    <aside>
-        <button
-            class="btn btn-primary"
-            *ngIf="mode === 'view'"
-            data-testid="groupedForm-edit-btn"
-            editableGroupEdit
-        >
-            Edit
-        </button>
-        <button
-            class="btn btn-success"
-            *ngIf="mode === 'edit'"
-            data-testid="groupedForm-save-btn"
-            editableGroupSave
-        >
-            Save
-        </button>
-        <button
-            class="btn btn-secondary"
-            *ngIf="mode === 'edit'"
-            data-testid="groupedForm-cancel-btn"
-            editableGroupCancel
-        >
-            Cancel
-        </button>
-    </aside>
-    <div *ngIf="editing">
-        <form [formGroup]="groupedForm">
-            <article>
-                <editable data-testid="grouped-input-1">
-                    <ng-template viewMode>
-                        {{ identity.name }}
-                    </ng-template>
-                    <ng-template editMode>
-                        <div class="form-group">
-                            <input
-                                class="form-control"
-                                data-testid="grouped-input-edit-1"
-                                placeholder="Name"
-                                type="text"
-                                formControlName="name"
-                            />
-                        </div>
-                    </ng-template>
-                </editable>
-            </article>
-            <article>
-                <editable data-testid="grouped-input-2">
-                    <ng-template viewMode>
-                        {{ identity.city }}
-                    </ng-template>
-                    <ng-template editMode>
-                        <div class="form-group">
-                            <input
-                                class="form-control"
-                                data-testid="grouped-input-edit-2"
-                                placeholder="City"
-                                type="text"
-                                formControlName="city"
-                            />
-                        </div>
-                    </ng-template>
-                </editable>
-            </article>
-            <article>
-                <editable data-testid="grouped-input-3">
+    <div class="flex flex-col sm:flex-row items-start justify-between">
+        <div class="text-lg font-medium tracking-tight leading-6 truncate">
+            Organization Information
+        </div>
+        <div class="mt-3 sm:mt-0 sm:ml-2">
+            <button
+                mat-raised-button
+                *ngIf="mode === 'view'"
+                data-testid="groupedForm-edit-btn"
+                editableGroupEdit
+            >
+                Edit
+            </button>
+            <button
+                mat-raised-button
+                *ngIf="mode === 'edit'"
+                data-testid="groupedForm-save-btn"
+                editableGroupSave
+            >
+                Save
+            </button>
+            <button
+                mat-raised-button
+                *ngIf="mode === 'edit'"
+                data-testid="groupedForm-cancel-btn"
+                editableGroupCancel
+            >
+                Cancel
+            </button>
+        </div>
+    </div>
+    <div class="flex flex-col mt-2">
+        <div *ngIf="editing">
+            <form [formGroup]="groupedForm">
+                <article>
+                    <editable data-testid="grouped-input-1">
+                        <ng-template viewMode>
+                            {{ identity.name }}
+                        </ng-template>
+                        <ng-template editMode>
+                            <div class="form-group">
+                                <input
+                                    class="form-control"
+                                    data-testid="grouped-input-edit-1"
+                                    placeholder="Name"
+                                    type="text"
+                                    formControlName="name"
+                                />
+                            </div>
+                        </ng-template>
+                    </editable>
+                </article>
+                <article>
+                    <editable data-testid="grouped-input-2">
+                        <ng-template viewMode>
+                            {{ identity.city }}
+                        </ng-template>
+                        <ng-template editMode>
+                            <div class="form-group">
+                                <input
+                                    class="form-control"
+                                    data-testid="grouped-input-edit-2"
+                                    placeholder="City"
+                                    type="text"
+                                    formControlName="city"
+                                />
+                            </div>
+                        </ng-template>
+                    </editable>
+                </article>
+                <article>
+                    <editable data-testid="grouped-input-3">
+                        <ng-template viewMode>
+                            {{ identity.country }}
+                        </ng-template>
+                        <ng-template editMode>
+                            <div class="form-group">
+                                <input
+                                    class="form-control"
+                                    data-testid="grouped-input-edit-3"
+                                    placeholder="Country"
+                                    type="text"
+                                    formControlName="country"
+                                />
+                            </div>
+                        </ng-template>
+                    </editable>
+                </article>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section>
+    <article>
+        <div *ngIf="!editing">
+            <form [formGroup]="groupedForm">
+                <editable
+                    data-testid="sample-input-click"
+                    (save)="updateSingleField('country', 'inputControl')"
+                    (cancel)="cancelSingleField('country', 'inputControl')"
+                >
                     <ng-template viewMode>
                         {{ identity.country }}
                     </ng-template>
@@ -78,7 +113,7 @@
                         <div class="form-group">
                             <input
                                 class="form-control"
-                                data-testid="grouped-input-edit-3"
+                                data-testid="sample-input-click-edit"
                                 placeholder="Country"
                                 type="text"
                                 formControlName="country"
@@ -86,35 +121,7 @@
                         </div>
                     </ng-template>
                 </editable>
-            </article>
-        </form>
-    </div>
-</section>
-
-<section>
-    <h4>Sample input triggered by single click</h4>
-    <article>
-        <form [formGroup]="groupedForm">
-            <editable
-                data-testid="sample-input-click"
-                (save)="updateSingleField('country', 'inputControl')"
-                (cancel)="cancelSingleField('country', 'inputControl')"
-            >
-                <ng-template viewMode>
-                    {{ identity.country }}
-                </ng-template>
-                <ng-template editMode>
-                    <div class="form-group">
-                        <input
-                            class="form-control"
-                            data-testid="sample-input-click-edit"
-                            placeholder="Country"
-                            type="text"
-                            formControlName="country"
-                        />
-                    </div>
-                </ng-template>
-            </editable>
-        </form>
+            </form>
+        </div>
     </article>
 </section>
