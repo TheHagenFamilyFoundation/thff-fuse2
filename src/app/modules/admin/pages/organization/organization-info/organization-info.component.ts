@@ -48,6 +48,9 @@ export class OrganizationInfoComponent implements OnInit {
 
     @ViewChild('toggleButton2') toggleButton2: ElementRef;
 
+ // multiple form
+ public mode: 'view' | 'edit' = 'view';
+
     apiUrl: string;
 
     orgID: any;
@@ -168,9 +171,19 @@ export class OrganizationInfoComponent implements OnInit {
 
     faxFormControl = new FormControl('', [Validators.required]);
 
+    //TODO: example, delete after
     public inputText = 'foo';
     public inputControl: FormControl = new FormControl(this.inputText);
 
+    //edit in place formcontrols
+    public legalNameControl: FormControl = null;
+
+    public groupedForm: FormGroup;
+    public identity = {
+      name: 'John Doe',
+      city: 'London',
+      country: 'England',
+    };
 
     constructor(
         private createOrganizationInfoService: CreateOrganizationInfoService,
@@ -180,6 +193,11 @@ export class OrganizationInfoComponent implements OnInit {
         fb: FormBuilder,
         private renderer: Renderer2
     ) {
+
+
+
+
+        //main edit mode
         this.formContactPerson = fb.group({
             contactPersonPhoneNumber: new FormControl('', Validators.required),
             contactPersonTitle: new FormControl('', Validators.required),
@@ -348,6 +366,7 @@ export class OrganizationInfoComponent implements OnInit {
     defaultValues(): void {
         console.log('defaulting values');
 
+        //main
         this.legalName = '';
         this.yearFounded = 0;
         this.currentOperatingBudget = '';
@@ -362,6 +381,9 @@ export class OrganizationInfoComponent implements OnInit {
         this.state = '';
         this.zip = 0;
         this.fax = '';
+
+        // //edit in place
+        // this.legalNameControl = '';
     }
 
     ngOnInit(): void {
@@ -371,6 +393,10 @@ export class OrganizationInfoComponent implements OnInit {
         this.orgID = this.org.id;
 
         this.getOrganizationInfo();
+
+        this.initGroupedForm();
+
+        this.inputControl = new FormControl(this.identity.country);
     }
 
     getOrganizationInfo(): void {
@@ -431,6 +457,9 @@ export class OrganizationInfoComponent implements OnInit {
                 this.legalName = this.orgInfo.legalName;
                 // this.formOrganization.get('legalName').value = this.legalName;
             }
+
+        //edit in place
+        this.legalNameControl = new FormControl(this.legalName);
 
             if (this.orgInfo.yearFounded) {
                 this.yearFounded = this.orgInfo.yearFounded;
@@ -691,15 +720,49 @@ export class OrganizationInfoComponent implements OnInit {
         //and many more
     }
 
+    //new stuff
+
+    initGroupedForm(): void {
+        this.groupedForm = new FormGroup({
+          name: new FormControl(this.identity.name),
+          city: new FormControl(this.identity.city),
+          country: new FormControl(this.identity.country),
+        });
+      }
+
+
     updateSingleField(prop: any, control: any): void {
         console.log('org info - updateSingleField', this[control].value);
         this[prop] = this[control].value;
-        console.log('prop = ',this[prop]);
+        console.log('prop = ', prop);
+        console.log('prop value = ',this[prop]);
+        this.identity = this.groupedForm.value;
       }
 
       cancelSingleField(prop: string, control: any): void {
         console.log('org info - cancelSingleField', this[control].value);
         (this[control] as AbstractControl).setValue(this[prop]);
+      }
+
+      updateGroupedEdition(): void {
+        console.log('org info - updateGroupedEdition');
+        this.identity = this.groupedForm.value;
+      }
+
+      cancelGroupedEdition(): void {
+        console.log('org info - cancelGroupedEdition');
+        this.groupedForm.setValue(this.identity);
+      }
+
+      handleModeChange(mode: 'view' | 'edit'): void {
+        console.log('org info - toggle mode change',mode);
+        this.mode = mode;
+        if(mode === 'view') {
+            this.editing = false;
+        }
+        else {
+            this.editing = true;
+        }
       }
 
 }
