@@ -174,6 +174,7 @@ export class OrganizationInfoComponent implements OnInit {
     //TODO: example, delete after
     public inputText = 'foo';
     public inputControl: FormControl = new FormControl(this.inputText);
+    public nameControl: FormControl = new FormControl(this.inputText);
 
     //edit in place formcontrols
     public legalNameControl: FormControl = null;
@@ -397,6 +398,7 @@ export class OrganizationInfoComponent implements OnInit {
         this.initGroupedForm();
 
         this.inputControl = new FormControl(this.identity.country);
+        this.nameControl = new FormControl(this.identity.name);
     }
 
     getOrganizationInfo(): void {
