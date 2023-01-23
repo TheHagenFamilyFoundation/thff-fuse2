@@ -779,18 +779,6 @@ export class OrganizationInfoComponent implements OnInit {
         // this.isReadOnly = !this.isReadOnly;
     }
 
-    saveLegalName(): void {
-        console.log('saving legal name');
-
-    //done editing
-        this.editingLegalName = false;
-    }
-
-    cancel(): void {
-        this.editingLegalName = false;
-        //and many more
-    }
-
     //new stuff
 
     initGroupedForm(): void {
