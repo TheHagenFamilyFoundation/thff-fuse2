@@ -174,17 +174,53 @@ export class OrganizationInfoComponent implements OnInit {
     //TODO: example, delete after
     public inputText = 'foo';
     public inputControl: FormControl = new FormControl(this.inputText);
+
+    //keep
+    public legalNameControl: FormControl;
+    public yearFoundedControl: FormControl;
+    public currentOperatingBudgetControl: FormControl;
+    public directorControl: FormControl;
+    public phoneControl: FormControl;
+    public contactPersonControl: FormControl;
+    public contactPersonTitleControl: FormControl;
+    public contactPersonPhoneNumberControl: FormControl;
+    public emailControl: FormControl;
+    public addressControl: FormControl;
+    public cityControl: FormControl;
+    public stateControl: FormControl;
+    public zipControl: FormControl;
+    public faxControl: FormControl;
+
     public nameControl: FormControl = new FormControl(this.inputText);
 
     //edit in place formcontrols
-    public legalNameControl: FormControl = null;
+    // public legalNameControl: FormControl = null;
 
     public groupedForm: FormGroup;
-    public identity = {
-      name: 'John Doe',
-      city: 'London',
-      country: 'England',
-    };
+    // public identity = {
+    //   name: 'John Doe',
+    //   city: 'London',
+    //   country: 'England',
+    // };
+
+    //default values
+    public orgObj: any;
+    //     legalName :'',
+    //     yearFounded: 0,
+    //     currentOperatingBudget: '',
+    //     director: '',
+    //     phone: '',
+    //     contactPerson: '',
+    //     contactPersonTitle: '',
+    //     contactPersonPhoneNumber: '',
+    //     email: '',
+    //     address: '',
+    //     city: '',
+    //     state: '',
+    //     zip: 0,
+    //     fax: ''
+    // };
+
 
     constructor(
         private createOrganizationInfoService: CreateOrganizationInfoService,
@@ -192,7 +228,6 @@ export class OrganizationInfoComponent implements OnInit {
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
         private authService: AuthService,
         fb: FormBuilder,
-        private renderer: Renderer2
     ) {
 
 
@@ -394,11 +429,6 @@ export class OrganizationInfoComponent implements OnInit {
         this.orgID = this.org.id;
 
         this.getOrganizationInfo();
-
-        this.initGroupedForm();
-
-        this.inputControl = new FormControl(this.identity.country);
-        this.nameControl = new FormControl(this.identity.name);
     }
 
     getOrganizationInfo(): void {
@@ -414,6 +444,7 @@ export class OrganizationInfoComponent implements OnInit {
                     console.log('this.orgInfo.id', this.orgInfo.id);
 
                     this.setFields();
+
                 } else {
                     // default values
                 }
@@ -456,12 +487,12 @@ export class OrganizationInfoComponent implements OnInit {
             console.log('yes');
 
             if (this.orgInfo.legalName) {
+                console.log('this.orgInfo.legalName',this.orgInfo.legalName);
                 this.legalName = this.orgInfo.legalName;
                 // this.formOrganization.get('legalName').value = this.legalName;
             }
-
-        //edit in place
-        this.legalNameControl = new FormControl(this.legalName);
+        //edit in place - old
+        // this.legalNameControl = new FormControl(this.legalName);
 
             if (this.orgInfo.yearFounded) {
                 this.yearFounded = this.orgInfo.yearFounded;
@@ -520,9 +551,47 @@ export class OrganizationInfoComponent implements OnInit {
             if (this.orgInfo.fax) {
                 this.fax = this.orgInfo.fax;
             }
+
+            this.orgObj = {
+                legalName: this.legalName,
+                yearFounded: this.yearFounded,
+                currentOperatingBudget: this.currentOperatingBudget,
+                director: this.director,
+                phone: this.phone,
+                contactPerson: this.contactPerson,
+                contactPersonTitle: this.contactPersonTitle,
+                contactPersonPhoneNumber: this.contactPersonPhoneNumber,
+                email: this.email,
+                address: this.address,
+                city: this.city,
+                state: this.state,
+                zip: this.zip,
+                fax: this.fax
+            };
+
         } else {
             console.log('default values');
+
+            this.orgObj = {
+                    legalName :'',
+        yearFounded: 0,
+        currentOperatingBudget: '',
+        director: '',
+        phone: '',
+        contactPerson: '',
+        contactPersonTitle: '',
+        contactPersonPhoneNumber: '',
+        email: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: 0,
+        fax: ''
+    };
         }
+
+        this.initGroupedForm();
+
     }
 
     edit(): void {
@@ -725,20 +794,58 @@ export class OrganizationInfoComponent implements OnInit {
     //new stuff
 
     initGroupedForm(): void {
+
+        console.log('initializing grouped form');
+        console.log('org obj - ',this.orgObj.legalName);
+
         this.groupedForm = new FormGroup({
-          name: new FormControl(this.identity.name),
-          city: new FormControl(this.identity.city),
-          country: new FormControl(this.identity.country),
+            legalName: new FormControl(this.orgObj.legalName),
+            yearFounded: new FormControl(this.orgObj.yearFounded),
+            currentOperatingBudget: new FormControl(this.orgObj.currentOperatingBudget),
+            director: new FormControl(this.orgObj.director),
+            phone: new FormControl(this.orgObj.phone),
+            contactPerson: new FormControl(this.orgObj.contactPerson),
+            contactPersonTitle: new FormControl(this.orgObj.contactPersonTitle),
+            contactPersonPhoneNumber: new FormControl(this.orgObj.contactPersonPhoneNumber),
+            email: new FormControl(this.orgObj.email),
+            address: new FormControl(this.orgObj.address),
+            city: new FormControl(this.orgObj.city),
+            state: new FormControl(this.orgObj.state),
+            zip: new FormControl(this.orgObj.zip),
+            fax: new FormControl(this.orgObj.fax),
         });
+
+        this.initFormControls();
+
       }
 
+      initFormControls(): void {
+
+        console.log('initializing form controls');
+        console.log('this.legalName',this.legalName);
+
+                // this.inputControl = new FormControl(this.identity.country);
+        // this.nameControl = new FormControl(this.identity.name);
+        this.legalNameControl = new FormControl(this.legalName);
+        this.yearFoundedControl = new FormControl(this.yearFounded);
+        this.currentOperatingBudgetControl = new FormControl(this.currentOperatingBudget);
+        this.directorControl = new FormControl(this.director);
+        this.phoneControl = new FormControl(this.phone);
+        this.contactPersonControl = new FormControl(this.contactPerson);
+        this.contactPersonTitleControl = new FormControl(this.contactPersonTitle);;
+        this.contactPersonPhoneNumberControl = new FormControl(this.contactPersonPhoneNumber);
+        this.emailControl = new FormControl(this.email);
+        this.addressControl = new FormControl(this.address);
+        this.cityControl = new FormControl(this.city);
+        this.stateControl = new FormControl(this.state);
+        this.zipControl = new FormControl(this.zip);
+        this.faxControl = new FormControl(this.fax);
+      }
 
     updateSingleField(prop: any, control: any): void {
         console.log('org info - updateSingleField', this[control].value);
         this[prop] = this[control].value;
-        console.log('prop = ', prop);
-        console.log('prop value = ',this[prop]);
-        this.identity = this.groupedForm.value;
+        this.orgObj[prop] = this[control].value;
       }
 
       cancelSingleField(prop: string, control: any): void {
@@ -748,12 +855,12 @@ export class OrganizationInfoComponent implements OnInit {
 
       updateGroupedEdition(): void {
         console.log('org info - updateGroupedEdition');
-        this.identity = this.groupedForm.value;
+        this.orgObj = this.groupedForm.value;
       }
 
       cancelGroupedEdition(): void {
         console.log('org info - cancelGroupedEdition');
-        this.groupedForm.setValue(this.identity);
+        this.groupedForm.setValue(this.orgObj);
       }
 
       handleModeChange(mode: 'view' | 'edit'): void {

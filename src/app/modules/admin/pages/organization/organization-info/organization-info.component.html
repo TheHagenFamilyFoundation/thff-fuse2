@@ -37,11 +37,15 @@
     </div>
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
-            <form [formGroup]="groupedForm" class="w-full max-w-lg">
+            <form
+                *ngIf="orgInfo"
+                [formGroup]="groupedForm"
+                class="w-full max-w-lg"
+            >
                 <article>
                     <editable data-testid="grouped-input-1">
                         <ng-template viewMode>
-                            {{ identity.name }}
+                            {{ orgObj.legalName }}
                         </ng-template>
                         <ng-template editMode>
                             <div class="form-group">
@@ -59,7 +63,7 @@
                 <article>
                     <editable data-testid="grouped-input-2">
                         <ng-template viewMode>
-                            {{ identity.city }}
+                            {{ orgObj.city }}
                         </ng-template>
                         <ng-template editMode>
                             <div class="form-group">
@@ -77,7 +81,7 @@
                 <article>
                     <editable data-testid="grouped-input-3">
                         <ng-template viewMode>
-                            {{ identity.country }}
+                            {{ orgObj.country }}
                         </ng-template>
                         <ng-template editMode>
                             <div class="form-group">
@@ -100,7 +104,11 @@
 <section>
     <article>
         <div *ngIf="!editing">
-            <form [formGroup]="groupedForm" class="w-full max-w-lg">
+            <form
+                *ngIf="orgInfo"
+                [formGroup]="groupedForm"
+                class="w-full max-w-lg"
+            >
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
                         <label
@@ -112,17 +120,23 @@
                         <editable
                             data-testid="sample-input-click"
                             (save)="
-                                updateSingleField('country', 'inputControl')
+                                updateSingleField(
+                                    'legalName',
+                                    'legalNameControl'
+                                )
                             "
                             (cancel)="
-                                cancelSingleField('country', 'inputControl')
+                                cancelSingleField(
+                                    'legalName',
+                                    'legalNameControl'
+                                )
                             "
                         >
                             <ng-template viewMode>
                                 <div
                                     class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
                                 >
-                                    {{ identity.country }}
+                                    {{ orgObj.legalName }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
@@ -133,9 +147,9 @@
                                         class="form-control"
                                         editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Country"
+                                        placeholder="Legal Name"
                                         type="text"
-                                        formControlName="country"
+                                        [formControl]="legalNameControl"
                                     />
                                 </div>
                             </ng-template>
@@ -151,22 +165,38 @@
                             Year Founded
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField(
+                                    'yearFounded',
+                                    'yearFoundedControl'
+                                )
+                            "
+                            (cancel)="
+                                cancelSingleField(
+                                    'yearFounded',
+                                    'yearFoundedControl'
+                                )
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.yearFounded }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Year Founded"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="yearFoundedControl"
                                     />
                                 </div>
                             </ng-template>
@@ -180,22 +210,42 @@
                             Current Operating Budget
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField(
+                                    'currentOperatingBudget',
+                                    'currentOperatingBudgetControl'
+                                )
+                            "
+                            (cancel)="
+                                cancelSingleField(
+                                    'currentOperatingBudget',
+                                    'currentOperatingBudgetControl'
+                                )
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{
+                                        orgObj.currentOperatingBudget | currency
+                                    }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Current Operating Budget"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="
+                                            currentOperatingBudgetControl
+                                        "
                                     />
                                 </div>
                             </ng-template>
@@ -211,22 +261,38 @@
                             Executive Director
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField(
+                                    'executiveDirector',
+                                    'executiveDirectorControl'
+                                )
+                            "
+                            (cancel)="
+                                cancelSingleField(
+                                    'executiveDirector',
+                                    'executiveDirectorControl'
+                                )
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.director }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Executive Director"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="directorControl"
                                     />
                                 </div>
                             </ng-template>
@@ -240,22 +306,30 @@
                             Phone Number
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('phone', 'phoneControl')"
+                            (cancel)="
+                                cancelSingleField('phone', 'phoneControl')
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.phone }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Phone Number"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="phoneControl"
                                     />
                                 </div>
                             </ng-template>
@@ -274,22 +348,40 @@
                             Title
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField(
+                                    'contactPersonTitle',
+                                    'contactPersonTitleControl'
+                                )
+                            "
+                            (cancel)="
+                                cancelSingleField(
+                                    'contactPersonTitle',
+                                    'contactPersonTitleControl'
+                                )
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.contactPersonTitle }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Contact Person Title"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="
+                                            contactPersonTitleControl
+                                        "
                                     />
                                 </div>
                             </ng-template>
@@ -303,22 +395,40 @@
                             Phone Number
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField(
+                                    'contactPersonPhoneNumber',
+                                    'contactPersonPhoneNumberControl'
+                                )
+                            "
+                            (cancel)="
+                                cancelSingleField(
+                                    'contactPersonPhoneNumber',
+                                    'contactPersonPhoneNumberControl'
+                                )
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.contactPersonPhoneNumber }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Contact Person Phone Number"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="
+                                            contactPersonPhoneNumberControl
+                                        "
                                     />
                                 </div>
                             </ng-template>
@@ -334,22 +444,30 @@
                             Email
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('email', 'emailControl')"
+                            (cancel)="
+                                cancelSingleField('email', 'emailControl')
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.email }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Email"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="emailControl"
                                     />
                                 </div>
                             </ng-template>
@@ -368,22 +486,32 @@
                             Address
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="
+                                updateSingleField('address', 'addressControl')
+                            "
+                            (cancel)="
+                                cancelSingleField('address', 'addressControl')
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.address }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Address"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="addressControl"
                                     />
                                 </div>
                             </ng-template>
@@ -399,22 +527,28 @@
                             City
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('city', 'cityControl')"
+                            (cancel)="cancelSingleField('city', 'cityControl')"
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.city }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="City"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="cityControl"
                                     />
                                 </div>
                             </ng-template>
@@ -428,22 +562,30 @@
                             State
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('state', 'stateControl')"
+                            (cancel)="
+                                cancelSingleField('state', 'stateControl')
+                            "
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.state }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="State"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="stateControl"
                                     />
                                 </div>
                             </ng-template>
@@ -457,22 +599,28 @@
                             Zip
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('zip', 'zipControl')"
+                            (cancel)="cancelSingleField('zip', 'zipControl')"
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.zip }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Zip"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="zipControl"
                                     />
                                 </div>
                             </ng-template>
@@ -488,22 +636,28 @@
                             Fax
                         </label>
                         <editable
-                            class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight focus:outline focus:bg-white focus:border-gray-500 hover:border-gray-500 hover:bg-slate-200"
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('name', 'nameControl')"
-                            (cancel)="cancelSingleField('name', 'nameControl')"
+                            (save)="updateSingleField('fax', 'faxControl')"
+                            (cancel)="cancelSingleField('fax', 'faxControl')"
                         >
                             <ng-template viewMode>
-                                {{ identity.name }}
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                >
+                                    {{ orgObj.fax }}
+                                </div>
                             </ng-template>
                             <ng-template editMode>
-                                <div class="form-group">
+                                <div
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
+                                >
                                     <input
                                         class="form-control"
+                                        editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Name"
+                                        placeholder="Fax"
                                         type="text"
-                                        formControlName="name"
+                                        [formControl]="faxControl"
                                     />
                                 </div>
                             </ng-template>
