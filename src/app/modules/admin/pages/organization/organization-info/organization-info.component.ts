@@ -25,6 +25,7 @@ import { environment } from '../../../../../../environments/environment';
 
 // Services
 import { CreateOrganizationInfoService } from 'app/core/services/organization/organization-info/create-organization-info.service';
+import { UpdateOrganizationInfoService } from 'app/core/services/organization/organization-info/update-organization-info.service';
 import { GetOrganizationInfoService } from 'app/core/services/organization/organization-info/get-organization-info.service';
 import { DeleteOrganizationInfoService } from 'app/core/services/organization/organization-info/delete-organization-info.service';
 
@@ -224,6 +225,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     constructor(
         private createOrganizationInfoService: CreateOrganizationInfoService,
+        private updateOrganizationInfoService: UpdateOrganizationInfoService,
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
         private authService: AuthService,
@@ -830,11 +832,50 @@ export class OrganizationInfoComponent implements OnInit {
         this.faxControl = new FormControl(this.fax);
       }
 
+      //sets the fields to the updated value
+      //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
+        console.log('prop',prop);
+        console.log('control',control);
         console.log('org info - updateSingleField', this[control].value);
         this[prop] = this[control].value;
         this.orgObj[prop] = this[control].value;
+        const change = {
+            [prop]: this[control].value
+        };
+        this.saveSingleField(change);
+
       }
+
+      //takes in the field that changed
+      saveSingleField(change: any): void {
+        console.log('save single field');
+
+        const body = change;
+
+        console.log('saveSingleField - body', body);
+        this.updateOrganizationInfo(body);
+    }
+
+    //calls the updateOrganizationService
+    updateOrganizationInfo(body: any): void {
+
+        console.log('updateOrganizationInfo',body);
+
+        this.updateOrganizationInfoService.updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
+            .subscribe(
+                (result) => {
+                    console.log('Org Info updated', result);
+                    this.orgInfo = result;
+
+                    console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
+                },
+                (err) => {
+                    console.log(err);
+                }
+            );
+
+    }
 
       cancelSingleField(prop: string, control: any): void {
         console.log('org info - cancelSingleField', this[control].value);
