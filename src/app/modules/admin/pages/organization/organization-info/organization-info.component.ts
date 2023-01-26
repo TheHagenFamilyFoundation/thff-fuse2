@@ -883,7 +883,7 @@ export class OrganizationInfoComponent implements OnInit {
       }
 
       updateGroupedEdition(): void {
-        console.log('org info - updateGroupedEdition');
+        console.log('org info - updateGroupedEdition',this.groupedForm.value);
         this.orgObj = this.groupedForm.value;
       }
 
