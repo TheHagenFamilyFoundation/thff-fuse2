@@ -12,7 +12,8 @@ import { appConfig } from 'app/core/config/app.config';
 import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
-import { appRoutes } from 'app/app.routing';
+import { appHomeRoutes, appRoutes } from 'app/app.routing';
+// import { appRoutes } from 'app/app.routing';
 
 import { EditableModule } from '@ngneat/edit-in-place';
 
@@ -30,7 +31,8 @@ const routerConfig: ExtraOptions = {
         FormsModule,
         ReactiveFormsModule,
 
-        RouterModule.forRoot(appRoutes, routerConfig),
+        // RouterModule.forRoot(appRoutes, routerConfig)
+        RouterModule.forRoot(appHomeRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI
         FuseModule,
