@@ -14,6 +14,8 @@ import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
 
+import { EditableModule } from '@ngneat/edit-in-place';
+
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
     scrollPositionRestoration: 'enabled',
@@ -43,6 +45,8 @@ const routerConfig: ExtraOptions = {
 
         // 3rd party modules that require global configuration via forRoot
         MarkdownModule.forRoot({}),
+
+        EditableModule,
     ],
     bootstrap: [AppComponent],
 })
