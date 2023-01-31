@@ -35,6 +35,7 @@
             </button>
         </div>
     </div>
+    <!-- TODO clean this up-->
     <!-- <div class="flex flex-col mt-2">
         orgInfo:
         {{ orgInfo | json }}
@@ -47,10 +48,10 @@
         legalName:
         {{ legalName }}
     </div> -->
-    <div class="flex flex-col mt-2">
+    <!-- <div class="flex flex-col mt-2">
         formOrganization
         {{ formOrganization?.value | json }}
-    </div>
+    </div> -->
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
             <form
@@ -592,7 +593,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputYearFounded
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.yearFounded }}
                                 </div>
@@ -612,6 +617,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputYearFounded">
+                            Year founded is <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/2 px-3">
                         <label
@@ -637,7 +645,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputCurrentOperatingBudget
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{
                                         orgObj.currentOperatingBudget | currency
@@ -661,6 +673,10 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputCurrentOperatingBudget">
+                            Current Operating Budget is
+                            <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
@@ -674,21 +690,19 @@
                         <editable
                             data-testid="sample-input-click"
                             (save)="
-                                updateSingleField(
-                                    'executiveDirector',
-                                    'executiveDirectorControl'
-                                )
+                                updateSingleField('director', 'directorControl')
                             "
                             (cancel)="
-                                cancelSingleField(
-                                    'executiveDirector',
-                                    'executiveDirectorControl'
-                                )
+                                cancelSingleField('director', 'directorControl')
                             "
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputDirector
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.director }}
                                 </div>
@@ -708,6 +722,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputDirector">
+                            Director Name is <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/2 px-3">
                         <label
@@ -725,7 +742,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputPhone
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.phone }}
                                 </div>
@@ -745,6 +766,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputPhone">
+                            Phone Number is <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="block tracking-wide text-gray-700 text-base mb-2">
@@ -775,7 +799,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputContactPerson
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.contactPerson }}
                                 </div>
@@ -795,6 +823,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputContactPerson">
+                            Contact Person Name is <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                         <label
@@ -820,7 +851,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputContactPersonTitle
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.contactPersonTitle }}
                                 </div>
@@ -842,6 +877,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputContactPersonTitle">
+                            Contact Person Title is <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
@@ -869,7 +907,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputContactPersonPhoneNumber
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.contactPersonPhoneNumber }}
                                 </div>
@@ -882,7 +924,7 @@
                                         class="form-control"
                                         editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        placeholder="Contact Person Phone Number"
+                                        placeholder="Phone Number"
                                         type="text"
                                         [formControl]="
                                             contactPersonPhoneNumberControl
@@ -891,6 +933,10 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputContactPersonPhoneNumber">
+                            Contact Person Phone Number is
+                            <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                         <label
@@ -908,7 +954,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputEmail
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.email }}
                                 </div>
@@ -928,6 +978,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputEmail">
+                            Email is <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="block tracking-wide text-gray-700 text-base mb-2">
@@ -952,7 +1005,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputAddress
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.address }}
                                 </div>
@@ -972,6 +1029,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputAddress">
+                            Address is <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
@@ -989,7 +1049,9 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputCity ? 'border-red-600' : ''
+                                    }}"
                                 >
                                     {{ orgObj.city }}
                                 </div>
@@ -1009,6 +1071,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputCity">
+                            City is <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/3 px-3">
                         <label
@@ -1026,7 +1091,11 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputState
+                                            ? 'border-red-600'
+                                            : ''
+                                    }}"
                                 >
                                     {{ orgObj.state }}
                                 </div>
@@ -1046,6 +1115,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputState">
+                            State is <strong>required</strong>
+                        </mat-error>
                     </div>
                     <div class="w-full md:w-1/3 px-3">
                         <label
@@ -1061,7 +1133,9 @@
                         >
                             <ng-template viewMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
+                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                        invalidInputZip ? 'border-red-600' : ''
+                                    }}"
                                 >
                                     {{ orgObj.zip }}
                                 </div>
@@ -1081,6 +1155,9 @@
                                 </div>
                             </ng-template>
                         </editable>
+                        <mat-error *ngIf="invalidInputZip">
+                            Zip is <strong>required</strong>
+                        </mat-error>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
