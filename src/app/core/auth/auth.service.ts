@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import {
+    BehaviorSubject,
+    catchError,
+    Observable,
+    of,
+    switchMap,
+    throwError,
+} from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/services/user/user.service';
 import { environment } from '../../../environments/environment';
@@ -26,6 +33,7 @@ export class AuthService {
             this.apiUrl = this.getBackendURL();
             console.log('auth-service - this.apiUrl', this.apiUrl);
         }
+
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -42,6 +50,17 @@ export class AuthService {
     get accessToken(): string {
         return localStorage.getItem('accessToken') ?? '';
     }
+    // /**
+    //  * Setter & getter for current user
+    //  */
+    // set currentUser(currentUser: any) {
+    //     console.log('storing currentUser', currentUser);
+    //     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // }
+
+    // get currentUser(): any {
+    //     return localStorage.getItem('currentUser') ?? '';
+    // }
 
     set currentUser(user: string) {
         localStorage.setItem('currentUser', user);

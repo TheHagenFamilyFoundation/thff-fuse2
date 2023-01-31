@@ -1,3 +1,4 @@
+/* eslint-disable arrow-parens */
 import { Route } from '@angular/router';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
@@ -118,7 +119,6 @@ export const appRoutes: Route[] = [
             },
         ],
     },
-
     // Authenticated routes
     {
         path: '',
@@ -191,7 +191,6 @@ export const appRoutes: Route[] = [
 
 export const appHomeRoutes: Route[] = [
     { path: '', pathMatch: 'full', redirectTo: 'home' },
-
     // Landing routes
     {
         path: '',
