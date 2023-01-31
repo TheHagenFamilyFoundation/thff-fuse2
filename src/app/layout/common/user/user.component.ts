@@ -9,9 +9,9 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { BooleanInput } from '@angular/cdk/coercion';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, BehaviorSubject, Observable, takeUntil } from 'rxjs';
 import { User } from 'app/core/user/user.types';
-import { AuthService } from 'app/core/auth/auth.service';
+import { UserService } from 'app/core/services/user/user.service';
 
 @Component({
     selector: 'user',
@@ -28,15 +28,9 @@ export class UserComponent implements OnInit, OnDestroy {
     @Input() showAvatar: boolean = true;
     user: User;
 
-    currentUser: any;
+    public currentUser: Observable<User>;
 
-    userName: string;
-
-    organizations: any;
-
-    lois: any;
-
-    inOrgCheck: boolean;
+    private currentUserSubject: BehaviorSubject<User>;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -46,19 +40,8 @@ export class UserComponent implements OnInit, OnDestroy {
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
-        private _authService: AuthService
-    ) {
-        this._authService.currentUser.subscribe((x) => {
-            console.log('user component - constructor - x', x);
-            this.currentUser = x;
-            if (this.currentUser && this.currentUser) {
-                this.user = this.currentUser;
-                this.userName = this.user.username;
-            } else {
-                console.error('user component - no user');
-            }
-        });
-    }
+        private _userService: UserService
+    ) {}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -67,7 +50,26 @@ export class UserComponent implements OnInit, OnDestroy {
     /**
      * On init
      */
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        console.log('ngOnInit - getting user');
+
+        // this.currentUserSubject = new BehaviorSubject<User>(
+        //     JSON.parse(localStorage.getItem('currentUser'))
+        // );
+        // this.currentUser = this.currentUserSubject.asObservable();
+        // this.user = JSON.parse(localStorage.getItem('currentUser'));
+        // Subscribe to user changes
+        this._userService.user$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((user: User) => {
+                console.log('user-component - user', user);
+
+                this.user = user;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+    }
 
     /**
      * On destroy
@@ -82,25 +84,25 @@ export class UserComponent implements OnInit, OnDestroy {
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    // /**
-    //  * Update the user status
-    //  *
-    //  * @param status
-    //  */
-    // updateUserStatus(status: string): void {
-    //     // Return if user is not available
-    //     if (!this.user) {
-    //         return;
-    //     }
+    /**
+     * Update the user status
+     *
+     * @param status
+     */
+    updateUserStatus(status: string): void {
+        // Return if user is not available
+        if (!this.user) {
+            return;
+        }
 
-    //     // Update the user
-    //     this._authService
-    //         .update({
-    //             ...this.user,
-    //             status,
-    //         })
-    //         .subscribe();
-    // }
+        // Update the user
+        this._userService
+            .update({
+                ...this.user,
+                status,
+            })
+            .subscribe();
+    }
 
     /**
      * Sign out

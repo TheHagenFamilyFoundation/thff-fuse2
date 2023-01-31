@@ -10,19 +10,12 @@ import {
     throwError,
 } from 'rxjs';
 import { AuthUtils } from 'app/core/auth/auth.utils';
-import { UserService } from 'app/core/user/user.service';
+import { UserService } from 'app/core/services/user/user.service';
 import { environment } from '../../../environments/environment';
-import { User } from 'app/core/user/user.types';
 @Injectable()
 export class AuthService {
     private _authenticated: boolean = false;
-
     private apiUrl: string;
-
-    private currentUserSubject: BehaviorSubject<User>;
-
-    public currentUser: Observable<User>;
-
     /**
      * Constructor
      */
@@ -41,14 +34,6 @@ export class AuthService {
             console.log('auth-service - this.apiUrl', this.apiUrl);
         }
 
-        this.currentUserSubject = new BehaviorSubject<User>(
-            JSON.parse(localStorage.getItem('currentUser'))
-        );
-        this.currentUser = this.currentUserSubject.asObservable();
-    }
-
-    public get currentUserValue(): any {
-        return this.currentUserSubject.value;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -76,6 +61,14 @@ export class AuthService {
     // get currentUser(): any {
     //     return localStorage.getItem('currentUser') ?? '';
     // }
+
+    set currentUser(user: string) {
+        localStorage.setItem('currentUser', user);
+    }
+
+    get currentUser(): string {
+        return localStorage.getItem('currentUser') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -121,22 +114,24 @@ export class AuthService {
             .put(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
-                    console.log('user', response.user);
+                    //debug
+                    console.log('response', response);
 
                     // Store the access token in the local storage
                     this.accessToken = response.token;
+                    this.currentUser = JSON.stringify(response.user);
+
+                    //TODO: debug can remove
+                    // console.log(
+                    //     'currentUser - user',
+                    //     JSON.parse(this.currentUser)
+                    // );
 
                     // Set the authenticated flag to true
                     this._authenticated = true;
 
                     // // Store the user on the user service
-                    // this.currentUser = response.user;
-
-                    localStorage.setItem(
-                        'currrentUser',
-                        JSON.stringify(response.user)
-                    );
-                    this.currentUserSubject.next(response.user);
+                    this._userService.user = response.user;
 
                     // Return a new observable with the response
                     return of(response);
@@ -150,8 +145,9 @@ export class AuthService {
     signInUsingToken(): Observable<any> {
         // Renew token
         return this._httpClient
-            .post('api/auth/refresh-access-token', {
+            .post(`${this.apiUrl}/auth/refresh-access-token`, {
                 accessToken: this.accessToken,
+                user: this.currentUser
             })
             .pipe(
                 catchError(() =>
@@ -160,7 +156,7 @@ export class AuthService {
                 ),
                 switchMap((response: any) => {
                     // Store the access token in the local storage
-                    this.accessToken = response.accessToken;
+                    this.accessToken = response.token;
 
                     // Set the authenticated flag to true
                     this._authenticated = true;
@@ -178,6 +174,9 @@ export class AuthService {
      * Sign out
      */
     signOut(): Observable<any> {
+
+        console.log('signing out');
+
         // Remove the access token from the local storage
         localStorage.removeItem('accessToken');
         localStorage.removeItem('currentUser');

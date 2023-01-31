@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExtraOptions, PreloadAllModules, RouterModule } from '@angular/router';
 import { MarkdownModule } from 'ngx-markdown';
 import { FuseModule } from '@fuse';
@@ -11,21 +12,27 @@ import { appConfig } from 'app/core/config/app.config';
 import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
-import { appRoutes } from 'app/app.routing';
+import { appHomeRoutes, appRoutes } from 'app/app.routing';
+// import { appRoutes } from 'app/app.routing';
+
+import { EditableModule } from '@ngneat/edit-in-place';
 
 const routerConfig: ExtraOptions = {
-    preloadingStrategy       : PreloadAllModules,
-    scrollPositionRestoration: 'enabled'
+    preloadingStrategy: PreloadAllModules,
+    scrollPositionRestoration: 'enabled',
 };
 
 @NgModule({
-    declarations: [
-        AppComponent
-    ],
-    imports     : [
+    declarations: [AppComponent],
+    imports: [
         BrowserModule,
         BrowserAnimationsModule,
-        RouterModule.forRoot(appRoutes, routerConfig),
+
+        FormsModule,
+        ReactiveFormsModule,
+
+        // RouterModule.forRoot(appRoutes, routerConfig)
+        RouterModule.forRoot(appHomeRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI
         FuseModule,
@@ -39,12 +46,10 @@ const routerConfig: ExtraOptions = {
         LayoutModule,
 
         // 3rd party modules that require global configuration via forRoot
-        MarkdownModule.forRoot({})
+        MarkdownModule.forRoot({}),
+
+        EditableModule,
     ],
-    bootstrap   : [
-        AppComponent
-    ]
+    bootstrap: [AppComponent],
 })
-export class AppModule
-{
-}
+export class AppModule {}
