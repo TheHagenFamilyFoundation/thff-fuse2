@@ -159,7 +159,7 @@ export class UserOrganizationComponent implements OnInit {
 
     createOrganization(): void {
         console.log('create organization');
-        this.router.navigate(['/pages/create-organization']);
+        this.router.navigate(['/pages/organization/create']);
     }
 
     // this might be kept
