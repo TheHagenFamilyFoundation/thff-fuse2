@@ -11,14 +11,14 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
-import { SettingsComponent } from 'app/modules/admin/pages/settings/settings.component';
-import { SettingsAccountComponent } from 'app/modules/admin/pages/settings/account/account.component';
-import { SettingsSecurityComponent } from 'app/modules/admin/pages/settings/security/security.component';
-import { SettingsPlanBillingComponent } from 'app/modules/admin/pages/settings/plan-billing/plan-billing.component';
-import { SettingsNotificationsComponent } from 'app/modules/admin/pages/settings/notifications/notifications.component';
-import { SettingsTeamComponent } from 'app/modules/admin/pages/settings/team/team.component';
-import { SettingsAppComponent } from 'app/modules/admin/pages/settings/app-settings/app-settings.component';
-import { settingsRoutes } from 'app/modules/admin/pages/settings/settings.routing';
+import { SettingsComponent } from 'app/modules/pages/settings/settings.component';
+import { SettingsAccountComponent } from 'app/modules/pages/settings/account/account.component';
+import { SettingsSecurityComponent } from 'app/modules/pages/settings/security/security.component';
+import { SettingsPlanBillingComponent } from 'app/modules/pages/settings/plan-billing/plan-billing.component';
+import { SettingsNotificationsComponent } from 'app/modules/pages/settings/notifications/notifications.component';
+import { SettingsTeamComponent } from 'app/modules/pages/settings/team/team.component';
+import { SettingsAppComponent } from 'app/modules/pages/settings/app-settings/app-settings.component';
+import { settingsRoutes } from 'app/modules/pages/settings/settings.routing';
 
 @NgModule({
     declarations: [

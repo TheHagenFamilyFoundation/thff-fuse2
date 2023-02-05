@@ -5,9 +5,9 @@ import {
     OnInit,
 } from '@angular/core';
 
-import { AuthService } from '../../../../core/auth/auth.service';
-import { GetUserService } from '../../../../core/services/user/get-user.service';
-import { InOrgService } from '../../../../core/services/user/in-org.service';
+import { AuthService } from 'app/core/auth/auth.service';
+import { GetUserService } from 'app/core/services/user/get-user.service';
+import { InOrgService } from 'app/core/services/user/in-org.service';
 // import { DirectorService } from '../../../../core/services/user/director.service';
 
 @Component({

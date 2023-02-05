@@ -3,9 +3,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ApexOptions } from 'ng-apexcharts';
 import { OrganizationService } from './organization.service';
-import { GetOrganizationService } from '../../../../core/services/organization/get-organization.service';
+import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { AuthService } from 'app/core/auth/auth.service';
-import { environment } from '../../../../../environments/environment';
+import { environment } from 'environments/environment';
 
 @Component({
     selector       : 'organization',

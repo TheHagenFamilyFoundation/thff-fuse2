@@ -21,7 +21,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 
-import { environment } from '../../../../../../environments/environment';
+import { environment } from 'environments/environment';
 
 // Services
 import { CreateOrganizationInfoService } from 'app/core/services/organization/organization-info/create-organization-info.service';
@@ -58,11 +58,6 @@ export class OrganizationInfoComponent implements OnInit {
 
     orgInfo: any;
 
-    //TODO: figure out a better way to handle the field names
-    //field names
-    fnLegalName: string = 'Legal Name';
-
-
     legalName$ = new Subject<string>();
 
     yearFounded$ = new Subject<string>();
@@ -91,8 +86,6 @@ export class OrganizationInfoComponent implements OnInit {
 
     fax$ = new Subject<string>();
 
-    testphone$ = new Subject<string>();
-
     isReadOnly: boolean = true;
 
     legalName: string;
@@ -101,7 +94,7 @@ export class OrganizationInfoComponent implements OnInit {
     yearFounded: number;
 
     // -Year Founded
-    currentOperatingBudget: string;
+    currentOperatingBudget: number;
 
     // -Current Operating Budget
     director: string;
@@ -133,8 +126,6 @@ export class OrganizationInfoComponent implements OnInit {
 
     // -Zip - 5 length
     fax: string; // -Fax Number
-
-    testphone: any;
 
     loaded = false;
 
@@ -280,14 +271,14 @@ export class OrganizationInfoComponent implements OnInit {
                 this.yearFoundedChange();
             });
 
-        // this.currentOperatingBudget$.pipe(
-        //   debounceTime(400),
-        //   distinctUntilChanged())
-        //   .subscribe(term => {
+        this.currentOperatingBudget$.pipe(
+          debounceTime(400),
+          distinctUntilChanged())
+          .subscribe((term) => {
 
-        //     this.currentOperatingBudget = Number(term);
-        //     this.currentOperatingBudgetChange()
-        //   });
+            this.currentOperatingBudget = Number(term);
+            this.currentOperatingBudgetChange();
+          });
 
         this.director$
             .pipe(debounceTime(400), distinctUntilChanged())
@@ -366,15 +357,6 @@ export class OrganizationInfoComponent implements OnInit {
                 this.faxChange();
             });
 
-        this.testphone$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                console.log('term = ', term);
-
-                this.testphone = term.toString();
-                this.phoneChange();
-            });
-
         this.defaultValues();
 
         if (!environment.production) {
@@ -411,7 +393,7 @@ export class OrganizationInfoComponent implements OnInit {
         //main
         this.legalName = '';
         this.yearFounded = 0;
-        this.currentOperatingBudget = '';
+        this.currentOperatingBudget = 0;
         this.director = '';
         this.phone = '';
         this.contactPerson = '';
@@ -576,9 +558,9 @@ export class OrganizationInfoComponent implements OnInit {
             console.log('default values');
 
             this.orgObj = {
-                    legalName :'',
+            legalName :'',
         yearFounded: 0,
-        currentOperatingBudget: '',
+        currentOperatingBudget: 0,
         director: '',
         phone: '',
         contactPerson: '',

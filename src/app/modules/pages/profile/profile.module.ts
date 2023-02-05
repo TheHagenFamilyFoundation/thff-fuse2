@@ -11,8 +11,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
-import { ProfileComponent } from 'app/modules/admin/pages/profile/profile.component';
-import { profileRoutes } from 'app/modules/admin/pages/profile/profile.routing';
+import { ProfileComponent } from 'app/modules/pages/profile/profile.component';
+import { profileRoutes } from 'app/modules/pages/profile/profile.routing';
 
 import { UserOrganizationComponent } from './user-organization/user-organization.component';
 import { SelectedOrganizationComponent } from './user-organization/selected-organization/selected-organization.component';

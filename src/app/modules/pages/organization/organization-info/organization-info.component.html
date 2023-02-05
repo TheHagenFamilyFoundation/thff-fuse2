@@ -137,7 +137,7 @@
                                 required
                                 value="{{ currentOperatingBudget }}"
                                 (keyup)="
-                                    currentOperatingBudgetChange(
+                                    currentOperatingBudget$.next(
                                         $event.target.value
                                     )
                                 "
@@ -205,7 +205,7 @@
                                 matInput
                                 formControlName="phone"
                                 value="{{ phone }}"
-                                type="text"
+                                type="tel"
                                 appPhoneMask
                                 formControlName="phone"
                                 id="phone-number"
@@ -304,7 +304,7 @@
                                 matInput
                                 class="form-control"
                                 value="{{ contactPersonPhoneNumber }}"
-                                type="text"
+                                type="tel"
                                 appPhoneMask
                                 formControlName="contactPersonPhoneNumber"
                                 id="phone-number"
@@ -460,7 +460,7 @@
                                 matInput
                                 placeholder="Zip"
                                 maxlength="5"
-                                [formControl]="zipFormControl"
+                                formControlName="zip"
                                 value="{{ zip }}"
                                 required
                                 (keyup)="zip$.next($event.target.value)"
@@ -490,7 +490,7 @@
                             <input
                                 matInput
                                 value="{{ fax }}"
-                                type="text"
+                                type="tel"
                                 appPhoneMask
                                 formControlName="fax"
                                 id="fax"
@@ -755,11 +755,12 @@
                                     class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
                                 >
                                     <input
-                                        class="form-control"
                                         editableFocusable
+                                        appPhoneMask
+                                        maxlength="10"
                                         data-testid="sample-input-click-edit"
                                         placeholder="Phone Number"
-                                        type="text"
+                                        type="tel"
                                         [formControl]="phoneControl"
                                     />
                                 </div>
@@ -922,9 +923,11 @@
                                     <input
                                         class="form-control"
                                         editableFocusable
+                                        appPhoneMask
+                                        maxlength="10"
                                         data-testid="sample-input-click-edit"
                                         placeholder="Phone Number"
-                                        type="text"
+                                        type="tel"
                                         [formControl]="
                                             contactPersonPhoneNumberControl
                                         "
@@ -1187,8 +1190,9 @@
                                         class="form-control"
                                         editableFocusable
                                         data-testid="sample-input-click-edit"
+                                        appPhoneMask
                                         placeholder="Fax"
-                                        type="text"
+                                        type="tel"
                                         [formControl]="faxControl"
                                     />
                                 </div>

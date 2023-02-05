@@ -132,7 +132,7 @@ export const appRoutes: Route[] = [
             {
                 path: 'example',
                 loadChildren: () =>
-                    import('app/modules/admin/example/example.module').then(
+                    import('app/modules/example/example.module').then(
                         m => m.ExampleModule
                     ),
             },
@@ -146,41 +146,46 @@ export const appRoutes: Route[] = [
             // Pages
             {
                 path: 'pages',
-                children: [
-                    // Profile
-                    {
-                        path: 'profile',
-                        loadChildren: () =>
-                            import(
-                                'app/modules/admin/pages/profile/profile.module'
-                            ).then(m => m.ProfileModule),
-                    },
-                    // // Organization
-                    // {
-                    //     path: 'organization/:id',
-                    //     loadChildren: () =>
-                    //         import(
-                    //             'app/modules/admin/pages/organization/organization.module'
-                    //         ).then((m) => m.OrganizationModule),
-                    // },
-                    // Project
-                    {
-                        path: 'organization/:id',
-                        loadChildren: () =>
-                            import(
-                                'app/modules/admin/pages/organization/organization.module'
-                            ).then(m => m.OrganizationModule),
-                    },
-                    // Settings
-                    {
-                        path: 'settings',
-                        loadChildren: () =>
-                            import(
-                                'app/modules/admin/pages/settings/settings.module'
-                            ).then(m => m.SettingsModule),
-                    },
-                ],
-            },
+                loadChildren: () => import('./modules/pages/pages.module').then((m)=> m.PagesModule),
+                // loadChildren: () => import(''./main/pages/pages.module').then((m) => m.PagesModule),
+              },
+            // {
+            //     path: 'pages',
+            //     children: [
+            //         // Profile
+            //         {
+            //             path: 'profile',
+            //             loadChildren: () =>
+            //                 import(
+            //                     'app/modules/admin/pages/profile/profile.module'
+            //                 ).then(m => m.ProfileModule),
+            //         },
+            //         // // Organization
+            //         // {
+            //         //     path: 'organization/:id',
+            //         //     loadChildren: () =>
+            //         //         import(
+            //         //             'app/modules/admin/pages/organization/organization.module'
+            //         //         ).then((m) => m.OrganizationModule),
+            //         // },
+            //         // Project
+            //         {
+            //             path: 'organization/:id',
+            //             loadChildren: () =>
+            //                 import(
+            //                     'app/modules/admin/pages/organization/organization.module'
+            //                 ).then(m => m.OrganizationModule),
+            //         },
+            //         // Settings
+            //         {
+            //             path: 'settings',
+            //             loadChildren: () =>
+            //                 import(
+            //                     'app/modules/admin/pages/settings/settings.module'
+            //                 ).then(m => m.SettingsModule),
+            //         },
+            //     ],
+            // },
         ],
     },
     {

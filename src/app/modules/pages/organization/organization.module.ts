@@ -29,16 +29,24 @@ import { OrganizationInfoComponent } from './organization-info/organization-info
 
 import { EditableComponent } from 'app/common/components/editable/editable.component';
 
+import { CreateOrganizationComponent } from './create-organization/create-organization.component';
+
 //services
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
+import { CreateOrganizationService } from 'app/core/services/organization/create-organization.service';
+
+import { PhoneMaskDirective } from 'app/core/directives/phone-mask.directive';
 
 @NgModule({
     declarations: [
+        PhoneMaskDirective,
         OrganizationComponent,
         OrganizationInfoComponent,
         EditableComponent,
+        CreateOrganizationComponent,
+
     ],
-    providers: [GetOrganizationService],
+    providers: [GetOrganizationService, CreateOrganizationService],
     imports     : [
         RouterModule.forChild(organizationRoutes),
         MatButtonModule,
@@ -58,6 +66,9 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
         TranslocoModule,
         SharedModule,
         EditableModule
+    ],
+    exports: [
+        PhoneMaskDirective
     ]
 })
 export class OrganizationModule
