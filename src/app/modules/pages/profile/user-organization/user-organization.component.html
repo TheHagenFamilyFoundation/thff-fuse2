@@ -7,8 +7,6 @@
 >
     <mat-icon>add</mat-icon> Create Organization
 </button>
-<!-- </h3> -->
-<div *ngIf="inOrganization">
     <div class="example-container mat-elevation-z8">
         <mat-table [dataSource]="dataSource" matSort>
             <!-- Name Column -->
@@ -57,4 +55,3 @@
         <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
         <mat-paginator [pageSizeOptions]="[5]"></mat-paginator>
     </div>
-</div>

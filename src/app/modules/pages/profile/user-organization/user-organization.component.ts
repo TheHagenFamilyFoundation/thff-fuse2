@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, Input } from '@angular/core';
+import { Component, ViewChild, OnInit, Input, AfterViewInit } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -23,7 +23,7 @@ export class UserOrganizationComponent implements OnInit {
     @Input()
     organizations: any;
 
-    @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+    @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
     @ViewChild(MatSort, { static: false }) sort: MatSort;
 
@@ -76,7 +76,7 @@ export class UserOrganizationComponent implements OnInit {
 
         this.dataSource = new MatTableDataSource([]);
 
-        // console.log('user-organizaiton - check organizations 2');
+        // console.log('user-organizaton - check organizations 2');
         this.checkOrganizations();
     }
 
