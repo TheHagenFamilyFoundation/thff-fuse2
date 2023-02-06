@@ -108,6 +108,10 @@ export class OrganizationComponent implements OnInit, OnDestroy
         });
     }
 
+    refreshOrg(): void {
+        this.getOrganization(this.orgID); //fetch the organization again
+      }
+
     getBackendURL(): void {
         console.log('organization - environment', environment);
         if (environment.production) {

@@ -5,6 +5,7 @@ import {
     Renderer2,
     ViewChild,
     ElementRef,
+    Output, EventEmitter
 } from '@angular/core';
 import {
     AbstractControl, FormArray,
@@ -15,7 +16,6 @@ import {
     NgForm,
     Validators,
 } from '@angular/forms';
-
 import { ErrorStateMatcher } from '@angular/material/core';
 
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -41,13 +41,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class OrganizationInfoComponent implements OnInit {
     @Input()
     org: any;
-
-    /**
-     * This is the toggle button element, look at HTML and see its definition
-     */
-    @ViewChild('toggleButton') toggleButton: ElementRef;
-
-    @ViewChild('toggleButton2') toggleButton2: ElementRef;
+    @Output() refreshOrg = new EventEmitter<boolean>();
 
  // multiple form
  public mode: 'view' | 'edit' = 'view';
@@ -957,6 +951,8 @@ export class OrganizationInfoComponent implements OnInit {
                     this.orgInfo = result.info;
 
                     console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
+
+                    this.refreshOrg.emit(true);
                     this.resetFormValues();
 
                 },
@@ -1009,7 +1005,7 @@ export class OrganizationInfoComponent implements OnInit {
                     this.orgInfo = result.info;
 
                     console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
-
+                    this.refreshOrg.emit(true);
                     this.resetFormValues();
 
                 },

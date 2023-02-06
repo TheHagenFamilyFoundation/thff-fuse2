@@ -101,7 +101,7 @@
                             </div>
                             <div class="flex flex-col items-center mt-2"> -->
                                 <div *ngIf="org">
-                                    <app-organization-info [org]="org"></app-organization-info>
+                                    <app-organization-info (refreshOrg)="refreshOrg()" [org]="org"></app-organization-info>
                                 </div>
 
                             <!-- </div> -->
