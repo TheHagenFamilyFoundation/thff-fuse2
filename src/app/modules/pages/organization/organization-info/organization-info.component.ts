@@ -954,7 +954,7 @@ export class OrganizationInfoComponent implements OnInit {
             .subscribe(
                 (result) => {
                     console.log('Org Info updated', result);
-                    this.orgInfo = result;
+                    this.orgInfo = result.info;
 
                     console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
                     this.resetFormValues();
@@ -1006,7 +1006,7 @@ export class OrganizationInfoComponent implements OnInit {
             .subscribe(
                 (result) => {
                     console.log('Org Info updated', result);
-                    this.orgInfo = result;
+                    this.orgInfo = result.info;
 
                     console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
 
