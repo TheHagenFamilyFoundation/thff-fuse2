@@ -76,7 +76,7 @@ export class UserOrganizationComponent implements OnInit {
 
         this.dataSource = new MatTableDataSource([]);
 
-        // console.log('user-organizaton - check organizations 2');
+        // console.log('user-organization - check organizations 2');
         this.checkOrganizations();
     }
 

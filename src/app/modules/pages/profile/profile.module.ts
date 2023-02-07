@@ -16,8 +16,9 @@ import { profileRoutes } from 'app/modules/pages/profile/profile.routing';
 
 import { UserOrganizationComponent } from './user-organization/user-organization.component';
 import { SelectedOrganizationComponent } from './user-organization/selected-organization/selected-organization.component';
+import { UserProposalsComponent } from './user-proposals/user-proposals.component';
 @NgModule({
-    declarations: [ProfileComponent, UserOrganizationComponent],
+    declarations: [ProfileComponent, UserOrganizationComponent, UserProposalsComponent],
     imports: [
         RouterModule.forChild(profileRoutes),
         MatButtonModule,

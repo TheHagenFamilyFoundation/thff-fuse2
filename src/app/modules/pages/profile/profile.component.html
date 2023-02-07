@@ -59,9 +59,11 @@
             <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
                 <div class="text-xl font-semibold">Organizations</div>
                 <div class="flex flex-col sm:flex-row items-start mt-8">
-                    <app-user-organization *ngIf="organizations"
-                    [user]="user" [organizations]="organizations"
-                ></app-user-organization>
+                    <app-user-organization
+                        *ngIf="organizations"
+                        [user]="user"
+                        [organizations]="organizations"
+                    ></app-user-organization>
                 </div>
             </fuse-card>
         </div>
@@ -70,7 +72,7 @@
             <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
                 <div class="text-xl font-semibold">Proposals</div>
                 <div class="flex flex-col sm:flex-row items-start mt-8">
-                    Proposal Table
+                    <app-user-proposals [user]="user"></app-user-proposals>
                 </div>
             </fuse-card>
         </div>
