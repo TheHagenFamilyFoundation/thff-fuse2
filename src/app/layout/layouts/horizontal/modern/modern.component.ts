@@ -227,12 +227,11 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
 
     viewOrgs(): void {
         console.log('go to view orgs page');
-
+        this._router.navigate(['/pages/organizations']);
     }
 
     createOrg(): void {
         console.log('go to create org page');
         this._router.navigate(['/pages/organization/create']);
     }
-
 }
