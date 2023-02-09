@@ -34,41 +34,41 @@ export const appRoutes: Route[] = [
                 loadChildren: () =>
                     import(
                         'app/modules/auth/confirmation-required/confirmation-required.module'
-                    ).then(m => m.AuthConfirmationRequiredModule),
+                    ).then((m) => m.AuthConfirmationRequiredModule),
             },
             {
                 path: 'confirmation',
                 loadChildren: () =>
                     import(
                         'app/modules/auth/confirmation/confirmation.module'
-                    ).then(m => m.AuthConfirmationModule),
+                    ).then((m) => m.AuthConfirmationModule),
             },
             {
                 path: 'forgot-password',
                 loadChildren: () =>
                     import(
                         'app/modules/auth/forgot-password/forgot-password.module'
-                    ).then(m => m.AuthForgotPasswordModule),
+                    ).then((m) => m.AuthForgotPasswordModule),
             },
             {
                 path: 'reset-password',
                 loadChildren: () =>
                     import(
                         'app/modules/auth/reset-password/reset-password.module'
-                    ).then(m => m.AuthResetPasswordModule),
+                    ).then((m) => m.AuthResetPasswordModule),
             },
             {
                 path: 'sign-in',
                 loadChildren: () =>
                     import('app/modules/auth/sign-in/sign-in.module').then(
-                        m => m.AuthSignInModule
+                        (m) => m.AuthSignInModule
                     ),
             },
             {
                 path: 'sign-up',
                 loadChildren: () =>
                     import('app/modules/auth/sign-up/sign-up.module').then(
-                        m => m.AuthSignUpModule
+                        (m) => m.AuthSignUpModule
                     ),
             },
         ],
@@ -88,7 +88,7 @@ export const appRoutes: Route[] = [
                 path: 'sign-out',
                 loadChildren: () =>
                     import('app/modules/auth/sign-out/sign-out.module').then(
-                        m => m.AuthSignOutModule
+                        (m) => m.AuthSignOutModule
                     ),
             },
             {
@@ -96,7 +96,7 @@ export const appRoutes: Route[] = [
                 loadChildren: () =>
                     import(
                         'app/modules/auth/unlock-session/unlock-session.module'
-                    ).then(m => m.AuthUnlockSessionModule),
+                    ).then((m) => m.AuthUnlockSessionModule),
             },
         ],
     },
@@ -114,7 +114,7 @@ export const appRoutes: Route[] = [
                 path: 'home',
                 loadChildren: () =>
                     import('app/modules/landing/home/home.module').then(
-                        m => m.LandingHomeModule
+                        (m) => m.LandingHomeModule
                     ),
             },
         ],
@@ -133,22 +133,25 @@ export const appRoutes: Route[] = [
                 path: 'example',
                 loadChildren: () =>
                     import('app/modules/example/example.module').then(
-                        m => m.ExampleModule
+                        (m) => m.ExampleModule
                     ),
             },
             {
                 path: 'welcome',
                 loadChildren: () =>
-                    import('app/modules/admin/welcome/welcome.module').then(
-                        m => m.WelcomeModule
+                    import('app/modules/welcome/welcome.module').then(
+                        (m) => m.WelcomeModule
                     ),
             },
             // Pages
             {
                 path: 'pages',
-                loadChildren: () => import('./modules/pages/pages.module').then((m)=> m.PagesModule),
+                loadChildren: () =>
+                    import('./modules/pages/pages.module').then(
+                        (m) => m.PagesModule
+                    ),
                 // loadChildren: () => import(''./main/pages/pages.module').then((m) => m.PagesModule),
-              },
+            },
             // {
             //     path: 'pages',
             //     children: [
@@ -209,7 +212,7 @@ export const appHomeRoutes: Route[] = [
                 path: 'home',
                 loadChildren: () =>
                     import('app/modules/landing/home/home.module').then(
-                        m => m.LandingHomeModule
+                        (m) => m.LandingHomeModule
                     ),
             },
         ],
