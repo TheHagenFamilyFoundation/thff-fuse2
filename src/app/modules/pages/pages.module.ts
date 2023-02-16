@@ -16,6 +16,7 @@ import { TranslocoModule } from '@ngneat/transloco';
 import { OrganizationModule } from './organization/organization.module';
 import { ProfileModule } from './profile/profile.module';
 import { SettingsModule } from './settings/settings.module';
+import { DirectorModule } from './director/director.module';
 
 //components
 import { OrganizationsComponent } from './organizations/organizations.component';
@@ -28,6 +29,7 @@ import { pagesRoutes } from './page.routing';
         OrganizationModule,
         ProfileModule,
         SettingsModule,
+        DirectorModule,
         MatButtonModule,
         MatDividerModule,
         MatFormFieldModule,

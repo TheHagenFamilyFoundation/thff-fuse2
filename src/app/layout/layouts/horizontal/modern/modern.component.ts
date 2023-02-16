@@ -234,4 +234,9 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         console.log('go to create org page');
         this._router.navigate(['/pages/organization/create']);
     }
+
+    routeToDirectorsPage(): void {
+        console.log('go to directors page');
+        this._router.navigate(['/pages/director']);
+    }
 }
