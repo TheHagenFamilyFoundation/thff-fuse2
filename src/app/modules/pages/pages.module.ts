@@ -17,11 +17,14 @@ import { OrganizationModule } from './organization/organization.module';
 import { ProfileModule } from './profile/profile.module';
 import { SettingsModule } from './settings/settings.module';
 import { DirectorModule } from './director/director.module';
+import { ProposalModule } from './proposal/proposal.module';
 
 //components
 import { OrganizationsComponent } from './organizations/organizations.component';
 
 import { pagesRoutes } from './page.routing';
+import { ProposalsComponent } from './proposals/proposals.component';
+import { ProposalComponent } from './proposal/proposal.component';
 
 @NgModule({
     imports: [
@@ -30,6 +33,8 @@ import { pagesRoutes } from './page.routing';
         ProfileModule,
         SettingsModule,
         DirectorModule,
+        ProposalModule,
+
         MatButtonModule,
         MatDividerModule,
         MatFormFieldModule,
@@ -43,6 +48,10 @@ import { pagesRoutes } from './page.routing';
         SharedModule,
         TranslocoModule,
     ],
-    declarations: [OrganizationsComponent],
+    declarations: [
+        OrganizationsComponent,
+        ProposalsComponent,
+        ProposalComponent,
+    ],
 })
 export class PagesModule {}
