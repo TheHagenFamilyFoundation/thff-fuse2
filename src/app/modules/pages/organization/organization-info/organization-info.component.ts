@@ -5,10 +5,12 @@ import {
     Renderer2,
     ViewChild,
     ElementRef,
-    Output, EventEmitter
+    Output,
+    EventEmitter,
 } from '@angular/core';
 import {
-    AbstractControl, FormArray,
+    AbstractControl,
+    FormArray,
     FormBuilder,
     FormGroup,
     FormControl,
@@ -43,14 +45,16 @@ export class OrganizationInfoComponent implements OnInit {
     org: any;
     @Output() refreshOrg = new EventEmitter<boolean>();
 
- // multiple form
- public mode: 'view' | 'edit' = 'view';
+    // multiple form
+    public mode: 'view' | 'edit' = 'view';
 
     apiUrl: string;
 
     orgID: any;
 
     orgInfo: any;
+
+    orgInfoCreated: boolean = false;
 
     legalName$ = new Subject<string>();
 
@@ -205,7 +209,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     public invalidInputLegalName: boolean = false;
     public invalidInputYearFounded: boolean = false;
-    public invalidInputCurrentOperatingBudget: boolean =false;
+    public invalidInputCurrentOperatingBudget: boolean = false;
     public invalidInputDirector: boolean = false;
     public invalidInputPhone: boolean = false;
     public invalidInputContactPerson: boolean = false;
@@ -225,24 +229,23 @@ export class OrganizationInfoComponent implements OnInit {
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
         private authService: AuthService,
-        fb: FormBuilder,
+        fb: FormBuilder
     ) {
-
         //main edit mode
         this.formContactPerson = fb.group({
             contactPersonPhoneNumber: new FormControl('', Validators.required),
             contactPersonTitle: new FormControl('', Validators.required),
             contactPerson: new FormControl('', Validators.required),
-            email: new FormControl('', [
-                Validators.required,
-                Validators.email,
-            ])
+            email: new FormControl('', [Validators.required, Validators.email]),
         });
 
         this.formOrganization = fb.group({
             legalName: new FormControl('', Validators.required),
             yearFounded: new FormControl('', Validators.required),
-            currentOperatingBudget: new FormControl('', [Validators.required, Validators.min(1)]),
+            currentOperatingBudget: new FormControl('', [
+                Validators.required,
+                Validators.min(1),
+            ]),
             director: new FormControl('', Validators.required),
             phone: new FormControl('', Validators.required),
         });
@@ -265,14 +268,12 @@ export class OrganizationInfoComponent implements OnInit {
                 this.yearFoundedChange();
             });
 
-        this.currentOperatingBudget$.pipe(
-          debounceTime(400),
-          distinctUntilChanged())
-          .subscribe((term) => {
-
-            this.currentOperatingBudget = Number(term);
-            this.currentOperatingBudgetChange();
-          });
+        this.currentOperatingBudget$
+            .pipe(debounceTime(400), distinctUntilChanged())
+            .subscribe((term) => {
+                this.currentOperatingBudget = Number(term);
+                this.currentOperatingBudgetChange();
+            });
 
         this.director$
             .pipe(debounceTime(400), distinctUntilChanged())
@@ -377,8 +378,6 @@ export class OrganizationInfoComponent implements OnInit {
         //     ['state', false],
         //     ['zip', false]
         // ]);
-
-
     } // end of constructor
 
     defaultValues(): void {
@@ -426,9 +425,21 @@ export class OrganizationInfoComponent implements OnInit {
                     console.log('this.orgInfo.id', this.orgInfo.id);
 
                     this.setFields();
-
                 } else {
                     // default values
+                    //create one
+                    console.log('no orgInfo');
+                    this.setFields();
+                    this.orgInfo = this.orgObj;
+
+                    //create orgInfo
+                    console.log('creating org Info - body:', this.orgInfo);
+                    console.log(
+                        'org object to pass in as organization',
+                        this.org
+                    );
+                    this.orgInfo.organization = this.org.id;
+                    this.createOrganizationInfo(this.orgInfo);
                 }
             });
     }
@@ -469,7 +480,7 @@ export class OrganizationInfoComponent implements OnInit {
             console.log('yes');
 
             if (this.orgInfo.legalName) {
-                console.log('this.orgInfo.legalName',this.orgInfo.legalName);
+                console.log('this.orgInfo.legalName', this.orgInfo.legalName);
                 this.legalName = this.orgInfo.legalName;
             }
 
@@ -545,37 +556,34 @@ export class OrganizationInfoComponent implements OnInit {
                 city: this.city,
                 state: this.state,
                 zip: this.zip,
-                fax: this.fax
+                fax: this.fax,
             };
-
         } else {
             console.log('default values');
 
             this.orgObj = {
-            legalName :'',
-        yearFounded: 0,
-        currentOperatingBudget: 0,
-        director: '',
-        phone: '',
-        contactPerson: '',
-        contactPersonTitle: '',
-        contactPersonPhoneNumber: '',
-        email: '',
-        address: '',
-        city: '',
-        state: '',
-        zip: 0,
-        fax: ''
-    };
+                legalName: '',
+                yearFounded: 0,
+                currentOperatingBudget: 0,
+                director: '',
+                phone: '',
+                contactPerson: '',
+                contactPersonTitle: '',
+                contactPersonPhoneNumber: '',
+                email: '',
+                address: '',
+                city: '',
+                state: '',
+                zip: 0,
+                fax: '',
+            };
         }
 
         this.initGroupedForm();
-
     }
 
     //when toggling the full form
     resetFormValues(): void {
-
         console.log('reseting form values');
 
         this.formOrganization.setValue({
@@ -602,7 +610,6 @@ export class OrganizationInfoComponent implements OnInit {
 
         // this.initFormControls();
         this.initGroupedForm();
-
     }
 
     //maybe old
@@ -780,19 +787,23 @@ export class OrganizationInfoComponent implements OnInit {
     //new stuff
 
     initGroupedForm(): void {
-
         console.log('initializing grouped form');
-        console.log('org obj - ',this.orgObj.legalName);
+        console.log('org obj - ', this.orgObj.legalName);
 
         this.groupedForm = new FormGroup({
             legalName: new FormControl(this.orgObj.legalName),
             yearFounded: new FormControl(this.orgObj.yearFounded),
-            currentOperatingBudget: new FormControl(this.orgObj.currentOperatingBudget, [Validators.required, Validators.min(1)]),
+            currentOperatingBudget: new FormControl(
+                this.orgObj.currentOperatingBudget,
+                [Validators.required, Validators.min(1)]
+            ),
             director: new FormControl(this.orgObj.director),
             phone: new FormControl(this.orgObj.phone),
             contactPerson: new FormControl(this.orgObj.contactPerson),
             contactPersonTitle: new FormControl(this.orgObj.contactPersonTitle),
-            contactPersonPhoneNumber: new FormControl(this.orgObj.contactPersonPhoneNumber),
+            contactPersonPhoneNumber: new FormControl(
+                this.orgObj.contactPersonPhoneNumber
+            ),
             email: new FormControl(this.orgObj.email),
             address: new FormControl(this.orgObj.address),
             city: new FormControl(this.orgObj.city),
@@ -802,43 +813,47 @@ export class OrganizationInfoComponent implements OnInit {
         });
 
         this.initFormControls();
+    }
 
-      }
-
-      initFormControls(): void {
-
+    initFormControls(): void {
         console.log('initializing form controls');
-        console.log('this.legalName',this.legalName);
+        console.log('this.legalName', this.legalName);
 
-                // this.inputControl = new FormControl(this.identity.country);
+        // this.inputControl = new FormControl(this.identity.country);
         // this.nameControl = new FormControl(this.identity.name);
         this.legalNameControl = new FormControl(this.legalName);
         this.yearFoundedControl = new FormControl(this.yearFounded);
-        this.currentOperatingBudgetControl = new FormControl(this.currentOperatingBudget);
+        this.currentOperatingBudgetControl = new FormControl(
+            this.currentOperatingBudget
+        );
         this.directorControl = new FormControl(this.director);
         this.phoneControl = new FormControl(this.phone);
         this.contactPersonControl = new FormControl(this.contactPerson);
-        this.contactPersonTitleControl = new FormControl(this.contactPersonTitle);;
-        this.contactPersonPhoneNumberControl = new FormControl(this.contactPersonPhoneNumber);
+        this.contactPersonTitleControl = new FormControl(
+            this.contactPersonTitle
+        );
+        this.contactPersonPhoneNumberControl = new FormControl(
+            this.contactPersonPhoneNumber
+        );
         this.emailControl = new FormControl(this.email);
         this.addressControl = new FormControl(this.address);
         this.cityControl = new FormControl(this.city);
         this.stateControl = new FormControl(this.state);
         this.zipControl = new FormControl(this.zip);
         this.faxControl = new FormControl(this.fax);
-      }
+    }
 
-      //sets the fields to the updated value
-      //then calls the save single field function to call the database
+    //sets the fields to the updated value
+    //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
-        console.log('prop',prop);
-        console.log('control',control);
+        console.log('prop', prop);
+        console.log('control', control);
         console.log('org info - updateSingleField', this[control].value);
 
-        if(this[control].value === ''){
+        if (this[control].value === '') {
             console.log('blank value');
             //reset the value
-            console.log('old value',this.orgObj[prop]);
+            console.log('old value', this.orgObj[prop]);
             this[control].value = this.orgObj[prop];
 
             this.checkInvalidProp(prop, true);
@@ -847,90 +862,83 @@ export class OrganizationInfoComponent implements OnInit {
             setTimeout(() => {
                 // this.invalidInputLegalName = false;
                 this.checkInvalidProp(prop, false);
-              }, 2000);
-
-        }
-        else {
-
+            }, 2000);
+        } else {
             this[prop] = this[control].value;
             this.orgObj[prop] = this[control].value;
             const change = {
-                [prop]: this[control].value
+                [prop]: this[control].value,
             };
             this.saveSingleField(change);
-
         }
+    }
 
-      }
-
-      checkInvalidProp(prop: string, flag: boolean): void {
-
+    checkInvalidProp(prop: string, flag: boolean): void {
         // console.log('checkInvalidProp - prop',prop);
         // console.log('checkInvalidProp - flag',flag);
 
-        switch(prop) {
+        switch (prop) {
             case 'legalName': {
-               this.invalidInputLegalName = flag;
-               break;
+                this.invalidInputLegalName = flag;
+                break;
             }
             case 'yearFounded': {
                 this.invalidInputYearFounded = flag;
-               break;
+                break;
             }
             case 'currentOperatingBudget': {
                 this.invalidInputCurrentOperatingBudget = flag;
-               break;
+                break;
             }
             case 'director': {
                 this.invalidInputDirector = flag;
-               break;
+                break;
             }
             case 'phone': {
                 this.invalidInputPhone = flag;
-               break;
+                break;
             }
             case 'contactPerson': {
                 this.invalidInputContactPerson = flag;
-               break;
+                break;
             }
             case 'contactPersonTitle': {
                 this.invalidInputContactPersonTitle = flag;
-               break;
+                break;
             }
             case 'contactPersonPhoneNumber': {
                 this.invalidInputContactPersonPhoneNumber = flag;
-               break;
+                break;
             }
             case 'email': {
                 this.invalidInputEmail = flag;
-               break;
+                break;
             }
             case 'address': {
                 this.invalidInputAddress = flag;
-               break;
+                break;
             }
             case 'city': {
                 this.invalidInputCity = flag;
-               break;
+                break;
             }
             case 'state': {
                 this.invalidInputState = flag;
-               break;
+                break;
             }
             case 'zip': {
                 this.invalidInputZip = flag;
-               break;
+                break;
             }
             default: {
                 console.error('invalid switch prop');
-               break;
+                break;
             }
-         }
+        }
+    }
 
-      }
-
-      //takes in the field that changed
-      saveSingleField(change: any): void {
+    //takes in the field that changed
+    saveSingleField(change: any): void {
         console.log('save single field');
 
         const body = change;
@@ -941,101 +949,102 @@ export class OrganizationInfoComponent implements OnInit {
 
     //calls the updateOrganizationService
     updateOrganizationInfo(body: any): void {
+        console.log('updateOrganizationInfo', body);
 
-        console.log('updateOrganizationInfo',body);
-
-        this.updateOrganizationInfoService.updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
+        this.updateOrganizationInfoService
+            .updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
             .subscribe(
                 (result) => {
                     console.log('Org Info updated', result);
                     this.orgInfo = result.info;
 
-                    console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
+                    console.log(
+                        'new this.orgInfo.organizationInfoID',
+                        this.orgInfo.organizationInfoID
+                    );
 
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
-
                 },
                 (err) => {
                     console.log(err);
                 }
             );
-
     }
 
-      cancelSingleField(prop: string, control: any): void {
+    cancelSingleField(prop: string, control: any): void {
         console.log('org info - cancelSingleField', this[control].value);
         (this[control] as AbstractControl).setValue(this[prop]);
-      }
+    }
 
-      updateGroupedEdition(): void {
-
-
-        console.log('change - this.legalName',this.legalName);
+    updateGroupedEdition(): void {
+        console.log('change - this.legalName', this.legalName);
 
         // console.log('org info - updateGroupedEdition',this.groupedForm.value);
-        console.log('old - this.orgObj',this.orgObj);
+        console.log('old - this.orgObj', this.orgObj);
 
         // this.orgObj = this.groupedForm.value; //out of date
         this.orgObj = {
-
-        legalName: this.legalName, //changed
-        yearFounded: this.yearFounded,
-        currentOperatingBudget: this.currentOperatingBudget,
-        director: this.director,
-        phone: this.phone,
-        contactPerson: this.contactPerson,
-        contactPersonTitle: this.contactPersonTitle,
-        contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-        email: this.email,
-        address: this.address,
-        city: this.city,
-        state: this.state,
-        zip: this.zip,
-        fax: this.fax,
-        organization: this.orgID
+            legalName: this.legalName, //changed
+            yearFounded: this.yearFounded,
+            currentOperatingBudget: this.currentOperatingBudget,
+            director: this.director,
+            phone: this.phone,
+            contactPerson: this.contactPerson,
+            contactPersonTitle: this.contactPersonTitle,
+            contactPersonPhoneNumber: this.contactPersonPhoneNumber,
+            email: this.email,
+            address: this.address,
+            city: this.city,
+            state: this.state,
+            zip: this.zip,
+            fax: this.fax,
+            organization: this.orgID,
         };
 
-        console.log('new - this.orgObj',this.orgObj);
+        console.log('new - this.orgObj', this.orgObj);
 
-        this.updateOrganizationInfoService.updateOrganizationInfo(this.orgInfo.organizationInfoID, this.orgObj)
+        this.updateOrganizationInfoService
+            .updateOrganizationInfo(
+                this.orgInfo.organizationInfoID,
+                this.orgObj
+            )
             .subscribe(
                 (result) => {
                     console.log('Org Info updated', result);
                     this.orgInfo = result.info;
 
-                    console.log('new this.orgInfo.organizationInfoID', this.orgInfo.organizationInfoID);
+                    console.log(
+                        'new this.orgInfo.organizationInfoID',
+                        this.orgInfo.organizationInfoID
+                    );
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
-
                 },
                 (err) => {
                     console.log(err);
                 }
             );
+    }
 
-      }
-
-      cancelGroupedEdition(): void {
+    cancelGroupedEdition(): void {
         console.log('org info - cancelGroupedEdition');
         // this.groupedForm.setValue(this.orgObj);
 
         //reset values
         this.setFields();
-      }
+    }
 
-      handleModeChange(mode: 'view' | 'edit'): void {
-        console.log('org info - toggle mode change',mode);
+    handleModeChange(mode: 'view' | 'edit'): void {
+        console.log('org info - toggle mode change', mode);
         this.mode = mode;
 
         this.resetFormValues();
 
-        if(mode === 'view') {
+        if (mode === 'view') {
             this.editing = false;
-        }
-        else {
+        } else {
             this.editing = true;
         }
-      }
-
+    }
 }
