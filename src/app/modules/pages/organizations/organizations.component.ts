@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { OrganizationData } from 'app/common/interface/OrganizationData';
+import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 
 import { GetUserService } from 'app/core/services/user/get-user.service';
 @Component({

@@ -17,7 +17,7 @@ import { InOrgService } from 'app/core/services/user/in-org.service';
 // import { CreateOrganizationComponent } from '../../organization/create-organization/create-organization.component';
 import { SelectedOrganizationComponent } from './selected-organization/selected-organization.component';
 
-import { OrganizationData } from 'app/common/interface/OrganizationData';
+import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 @Component({
     selector: 'app-user-organization',
     templateUrl: './user-organization.component.html',
