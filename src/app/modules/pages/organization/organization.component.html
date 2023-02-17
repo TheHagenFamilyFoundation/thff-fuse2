@@ -65,6 +65,16 @@
                 <mat-tab label="Team">
                     <ng-template matTabContent>Team Here </ng-template>
                 </mat-tab>
+                <!-- 501c3 Information -->
+                <mat-tab label="501c3">
+                    <ng-template matTabContent>
+                    <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden"
+                        >
+                            <app-org-doc501c3></app-org-doc501c3>
+                        </div>
+                       </ng-template>
+                </mat-tab>
             </mat-tab-group>
         </div>
     </div>

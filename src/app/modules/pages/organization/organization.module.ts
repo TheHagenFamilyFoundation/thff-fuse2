@@ -36,6 +36,7 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
 import { CreateOrganizationService } from 'app/core/services/organization/create-organization.service';
 
 import { PhoneMaskDirective } from 'app/core/directives/phone-mask.directive';
+import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
 
 @NgModule({
     declarations: [
@@ -44,6 +45,7 @@ import { PhoneMaskDirective } from 'app/core/directives/phone-mask.directive';
         OrganizationInfoComponent,
         EditableComponent,
         CreateOrganizationComponent,
+        OrgDoc501c3Component,
 
     ],
     providers: [GetOrganizationService, CreateOrganizationService],
