@@ -1,4 +1,10 @@
-import { Component, ViewChild, OnInit, Input, AfterViewInit } from '@angular/core';
+import {
+    Component,
+    ViewChild,
+    OnInit,
+    Input,
+    AfterViewInit,
+} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,6 +17,7 @@ import { InOrgService } from 'app/core/services/user/in-org.service';
 // import { CreateOrganizationComponent } from '../../organization/create-organization/create-organization.component';
 import { SelectedOrganizationComponent } from './selected-organization/selected-organization.component';
 
+import { OrganizationData } from 'app/common/interface/OrganizationData';
 @Component({
     selector: 'app-user-organization',
     templateUrl: './user-organization.component.html',
@@ -188,15 +195,6 @@ export class UserOrganizationComponent implements OnInit {
     }
 
     goToOrganization(orgID: string): void {
-        this.router.navigate(['/pages/organization/',orgID]);
+        this.router.navigate(['/pages/organization/', orgID]);
     }
-
 } // end of component
-
-// old
-export interface OrganizationData {
-    id: string;
-    name: string;
-    progress: string;
-    color: string;
-}
