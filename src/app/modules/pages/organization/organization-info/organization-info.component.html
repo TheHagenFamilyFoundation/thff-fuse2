@@ -482,20 +482,19 @@
                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                         <label
                             class="block tracking-wide text-sm mb-2"
-                            for="grid-fax"
+                            for="grid-website"
                         >
-                            Fax
+                            Website
                         </label>
                         <mat-form-field>
                             <input
                                 matInput
-                                value="{{ fax }}"
-                                type="tel"
-                                appPhoneMask
-                                formControlName="fax"
-                                id="fax"
-                                placeholder="Fax"
-                                (keyup)="fax$.next($event.target.value)"
+                                value="{{ website }}"
+                                type="text"
+                                formControlName="website"
+                                id="website"
+                                placeholder="Website"
+                                (keyup)="website$.next($event.target.value)"
                             />
                         </mat-form-field>
                     </div>
@@ -1166,20 +1165,24 @@
                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                         <label
                             class="block tracking-wide text-sm mb-2"
-                            for="grid-fax"
+                            for="grid-website"
                         >
-                            Fax
+                            Website
                         </label>
                         <editable
                             data-testid="sample-input-click"
-                            (save)="updateSingleField('fax', 'faxControl')"
-                            (cancel)="cancelSingleField('fax', 'faxControl')"
+                            (save)="
+                                updateSingleField('website', 'websiteControl')
+                            "
+                            (cancel)="
+                                cancelSingleField('website', 'websiteControl')
+                            "
                         >
                             <ng-template viewMode>
                                 <div
                                     class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200"
                                 >
-                                    {{ orgObj.fax }}
+                                    {{ orgObj.website }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
@@ -1190,10 +1193,9 @@
                                         class="form-control"
                                         editableFocusable
                                         data-testid="sample-input-click-edit"
-                                        appPhoneMask
-                                        placeholder="Fax"
-                                        type="tel"
-                                        [formControl]="faxControl"
+                                        placeholder="Website"
+                                        type="text"
+                                        [formControl]="websiteControl"
                                     />
                                 </div>
                             </ng-template>

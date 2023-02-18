@@ -82,7 +82,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     zip$ = new Subject<string>();
 
-    fax$ = new Subject<string>();
+    website$ = new Subject<string>();
 
     isReadOnly: boolean = true;
 
@@ -122,8 +122,7 @@ export class OrganizationInfoComponent implements OnInit {
     // -State
     zip: number;
 
-    // -Zip - 5 length
-    fax: string; // -Fax Number
+    website: string;
 
     loaded = false;
 
@@ -140,7 +139,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     formOrganization: FormGroup;
 
-    formFax: FormGroup;
+    formWebsite: FormGroup;
 
     emailFormControl = new FormControl('', [
         Validators.required,
@@ -155,7 +154,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     zipFormControl = new FormControl('', [Validators.required]);
 
-    faxFormControl = new FormControl('', [Validators.required]);
+    websiteFormControl = new FormControl('', [Validators.required]);
 
     //TODO: example, delete after
     public inputText = 'foo';
@@ -175,7 +174,7 @@ export class OrganizationInfoComponent implements OnInit {
     public cityControl: FormControl;
     public stateControl: FormControl;
     public zipControl: FormControl;
-    public faxControl: FormControl;
+    public websiteControl: FormControl;
 
     public nameControl: FormControl = new FormControl(this.inputText);
 
@@ -204,7 +203,7 @@ export class OrganizationInfoComponent implements OnInit {
     //     city: '',
     //     state: '',
     //     zip: 0,
-    //     fax: ''
+    //     website: ''
     // };
 
     public invalidInputLegalName: boolean = false;
@@ -250,8 +249,8 @@ export class OrganizationInfoComponent implements OnInit {
             phone: new FormControl('', Validators.required),
         });
 
-        this.formFax = fb.group({
-            fax: [''],
+        this.formWebsite = fb.group({
+            website: [''],
         });
 
         this.legalName$
@@ -345,11 +344,11 @@ export class OrganizationInfoComponent implements OnInit {
                 this.zipChange();
             });
 
-        this.fax$
+        this.website$
             .pipe(debounceTime(400), distinctUntilChanged())
             .subscribe((term) => {
-                this.fax = term;
-                this.faxChange();
+                this.website = term;
+                this.websiteChange();
             });
 
         this.defaultValues();
@@ -397,7 +396,7 @@ export class OrganizationInfoComponent implements OnInit {
         this.city = '';
         this.state = '';
         this.zip = 0;
-        this.fax = '';
+        this.website = '';
 
         // //edit in place
         // this.legalNameControl = '';
@@ -538,8 +537,8 @@ export class OrganizationInfoComponent implements OnInit {
                 this.zip = this.orgInfo.zip;
             }
 
-            if (this.orgInfo.fax) {
-                this.fax = this.orgInfo.fax;
+            if (this.orgInfo.website) {
+                this.website = this.orgInfo.website;
             }
 
             this.orgObj = {
@@ -556,7 +555,7 @@ export class OrganizationInfoComponent implements OnInit {
                 city: this.city,
                 state: this.state,
                 zip: this.zip,
-                fax: this.fax,
+                website: this.website,
             };
         } else {
             console.log('default values');
@@ -575,7 +574,7 @@ export class OrganizationInfoComponent implements OnInit {
                 city: '',
                 state: '',
                 zip: 0,
-                fax: '',
+                website: '',
             };
         }
 
@@ -601,7 +600,7 @@ export class OrganizationInfoComponent implements OnInit {
             email: this.email,
         });
 
-        this.faxFormControl.setValue(this.fax);
+        this.websiteFormControl.setValue(this.website);
         this.emailFormControl.setValue(this.email);
         this.addressFormControl.setValue(this.address);
         this.cityFormControl.setValue(this.city);
@@ -631,7 +630,7 @@ export class OrganizationInfoComponent implements OnInit {
             email: this.email,
         });
 
-        this.faxFormControl.setValue(this.fax);
+        this.websiteFormControl.setValue(this.website);
         this.emailFormControl.setValue(this.email);
         this.addressFormControl.setValue(this.address);
         this.cityFormControl.setValue(this.city);
@@ -662,7 +661,7 @@ export class OrganizationInfoComponent implements OnInit {
             city: this.city,
             state: this.state,
             zip: this.zip,
-            fax: this.fax,
+            website: this.website,
             organization: this.orgID,
         };
 
@@ -765,8 +764,8 @@ export class OrganizationInfoComponent implements OnInit {
         this.showMessage = false;
     }
 
-    faxChange(): void {
-        console.log('faxChange');
+    websiteChange(): void {
+        console.log('websiteChange');
 
         this.showMessage = false;
     }
@@ -809,7 +808,7 @@ export class OrganizationInfoComponent implements OnInit {
             city: new FormControl(this.orgObj.city),
             state: new FormControl(this.orgObj.state),
             zip: new FormControl(this.orgObj.zip),
-            fax: new FormControl(this.orgObj.fax),
+            website: new FormControl(this.orgObj.website),
         });
 
         this.initFormControls();
@@ -840,7 +839,7 @@ export class OrganizationInfoComponent implements OnInit {
         this.cityControl = new FormControl(this.city);
         this.stateControl = new FormControl(this.state);
         this.zipControl = new FormControl(this.zip);
-        this.faxControl = new FormControl(this.fax);
+        this.websiteControl = new FormControl(this.website);
     }
 
     //sets the fields to the updated value
@@ -998,7 +997,7 @@ export class OrganizationInfoComponent implements OnInit {
             city: this.city,
             state: this.state,
             zip: this.zip,
-            fax: this.fax,
+            website: this.website,
             organization: this.orgID,
         };
 
