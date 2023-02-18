@@ -525,20 +525,21 @@
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label
                                     class="block tracking-wide text-sm mb-2"
-                                    for="grid-fax"
+                                    for="grid-website"
                                 >
-                                    Fax
+                                    Website
                                 </label>
                                 <mat-form-field>
                                     <input
                                         matInput
-                                        value="{{ fax }}"
-                                        type="tel"
-                                        appPhoneMask
-                                        formControlName="fax"
-                                        id="fax"
-                                        placeholder="Fax"
-                                        (keyup)="fax$.next($event.target.value)"
+                                        value="{{ website }}"
+                                        type="text"
+                                        formControlName="website"
+                                        id="website"
+                                        placeholder="Website"
+                                        (keyup)="
+                                            website$.next($event.target.value)
+                                        "
                                     />
                                 </mat-form-field>
                             </div>
