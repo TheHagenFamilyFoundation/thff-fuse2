@@ -27,8 +27,6 @@ import { organizationRoutes } from './organization.routing';
 
 import { OrganizationInfoComponent } from './organization-info/organization-info.component';
 
-import { EditableComponent } from 'app/common/components/editable/editable.component';
-
 import { CreateOrganizationComponent } from './create-organization/create-organization.component';
 
 //services
@@ -43,13 +41,11 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         PhoneMaskDirective,
         OrganizationComponent,
         OrganizationInfoComponent,
-        EditableComponent,
         CreateOrganizationComponent,
         OrgDoc501c3Component,
-
     ],
     providers: [GetOrganizationService, CreateOrganizationService],
-    imports     : [
+    imports: [
         RouterModule.forChild(organizationRoutes),
         MatButtonModule,
         MatButtonToggleModule,
@@ -67,12 +63,8 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         NgApexchartsModule,
         TranslocoModule,
         SharedModule,
-        EditableModule
+        EditableModule,
     ],
-    exports: [
-        PhoneMaskDirective
-    ]
+    exports: [PhoneMaskDirective],
 })
-export class OrganizationModule
-{
-}
+export class OrganizationModule {}
