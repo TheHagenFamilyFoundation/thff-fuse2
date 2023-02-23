@@ -86,7 +86,7 @@
                                 </mat-form-field>
                             </div>
                         </div>
-                        <div class="flex flex-wrap -mx-3 mb-6">
+                        <!-- <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-activity">
                                     Is this a new or ongoing activity?
@@ -100,15 +100,19 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-narrative">
-                                    Provide a detailed project narrative:
+                                    Provide a detailed project narrative that addresses the following questions, if
+                                    relevant.
+                                    Is this a new activity? How does the project fit into your organization's mission?
+                                    Who will be responsible for overseeing the project? How will you evaluate the
+                                    success? Do you anticipate partnering with any other organizations?
                                 </label>
                                 <mat-form-field style="width: 100%">
-                                    <textarea class="resize-none" matInput matTextareaAutosize rows="5"
-                                        matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
+                                    <textarea class="resize-none" matInput matTextareaAutosize rows="10"
+                                        matAutosizeMinRows="10" matAutosizeMaxRows="10" maxLength="2000"
                                         placeholder="Narrative" formControlName="narrative" value="{{ narrative }}"
                                         (keyup)="
                                                 narrative$.next(
@@ -116,7 +120,7 @@
                                                 )
                                             "></textarea>
                                     <mat-hint align="end">{{ narrative?.toString().length }} /
-                                        500</mat-hint>
+                                        2000</mat-hint>
                                 </mat-form-field>
                             </div>
                         </div>
@@ -193,7 +197,7 @@
                         <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-totalProjectCost">
-                                    Total Project Cost *
+                                    Total Project Cost
                                 </label>
                                 <mat-form-field class="totalProjectCost">
                                     <input matInput formControlName="totalProjectCost" placeholder="Total Project Cost"
