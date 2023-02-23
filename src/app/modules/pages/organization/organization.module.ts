@@ -13,22 +13,14 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-
 import { TranslocoModule } from '@ngneat/transloco';
-
 import { NgApexchartsModule } from 'ng-apexcharts';
-
 import { SharedModule } from 'app/shared/shared.module';
-
 import { EditableModule } from '@ngneat/edit-in-place';
-
 import { OrganizationComponent } from './organization.component';
 import { organizationRoutes } from './organization.routing';
-
 import { OrganizationInfoComponent } from './organization-info/organization-info.component';
-
-import { EditableComponent } from 'app/common/components/editable/editable.component';
-
+// import { EditableComponent } from 'app/common/components/editable/editable.component';
 import { CreateOrganizationComponent } from './create-organization/create-organization.component';
 
 //services
@@ -43,13 +35,13 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         PhoneMaskDirective,
         OrganizationComponent,
         OrganizationInfoComponent,
-        EditableComponent,
+        // EditableComponent,
         CreateOrganizationComponent,
         OrgDoc501c3Component,
 
     ],
     providers: [GetOrganizationService, CreateOrganizationService],
-    imports     : [
+    imports: [
         RouterModule.forChild(organizationRoutes),
         MatButtonModule,
         MatButtonToggleModule,
@@ -73,6 +65,5 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         PhoneMaskDirective
     ]
 })
-export class OrganizationModule
-{
+export class OrganizationModule {
 }

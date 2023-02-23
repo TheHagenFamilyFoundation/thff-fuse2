@@ -1,8 +1,10 @@
 import { Route } from '@angular/router';
-import { ProposalComponent } from './proposal.component';
+
 import { ProposalResolver } from './proposal.resolvers';
 
 import { CreateProposalComponent } from './create-proposal/create-proposal.component';
+
+import { ProposalComponent } from './proposal/proposal.component';
 
 export const proposalRoutes: Route[] = [
     {

@@ -22,9 +22,8 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-create-proposal',
   templateUrl: './create-proposal.component.html',
-  styleUrls: ['./create-proposal.component.scss']
+  styleUrls: ['./create-proposal.component.scss'],
 })
-
 export class CreateProposalComponent implements OnInit {
   apiUrl: string;
 

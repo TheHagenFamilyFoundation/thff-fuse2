@@ -3,7 +3,6 @@
     <div class="bg-card">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
             <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-
                 <!-- Avatar and name -->
                 <div class="flex flex-auto items-center min-w-0">
                     <div class="flex flex-col min-w-0 ml-4">
@@ -33,19 +32,20 @@
                         <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full px-3">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-project-title">
-
                                     Project Title
                                 </label>
                                 <mat-form-field style="width: 100%">
                                     <textarea class="resize-none" matInput placeholder="Project Title"
                                         formControlName="projectTitle" value="{{ projectTitle }}" required (keyup)="
-                                                projectTitle$.next($event.target.value)
-                                    "></textarea>
+                                            projectTitle$.next(
+                                                $event.target.value
+                                            )
+                                        "></textarea>
                                     <mat-error *ngIf="
-                                                groupedForm
-                                                    .get('projectTitle')
-                                                    .hasError('required')
-                                            ">
+                                            groupedForm
+                                                .get('projectTitle')
+                                                .hasError('required')
+                                        ">
                                         Project Title is
                                         <strong>required</strong>
                                     </mat-error>
@@ -61,8 +61,8 @@
                                     <textarea class="resize-none" matInput matTextareaAutosize rows="5"
                                         matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                         placeholder="Purpose" formControlName="purpose" value="{{ purpose }}" (keyup)="
-                                                purpose$.next($event.target.value)
-                                            "></textarea>
+                                            purpose$.next($event.target.value)
+                                        "></textarea>
                                     <mat-hint align="end">{{ purpose?.toString().length }} /
                                         500</mat-hint>
                                 </mat-form-field>
@@ -71,16 +71,15 @@
                         <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-goals">
-                                    Describe the specific goals and/or intended outcomes of your project:
+                                    Describe the specific goals and/or intended
+                                    outcomes of your project:
                                 </label>
                                 <mat-form-field style="width: 100%">
                                     <textarea class="resize-none" matInput matTextareaAutosize rows="5"
                                         matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                         placeholder="Goals" formControlName="goals" value="{{ goals }}" (keyup)="
-                                                goals$.next(
-                                                    $event.target.value
-                                                )
-                                            "></textarea>
+                                            goals$.next($event.target.value)
+                                        "></textarea>
                                     <mat-hint align="end">{{ goals?.toString().length }} /
                                         500</mat-hint>
                                 </mat-form-field>
@@ -134,10 +133,8 @@
                                         matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                         placeholder="Timetable" formControlName="timeTable" value="{{ timeTable }}"
                                         (keyup)="
-                                                timeTable$.next(
-                                                    $event.target.value
-                                                )
-                                            "></textarea>
+                                            timeTable$.next($event.target.value)
+                                        "></textarea>
                                     <mat-hint align="end">{{ timeTable?.toString().length }} /
                                         500</mat-hint>
                                 </mat-form-field>
@@ -177,7 +174,8 @@
                         <div class="flex flex-wrap -mx-3 mb-6">
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-itemizedBudget">
-                                    Explain how the budget will be allocated across different expense items (e.g.,
+                                    Explain how the budget will be allocated
+                                    across different expense items (e.g.,
                                     materials, labor).
                                 </label>
                                 <mat-form-field style="width: 100%">
@@ -185,12 +183,14 @@
                                         matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                         placeholder="Itemized Budget" formControlName="itemizedBudget"
                                         value="{{ itemizedBudget }}" (keyup)="
-                                                itemizedBudget$.next(
-                                                    $event.target.value
-                                                )
-                                            "></textarea>
-                                    <mat-hint align="end">{{ itemizedBudget?.toString().length }} /
-                                        500</mat-hint>
+                                            itemizedBudget$.next(
+                                                $event.target.value
+                                            )
+                                        "></textarea>
+                                    <mat-hint align="end">{{
+                                        itemizedBudget?.toString().length
+                                        }}
+                                        / 500</mat-hint>
                                 </mat-form-field>
                             </div>
                         </div>
@@ -202,23 +202,23 @@
                                 <mat-form-field class="totalProjectCost">
                                     <input matInput formControlName="totalProjectCost" placeholder="Total Project Cost"
                                         currencyMask required value="{{ totalProjectCost }}" (keyup)="
-                                                totalProjectCost$.next(
-                                                    $event.target.value
-                                                )
-                                            " />
+                                            totalProjectCost$.next(
+                                                $event.target.value
+                                            )
+                                        " />
                                     <mat-error *ngIf="
-                                                groupedForm
-                                                    .get('totalProjectCost')
-                                                    .hasError('required')
-                                            ">
+                                            groupedForm
+                                                .get('totalProjectCost')
+                                                .hasError('required')
+                                        ">
                                         Total Project Cost is
                                         <strong>required</strong>
                                     </mat-error>
                                     <mat-error *ngIf="
-                                                groupedForm
-                                                    .get('totalProjectCost')
-                                                    .hasError('min')
-                                            ">
+                                            groupedForm
+                                                .get('totalProjectCost')
+                                                .hasError('min')
+                                        ">
                                         Amount Requested must be
                                         <strong>positive</strong>
                                     </mat-error>
