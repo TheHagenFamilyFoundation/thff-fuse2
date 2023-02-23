@@ -21,7 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { environment } from 'environments/environment';
 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { ProposalService } from '../../../core/services/proposal/proposal.service';
+import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
@@ -219,9 +219,9 @@ export class ProposalComponent implements OnInit, OnDestroy {
             });
     }
 
-    refreshProposal(): void {
-        this.getProposal(this.proposalID); //fetch the proposal again
-    }
+    // refreshProposal(): void {
+    //     this.getProposal(this.proposalID); //fetch the proposal again
+    // }
 
     getBackendURL(): void {
         console.log('proposal - environment', environment);
