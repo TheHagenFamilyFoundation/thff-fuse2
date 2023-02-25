@@ -24,15 +24,17 @@ import { OrganizationsComponent } from './organizations/organizations.component'
 
 import { pagesRoutes } from './page.routing';
 import { ProposalsComponent } from './proposals/proposals.component';
-import { ProposalComponent } from './proposal/proposal.component';
 
 @NgModule({
     imports: [
         RouterModule.forChild(pagesRoutes),
         OrganizationModule,
+
         ProfileModule,
+
         SettingsModule,
         DirectorModule,
+
         ProposalModule,
 
         MatButtonModule,
@@ -48,10 +50,6 @@ import { ProposalComponent } from './proposal/proposal.component';
         SharedModule,
         TranslocoModule,
     ],
-    declarations: [
-        OrganizationsComponent,
-        ProposalsComponent,
-        ProposalComponent,
-    ],
+    declarations: [OrganizationsComponent, ProposalsComponent],
 })
 export class PagesModule {}

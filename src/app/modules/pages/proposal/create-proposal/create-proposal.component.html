@@ -21,4 +21,349 @@
         </div>
     </div>
     <!-- End of Header -->
+
+    <!-- Main -->
+    <div class="flex-auto border-t -mt-px pt-4 sm:pt-6 my-6">
+        <div class="w-5/6 max-w-screen-xl mx-auto">
+            <div
+                class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden"
+            >
+                <div class="flex flex-col mt-2">
+                    <div
+                        class="text-lg font-medium tracking-tight leading-6 truncate mb-6"
+                    >
+                        Please fill out all fields below.
+                    </div>
+                    <form [formGroup]="groupedForm" class="w-full">
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full px-3">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-project-title"
+                                >
+                                    Project Title
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        placeholder="Project Title"
+                                        formControlName="projectTitle"
+                                        value="{{ projectTitle }}"
+                                        required
+                                        (keyup)="
+                                            projectTitle$.next(
+                                                $event.target.value
+                                            )
+                                        "
+                                    ></textarea>
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('projectTitle')
+                                                .hasError('required')
+                                        "
+                                    >
+                                        Project Title is
+                                        <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full px-3">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-purpose"
+                                >
+                                    Describe the purpose of your project:
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        matTextareaAutosize
+                                        rows="5"
+                                        matAutosizeMinRows="5"
+                                        matAutosizeMaxRows="5"
+                                        maxLength="500"
+                                        placeholder="Purpose"
+                                        formControlName="purpose"
+                                        value="{{ purpose }}"
+                                        (keyup)="
+                                            purpose$.next($event.target.value)
+                                        "
+                                    ></textarea>
+                                    <mat-hint align="end"
+                                        >{{ purpose?.toString().length }} /
+                                        500</mat-hint
+                                    >
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-goals"
+                                >
+                                    Describe the specific goals and/or intended
+                                    outcomes of your project:
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        matTextareaAutosize
+                                        rows="5"
+                                        matAutosizeMinRows="5"
+                                        matAutosizeMaxRows="5"
+                                        maxLength="500"
+                                        placeholder="Goals"
+                                        formControlName="goals"
+                                        value="{{ goals }}"
+                                        (keyup)="
+                                            goals$.next($event.target.value)
+                                        "
+                                    ></textarea>
+                                    <mat-hint align="end"
+                                        >{{ goals?.toString().length }} /
+                                        500</mat-hint
+                                    >
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-narrative"
+                                >
+                                    Provide a detailed project narrative:
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        matTextareaAutosize
+                                        rows="5"
+                                        matAutosizeMinRows="5"
+                                        matAutosizeMaxRows="5"
+                                        maxLength="500"
+                                        placeholder="Narrative"
+                                        formControlName="narrative"
+                                        value="{{ narrative }}"
+                                        (keyup)="
+                                            narrative$.next($event.target.value)
+                                        "
+                                    ></textarea>
+                                    <mat-hint align="end"
+                                        >{{ narrative?.toString().length }} /
+                                        500</mat-hint
+                                    >
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-timeTable"
+                                >
+                                    Provide a timetable for your project.
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        matTextareaAutosize
+                                        rows="5"
+                                        matAutosizeMinRows="5"
+                                        matAutosizeMaxRows="5"
+                                        maxLength="500"
+                                        placeholder="Timetable"
+                                        formControlName="timeTable"
+                                        value="{{ timeTable }}"
+                                        (keyup)="
+                                            timeTable$.next($event.target.value)
+                                        "
+                                    ></textarea>
+                                    <mat-hint align="end"
+                                        >{{ timeTable?.toString().length }} /
+                                        500</mat-hint
+                                    >
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-amountRequested"
+                                >
+                                    Amount Requested
+                                </label>
+                                <mat-form-field class="amountRequested">
+                                    <input
+                                        matInput
+                                        formControlName="amountRequested"
+                                        placeholder="Amount Requested"
+                                        currencyMask
+                                        required
+                                        value="{{ amountRequested }}"
+                                        (keyup)="
+                                            amountRequested$.next(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('amountRequested')
+                                                .hasError('required')
+                                        "
+                                    >
+                                        Amount Requested is
+                                        <strong>required</strong>
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('amountRequested')
+                                                .hasError('min')
+                                        "
+                                    >
+                                        Amount Requested must be
+                                        <strong>positive</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-itemizedBudget"
+                                >
+                                    Explain how the budget will be allocated
+                                    across different expense items (e.g.,
+                                    materials, labor).
+                                </label>
+                                <mat-form-field style="width: 100%">
+                                    <textarea
+                                        class="resize-none"
+                                        matInput
+                                        matTextareaAutosize
+                                        rows="5"
+                                        matAutosizeMinRows="5"
+                                        matAutosizeMaxRows="5"
+                                        maxLength="500"
+                                        placeholder="Itemized Budget"
+                                        formControlName="itemizedBudget"
+                                        value="{{ itemizedBudget }}"
+                                        (keyup)="
+                                            itemizedBudget$.next(
+                                                $event.target.value
+                                            )
+                                        "
+                                    ></textarea>
+                                    <mat-hint align="end"
+                                        >{{
+                                            itemizedBudget?.toString().length
+                                        }}
+                                        / 500</mat-hint
+                                    >
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap -mx-3 mb-6">
+                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <label
+                                    class="block tracking-wide text-sm mb-2"
+                                    for="grid-totalProjectCost"
+                                >
+                                    Total Project Cost *
+                                </label>
+                                <mat-form-field class="totalProjectCost">
+                                    <input
+                                        matInput
+                                        formControlName="totalProjectCost"
+                                        placeholder="Total Project Cost"
+                                        currencyMask
+                                        required
+                                        value="{{ totalProjectCost }}"
+                                        (keyup)="
+                                            totalProjectCost$.next(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('totalProjectCost')
+                                                .hasError('required')
+                                        "
+                                    >
+                                        Total Project Cost is
+                                        <strong>required</strong>
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('totalProjectCost')
+                                                .hasError('min')
+                                        "
+                                    >
+                                        Amount Requested must be
+                                        <strong>positive</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                    <div
+                        class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 rounded-2xl overflow-hidden"
+                    >
+                        <div
+                            class="flex flex-col sm:flex-row items-start justify-between"
+                        >
+                            <div
+                                class="text-lg font-medium tracking-tight leading-6 truncate"
+                            >
+                                Note: all items are required.
+                            </div>
+                            <div class="mt-3 sm:mt-0 sm:ml-2">
+                                <button
+                                    class="fuse-mat-button-large mt-6"
+                                    mat-raised-button
+                                    [color]="'primary'"
+                                    (click)="cancel()"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    class="fuse-mat-button-large mt-6"
+                                    mat-raised-button
+                                    [color]="'primary'"
+                                    [disabled]="!groupedForm.valid"
+                                    (click)="createProposal()"
+                                >
+                                    Create
+                                </button>
+                            </div>
+                        </div>
+                        <div
+                            class="text-lg font-medium tracking-tight leading-6 truncate text-center my-6"
+                        >
+                            <mat-error *ngIf="showMessage">
+                                {{ message }}
+                            </mat-error>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
