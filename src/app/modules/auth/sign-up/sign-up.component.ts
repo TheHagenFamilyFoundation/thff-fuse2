@@ -76,16 +76,19 @@ export class AuthSignUpComponent implements OnInit {
                 this._router.navigateByUrl('/confirmation-required');
             },
             (response) => {
+                console.log('signing up - response', response);
+
                 // Re-enable the form
                 this.signUpForm.enable();
 
                 // Reset the form
-                this.signUpNgForm.resetForm();
+                //TODO take another look
+                // this.signUpNgForm.resetForm();
 
                 // Set the alert
                 this.alert = {
                     type: 'error',
-                    message: 'Something went wrong, please try again.',
+                    message: response.error.message,
                 };
 
                 // Show the alert
