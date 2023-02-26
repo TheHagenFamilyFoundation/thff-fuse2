@@ -18,6 +18,7 @@ import { EditableModule } from '@ngneat/edit-in-place';
 import { AppRoutingModule } from './app-routing.module';
 
 import { NotFoundComponent } from './core/utilities/not-found/not-found.component';
+import { AuthModule } from './core/auth/auth.module';
 
 // const routerConfig: ExtraOptions = {
 //     preloadingStrategy: PreloadAllModules,
@@ -29,7 +30,7 @@ import { NotFoundComponent } from './core/utilities/not-found/not-found.componen
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
-
+        AuthModule,
         AppRoutingModule,
 
         FormsModule,
