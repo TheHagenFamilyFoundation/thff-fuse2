@@ -26,14 +26,15 @@ export class AuthService {
         console.log('auth service constructor');
         console.log('auth service - environment', environment);
 
-        this.initializeBackendURL();
-
         if (!environment.production) {
             console.log('production env', environment.production);
             this.apiUrl = environment.apiUrl;
         } else {
-            this.apiUrl = this.getBackendURL();
-            console.log('auth-service - this.apiUrl', this.apiUrl);
+            this.initializeBackendURL().subscribe(() => {
+                console.log('initialize backend');
+                this.apiUrl = this.getBackendURL();
+                console.log('auth-service - this.apiUrl', this.apiUrl);
+            });
         }
     }
 
@@ -257,6 +258,7 @@ export class AuthService {
     }
 
     initializeBackendURL(): Observable<any> {
+        console.log('initializing backend');
         if (environment.production === true) {
             console.log(
                 'getting backend URL',
