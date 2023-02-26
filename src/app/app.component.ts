@@ -26,6 +26,8 @@ export class AppComponent implements OnInit {
                 );
                 // console.log('auth-service - this.apiUrl', this.apiUrl);
                 sessionStorage.setItem('backend_url', backend.url);
+                //set auth service
+                this.authService.setBackendURL();
             });
         } catch (e) {
             console.error(e);

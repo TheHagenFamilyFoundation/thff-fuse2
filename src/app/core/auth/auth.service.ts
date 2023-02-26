@@ -262,7 +262,11 @@ export class AuthService {
     }
 
     setBackendURL(): void {
-        this.apiUrl = sessionStorage.getItem('backend_url');
+        if (environment.production === true) {
+            this.apiUrl = sessionStorage.getItem('backend_url');
+        } else {
+            this.apiUrl = environment.apiUrl;
+        }
     }
     getBackendURL(): string {
         return this.apiUrl;
@@ -278,7 +282,7 @@ export class AuthService {
             return this._httpClient.get(`${window.location.origin}/backend`);
         } else {
             console.log('production env', environment.production);
-            this.apiUrl = environment.apiUrl;
+
             return of(true);
         }
     }
