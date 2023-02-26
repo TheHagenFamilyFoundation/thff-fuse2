@@ -11,8 +11,5 @@ export class AppComponent {
     /**
      * Constructor
      */
-    constructor(public authService: AuthService) {
-        console.log('app-initialize backendurl');
-        this.authService.initializeBackendURL();
-    }
+    constructor(public authService: AuthService) {}
 }
