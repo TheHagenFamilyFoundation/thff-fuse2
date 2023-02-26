@@ -26,6 +26,8 @@ export class AuthService {
         console.log('auth service constructor');
         console.log('auth service - environment', environment);
 
+        this.initializeBackendURL();
+
         if (!environment.production) {
             console.log('production env', environment.production);
             this.apiUrl = environment.apiUrl;
@@ -33,7 +35,6 @@ export class AuthService {
             this.apiUrl = this.getBackendURL();
             console.log('auth-service - this.apiUrl', this.apiUrl);
         }
-
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -147,7 +148,7 @@ export class AuthService {
         return this._httpClient
             .post(`${this.apiUrl}/auth/refresh-access-token`, {
                 accessToken: this.accessToken,
-                user: this.currentUser
+                user: this.currentUser,
             })
             .pipe(
                 catchError(() =>
@@ -174,7 +175,6 @@ export class AuthService {
      * Sign out
      */
     signOut(): Observable<any> {
-
         console.log('signing out');
 
         // Remove the access token from the local storage
