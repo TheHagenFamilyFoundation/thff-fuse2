@@ -32,8 +32,9 @@ export class AuthService {
         } else {
             this.initializeBackendURL().subscribe(() => {
                 console.log('initialize backend');
-                this.apiUrl = this.getBackendURL();
-                console.log('auth-service - this.apiUrl', this.apiUrl);
+                console.log('this.getBackendURL()', this.getBackendURL());
+                // this.apiUrl = this.getBackendURL();
+                // console.log('auth-service - this.apiUrl', this.apiUrl);
             });
         }
     }
@@ -267,7 +268,6 @@ export class AuthService {
                 'getting backend URL',
                 `${window.location.origin}/backend`
             );
-
             return this._httpClient.get(`${window.location.origin}/backend`);
         }
     }
