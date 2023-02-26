@@ -47,36 +47,34 @@ export class SettingsComponent implements OnInit, OnDestroy {
                 id: 'account',
                 icon: 'heroicons_outline:user-circle',
                 title: 'Account',
-                description:
-                    'Manage your public profile and private information',
+                description: 'Manage your information',
             },
             {
                 id: 'security',
                 icon: 'heroicons_outline:lock-closed',
                 title: 'Security',
-                description:
-                    'Manage your password and 2-step verification preferences',
+                description: 'Manage your password.',
             },
-            {
-                id: 'plan-billing',
-                icon: 'heroicons_outline:credit-card',
-                title: 'Plan & Billing',
-                description:
-                    'Manage your subscription plan, payment method and billing information',
-            },
+            // {
+            //     id: 'plan-billing',
+            //     icon: 'heroicons_outline:credit-card',
+            //     title: 'Plan & Billing',
+            //     description:
+            //         'Manage your subscription plan, payment method and billing information',
+            // },
             {
                 id: 'notifications',
                 icon: 'heroicons_outline:bell',
                 title: 'Notifications',
                 description: "Manage when you'll be notified on which channels",
             },
-            {
-                id: 'team',
-                icon: 'heroicons_outline:user-group',
-                title: 'Team',
-                description:
-                    'Manage your existing team and change roles/permissions',
-            },
+            // {
+            //     id: 'team',
+            //     icon: 'heroicons_outline:user-group',
+            //     title: 'Team',
+            //     description:
+            //         'Manage your organization and change roles/permissions',
+            // },
             {
                 id: 'app',
                 icon: 'heroicons_outline:user-group',
