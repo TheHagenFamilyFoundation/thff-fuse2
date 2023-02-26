@@ -1,37 +1,19 @@
-<section
-    editableGroup
-    (editableModeChange)="handleModeChange($event)"
-    (save)="updateGroupedEdition()"
-    (cancel)="cancelGroupedEdition()"
->
+<section editableGroup (editableModeChange)="handleModeChange($event)" (save)="updateGroupedEdition()"
+    (cancel)="cancelGroupedEdition()">
     <div class="flex flex-col sm:flex-row items-start justify-between">
         <div class="text-lg font-medium tracking-tight leading-6 truncate">
             Proposal Information
         </div>
         <!-- Buttons -->
         <div class="mt-3 sm:mt-0 sm:ml-2">
-            <button
-                mat-raised-button
-                *ngIf="mode === 'view'"
-                data-testid="groupedForm-edit-btn"
-                editableGroupEdit
-            >
+            <button mat-raised-button *ngIf="mode === 'view'" data-testid="groupedForm-edit-btn" editableGroupEdit>
                 Edit
             </button>
-            <button
-                mat-raised-button
-                *ngIf="mode === 'edit' && groupedForm.valid"
-                data-testid="groupedForm-save-btn"
-                editableGroupSave
-            >
+            <button mat-raised-button *ngIf="mode === 'edit' && groupedForm.valid" data-testid="groupedForm-save-btn"
+                editableGroupSave>
                 Save
             </button>
-            <button
-                mat-raised-button
-                *ngIf="mode === 'edit'"
-                data-testid="groupedForm-cancel-btn"
-                editableGroupCancel
-            >
+            <button mat-raised-button *ngIf="mode === 'edit'" data-testid="groupedForm-cancel-btn" editableGroupCancel>
                 Cancel
             </button>
         </div>
@@ -41,31 +23,19 @@
             <form *ngIf="proposal" [formGroup]="groupedForm" class="w-full">
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-project-title"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-project-title">
                             Project Title
                         </label>
                         <mat-form-field style="width: 100%">
-                            <input
-                                matInput
-                                placeholder="Project Title"
-                                formControlName="projectTitle"
-                                value="{{ projectTitle }}"
-                                maxlength="100"
-                                required
-                                (keyup)="
+                            <input matInput placeholder="Project Title" formControlName="projectTitle"
+                                value="{{ projectTitle }}" maxlength="100" required (keyup)="
                                     projectTitle$.next($event.target.value)
-                                "
-                            />
-                            <mat-error
-                                *ngIf="
+                                " />
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('projectTitle')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Project Title is
                                 <strong>required</strong>
                             </mat-error>
@@ -74,37 +44,20 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-purpose"
-                        >
-                            Purpose
+                        <label class="block tracking-wide text-sm mb-2" for="grid-purpose">
+                            Describe the purpose of your project:
                         </label>
                         <mat-form-field class="purpose">
-                            <textarea
-                                class="resize-none"
-                                matInput
-                                placeholder="Purpose"
-                                formControlName="purpose"
-                                matTextareaAutosize
-                                rows="5"
-                                matAutosizeMinRows="5"
-                                matAutosizeMaxRows="5"
-                                maxLength="500"
-                                value="{{ purpose }}"
-                                required
-                                (keyup)="purpose$.next($event.target.value)"
-                            ></textarea>
-                            <mat-hint align="end"
-                                >{{ purpose.length }} / 500</mat-hint
-                            >
-                            <mat-error
-                                *ngIf="
+                            <textarea class="resize-none" matInput placeholder="Purpose" formControlName="purpose"
+                                matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
+                                maxLength="500" value="{{ purpose }}" required
+                                (keyup)="purpose$.next($event.target.value)"></textarea>
+                            <mat-hint align="end">{{ purpose.length }} / 500</mat-hint>
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('purpose')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Purpose is
                                 <strong>required</strong>
                             </mat-error>
@@ -113,37 +66,21 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-goals"
-                        >
-                            Goals
+                        <label class="block tracking-wide text-sm mb-2" for="grid-goals">
+                            Describe the specific goals and/or intended
+                            outcomes of your project:
                         </label>
                         <mat-form-field class="goals">
-                            <textarea
-                                class="resize-none"
-                                matInput
-                                formControlName="goals"
-                                placeholder="Goals"
-                                matTextareaAutosize
-                                rows="5"
-                                matAutosizeMinRows="5"
-                                matAutosizeMaxRows="5"
-                                maxLength="500"
-                                value="{{ goals }}"
-                                required
-                                (keyup)="goals$.next($event.target.value)"
-                            ></textarea>
-                            <mat-hint align="end"
-                                >{{ goals.length }} / 500</mat-hint
-                            >
-                            <mat-error
-                                *ngIf="
+                            <textarea class="resize-none" matInput formControlName="goals" placeholder="Goals"
+                                matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
+                                maxLength="500" value="{{ goals }}" required
+                                (keyup)="goals$.next($event.target.value)"></textarea>
+                            <mat-hint align="end">{{ goals.length }} / 500</mat-hint>
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('goals')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Goals is
                                 <strong>required</strong>
                             </mat-error>
@@ -152,39 +89,24 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-narrative"
-                        >
-                            Narrative
+                        <label class="block tracking-wide text-sm mb-2" for="grid-narrative">
+                            Provide a detailed project narrative that addresses the following questions, if
+                            relevant.
+                            Is this a new activity? How does the project fit into your organization's mission?
+                            Who will be responsible for overseeing the project? How will you evaluate the
+                            success? Do you anticipate partnering with any other organizations?
                         </label>
                         <mat-form-field>
-                            <textarea
-                                class="resize-none"
-                                matInput
-                                formControlName="narrative"
-                                value="{{ narrative }}"
-                                type="text"
-                                id="narrative"
-                                matTextareaAutosize
-                                rows="5"
-                                matAutosizeMinRows="5"
-                                matAutosizeMaxRows="5"
-                                maxlength="2000"
-                                placeholder="Narrative"
-                                (keyup)="phone$.next($event.target.value)"
-                                required
-                            ></textarea>
-                            <mat-hint align="end"
-                                >{{ narrative.length }} /2000</mat-hint
-                            >
-                            <mat-error
-                                *ngIf="
+                            <textarea class="resize-none" matInput formControlName="narrative" value="{{ narrative }}"
+                                type="text" id="narrative" matTextareaAutosize rows="5" matAutosizeMinRows="5"
+                                matAutosizeMaxRows="5" maxlength="2000" placeholder="Narrative"
+                                (keyup)="phone$.next($event.target.value)" required></textarea>
+                            <mat-hint align="end">{{ narrative.length }} /2000</mat-hint>
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('narrative')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Narrative is
                                 <strong>required</strong>
                             </mat-error>
@@ -193,37 +115,20 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-time-table"
-                        >
-                            Time Table
+                        <label class="block tracking-wide text-sm mb-2" for="grid-time-table">
+                            Provide a timeline for your project with key milestones.
                         </label>
                         <mat-form-field>
-                            <textarea
-                                class="resize-none"
-                                matInput
-                                placeholder="Time Table"
-                                formControlName="timeTable"
-                                matTextareaAutosize
-                                rows="5"
-                                matAutosizeMinRows="5"
-                                matAutosizeMaxRows="5"
-                                maxLength="500"
-                                value="{{ timeTable }}"
-                                (keyup)="timeTable$.next($event.target.value)"
-                                required
-                            ></textarea>
-                            <mat-hint align="end"
-                                >{{ timeTable.length }} / 500</mat-hint
-                            >
-                            <mat-error
-                                *ngIf="
+                            <textarea class="resize-none" matInput placeholder="Time Table" formControlName="timeTable"
+                                matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
+                                maxLength="500" value="{{ timeTable }}" (keyup)="timeTable$.next($event.target.value)"
+                                required></textarea>
+                            <mat-hint align="end">{{ timeTable.length }} / 500</mat-hint>
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('timeTable')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Time Table is
                                 <strong>required</strong>
                             </mat-error>
@@ -232,31 +137,19 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-contact-person-title"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-contact-person-title">
                             Amount Requested
                         </label>
                         <mat-form-field>
-                            <input
-                                matInput
-                                placeholder="Amount Requested"
-                                formControlName="amountRequested"
-                                maxlength="10"
-                                value="{{ amountRequested }}"
-                                (keyup)="
+                            <input matInput placeholder="Amount Requested" formControlName="amountRequested"
+                                maxlength="10" value="{{ amountRequested }}" (keyup)="
                                     amountedRequested$.next($event.target.value)
-                                "
-                                required
-                            />
-                            <mat-error
-                                *ngIf="
+                                " required />
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('amountRequested')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Amount Requested is
                                 <strong>required</strong>
                             </mat-error>
@@ -265,41 +158,24 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-itemized-budget"
-                        >
-                            Itemized Budget
+                        <label class="block tracking-wide text-sm mb-2" for="grid-itemized-budget">
+                            Explain how the budget will be allocated
+                            across different expense items (e.g.,
+                            materials, labor).
                         </label>
                         <mat-form-field>
-                            <textarea
-                                class="resize-none"
-                                matInput
-                                value="{{ itemizedBudget }}"
-                                type="text"
-                                matTextareaAutosize
-                                rows="5"
-                                matAutosizeMinRows="5"
-                                matAutosizeMaxRows="5"
-                                maxLength="500"
-                                formControlName="itemizedBudget"
-                                id="itemized-budget"
-                                placeholder="Itemized Budget"
-                                (keyup)="
+                            <textarea class="resize-none" matInput value="{{ itemizedBudget }}" type="text"
+                                matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
+                                maxLength="500" formControlName="itemizedBudget" id="itemized-budget"
+                                placeholder="Itemized Budget" (keyup)="
                                     itemizedBudget$.next($event.target.value)
-                                "
-                                required
-                            ></textarea>
-                            <mat-hint align="end"
-                                >{{ itemizedBudget.length }} / 500</mat-hint
-                            >
-                            <mat-error
-                                *ngIf="
+                                " required></textarea>
+                            <mat-hint align="end">{{ itemizedBudget.length }} / 500</mat-hint>
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('itemizedBudget')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Itemized Budget is
                                 <strong>required</strong>
                             </mat-error>
@@ -308,34 +184,20 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-total-project-cost"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-total-project-cost">
                             Total Project Cost
                         </label>
                         <mat-form-field>
-                            <input
-                                matInput
-                                class="form-control"
-                                value="{{ totalProjectCost }}"
-                                type="text"
-                                maxlength="10"
-                                formControlName="totalProjectCost"
-                                id="total-project-cost"
-                                placeholder="Total Project Cost"
-                                (keyup)="
+                            <input matInput class="form-control" value="{{ totalProjectCost }}" type="text"
+                                maxlength="10" formControlName="totalProjectCost" id="total-project-cost"
+                                placeholder="Total Project Cost" (keyup)="
                                     totalProjectCost$.next($event.target.value)
-                                "
-                                required
-                            />
-                            <mat-error
-                                *ngIf="
+                                " required />
+                            <mat-error *ngIf="
                                     groupedForm
                                         .get('totalProjectCost')
                                         .hasError('required')
-                                "
-                            >
+                                ">
                                 Total Project Cost is
                                 <strong>required</strong>
                             </mat-error>
@@ -352,28 +214,15 @@
             </div>
             <!-- Buttons -->
             <div class="mt-3 sm:mt-0 sm:ml-2">
-                <button
-                    mat-raised-button
-                    *ngIf="mode === 'view'"
-                    data-testid="groupedForm-edit-btn"
-                    editableGroupEdit
-                >
+                <button mat-raised-button *ngIf="mode === 'view'" data-testid="groupedForm-edit-btn" editableGroupEdit>
                     Edit
                 </button>
-                <button
-                    mat-raised-button
-                    *ngIf="mode === 'edit' && groupedForm.valid"
-                    data-testid="groupedForm-save-btn"
-                    editableGroupSave
-                >
+                <button mat-raised-button *ngIf="mode === 'edit' && groupedForm.valid"
+                    data-testid="groupedForm-save-btn" editableGroupSave>
                     Save
                 </button>
-                <button
-                    mat-raised-button
-                    *ngIf="mode === 'edit'"
-                    data-testid="groupedForm-cancel-btn"
-                    editableGroupCancel
-                >
+                <button mat-raised-button *ngIf="mode === 'edit'" data-testid="groupedForm-cancel-btn"
+                    editableGroupCancel>
                     Cancel
                 </button>
             </div>
@@ -387,51 +236,35 @@
             <form *ngIf="proposal" [formGroup]="groupedForm" class="w-full">
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-project-title"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-project-title">
                             Project Title
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'projectTitle',
                                     'projectTitleControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'projectTitleName',
                                     'projectTitleControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputProjectTitle
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.projectTitle }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <input
-                                        class="form-control"
-                                        editableFocusable
-                                        data-testid="sample-input-click-edit"
-                                        maxLength="100"
-                                        placeholder="Project Title"
-                                        type="text"
-                                        [formControl]="projectTitleControl"
-                                    />
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <input class="form-control" editableFocusable data-testid="sample-input-click-edit"
+                                        maxLength="100" placeholder="Project Title" type="text"
+                                        [formControl]="projectTitleControl" />
                                     <!-- <textarea
                                         class="resize-none"
                                         editableFocusable
@@ -451,55 +284,33 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-purpose"
-                        >
-                            Purpose
+                        <label class="block tracking-wide text-sm mb-2" for="grid-purpose">
+                            Describe the purpose of your project:
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField('purpose', 'purposeControl')
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField('purpose', 'purposeControl')
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputPurpose
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.purpose }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <textarea
-                                        class="resize-none"
-                                        editableFocusable
-                                        matInput
-                                        matTextareaAutosize
-                                        rows="5"
-                                        matAutosizeMinRows="5"
-                                        matAutosizeMaxRows="5"
-                                        maxLength="500"
-                                        placeholder="Purpose"
-                                        [formControl]="purposeControl"
-                                        required
-                                    ></textarea>
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
+                                        rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
+                                        placeholder="Purpose" [formControl]="purposeControl" required></textarea>
                                 </div>
                             </ng-template>
                         </editable>
-                        <mat-hint align="end"
-                            >{{ purpose?.toString().length }} / 500</mat-hint
-                        >
+                        <mat-hint align="end">{{ purpose?.toString().length }} / 500</mat-hint>
                         <mat-error *ngIf="invalidInputPurpose">
                             Purpose is
                             <strong>required</strong>
@@ -508,53 +319,33 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-goals"
-                        >
-                            Goals
+                        <label class="block tracking-wide text-sm mb-2" for="grid-goals">
+                            Describe the specific goals and/or intended
+                            outcomes of your project:
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="updateSingleField('goals', 'goalsControl')"
+                        <editable data-testid="sample-input-click" (save)="updateSingleField('goals', 'goalsControl')"
                             (cancel)="
                                 cancelSingleField('goals', 'goalsControl')
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputGoals
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.goals }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <textarea
-                                        class="resize-none"
-                                        editableFocusable
-                                        matInput
-                                        matTextareaAutosize
-                                        rows="5"
-                                        matAutosizeMinRows="5"
-                                        matAutosizeMaxRows="5"
-                                        maxLength="500"
-                                        placeholder="Goals"
-                                        [formControl]="goalsControl"
-                                        required
-                                    ></textarea>
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
+                                        rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
+                                        placeholder="Goals" [formControl]="goalsControl" required></textarea>
                                 </div>
                             </ng-template>
                         </editable>
-                        <mat-hint align="end"
-                            >{{ goals?.toString().length }} / 500</mat-hint
-                        >
+                        <mat-hint align="end">{{ goals?.toString().length }} / 500</mat-hint>
                         <mat-error *ngIf="invalidInputGoals">
                             Goals is
                             <strong>required</strong>
@@ -563,61 +354,43 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-narrative"
-                        >
-                            Narrative
+                        <label class="block tracking-wide text-sm mb-2" for="grid-narrative">
+                            Provide a detailed project narrative that addresses the following questions, if
+                            relevant.
+                            Is this a new activity? How does the project fit into your organization's mission?
+                            Who will be responsible for overseeing the project? How will you evaluate the
+                            success? Do you anticipate partnering with any other organizations?
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'narrative',
                                     'narrativeControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'narrative',
                                     'narrativeControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputNarrative
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.narrative }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <textarea
-                                        class="resize-none"
-                                        editableFocusable
-                                        matInput
-                                        matTextareaAutosize
-                                        rows="5"
-                                        matAutosizeMinRows="5"
-                                        matAutosizeMaxRows="5"
-                                        maxLength="2000"
-                                        placeholder="Narrative"
-                                        [formControl]="narrativeControl"
-                                        required
-                                    ></textarea>
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
+                                        rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="2000"
+                                        placeholder="Narrative" [formControl]="narrativeControl" required></textarea>
                                 </div>
                             </ng-template>
                         </editable>
-                        <mat-hint align="end"
-                            >{{ narrative?.toString().length }} / 2000</mat-hint
-                        >
+                        <mat-hint align="end">{{ narrative?.toString().length }} / 2000</mat-hint>
                         <mat-error *ngIf="invalidInputNarrative">
                             Narrative is
                             <strong>required</strong>
@@ -626,115 +399,76 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-time-table"
-                        >
-                            Time Table
+                        <label class="block tracking-wide text-sm mb-2" for="grid-time-table">
+                            Provide a timeline for your project with key milestones.
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'timeTable',
                                     'timeTableControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'timeTable',
                                     'timeTableControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputTimeTable
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.timeTable }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <textarea
-                                        class="resize-none"
-                                        editableFocusable
-                                        matInput
-                                        matTextareaAutosize
-                                        rows="5"
-                                        matAutosizeMinRows="5"
-                                        matAutosizeMaxRows="5"
-                                        maxLength="500"
-                                        placeholder="Time Table"
-                                        [formControl]="timeTableControl"
-                                        required
-                                    ></textarea>
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
+                                        rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
+                                        placeholder="Time Table" [formControl]="timeTableControl" required></textarea>
                                 </div>
                             </ng-template>
                         </editable>
-                        <mat-hint align="end"
-                            >{{ timeTable?.toString().length }} / 500</mat-hint
-                        >
+                        <mat-hint align="end">{{ timeTable?.toString().length }} / 500</mat-hint>
                         <mat-error *ngIf="invalidInputTimeTable">
-                            Time Table is
+                            Timeline is
                             <strong>required</strong>
                         </mat-error>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-amount-requested"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-amount-requested">
                             Amount Requested
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'amountedRequested',
                                     'amountRequestedControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'amountedRequested',
                                     'amountRequestedControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputAmountRequested
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.amountRequested | currency }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <input
-                                        class="form-control"
-                                        editableFocusable
-                                        currencyMask
-                                        maxLength="10"
-                                        data-testid="sample-input-click-edit"
-                                        placeholder="Amount Requested"
-                                        type="text"
-                                        [formControl]="amountRequestedControl"
-                                    />
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <input class="form-control" editableFocusable currencyMask maxLength="10"
+                                        data-testid="sample-input-click-edit" placeholder="Amount Requested" type="text"
+                                        [formControl]="amountRequestedControl" />
                                 </div>
                             </ng-template>
                         </editable>
@@ -746,62 +480,43 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-itemized-budget"
-                        >
-                            Itemized Budget
+                        <label class="block tracking-wide text-sm mb-2" for="grid-itemized-budget">
+                            Explain how the budget will be allocated
+                            across different expense items (e.g.,
+                            materials, labor).
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'itemizedBudget',
                                     'itemizedBudgetControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'itemizedBudget',
                                     'itemizedBudgetControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputItemizedBudget
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.itemizedBudget }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <textarea
-                                        class="resize-none"
-                                        editableFocusable
-                                        matInput
-                                        matTextareaAutosize
-                                        rows="5"
-                                        matAutosizeMinRows="5"
-                                        matAutosizeMaxRows="5"
-                                        maxLength="500"
-                                        placeholder="Itemized Budget"
-                                        [formControl]="itemizedBudgetControl"
-                                        required
-                                    ></textarea>
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
+                                        rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
+                                        placeholder="Itemized Budget" [formControl]="itemizedBudgetControl"
+                                        required></textarea>
                                 </div>
                             </ng-template>
                         </editable>
-                        <mat-hint align="end"
-                            >{{ itemizedBudget?.toString().length }} /
-                            500</mat-hint
-                        >
+                        <mat-hint align="end">{{ itemizedBudget?.toString().length }} /
+                            500</mat-hint>
                         <mat-error *ngIf="invalidItemizedBudget">
                             Itemized Budget is
                             <strong>required</strong>
@@ -810,52 +525,35 @@
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
-                        <label
-                            class="block tracking-wide text-sm mb-2"
-                            for="grid-total-project-cost"
-                        >
+                        <label class="block tracking-wide text-sm mb-2" for="grid-total-project-cost">
                             Total Project Cost
                         </label>
-                        <editable
-                            data-testid="sample-input-click"
-                            (save)="
+                        <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
                                     'totalProjectCost',
                                     'totalProjectCostControl'
                                 )
-                            "
-                            (cancel)="
+                            " (cancel)="
                                 cancelSingleField(
                                     'totalProjectCost',
                                     'totalProjectCostControl'
                                 )
-                            "
-                        >
+                            ">
                             <ng-template viewMode>
-                                <div
-                                    class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
                                         invalidInputTotalProjectCost
                                             ? 'border-red-600'
                                             : ''
-                                    }}"
-                                >
+                                    }}">
                                     {{ propObj.totalProjectCost | currency }}
                                 </div>
                             </ng-template>
                             <ng-template editMode>
                                 <div
-                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500"
-                                >
-                                    <input
-                                        class="form-control"
-                                        editableFocusable
-                                        currencyMask
-                                        maxLength="10"
-                                        data-testid="sample-input-click-edit"
-                                        placeholder="Total Project Cost"
-                                        type="text"
-                                        [formControl]="totalProjectCostControl"
-                                    />
+                                    class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                    <input class="form-control" editableFocusable currencyMask maxLength="10"
+                                        data-testid="sample-input-click-edit" placeholder="Total Project Cost"
+                                        type="text" [formControl]="totalProjectCostControl" />
                                 </div>
                             </ng-template>
                         </editable>

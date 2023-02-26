@@ -2,15 +2,12 @@
     <!-- Header -->
     <div class="bg-card">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div
-                class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12"
-            >
+            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
                 <div class="flex flex-auto items-center min-w-0">
                     <div class="flex flex-col min-w-0 ml-4">
                         <ng-container *transloco="let t">
                             <div
-                                class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate"
-                            >
+                                class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
                                 Organizations
                             </div>
                         </ng-container>
@@ -21,31 +18,17 @@
     </div>
 
     <!-- Main -->
-    <div
-        class="flex flex-wrap justify-center w-full max-w-5xl mx-auto p-6 sm:p-8"
-    >
+    <div class="flex flex-wrap justify-center w-full max-w-5xl mx-auto p-6 sm:p-8">
         <div class="flex flex-col items-start">
             <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
                 <!-- <div class="text-xl font-semibold">Organizations</div> -->
                 <div class="flex flex-col items-start mt-8">
-                    <div>
-                        <button
-                            mat-button
-                            color="primary"
-                            (click)="createOrganization()"
-                            fxHide="false"
-                        >
-                            <mat-icon>add</mat-icon> Create Organization
-                        </button>
-                    </div>
+
                     <div>
                         <mat-table [dataSource]="dataSource" matSort>
                             <!-- Name Column -->
                             <ng-container matColumnDef="name">
-                                <mat-header-cell
-                                    *matHeaderCellDef
-                                    mat-sort-header
-                                >
+                                <mat-header-cell *matHeaderCellDef mat-sort-header>
                                     Name
                                 </mat-header-cell>
                                 <mat-cell *matCellDef="let row">
@@ -55,10 +38,7 @@
 
                             <!-- createdOn Column -->
                             <ng-container matColumnDef="createdOn">
-                                <mat-header-cell
-                                    *matHeaderCellDef
-                                    mat-sort-header
-                                >
+                                <mat-header-cell *matHeaderCellDef mat-sort-header>
                                     Created On
                                 </mat-header-cell>
                                 <mat-cell *matCellDef="let row">
@@ -68,32 +48,20 @@
 
                             <!-- link Column -->
                             <ng-container matColumnDef="link">
-                                <mat-header-cell
-                                    *matHeaderCellDef
-                                    mat-sort-header
-                                >
+                                <mat-header-cell *matHeaderCellDef mat-sort-header>
                                     Link
                                 </mat-header-cell>
                                 <mat-cell *matCellDef="let row">
-                                    <button
-                                        mat-raised-button
-                                        color="primary"
-                                        (click)="
+                                    <button mat-raised-button color="primary" (click)="
                                             goToOrganization(row.organizationID)
-                                        "
-                                        mat-dialog-close
-                                    >
+                                        " mat-dialog-close>
                                         Go to Org
                                     </button>
                                 </mat-cell>
                             </ng-container>
 
-                            <mat-header-row
-                                *matHeaderRowDef="displayedColumns"
-                            ></mat-header-row>
-                            <mat-row
-                                *matRowDef="let row; columns: displayedColumns"
-                            >
+                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                            <mat-row *matRowDef="let row; columns: displayedColumns">
                             </mat-row>
                         </mat-table>
                         <div *ngIf="!loaded">
@@ -101,6 +69,11 @@
                         </div>
                         <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
                         <mat-paginator [pageSizeOptions]="[5]"></mat-paginator>
+                    </div>
+                    <div>
+                        <button mat-button color="primary" (click)="createOrganization()" fxHide="false">
+                            <mat-icon>add</mat-icon> Create Organization
+                        </button>
                     </div>
                 </div>
             </fuse-card>

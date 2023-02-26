@@ -1,13 +1,11 @@
-<!-- <h3> -->
-
 <div class="example-container">
     <mat-table [dataSource]="dataSource" matSort>
         <!-- Name Column -->
-        <ng-container matColumnDef="name">
+        <ng-container matColumnDef="projectTitle">
             <mat-header-cell *matHeaderCellDef mat-sort-header>
-                Name
+                Project Title
             </mat-header-cell>
-            <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+            <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
         </ng-container>
 
         <!-- createdOn Column -->
@@ -26,9 +24,8 @@
                 Link
             </mat-header-cell>
             <mat-cell *matCellDef="let row">
-                <button mat-raised-button color="primary" (click)="goToOrganization(row.organizationID)"
-                    mat-dialog-close>
-                    Go to Org
+                <button mat-raised-button color="primary" (click)="goToProposal(row.proposalID)" mat-dialog-close>
+                    Go to Proposal
                 </button>
             </mat-cell>
         </ng-container>
@@ -42,6 +39,6 @@
     <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
     <mat-paginator [pageSizeOptions]="[5]"></mat-paginator>
 </div>
-<button mat-button color="primary" (click)="createOrganization()" fxHide="false">
-    <mat-icon>add</mat-icon> Create Organization
+<button mat-button color="primary" (click)="createProposal()" fxHide="false">
+    <mat-icon>add</mat-icon> Create Proposal
 </button>

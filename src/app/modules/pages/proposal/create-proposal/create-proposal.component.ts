@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import {
-    AbstractControl,
-    FormArray,
-    FormBuilder,
-    FormGroup,
-    FormControl,
-    FormGroupDirective,
-    NgForm,
-    Validators,
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  FormGroupDirective,
+  NgForm,
+  Validators,
 } from '@angular/forms';
 
 import { Observable, Subject } from 'rxjs';
@@ -17,310 +17,291 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
-    selector: 'app-create-proposal',
-    templateUrl: './create-proposal.component.html',
-    styleUrls: ['./create-proposal.component.scss'],
+  selector: 'app-create-proposal',
+  templateUrl: './create-proposal.component.html',
+  styleUrls: ['./create-proposal.component.scss'],
 })
 export class CreateProposalComponent implements OnInit {
-    apiUrl: string;
+  apiUrl: string;
 
-    //org object
-    proposalObj: any;
+  //TODO: Type Organization id - mongo
+  org: any;
 
-    projectTitle$ = new Subject<string>();
+  proposalObj: any;
 
-    purpose$ = new Subject<string>();
+  projectTitle$ = new Subject<string>();
 
-    goals$ = new Subject<string>();
+  purpose$ = new Subject<string>();
 
-    activity$ = new Subject<string>();
+  goals$ = new Subject<string>();
 
-    narrative$ = new Subject<string>();
+  narrative$ = new Subject<string>();
 
-    timeTable$ = new Subject<string>();
+  timeTable$ = new Subject<string>();
 
-    amountRequested$ = new Subject<string>();
+  amountRequested$ = new Subject<string>();
 
-    itemizedBudget$ = new Subject<string>();
+  itemizedBudget$ = new Subject<string>();
 
-    totalProjectCost$ = new Subject<string>();
+  totalProjectCost$ = new Subject<string>();
 
-    projectTitle: string;
+  projectTitle: string;
 
-    purpose: string;
+  purpose: string;
 
-    goals: string;
+  goals: string;
 
-    activity: number;
+  narrative: string;
 
-    activities: [
-        { value: '1'; viewValue: 'New' },
-        { value: '2'; viewValue: 'Ongoing' }
-    ];
+  timeTable: string;
 
-    activitySelected: any;
+  amountRequested: number;
 
-    newOrOngoing: any;
+  itemizedBudget: string;
 
-    narrative: string;
+  totalProjectCost: number;
 
-    timeTable: string;
+  showMessage: boolean;
 
-    amountRequested: number;
+  user: any;
 
-    itemizedBudget: string;
+  // object
+  userId: any;
 
-    totalProjectCost: number;
+  // string
+  userEmail: string;
 
-    showMessage: boolean;
+  message: string;
 
-    user: any;
+  public groupedForm: FormGroup;
 
-    // object
-    userId: any;
+  constructor(
+    fb: FormBuilder,
+    private proposalService: ProposalService,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.projectTitle$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.projectTitle = term;
+        this.projectTitleChange();
+      });
 
-    // string
-    userEmail: string;
+    this.purpose$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.purpose = term;
+        this.purposeChange();
+      });
 
-    message: string;
+    this.goals$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.goals = term;
+        this.goalsChange();
+      });
 
-    public groupedForm: FormGroup;
+    this.narrative$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.narrative = term;
+        this.narrativeChange();
+      });
 
-    constructor(
-        fb: FormBuilder,
-        private proposalService: ProposalService,
-        private authService: AuthService,
-        private router: Router
-    ) {
-        this.projectTitle$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.projectTitle = term;
-                this.projectTitleChange();
-            });
+    this.timeTable$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.timeTable = term;
+        this.timeTableChange();
+      });
 
-        this.purpose$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.purpose = term;
-                this.purposeChange();
-            });
+    this.amountRequested$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.amountRequested = Number(term);
+        this.amountRequestedChange();
+      });
 
-        this.goals$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.goals = term;
-                this.goalsChange();
-            });
+    this.itemizedBudget$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.itemizedBudget = term;
+        this.itemizedBudgetChange();
+      });
 
-        // this.activity$
-        // .pipe(debounceTime(400), distinctUntilChanged())
-        // .subscribe((term) => {
-        //     this.activity = Number(term);
-        //     this.activityChange();
-        // });
+    this.totalProjectCost$
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.totalProjectCost = Number(term);
+        this.totalProjectCostChange();
+      });
 
-        this.narrative$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.narrative = term;
-                this.narrativeChange();
-            });
+    this.defaultValues();
 
-        this.timeTable$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.timeTable = term;
-                this.timeTableChange();
-            });
-
-        this.amountRequested$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.amountRequested = Number(term);
-                this.amountRequestedChange();
-            });
-
-        this.itemizedBudget$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.itemizedBudget = term;
-                this.itemizedBudgetChange();
-            });
-
-        this.totalProjectCost$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.totalProjectCost = Number(term);
-                this.totalProjectCostChange();
-            });
-
-        this.defaultValues();
-
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
-        }
+    if (!environment.production) {
+      this.apiUrl = environment.apiUrl;
+    } else {
+      this.apiUrl = this.authService.getBackendURL();
+      console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
     }
+  }
 
-    ngOnInit(): void {
-        this.getUser();
+  ngOnInit(): void {
+    this.getUser();
+
+    this.route.queryParams.subscribe((query) => {
+      console.log('create-proposal - query', query);
+      this.org = query.org
+    });
+
+  }
+
+  //retrieve the user from localStorage
+  getUser(): void {
+    if (localStorage.getItem('currentUser')) {
+      console.log(
+        'create proposal - localStorage. currentUser',
+        localStorage.getItem('currentUser')
+      );
+
+      // logged in so return true
+      this.user = JSON.parse(localStorage.getItem('currentUser'));
+      this.userId = this.user.id;
+      this.userEmail = this.user.email;
+    } else {
+      // not logged in - redirect to home?
+      this.router.navigate(['/sign-in']);
     }
+  } // end of getUserName
 
-    //retrieve the user from localStorage
-    getUser(): void {
-        if (localStorage.getItem('currentUser')) {
-            console.log(
-                'localStorage. currentUser',
-                localStorage.getItem('currentUser')
-            );
+  projectTitleChange(): void {
+    console.log('projectTitleChange');
 
-            // logged in so return true
-            this.user = JSON.parse(localStorage.getItem('currentUser'));
-            this.userId = this.user.id;
-            this.userEmail = this.user.email;
-        } else {
-            // not logged in - redirect to home?
-            this.router.navigate(['/sign-in']);
-        }
-    } // end of getUserName
+    this.showMessage = false;
+  }
 
-    projectTitleChange(): void {
-        console.log('projectTitleChange');
+  purposeChange(): void {
+    console.log('purposeChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    purposeChange(): void {
-        console.log('purposeChange');
+  goalsChange(): void {
+    console.log('goalsChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    goalsChange(): void {
-        console.log('goalsChange');
+  narrativeChange(): void {
+    console.log('narrativeChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    // activityChange(): void {
-    //   console.log('activityChange');
+  timeTableChange(): void {
+    console.log('timeTableChange');
 
-    //   this.showMessage = false;
-    // }
+    this.showMessage = false;
+  }
 
-    narrativeChange(): void {
-        console.log('narrativeChange');
+  amountRequestedChange(): void {
+    console.log('amountRequestedChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    timeTableChange(): void {
-        console.log('timeTableChange');
+  itemizedBudgetChange(): void {
+    console.log('itemizedBudgetChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    amountRequestedChange(): void {
-        console.log('amountRequestedChange');
+  totalProjectCostChange(): void {
+    console.log('totalProjectCostChange');
 
-        this.showMessage = false;
-    }
+    this.showMessage = false;
+  }
 
-    itemizedBudgetChange(): void {
-        console.log('itemizedBudgetChange');
+  defaultValues(): void {
+    console.log('default values');
 
-        this.showMessage = false;
-    }
 
-    totalProjectCostChange(): void {
-        console.log('totalProjectCostChange');
+    //proposal information object
+    this.proposalObj = {
+      projectTitle: '',
+      purpose: '',
+      goals: '',
+      narrative: '',
+      timeTable: '',
+      amountRequested: 0,
+      itemizedBudget: '',
+      totalProjectCost: 0,
+    };
 
-        this.showMessage = false;
-    }
+    this.initGroupedForm();
+  }
 
-    defaultValues(): void {
-        console.log('default values');
+  initGroupedForm(): void {
+    console.log('initializing grouped form');
+    console.log('proposal obj - ', this.proposalObj.projectTitle);
 
-        // //proposal information object
-        this.proposalObj = {
-            projectTitle: '',
-            purpose: '',
-            goals: '',
-            activity: 0,
-            narrative: '',
-            timeTable: '',
-            amountRequested: 0,
-            itemizedBudget: '',
-            totalProjectCost: 0,
-        };
+    this.groupedForm = new FormGroup({
+      projectTitle: new FormControl(this.proposalObj.projectTitle),
+      purpose: new FormControl(this.proposalObj.purpose),
+      goals: new FormControl(this.proposalObj.goals),
+      narrative: new FormControl(this.proposalObj.narrative),
+      timeTable: new FormControl(this.proposalObj.timeTable),
+      amountRequested: new FormControl(this.proposalObj.amountRequested,
+        [Validators.required, Validators.min(1)]
+      ),
+      itemizedBudget: new FormControl(this.proposalObj.itemizedBudget),
+      totalProjectCost: new FormControl(this.proposalObj.totalProjectCost,
+        [Validators.required, Validators.min(1)]
+      ),
+    });
+  }
 
-        this.initGroupedForm();
-    }
+  cancel(): void {
+    //route to main/home
+    this.router.navigate(['/welcome']);
+  }
 
-    initGroupedForm(): void {
-        console.log('initializing grouped form');
-        console.log('proposal obj - ', this.proposalObj.projectTitle);
+  createProposal(): void {
+    console.log('creating proposal');
+    this.proposalObj = {
+      projectTitle: this.projectTitle, //changed
+      purpose: this.purpose,
+      goals: this.goals,
+      narrative: this.narrative,
+      timeTable: this.timeTable,
+      amountRequested: this.amountRequested,
+      itemizedBudget: this.itemizedBudget,
+      totalProjectCost: this.totalProjectCost,
+      organization: this.org //mongo id
+    };
 
-        this.groupedForm = new FormGroup({
-            projectTitle: new FormControl(this.projectTitle),
-            purpose: new FormControl(this.proposalObj.purpose),
-            goals: new FormControl(this.proposalObj.goals),
-            activity: new FormControl(this.proposalObj.activity),
-            narrative: new FormControl(this.proposalObj.narrative),
-            timeTable: new FormControl(this.proposalObj.timeTable),
-            amountRequested: new FormControl(this.proposalObj.amountRequested, [
-                Validators.required,
-                Validators.min(1),
-            ]),
-            itemizedBudget: new FormControl(this.proposalObj.itemizedBudget),
-            totalProjectCost: new FormControl(
-                this.proposalObj.totalProjectCost,
-                [Validators.required, Validators.min(1)]
-            ),
-        });
-    }
 
-    cancel(): void {
-        //route to main/home
-        this.router.navigate(['/welcome']);
-    }
-
-    createProposal(): void {
-        console.log('creating proposal');
-        this.proposalObj = {
-            projectTitle: this.projectTitle, //changed
-            purpose: this.purpose,
-            goals: this.goals,
-            activity: this.activity,
-            narrative: this.narrative,
-            timeTable: this.timeTable,
-            amountRequested: this.amountRequested,
-            itemizedBudget: this.itemizedBudget,
-            totalProjectCost: this.totalProjectCost,
-        };
-
-        // call the service
-        this.proposalService.createProposal(this.proposalObj).subscribe(
-            (result) => {
-                console.log('Proposal Info Created', result);
-                this.router.navigate([
-                    `/pages/proposal/${result.proposal.proposalID}`,
-                ]);
-            },
-            (err) => {
-                console.log(err);
-                this.message = err.error.message;
-                this.showMessage = true;
-                setTimeout(() => {
-                    this.showMessage = false;
-                }, 3000);
-            }
-        );
-    }
+    // call the service
+    this.proposalService.createProposal(this.proposalObj).subscribe(
+      (result) => {
+        console.log('Proposal Info Created', result);
+        this.router.navigate([
+          `/pages/proposal/${result.proposalID}`,
+        ]);
+      },
+      (err) => {
+        console.log(err);
+        this.message = err.error.message;
+        this.showMessage = true;
+        setTimeout(() => {
+          this.showMessage = false;
+        }, 3000);
+      }
+    );
+  }
 }

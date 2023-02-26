@@ -13,21 +13,17 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { TranslocoModule } from '@ngneat/transloco';
-
 import { NgApexchartsModule } from 'ng-apexcharts';
-
 import { SharedModule } from 'app/shared/shared.module';
-
 import { EditableModule } from '@ngneat/edit-in-place';
-
 import { OrganizationComponent } from './organization.component';
 import { organizationRoutes } from './organization.routing';
-
 import { OrganizationInfoComponent } from './organization-info/organization-info.component';
-
+import { EditableComponent } from 'app/common/components/editable/editable.component';
 import { CreateOrganizationComponent } from './create-organization/create-organization.component';
+import { OrgProposalsComponent } from './org-proposals/org-proposals.component';
 
 //services
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
@@ -41,10 +37,15 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         PhoneMaskDirective,
         OrganizationComponent,
         OrganizationInfoComponent,
+        EditableComponent,
         CreateOrganizationComponent,
         OrgDoc501c3Component,
+        OrgProposalsComponent,
+
     ],
-    providers: [GetOrganizationService, CreateOrganizationService],
+    providers: [
+        GetOrganizationService, CreateOrganizationService
+    ],
     imports: [
         RouterModule.forChild(organizationRoutes),
         MatButtonModule,
@@ -57,14 +58,18 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         MatSidenavModule,
         MatSortModule,
         MatTableModule,
+        MatPaginatorModule,
         MatTabsModule,
         MatFormFieldModule,
         MatInputModule,
         NgApexchartsModule,
         TranslocoModule,
         SharedModule,
-        EditableModule,
+        EditableModule
     ],
-    exports: [PhoneMaskDirective],
+    exports: [
+        PhoneMaskDirective
+    ]
 })
-export class OrganizationModule {}
+export class OrganizationModule {
+}
