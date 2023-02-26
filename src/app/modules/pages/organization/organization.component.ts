@@ -141,9 +141,12 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         }
     }
 
+    //old
     createProposal(): void {
         console.log('create proposal');
-        this._router.navigate([`/pages/proposal/create`], { queryParams: { org: this.org.id } });
+        this._router.navigate(['/pages/proposal/create'], {
+            queryParams: { org: this.org.id },
+        });
     }
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -181,6 +184,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         // 2. Filter out the ones that doesn't have cross reference so we only left with the ones that use the 'url(#id)' syntax
         // 3. Insert the 'currentURL' at the front of the 'fill' attribute value
         Array.from(element.querySelectorAll('*[fill]'))
+            // eslint-disable-next-line arrow-parens
             .filter((el) => el.getAttribute('fill').indexOf('url(') !== -1)
             .forEach((el) => {
                 const attrVal = el.getAttribute('fill');

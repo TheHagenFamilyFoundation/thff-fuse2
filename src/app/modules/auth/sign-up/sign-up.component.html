@@ -1,5 +1,9 @@
-<div class="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-auto min-w-0">
-    <div class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none sm:bg-card">
+<div
+    class="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-auto min-w-0"
+>
+    <div
+        class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none sm:bg-card"
+    >
         <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
             <!-- Logo -->
             <div>
@@ -9,12 +13,17 @@
             </div>
 
             <!-- Title -->
-            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Sign up</div>
+            <div
+                class="mt-8 text-4xl font-extrabold tracking-tight leading-tight"
+            >
+                Sign up
+            </div>
             <div class="flex items-baseline mt-0.5 font-medium">
                 <div>Already have an account?</div>
                 <a
                     class="ml-1 text-primary-500 hover:underline"
-                    [routerLink]="['/sign-in']">Sign in
+                    [routerLink]="['/sign-in']"
+                    >Sign in
                 </a>
             </div>
 
@@ -25,15 +34,13 @@
                 [appearance]="'outline'"
                 [showIcon]="false"
                 [type]="alert.type"
-                [@shake]="alert.type === 'error'">
-                {{alert.message}}
+                [@shake]="alert.type === 'error'"
+            >
+                {{ alert.message }}
             </fuse-alert>
 
             <!-- Sign Up form -->
-            <form
-                class="mt-8"
-                [formGroup]="signUpForm">
-
+            <form class="mt-8" [formGroup]="signUpForm" #signUpNgForm="ngForm">
                 <!-- Name field -->
                 <!-- <mat-form-field class="w-full">
                     <mat-label>Full name</mat-label>
@@ -49,14 +56,15 @@
                 <!-- Email field -->
                 <mat-form-field class="w-full">
                     <mat-label>Email address</mat-label>
-                    <input
-                        id="email"
-                        matInput
-                        [formControlName]="'email'">
-                    <mat-error *ngIf="signUpForm.get('email').hasError('required')">
+                    <input id="email" matInput [formControlName]="'email'" />
+                    <mat-error
+                        *ngIf="signUpForm.get('email').hasError('required')"
+                    >
                         Email address is required
                     </mat-error>
-                    <mat-error *ngIf="signUpForm.get('email').hasError('email')">
+                    <mat-error
+                        *ngIf="signUpForm.get('email').hasError('email')"
+                    >
                         Please enter a valid email address
                     </mat-error>
                 </mat-form-field>
@@ -69,24 +77,30 @@
                         matInput
                         type="password"
                         [formControlName]="'password'"
-                        #passwordField>
+                        #passwordField
+                    />
                     <button
                         mat-icon-button
                         type="button"
-                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
-                        matSuffix>
+                        (click)="
+                            passwordField.type === 'password'
+                                ? (passwordField.type = 'text')
+                                : (passwordField.type = 'password')
+                        "
+                        matSuffix
+                    >
                         <mat-icon
                             class="icon-size-5"
                             *ngIf="passwordField.type === 'password'"
-                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                            [svgIcon]="'heroicons_solid:eye'"
+                        ></mat-icon>
                         <mat-icon
                             class="icon-size-5"
                             *ngIf="passwordField.type === 'text'"
-                            [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
+                            [svgIcon]="'heroicons_solid:eye-off'"
+                        ></mat-icon>
                     </button>
-                    <mat-error>
-                        Password is required
-                    </mat-error>
+                    <mat-error> Password is required </mat-error>
                 </mat-form-field>
 
                 <!-- Company field -->
@@ -122,20 +136,23 @@
                     mat-flat-button
                     [color]="'primary'"
                     [disabled]="signUpForm.disabled"
-                    (click)="signUp()">
+                    (click)="signUp()"
+                >
                     <span *ngIf="!signUpForm.disabled">
                         Create your account
                     </span>
                     <mat-progress-spinner
                         *ngIf="signUpForm.disabled"
                         [diameter]="24"
-                        [mode]="'indeterminate'"></mat-progress-spinner>
+                        [mode]="'indeterminate'"
+                    ></mat-progress-spinner>
                 </button>
-
             </form>
         </div>
     </div>
-    <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-darkgray dark:border-l">
+    <div
+        class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-darkgray dark:border-l"
+    >
         <!-- Background - @formatter:off -->
         <!-- Rings -->
         <!-- <svg class="absolute inset-0 pointer-events-none"
@@ -163,7 +180,9 @@
                 <div>The Hagen Family Foundation</div>
             </div>
             <div class="mt-6 text-lg tracking-tight leading-6 text-lightgray">
-                The Hagen Family Foundation provides financial grants to not-for-profit organizations in the areas of the arts, education, environment, religion, and social services.
+                The Hagen Family Foundation provides financial grants to
+                not-for-profit organizations in the areas of the arts,
+                education, environment, religion, and social services.
             </div>
         </div>
     </div>
