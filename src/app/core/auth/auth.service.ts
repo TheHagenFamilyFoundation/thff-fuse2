@@ -112,6 +112,9 @@ export class AuthService {
             return throwError('User is already logged in.');
         }
 
+        console.log('creds', credentials);
+        console.log('this.apiUrl', this.apiUrl);
+
         return this._httpClient
             .put(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
