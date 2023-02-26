@@ -52,6 +52,8 @@ export class AuthInterceptor implements HttpInterceptor {
             });
         }
 
+        console.log('after check');
+
         // Response
         return next.handle(newReq).pipe(
             catchError((error) => {
