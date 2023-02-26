@@ -483,10 +483,10 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         this._proposalService.updateProposal(this.proposalID, body).subscribe(
             (result) => {
                 console.log('Proposal updated', result);
-                this.proposal = result;
+                this.proposal = result.proposal;
 
                 console.log(
-                    'new this.orgInfo.organizationInfoID',
+                    'new this.proposal.proposalID',
                     this.proposal.proposalID
                 );
 
@@ -524,7 +524,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
             .subscribe(
                 (result) => {
                     console.log('Proposal updated', result);
-                    this.propObj = result.info;
+                    this.propObj = result.proposal;
 
                     // this.refreshProp.emit(true);
                     this.resetFormValues();
