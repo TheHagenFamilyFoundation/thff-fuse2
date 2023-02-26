@@ -388,8 +388,8 @@ export class CreateOrganizationComponent implements OnInit {
         //     zip: 32323,
         //     website: '',
         // };
-
-        this.description = 'testing description';
+        //part of testing too
+        // this.description = 'testing description';
 
         this.initGroupedForm();
     }

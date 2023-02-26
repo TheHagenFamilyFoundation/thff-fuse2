@@ -1,32 +1,40 @@
-
-      <div *ngIf="!HasUpload501c3">
-        <input type="file" (change)="fileChange($event)" placeholder="Upload file" accept=".pdf,.doc,.docx">
-        <div *ngIf="CanUpload501c3 && !Submitted">
-          <div align="center">
+<div *ngIf="!hasUpload501c3">
+    <input
+        type="file"
+        (change)="fileChange($event)"
+        placeholder="Upload file"
+        accept=".pdf,.doc,.docx"
+    />
+    <div *ngIf="canUpload501c3 && !submitted">
+        <div align="center">
             <button mat-raised-button (click)="upload()">Upload</button>
-          </div>
         </div>
-        <div *ngIf="Submitted">
-          <!-- <mat-spinner></mat-spinner> -->
-        </div>
-      </div>
-      <div *ngIf="HasUpload501c3">
-        <button mat-raised-button (click)="get501c3()">View 501c3</button>
-        <button mat-raised-button (click)="delete501c3check()">Delete 501c3</button>
-      </div>
-      <div>
-        <h4>Status</h4>
-        <div>{{outputStatus}}</div>
-        <div *ngIf="Rejected501c3">
-          <div>
-            Please upload another.
-          </div>
-          <input type="file" (change)="fileChange($event)" placeholder="Upload file" accept=".pdf,.doc,.docx">
-          <div *ngIf="CanUpload501c3">
+    </div>
+    <div *ngIf="submitted">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>
+<div *ngIf="hasUpload501c3">
+    <button mat-raised-button (click)="get501c3()">View 501c3</button>
+    <button mat-raised-button (click)="uploadNew501c3()">
+        Upload new 501c3
+    </button>
+</div>
+<div>
+    <h4>Status</h4>
+    <div>{{ outputStatus }}</div>
+    <div *ngIf="rejected501c3">
+        <div>Please upload another.</div>
+        <input
+            type="file"
+            (change)="fileChange($event)"
+            placeholder="Upload file"
+            accept=".pdf,.doc,.docx"
+        />
+        <div *ngIf="canUpload501c3">
             <div align="center">
-              <button mat-raised-button (click)="uploadReplacement()">Upload</button>
+                <button mat-raised-button (click)="upload()">Upload</button>
             </div>
-          </div>
         </div>
-      </div>
- 
+    </div>
+</div>
