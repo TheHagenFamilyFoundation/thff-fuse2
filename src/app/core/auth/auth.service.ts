@@ -30,7 +30,8 @@ export class AuthService {
             console.log('production env', environment.production);
             this.apiUrl = environment.apiUrl;
         } else {
-            this.initializeBackendURL().subscribe(() => {
+            this.initializeBackendURL().subscribe((url) => {
+                console.log('url', url);
                 console.log('initialize backend');
                 console.log('this.getBackendURL()', this.getBackendURL());
                 // this.apiUrl = this.getBackendURL();
