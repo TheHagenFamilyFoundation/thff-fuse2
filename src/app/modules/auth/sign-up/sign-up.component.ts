@@ -82,8 +82,7 @@ export class AuthSignUpComponent implements OnInit {
                 this.signUpForm.enable();
 
                 // Reset the form
-                //TODO take another look
-                // this.signUpNgForm.resetForm();
+                this.signUpNgForm.resetForm();
 
                 // Set the alert
                 this.alert = {

@@ -1,14 +1,23 @@
 /* eslint-disable arrow-parens */
-import { Route } from '@angular/router';
-import { AuthGuard } from 'app/core/auth/guards/auth.guard';
-import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
+import { NgModule, InjectionToken } from '@angular/core';
+import { RouterModule, Routes, ActivatedRouteSnapshot } from '@angular/router';
+
 import { LayoutComponent } from 'app/layout/layout.component';
 import { InitialDataResolver } from 'app/app.resolvers';
+
+// guards
+import { AuthGuard } from 'app/core/auth/guards/auth.guard';
+import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
+
+// Utility
+import { NotFoundComponent } from './core/utilities/not-found/not-found.component';
+
+const externalUrlProvider = new InjectionToken('externalUrlRedirectResolver');
 
 // @formatter:off
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-export const appRoutes: Route[] = [
+export const appRoutes: Routes = [
     // Redirect empty path to '/example'
     { path: '', pathMatch: 'full', redirectTo: 'welcome' },
 
@@ -152,44 +161,15 @@ export const appRoutes: Route[] = [
                     ),
                 // loadChildren: () => import(''./main/pages/pages.module').then((m) => m.PagesModule),
             },
-            // {
-            //     path: 'pages',
-            //     children: [
-            //         // Profile
-            //         {
-            //             path: 'profile',
-            //             loadChildren: () =>
-            //                 import(
-            //                     'app/modules/admin/pages/profile/profile.module'
-            //                 ).then(m => m.ProfileModule),
-            //         },
-            //         // // Organization
-            //         // {
-            //         //     path: 'organization/:id',
-            //         //     loadChildren: () =>
-            //         //         import(
-            //         //             'app/modules/admin/pages/organization/organization.module'
-            //         //         ).then((m) => m.OrganizationModule),
-            //         // },
-            //         // Project
-            //         {
-            //             path: 'organization/:id',
-            //             loadChildren: () =>
-            //                 import(
-            //                     'app/modules/admin/pages/organization/organization.module'
-            //                 ).then(m => m.OrganizationModule),
-            //         },
-            //         // Settings
-            //         {
-            //             path: 'settings',
-            //             loadChildren: () =>
-            //                 import(
-            //                     'app/modules/admin/pages/settings/settings.module'
-            //                 ).then(m => m.SettingsModule),
-            //         },
-            //     ],
-            // },
         ],
+    },
+    {
+        path: 'externalRedirect',
+        resolve: {
+            url: externalUrlProvider,
+        },
+        // We need a component here because we cannot define the route otherwise
+        component: NotFoundComponent,
     },
     {
         path: '**',
@@ -197,7 +177,8 @@ export const appRoutes: Route[] = [
     },
 ];
 
-export const appHomeRoutes: Route[] = [
+//maintenance
+export const appHomeRoutes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'home' },
     // Landing routes
     {
@@ -222,3 +203,20 @@ export const appHomeRoutes: Route[] = [
         redirectTo: 'home',
     },
 ];
+
+@NgModule({
+    imports: [RouterModule.forRoot(appRoutes)],
+    exports: [RouterModule],
+    providers: [
+        {
+            provide: externalUrlProvider,
+            useValue: (route: ActivatedRouteSnapshot) => {
+                const externalUrl = route.paramMap.get('externalUrl');
+                // window.open(externalUrl, '_self');//self for same window
+                //bank for new tab
+                window.open(externalUrl, '_blank');
+            },
+        },
+    ],
+})
+export class AppRoutingModule {}

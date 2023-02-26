@@ -12,26 +12,30 @@ import { appConfig } from 'app/core/config/app.config';
 import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
-// import { appHomeRoutes, appRoutes } from 'app/app.routing';
-import { appRoutes } from 'app/app.routing';
 
 import { EditableModule } from '@ngneat/edit-in-place';
 
-const routerConfig: ExtraOptions = {
-    preloadingStrategy: PreloadAllModules,
-    scrollPositionRestoration: 'enabled',
-};
+import { AppRoutingModule } from './app-routing.module';
+
+import { NotFoundComponent } from './core/utilities/not-found/not-found.component';
+
+// const routerConfig: ExtraOptions = {
+//     preloadingStrategy: PreloadAllModules,
+//     scrollPositionRestoration: 'enabled',
+// };
 
 @NgModule({
-    declarations: [AppComponent],
+    declarations: [AppComponent, NotFoundComponent],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
 
+        AppRoutingModule,
+
         FormsModule,
         ReactiveFormsModule,
 
-        RouterModule.forRoot(appRoutes, routerConfig),
+        // RouterModule.forRoot(appRoutes, routerConfig),
         // RouterModule.forRoot(appHomeRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI

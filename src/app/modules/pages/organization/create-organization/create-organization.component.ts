@@ -354,42 +354,42 @@ export class CreateOrganizationComponent implements OnInit {
         // this.description = '';
 
         // //org information object
-        // this.orgObj = {
-        //   legalName :'',
-        //   yearFounded: 0,
-        //   currentOperatingBudget: 0,
-        //   director: '',
-        //   phone: '',
-        //   contactPerson: '',
-        //   contactPersonTitle: '',
-        //   contactPersonPhoneNumber: '',
-        //   email: '',
-        //   address: '',
-        //   city: '',
-        //   state: '',
-        //   zip: 0,
-        //   website: ''
-        //   };
-
-        /*********** Testing *********/
         this.orgObj = {
-            legalName: 'Test Organization 61',
-            yearFounded: 2023,
-            currentOperatingBudget: 1,
-            director: 'test',
-            phone: '1231233211',
-            contactPerson: 'test',
-            contactPersonTitle: 'test title',
-            contactPersonPhoneNumber: '1231233211',
-            email: 'test@mailinator.com',
-            address: '123 all street',
-            city: 'test',
-            state: 'fl',
-            zip: 32323,
+            legalName: '',
+            yearFounded: 0,
+            currentOperatingBudget: 0,
+            director: '',
+            phone: '',
+            contactPerson: '',
+            contactPersonTitle: '',
+            contactPersonPhoneNumber: '',
+            email: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: 0,
             website: '',
         };
 
-        this.description = 'testing description';
+        /*********** Testing *********/
+        // this.orgObj = {
+        //     legalName: 'Test Organization 61',
+        //     yearFounded: 2023,
+        //     currentOperatingBudget: 1,
+        //     director: 'test',
+        //     phone: '1231233211',
+        //     contactPerson: 'test',
+        //     contactPersonTitle: 'test title',
+        //     contactPersonPhoneNumber: '1231233211',
+        //     email: 'test@mailinator.com',
+        //     address: '123 all street',
+        //     city: 'test',
+        //     state: 'fl',
+        //     zip: 32323,
+        //     website: '',
+        // };
+        //part of testing too
+        // this.description = 'testing description';
 
         this.initGroupedForm();
     }
@@ -421,7 +421,6 @@ export class CreateOrganizationComponent implements OnInit {
             website: new FormControl(this.orgObj.website),
         });
     }
-
 
     createOrg(): void {
         console.log('creating organization');
