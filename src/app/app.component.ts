@@ -19,11 +19,6 @@ export class AppComponent implements OnInit {
         try {
             this.authService.initializeBackendURL().subscribe((backend) => {
                 console.log('backend', backend);
-                console.log('initialize backend');
-                console.log(
-                    'this.getBackendURL()',
-                    this.authService.getBackendURL()
-                );
                 // console.log('auth-service - this.apiUrl', this.apiUrl);
                 sessionStorage.setItem('backend_url', backend.url);
                 //set auth service
