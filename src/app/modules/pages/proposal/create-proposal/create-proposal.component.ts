@@ -17,7 +17,7 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-create-proposal',
@@ -27,7 +27,9 @@ import { Router } from '@angular/router';
 export class CreateProposalComponent implements OnInit {
   apiUrl: string;
 
-  //org object
+  //TODO: Type Organization id - mongo
+  org: any;
+
   proposalObj: any;
 
   projectTitle$ = new Subject<string>();
@@ -80,7 +82,8 @@ export class CreateProposalComponent implements OnInit {
     fb: FormBuilder,
     private proposalService: ProposalService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.projectTitle$
       .pipe(debounceTime(400), distinctUntilChanged())
@@ -150,13 +153,19 @@ export class CreateProposalComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUser();
+
+    this.route.queryParams.subscribe((query) => {
+      console.log('create-proposal - query', query);
+      this.org = query.org
+    });
+
   }
 
   //retrieve the user from localStorage
   getUser(): void {
     if (localStorage.getItem('currentUser')) {
       console.log(
-        'localStorage. currentUser',
+        'create proposal - localStorage. currentUser',
         localStorage.getItem('currentUser')
       );
 
@@ -273,14 +282,16 @@ export class CreateProposalComponent implements OnInit {
       amountRequested: this.amountRequested,
       itemizedBudget: this.itemizedBudget,
       totalProjectCost: this.totalProjectCost,
+      organization: this.org //mongo id
     };
+
 
     // call the service
     this.proposalService.createProposal(this.proposalObj).subscribe(
       (result) => {
         console.log('Proposal Info Created', result);
         this.router.navigate([
-          `/pages/proposal/${result.proposal.proposalID}`,
+          `/pages/proposal/${result.proposalID}`,
         ]);
       },
       (err) => {

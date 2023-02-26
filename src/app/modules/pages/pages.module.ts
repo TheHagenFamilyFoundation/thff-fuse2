@@ -52,4 +52,4 @@ import { ProposalsComponent } from './proposals/proposals.component';
     ],
     declarations: [OrganizationsComponent, ProposalsComponent],
 })
-export class PagesModule {}
+export class PagesModule { }

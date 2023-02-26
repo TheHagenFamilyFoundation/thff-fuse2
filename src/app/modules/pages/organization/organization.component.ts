@@ -141,6 +141,10 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         }
     }
 
+    createProposal(): void {
+        console.log('create proposal');
+        this._router.navigate([`/pages/proposal/create`], { queryParams: { org: this.org.id } });
+    }
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------

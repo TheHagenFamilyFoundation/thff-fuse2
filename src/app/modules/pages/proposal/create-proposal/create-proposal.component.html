@@ -11,6 +11,7 @@
                                 class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
                                 Create Proposal
                             </div>
+                            TEST: Creating Proposal for {{org}}
                         </ng-container>
                     </div>
                 </div>
@@ -34,13 +35,13 @@
                                 <label class="block tracking-wide text-sm mb-2" for="grid-project-title">
                                     Project Title
                                 </label>
-                                <mat-form-field style="width: 100%">
-                                    <textarea class="resize-none" matInput placeholder="Project Title"
-                                        formControlName="projectTitle" value="{{ projectTitle }}" required (keyup)="
+                                <mat-form-field class="projectTitle" style="width: 100%">
+                                    <input matInput formControlName="projectTitle" placeholder="Project Title"
+                                        currencyMask required value="{{ projectTitle }}" (keyup)="
                                             projectTitle$.next(
                                                 $event.target.value
                                             )
-                                        "></textarea>
+                                        " />
                                     <mat-error *ngIf="
                                             groupedForm
                                                 .get('projectTitle')
@@ -69,7 +70,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-goals">
                                     Describe the specific goals and/or intended
                                     outcomes of your project:
@@ -101,7 +102,7 @@
                             </div>
                         </div> -->
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-narrative">
                                     Provide a detailed project narrative that addresses the following questions, if
                                     relevant.
@@ -124,7 +125,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-timeTable">
                                     Provide a timetable for your project.
                                 </label>
@@ -141,7 +142,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-amountRequested">
                                     Amount Requested
                                 </label>
@@ -172,7 +173,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3 mb-6 md:mb-0">
                                 <label class="block tracking-wide text-sm mb-2" for="grid-itemizedBudget">
                                     Explain how the budget will be allocated
                                     across different expense items (e.g.,
