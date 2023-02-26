@@ -23,25 +23,24 @@ export class AuthService {
         private _httpClient: HttpClient,
         private _userService: UserService
     ) {
-        console.log('auth service constructor');
-        console.log('auth service - environment', environment);
-
-        if (!environment.production) {
-            console.log('production env', environment.production);
-            this.apiUrl = environment.apiUrl;
-        } else {
-            try {
-                this.initializeBackendURL().subscribe((url) => {
-                    console.log('url', url);
-                    console.log('initialize backend');
-                    console.log('this.getBackendURL()', this.getBackendURL());
-                    // this.apiUrl = this.getBackendURL();
-                    // console.log('auth-service - this.apiUrl', this.apiUrl);
-                });
-            } catch (e) {
-                console.error(e);
-            }
-        }
+        // console.log('auth service constructor');
+        // console.log('auth service - environment', environment);
+        // if (!environment.production) {
+        //     console.log('production env', environment.production);
+        //     this.apiUrl = environment.apiUrl;
+        // } else {
+        //     try {
+        //         this.initializeBackendURL().subscribe((url) => {
+        //             console.log('url', url);
+        //             console.log('initialize backend');
+        //             console.log('this.getBackendURL()', this.getBackendURL());
+        //             // this.apiUrl = this.getBackendURL();
+        //             // console.log('auth-service - this.apiUrl', this.apiUrl);
+        //         });
+        //     } catch (e) {
+        //         console.error(e);
+        //     }
+        // }
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -262,8 +261,11 @@ export class AuthService {
         return this.signInUsingToken();
     }
 
+    setBackendURL(): void {
+        this.apiUrl = sessionStorage.getItem('backend_url');
+    }
     getBackendURL(): string {
-        return sessionStorage.getItem('backend_url');
+        return this.apiUrl;
     }
 
     initializeBackendURL(): Observable<any> {
@@ -274,6 +276,10 @@ export class AuthService {
                 `${window.location.origin}/backend`
             );
             return this._httpClient.get(`${window.location.origin}/backend`);
+        } else {
+            console.log('production env', environment.production);
+            this.apiUrl = environment.apiUrl;
+            return of(true);
         }
     }
 }
