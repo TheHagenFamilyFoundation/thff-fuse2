@@ -1,13 +1,7 @@
 <div class="flex flex-col items-center justify-center w-full h-full bg-white">
     <div class="w-full max-w-3xl">
         <div class="max-w-none mx-auto prose prose-sm">
-            <img
-                class="w-50"
-                src="assets/images/logo/logo_2020_9.svg"
-                width="150px"
-                height="150px"
-                alt="Logo image"
-            />
+            <img class="myImg" src="assets/images/logo/logo_2020_9.svg" alt="Logo image" />
             <p>
                 The Hagen Family Foundation provides financial grants to
                 not-for-profit organizations around the world in the areas of the arts,education,
@@ -19,23 +13,13 @@
             </p> -->
         </div>
         <div>
-            <img
-                src="assets/images/grant_review_timeline.png"
-                alt="timeline image"
-            />
+            <!-- <img src="assets/images/grant_review_timeline.jpg" alt="timeline image" height="90" /> -->
+            <img src="assets/images/grant_review_timeline.jpg" class="myImg2" alt="timeline image" />
         </div>
         <div>
-            <a
-                class="mt-8"
-                mat-flat-button
-                [color]="'primary'"
-                [routerLink]="'/sign-in'"
-            >
+            <a class="mt-8" mat-flat-button [color]="'primary'" [routerLink]="'/sign-in'">
                 <span>Sign in here</span>
-                <mat-icon
-                    class="ml-2 icon-size-5"
-                    [svgIcon]="'heroicons_solid:arrow-narrow-right'"
-                ></mat-icon>
+                <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
             </a>
         </div>
     </div>

@@ -41,4 +41,5 @@
 </div>
 <button mat-button color="primary" (click)="createProposal()" fxHide="false">
     <mat-icon>add</mat-icon> Create Proposal
+    <div *ngIf="org"><app-create-proposal [org]="org"></app-create-proposal></div>
 </button>

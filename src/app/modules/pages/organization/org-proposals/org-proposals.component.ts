@@ -77,7 +77,7 @@ export class OrgProposalsComponent implements OnInit {
 
     createProposal(): void {
         console.log('create proposal');
-        this._router.navigate(['/pages/proposal/create']);
+        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org.id } });
     }
     goToProposal(proposalID: string): void {
         this._router.navigate(['/pages/proposal/', proposalID]);
