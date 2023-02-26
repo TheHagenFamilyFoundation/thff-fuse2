@@ -1,0 +1,48 @@
+<div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full min-w-0"
+>
+    <ng-container *ngFor="let member of data.teamMembers">
+        <div
+            class="flex flex-col flex-auto items-center bg-card shadow rounded-2xl overflow-hidden"
+        >
+            <!-- Avatar & Info -->
+            <div class="flex flex-col flex-auto w-full p-8 text-center">
+                <div class="w-32 h-32 mx-auto rounded-full overflow-hidden">
+                    <img
+                        class="w-full h-full object-cover"
+                        [src]="member.avatar"
+                    />
+                </div>
+                <div class="mt-6 font-medium">{{ member.name }}</div>
+                <div class="text-secondary">{{ member.title }}</div>
+            </div>
+            <!-- Email & Phone -->
+            <div class="flex items-center w-full border-t divide-x">
+                <a
+                    class="flex flex-auto items-center justify-center py-4 hover:bg-hover"
+                    [href]="'mailto:' + member.email"
+                >
+                    <mat-icon
+                        class="icon-size-5 text-hint"
+                        [svgIcon]="
+                        'heroicons_solid:mail'
+                    "
+                    ></mat-icon>
+                    <span class="ml-2">Email</span>
+                </a>
+                <a
+                    class="flex flex-auto items-center justify-center py-4 hover:bg-hover"
+                    [href]="'tel:' + member.phone"
+                >
+                    <mat-icon
+                        class="icon-size-5 text-hint"
+                        [svgIcon]="
+                        'heroicons_solid:phone'
+                    "
+                    ></mat-icon>
+                    <span class="ml-2">Call</span>
+                </a>
+            </div>
+        </div>
+    </ng-container>
+</div>

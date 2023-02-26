@@ -76,6 +76,8 @@ export class AuthSignUpComponent implements OnInit {
                 this._router.navigateByUrl('/confirmation-required');
             },
             (response) => {
+                console.log('signing up - response', response);
+
                 // Re-enable the form
                 this.signUpForm.enable();
 
@@ -85,7 +87,7 @@ export class AuthSignUpComponent implements OnInit {
                 // Set the alert
                 this.alert = {
                     type: 'error',
-                    message: 'Something went wrong, please try again.',
+                    message: response.error.message,
                 };
 
                 // Show the alert

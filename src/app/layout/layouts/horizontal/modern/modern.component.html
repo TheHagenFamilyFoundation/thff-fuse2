@@ -1,29 +1,6 @@
 <!-- Loading bar -->
 <fuse-loading-bar></fuse-loading-bar>
 
-<!-- Navigation -->
-<!-- TODO screen too small nav -->
-<ng-container *ngIf="isScreenSmall">
-    <!-- <fuse-vertical-navigation
-        class="dark bg-gray-900 print:hidden"
-        [mode]="'over'"
-        [name]="'mainNavigation'"
-        [navigation]="navigation.default"
-        [opened]="false"> -->
-    <!-- Navigation header hook -->
-    <ng-container fuseVerticalNavigationContentHeader>
-        <!-- Logo -->
-        <div class="flex items-center h-20 pt-6 px-8">
-            <img
-                class="w-24"
-                src="assets/images/logo/logo-text-on-dark.svg"
-                alt="Logo image"
-            />
-        </div>
-    </ng-container>
-    <!-- </fuse-vertical-navigation> -->
-</ng-container>
-
 <!-- Wrapper -->
 <div class="flex flex-col flex-auto w-full min-w-0">
     <!-- Header -->
@@ -46,27 +23,29 @@
                     <mat-icon>home</mat-icon>
                 </button>
                 <div *ngIf="isLoggedIn">
-                    <div *ngIf="!inOrganization">
-                        <button
-                            mat-button
-                            routerLink="pages/create-organization"
-                            fxHide="false"
-                        >
-                            Create Organization
-                        </button>
-                    </div>
                     <div *ngIf="inOrganization">
-                        <button mat-button [matMenuTriggerFor]="orgMenu">
+                        <!-- <button mat-button [matMenuTriggerFor]="orgMenu">
+                            Organizations
+                        </button> -->
+                        <button mat-button routerLink="/pages/organizations">
                             Organizations
                         </button>
-                        <mat-menu #orgMenu="matMenu">
+                        <!-- <mat-menu #orgMenu="matMenu">
                             <button mat-menu-item (click)="viewOrgs()">
                                 View Organizations
                             </button>
                             <button mat-menu-item (click)="createOrg()">
                                 Create Organization
                             </button>
-                        </mat-menu>
+                        </mat-menu> -->
+                    </div>
+                    <div *ngIf="!inOrganization">
+                        <button
+                            mat-button
+                            routerLink="/pages/organization/create"
+                        >
+                            Create Organization
+                        </button>
                     </div>
                 </div>
                 <div *ngIf="isLoggedIn && _directorService.isDirector()">

@@ -1,0 +1,145 @@
+<div class="w-full max-w-3xl">
+    <!-- Scheme -->
+    <div class="text-md font-semibold text-secondary">SCHEME</div>
+    <div id="alert" *ngIf="showAlert">
+        <!-- {{alert.message}} -->
+        <!-- 
+        <fuse-alert
+        class="mt-8 -mb-4"
+        *ngIf="showAlert"
+        [appearance]="'outline'"
+        [showIcon]="false"
+        [type]="alert.type"
+        [@shake]="alert.type === 'error'">
+        {{alert.message}}
+    </fuse-alert> -->
+    </div>
+
+    <!-- Alert -->
+
+    <!-- Form -->
+    <!-- <form [formGroup]="accountForm"> -->
+    <!-- <form
+        class="mt-8"
+        [formGroup]="saveSettingsForm"
+        #saveSettingsNgForm="ngForm"
+        > -->
+    <!-- Section -->
+    <div class="w-full">
+        <!-- TODO: dark mode looks horrible -->
+        <div class="text-xl">Dark Mode Toggle - Broken</div>
+        <!-- <div class="text-secondary">Communication details in case we want to connect with you. These will be kept private.</div> -->
+    </div>
+
+    <div class="grid grid-cols-3 gap-3 justify-items-start mt-6">
+        <!-- <form [formGroup]="saveSettingsForm" (ngSubmit)="saveScheme()">
+           
+                <div class="form-group">
+                    <label for="scheme">Scheme:</label>
+
+                    <mat-radio-group formControlName="scheme">
+                        <mat-radio-button value="light" [checked]="config.scheme === 'light'"> Light </mat-radio-button>
+                        <mat-radio-button value="dark" [checked]="config.scheme === 'dark'"> Dark </mat-radio-button>
+                      </mat-radio-group>
+
+                </div> -->
+        <!--                 
+                <button
+                class="ml-4"
+                mat-flat-button
+                type="submit"
+                [color]="'primary'"
+                [disabled]="saveSettingsForm.disabled">Save Scheme</button> -->
+
+        <!-- </form> -->
+
+        <!-- </div>
+            <div class="grid grid-cols-3 gap-3 justify-items-start mt-6"> -->
+
+        <!-- Divider -->
+        <!-- <div class="mt-11 mb-10 border-t"></div> -->
+
+        <!-- Auto -->
+        <!-- <div
+            class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
+            [class.ring-2]="config.scheme === 'auto'"
+            matTooltip="Automatically sets the scheme based on user's operating system's color scheme preference using 'prefer-color-scheme' media query."
+            (click)="setScheme('auto')">
+            <div class="flex items-center rounded-full overflow-hidden">
+                <mat-icon
+                    class="icon-size-5"
+                    [svgIcon]="'heroicons_solid:lightning-bolt'"></mat-icon>
+            </div>
+            <div
+                class="flex items-center ml-2 font-medium leading-5"
+                [class.text-secondary]="config.scheme !== 'auto'">
+                Auto
+            </div>
+        </div> -->
+        <!-- Dark -->
+        <div
+            class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
+            [class.ring-2]="config.scheme === 'dark'"
+            (click)="setScheme('dark')"
+        >
+            <div class="flex items-center rounded-full overflow-hidden">
+                <mat-icon
+                    class="icon-size-5"
+                    [svgIcon]="'heroicons_solid:moon'"
+                ></mat-icon>
+            </div>
+            <div
+                class="flex items-center ml-2 font-medium leading-5"
+                [class.text-secondary]="config.scheme !== 'dark'"
+            >
+                Dark
+            </div>
+        </div>
+        <!-- Light -->
+        <div
+            class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
+            [class.ring-2]="config.scheme === 'light'"
+            (click)="setScheme('light')"
+        >
+            <div class="flex items-center rounded-full overflow-hidden">
+                <mat-icon
+                    class="icon-size-5"
+                    [svgIcon]="'heroicons_solid:sun'"
+                ></mat-icon>
+            </div>
+            <div
+                class="flex items-center ml-2 font-medium leading-5"
+                [class.text-secondary]="config.scheme !== 'light'"
+            >
+                Light
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mt-11 mb-10 border-t"></div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end">
+            <button
+                class="ml-4"
+                mat-flat-button
+                type="button"
+                [color]="'primary'"
+                [disabled]="!toggledScheme"
+                (click)="saveScheme()"
+            >
+                Save
+                <!-- <span *ngIf="!saveSettingsForm.disabled">
+                Save
+            </span> -->
+                <mat-progress-spinner
+                    *ngIf="saveSettingsForm.disabled"
+                    [diameter]="24"
+                    [mode]="'indeterminate'"
+                ></mat-progress-spinner>
+            </button>
+        </div>
+        <!-- </div> -->
+        <!-- </form> -->
+    </div>
+</div>

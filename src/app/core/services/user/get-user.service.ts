@@ -24,7 +24,6 @@ export class GetUserService {
         }
     }
 
-    // maybe make a getUser by ID
     getUserbyUsername(username: string): Observable<any> {
         this.getBackendURL();
 
@@ -92,6 +91,7 @@ export class GetUserService {
         return this.http.get(urlString);
     }
 
+    //possibly move to organization service
     getOrgUsers(orgID: string): Observable<any> {
         this.getBackendURL();
 

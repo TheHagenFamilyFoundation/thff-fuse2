@@ -2,3 +2,58 @@
 /*  @ Import/write your custom styles here.
 /*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
+@media (min-width: 640px) {
+
+    .myImg {
+        max-width: 150px;
+        max-height: 150px;
+    }
+
+    .myImg2 {
+        max-width: 500px;
+        max-height: 500px;
+    }
+
+}
+
+@media (min-width: 768px) {
+
+    .myImg {
+        max-width: 150px;
+        max-height: 150px;
+    }
+
+    .myImg2 {
+        max-width: 500px;
+        max-height: 500px;
+    }
+
+}
+
+@media (min-width: 1024px) {
+
+    .myImg {
+        max-width: 300px;
+        max-height: 300px;
+    }
+
+    .myImg2 {
+        max-width: 700px;
+        max-height: 700px;
+    }
+
+}
+
+@media (min-width: 1200px) {
+
+    .myImg {
+        max-width: 300px;
+        max-height: 300px;
+    }
+
+    .myImg2 {
+        max-width: 700px;
+        max-height: 700px;
+    }
+
+}
