@@ -19,7 +19,7 @@ const externalUrlProvider = new InjectionToken('externalUrlRedirectResolver');
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const appRoutes: Routes = [
     // Redirect empty path to '/example'
-    { path: '', pathMatch: 'full', redirectTo: 'welcome' },
+    { path: '', pathMatch: 'full', redirectTo: 'home' },
 
     // Redirect signed in user to the '/example'
     //
@@ -173,7 +173,7 @@ export const appRoutes: Routes = [
     },
     {
         path: '**',
-        redirectTo: 'sign-in',
+        redirectTo: 'home',
     },
 ];
 
