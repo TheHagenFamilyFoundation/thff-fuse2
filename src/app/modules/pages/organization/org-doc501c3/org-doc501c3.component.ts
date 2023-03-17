@@ -115,49 +115,23 @@ export class OrgDoc501c3Component implements OnInit {
 
         this.submitted = true;
 
-        // call the delete 501c3 service
-        this.delete501c3Service.delete501c3byOrgID(this.orgID).subscribe(() => {
-            this.upload501c3Service
-                .upload501c3(this.file, this.orgID)
-                .subscribe(
-                    (result) => {
-                        console.log('result', result);
-
-                        if (result.body) {
-                            console.log('result has body');
-
-                            const body = {
-                                url: result.body.files[0].extra.Location,
-                                fileName: result.body.files[0].fd,
-                                organization: this.organizationID,
-                                orgID: this.orgID,
-                            };
-
-                            this.create501c3Service.create501c3(body).subscribe(
-                                (result2) => {
-                                    console.log('result2', result2);
-
-                                    if (result2.body) {
-                                        console.log('result has body');
-                                    }
-                                    // refresh the organization
-                                    this.getOrganization(this.orgID);
-                                    this.submitted = false;
-                                },
-                                (err) => {
-                                    console.log(err);
-                                    this.submitted = false;
-                                }
-                            );
-                        }
-                    },
-                    (err) => {
-                        console.log(err);
-                        this.submitted = false;
-                    }
-                );
-        });
+        //call upload service
+        //backend deletes object and creates
+        //backend does all the logic
+        //just pass the file to backend
+        this.upload501c3Service.upload501c3(this.file, this.orgID).subscribe(
+            (result) => {
+                console.log('result', result);
+                this.submitted = false;
+                this.getOrganization(this.orgID);
+            },
+            (err) => {
+                console.log(err);
+                this.submitted = false;
+            }
+        );
     }
+
     delete501c3(): void {
         console.log('deleting 501c3');
 
