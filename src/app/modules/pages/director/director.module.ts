@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TranslocoModule } from '@ngneat/transloco';
 import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,9 +16,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DirectorComponent } from './director.component';
 
 import { directorRoutes } from './director.routing';
+import { OrganizationsComponent } from './organizations/organizations.component';
+import { ProposalsComponent } from './proposals/proposals.component';
+import { VotingComponent } from './voting/voting.component';
 
 @NgModule({
-    declarations: [DirectorComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -32,8 +34,7 @@ import { directorRoutes } from './director.routing';
         MatInputModule,
         MatMenuModule,
         MatTooltipModule,
-        MatTableModule,
-        TranslocoModule,
+        MatTableModule
     ],
 })
 export class DirectorModule {}
