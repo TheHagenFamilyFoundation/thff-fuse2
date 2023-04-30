@@ -34,7 +34,7 @@ import { VotingComponent } from './voting/voting.component';
         MatInputModule,
         MatMenuModule,
         MatTooltipModule,
-        MatTableModule
+        MatTableModule,
     ],
 })
-export class DirectorModule {}
+export class DirectorModule { }

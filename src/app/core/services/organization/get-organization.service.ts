@@ -39,8 +39,16 @@ export class GetOrganizationService {
     return this.http.get(urlString);
   }
 
+  //TODO: old
+  // want to remove
   getAllOrgs(): Observable<any> {
     const urlString = `${this.apiUrl}/organization?limit=1000`;
+
+    return this.http.get(urlString);
+  }
+
+  getOrgs(skip: number, limit: number): Observable<any> {
+    const urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
 
     return this.http.get(urlString);
   }
