@@ -7,49 +7,56 @@ import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
 export class GetOrganizationService {
-  apiUrl: string;
+    apiUrl: string;
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    if (!environment.production) {
-      this.apiUrl = environment.apiUrl;
-    } else {
-      this.apiUrl = this.authService.getBackendURL();
-      console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
+    constructor(private http: HttpClient, private authService: AuthService) {
+        if (!environment.production) {
+            this.apiUrl = environment.apiUrl;
+        } else {
+            this.apiUrl = this.authService.getBackendURL();
+            console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
+        }
+
+        console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
     }
 
-    console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
-  }
+    // get Organization by director
+    getOrgbyDirector(username: string): Observable<any> {
+        const urlString = `${this.apiUrl}/organization?director=${username}`;
 
-  // get Organization by director
-  getOrgbyDirector(username: string): Observable<any> {
-    const urlString = `${this.apiUrl}/organization?director=${username}`;
+        return this.http.get(urlString);
+    }
 
-    return this.http.get(urlString);
-  }
+    getOrgbyName(name: string): Observable<any> {
+        const urlString = `${this.apiUrl}/organization?name=${name}`;
 
-  getOrgbyName(name: string): Observable<any> {
-    const urlString = `${this.apiUrl}/organization?name=${name}`;
+        return this.http.get(urlString);
+    }
 
-    return this.http.get(urlString);
-  }
+    getOrgbyID(orgID: string): Observable<any> {
+        const urlString = `${this.apiUrl}/organization?organizationID=${orgID}`;
 
-  getOrgbyID(orgID: string): Observable<any> {
-    const urlString = `${this.apiUrl}/organization?organizationID=${orgID}`;
+        return this.http.get(urlString);
+    }
 
-    return this.http.get(urlString);
-  }
+    //TODO: old
+    // want to remove
+    getAllOrgs(): Observable<any> {
+        const urlString = `${this.apiUrl}/organization?limit=1000`;
 
-  //TODO: old
-  // want to remove
-  getAllOrgs(): Observable<any> {
-    const urlString = `${this.apiUrl}/organization?limit=1000`;
+        return this.http.get(urlString);
+    }
 
-    return this.http.get(urlString);
-  }
+    getOrgs(skip: number, limit: number): Observable<any> {
+        const urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
 
-  getOrgs(skip: number, limit: number): Observable<any> {
-    const urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
+        return this.http.get(urlString);
+    }
 
-    return this.http.get(urlString);
-  }
+    //returns count of organizations in database
+    getOrganizationCount(): Observable<any> {
+        const urlString = `${this.apiUrl}/organizationCount`;
+
+        return this.http.get(urlString);
+    }
 }

@@ -9,8 +9,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -35,6 +37,8 @@ import { VotingComponent } from './voting/voting.component';
         MatMenuModule,
         MatTooltipModule,
         MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
     ],
 })
 export class DirectorModule { }
