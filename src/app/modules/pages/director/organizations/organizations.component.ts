@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { merge, Observable, of as observableOf } from 'rxjs';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { merge, Observable, of as observableOf, fromEvent } from 'rxjs';
+import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
@@ -14,12 +14,9 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
 })
 export class OrganizationsComponent implements AfterViewInit {
 
-    // @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
-
-    // @ViewChild(MatSort, { static: false }) sort: MatSort;
-
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
+    @ViewChild('filterInput', { static: true }) input: ElementRef;
 
     organizations: any;
 
@@ -39,27 +36,24 @@ export class OrganizationsComponent implements AfterViewInit {
 
     pageEvent: PageEvent;
 
+    filterInputString: string;
+
     constructor(public getOrgService: GetOrganizationService, private _router: Router) {
         this.loaded = false;
-
+        this.filterInputString = '';
         this.limit = 10;
         this.skip = 0;
     }
 
-    // ngOnInit(): void {
-    //     this.getOrganizationCount();
-    //     this.getOrganizations();
-    // }
-
-    getOrganizationCount(): void {
-        this.getOrgService.getOrganizationCount()
+    getOrganizationCount(countFilter?: string): void {
+        this.getOrgService.getOrganizationCount(countFilter)
             .subscribe(
                 (count) => { this.orgCount = count; });
     }
 
     ngAfterViewInit(): void {
 
-        this.getOrganizationCount();
+        this.getOrganizationCount(); // no need for parameter
 
         // If the user changes the sort order, reset back to the first page.
         this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
@@ -69,7 +63,8 @@ export class OrganizationsComponent implements AfterViewInit {
                 startWith({}),
                 switchMap(() => {
                     this.loaded = false;
-                    return this.getOrgService.getOrgs(this.skip, this.limit).pipe(catchError(() => observableOf(null)));
+                    // this.getOrganizationCount(this.filterInputString);
+                    return this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString).pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
 
@@ -87,11 +82,27 @@ export class OrganizationsComponent implements AfterViewInit {
                     // limit errors, we do not want to reset the paginator to zero, as that
                     // would prevent users from re-triggering requests.
                     // this.orgCount = data.length;
-                    this.getOrganizationCount();
+                    this.getOrganizationCount(this.filterInputString);
                     return data;
                 }),
             )
             .subscribe(data => (this.data = data));
+
+        // server-side filter
+        fromEvent(this.input.nativeElement, 'keyup')
+            .pipe(
+                filter(Boolean),
+                debounceTime(500),
+                distinctUntilChanged(),
+                tap((event: KeyboardEvent) => {
+                    console.log(event);
+                    this.filterInputString = (event.target as HTMLInputElement).value;
+                    this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString).subscribe((data) => { this.data = data; });
+                    this.getOrganizationCount(this.filterInputString);
+                })
+            )
+            .subscribe();
+
     }
 
     goToOrganization(orgID: string): void {

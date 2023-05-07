@@ -20,7 +20,16 @@
         <div class="flex justify-center ...">
             <div class="w-200">
 
-                Limit - {{limit}} Skip - {{skip}}
+                <div>
+                    <mat-form-field class="w-full">
+                        <!-- <mat-label>Filter</mat-label> -->
+                        <input matInput placeholder="Filter" #filterInput>
+                    </mat-form-field>
+                </div>
+
+                <!--TODO: Remove -->
+                <!-- Debugging -->
+                <!-- Limit - {{limit}} Skip - {{skip}} -->
 
                 <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
                     matSortDirection="desc">

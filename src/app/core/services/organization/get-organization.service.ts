@@ -47,15 +47,28 @@ export class GetOrganizationService {
         return this.http.get(urlString);
     }
 
-    getOrgs(skip: number, limit: number): Observable<any> {
-        const urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
+    //TODO: pass in sort
+    getOrgs(skip: number, limit: number, filter: string): Observable<any> {
+        let urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
+
+        //empty string
+        if (filter.trim().length !== 0) {
+            urlString += `&where={\"name\":{\"contains\":\"${filter}\"}}`;
+        }
+
+        console.log('urlString', urlString);
 
         return this.http.get(urlString);
     }
 
     //returns count of organizations in database
-    getOrganizationCount(): Observable<any> {
-        const urlString = `${this.apiUrl}/organizationCount`;
+    getOrganizationCount(filter?: string): Observable<any> {
+        let urlString = `${this.apiUrl}/organizationCount`;
+
+        //empty string
+        if (filter && filter.trim().length !== 0) {
+            urlString += `?filter=${filter}`;
+        }
 
         return this.http.get(urlString);
     }
