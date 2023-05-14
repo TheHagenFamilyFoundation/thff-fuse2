@@ -8,7 +8,6 @@ import {
 import { AuthService } from 'app/core/auth/auth.service';
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { InOrgService } from 'app/core/services/user/in-org.service';
-// import { DirectorService } from '../../../../core/services/user/director.service';
 
 @Component({
     selector: 'profile',
@@ -33,7 +32,7 @@ export class ProfileComponent implements OnInit {
     constructor(
         private _authService: AuthService,
         private _getUserService: GetUserService,
-        private _inOrgService: InOrgService // private _directorService: DirectorService
+        private _inOrgService: InOrgService
     ) {
         console.log('profile constructor - organizations', this.organizations);
     }
@@ -53,6 +52,10 @@ export class ProfileComponent implements OnInit {
             this.isLoggedIn = authenticated;
         });
 
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
+
         console.log('profile 1 - this.isLoggedIn', this.isLoggedIn);
 
         if (this.isLoggedIn) {
@@ -63,16 +66,6 @@ export class ProfileComponent implements OnInit {
                 this.user = this.currentUser;
                 this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
-
-                if (this.accessLevel > 1) {
-                    this.isDirector = true;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                } else {
-                    this.isDirector = false;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                }
 
                 this.getOrganizations();
             }
@@ -87,6 +80,10 @@ export class ProfileComponent implements OnInit {
             this.isLoggedIn = authenticated;
         });
 
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
+
         if (this.isLoggedIn) {
             if (localStorage.getItem('currentUser')) {
                 this.currentUser = JSON.parse(
@@ -95,16 +92,6 @@ export class ProfileComponent implements OnInit {
                 console.log('profile - email ', this.currentUser.email);
                 this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
-
-                if (this.accessLevel > 1) {
-                    this.isDirector = true;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                } else {
-                    this.isDirector = false;
-
-                    // this.directorService.changeMessage(this.IsDirector)
-                }
 
                 // TODO
                 this.getOrganizations();

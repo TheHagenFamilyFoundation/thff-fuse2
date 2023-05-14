@@ -20,7 +20,6 @@ import { ModernLayoutComponent } from 'app/layout/layouts/horizontal/modern/mode
 
 import { GetUserService } from '../../../../core/services/user/get-user.service';
 import { InOrgService } from '../../../../core/services/user/in-org.service';
-import { DirectorService } from '../../../../core/services/user/director.service';
 
 @NgModule({
     declarations: [ModernLayoutComponent],
@@ -43,7 +42,7 @@ import { DirectorService } from '../../../../core/services/user/director.service
         UserModule,
         SharedModule,
     ],
-    providers: [GetUserService, InOrgService, DirectorService],
+    providers: [GetUserService, InOrgService],
     exports: [ModernLayoutComponent],
 })
 export class ModernLayoutModule {}
