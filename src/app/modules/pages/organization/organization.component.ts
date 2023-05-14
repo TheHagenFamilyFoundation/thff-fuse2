@@ -7,7 +7,11 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+
 import { ApexOptions } from 'ng-apexcharts';
+
 import { OrganizationService } from './organization.service';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -20,17 +24,24 @@ import { environment } from 'environments/environment';
     changeDetection: ChangeDetectionStrategy.Default,
 })
 export class OrganizationComponent implements OnInit, OnDestroy {
+    currentUser: any;
     orgID: any;
     organizationID: any;
     org: any; // the Organization object
+    isDirector: boolean;
+    inOrg: boolean;
+    viewing: string;
+    //TODO: We don't need these:
     chartGithubIssues: ApexOptions = {};
     chartTaskDistribution: ApexOptions = {};
     chartBudgetDistribution: ApexOptions = {};
     chartWeeklyExpenses: ApexOptions = {};
     chartMonthlyExpenses: ApexOptions = {};
     chartYearlyExpenses: ApexOptions = {};
-    data: any;
     selectedProject: string = 'ACME Corp. Backend App';
+
+    data: any;
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -41,12 +52,17 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         private _router: Router,
         private route: ActivatedRoute,
         public getOrgService: GetOrganizationService,
-        public authService: AuthService
+        public _authService: AuthService,
+        public snackBar: MatSnackBar,
     ) {
         this.route.params.subscribe((params) => {
             console.log(params);
             this.orgID = params.id;
         });
+
+        //initialize
+        this.inOrg = false;
+
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -68,23 +84,31 @@ export class OrganizationComponent implements OnInit, OnDestroy {
                 this._prepareChartData();
             });
 
+        this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
+
         console.log('organization - orgID', this.orgID);
 
         this.getOrganization(this.orgID);
 
-        // Attach SVG fill fixer to all ApexCharts
-        window['Apex'] = {
-            chart: {
-                events: {
-                    mounted: (chart: any, options?: any): void => {
-                        this._fixSvgFill(chart.el);
-                    },
-                    updated: (chart: any, options?: any): void => {
-                        this._fixSvgFill(chart.el);
-                    },
-                },
-            },
-        };
+
+
+        // // Attach SVG fill fixer to all ApexCharts
+        // window['Apex'] = {
+        //     chart: {
+        //         events: {
+        //             mounted: (chart: any, options?: any): void => {
+        //                 this._fixSvgFill(chart.el);
+        //             },
+        //             updated: (chart: any, options?: any): void => {
+        //                 this._fixSvgFill(chart.el);
+        //             },
+        //         },
+        //     },
+        // };
     }
 
     /**
@@ -106,6 +130,13 @@ export class OrganizationComponent implements OnInit, OnDestroy {
 
             this.org = org[0];
             this.organizationID = this.org.id;
+
+            //checking if director and in org
+            //check if in org - this sets inOrg
+            this.checkInOrganization(this.currentUser.id);
+            //check if director
+            this.checkIsDirectorAndInOrg();
+
         });
     }
 
@@ -117,7 +148,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         console.log('organization - environment', environment);
         if (environment.production) {
             console.log('environment is production');
-            this.authService.initializeBackendURL().subscribe((backendUrl) => {
+            this._authService.initializeBackendURL().subscribe((backendUrl) => {
                 console.log(
                     'organization component - backendUrl',
                     backendUrl.url
@@ -139,6 +170,40 @@ export class OrganizationComponent implements OnInit, OnDestroy {
                 // this.LoadedAPI = true;
             });
         }
+    }
+
+    checkIsDirectorAndInOrg(): void {
+        console.log('checking if director and in organization');
+
+        console.log('isDirector', this.isDirector);
+        console.log('inOrg', this.inOrg);
+
+        if (this.isDirector && !this.inOrg) {
+            this.viewing = 'Viewing: ';
+        }
+    }
+
+    checkInOrganization(id: string): void {
+
+        // finding the object whose id
+        const object = this.org.users.find((obj) => {
+            console.log('obj.id', obj.id);
+            console.log('id', id);
+            return obj.id === id;
+        });
+        console.log('object', object);
+        this.inOrg = object ? true : false;
+
+        //route to welcome if not in organization
+        if (!this.inOrg && !this.isDirector) {
+            this._router.navigate(['welcome']);
+            //show toast
+            const message = 'You are not allowed to view this Organization';
+            const snackBarRef = this.snackBar.open(message, 'OK', {
+                duration: 3000,
+            });
+        }
+
     }
 
     //old

@@ -5,8 +5,7 @@
 <div class="flex flex-col flex-auto w-full min-w-0">
     <!-- Header -->
     <div
-        class="relative flex flex-0 items-center w-full h-16 sm:h-20 px-4 md:px-6 z-49 shadow dark:shadow-none dark:border-b bg-card dark:bg-transparent print:hidden"
-    >
+        class="relative flex flex-0 items-center w-full h-16 sm:h-20 px-4 md:px-6 z-49 shadow dark:shadow-none dark:border-b bg-card dark:bg-transparent print:hidden">
         <ng-container *ngIf="!isScreenSmall">
             <!-- House Icon -->
             <div class="flex items-center mx-2 lg:mr-8">
@@ -40,24 +39,15 @@
                         </mat-menu> -->
                     </div>
                     <div *ngIf="!inOrganization">
-                        <button
-                            mat-button
-                            routerLink="/pages/organization/create"
-                        >
+                        <button mat-button routerLink="/pages/organization/create">
                             Create Organization
                         </button>
                     </div>
                 </div>
-                <div *ngIf="isLoggedIn && _directorService.isDirector()">
-                    <!-- <div *ngIf="IsDirector"> -->
-                    <button
-                        mat-button
-                        (click)="routeToDirectorsPage()"
-                        fxHide="false"
-                    >
+                <div *ngIf="isDirector">
+                    <button mat-button (click)="routeToDirectorsPage()" fxHide="false">
                         Directors
                     </button>
-                    <!-- </div> -->
                 </div>
             </div>
             <!-- Horizontal navigation -->
@@ -68,10 +58,7 @@
         </ng-container>
         <!-- Navigation toggle button -->
         <ng-container *ngIf="isScreenSmall">
-            <button
-                mat-icon-button
-                (click)="toggleNavigation('mainNavigation')"
-            >
+            <button mat-icon-button (click)="toggleNavigation('mainNavigation')">
                 <!-- <mat-icon [svgIcon]="'heroicons_outline:menu'"></mat-icon> -->
             </button>
         </ng-container>
@@ -102,11 +89,8 @@
 
     <!-- Footer -->
     <div
-        class="relative flex flex-0 items-center w-full h-14 sm:h-20 px-4 md:px-6 z-49 border-t bg-card dark:bg-transparent print:hidden"
-    >
-        <span class="font-medium text-secondary"
-            >THFF &copy; {{ currentYear }}</span
-        >
+        class="relative flex flex-0 items-center w-full h-14 sm:h-20 px-4 md:px-6 z-49 border-t bg-card dark:bg-transparent print:hidden">
+        <span class="font-medium text-secondary">THFF &copy; {{ currentYear }}</span>
     </div>
 </div>
 

@@ -1,0 +1,101 @@
+<div class="flex flex-col flex-auto min-w-0">
+    <!-- Header -->
+    <div class="bg-card">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
+                <div class="flex flex-auto items-center min-w-0">
+                    <div class="flex flex-col min-w-0 ml-4">
+                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
+                            View Organizations
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Header -->
+
+    <!-- Main -->
+    <div class="text-center pt-4 sm:pt-6 ">
+        <div class="flex justify-center ...">
+            <div class="w-200">
+
+                <div>
+                    <mat-form-field class="w-full">
+                        <!-- <mat-label>Filter</mat-label> -->
+                        <input matInput placeholder="Filter" #filterInput>
+                    </mat-form-field>
+                </div>
+
+                <!--TODO: Remove -->
+                <!-- Debugging -->
+                <!-- Limit - {{limit}} Skip - {{skip}} -->
+
+                <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
+                    matSortDirection="desc">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Name
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+                    </ng-container>
+
+                    <!-- createdOn Column -->
+                    <ng-container matColumnDef="createdOn">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                            Created On
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{ row.createdAt | date: "MM/dd/yyyy" }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- users Column -->
+                    <ng-container matColumnDef="users">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Users
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{ row.users.length }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- proposals Column -->
+                    <ng-container matColumnDef="proposals">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Proposals
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{ row.proposals.length }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- link Column -->
+                    <ng-container matColumnDef="link">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Link
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <button mat-raised-button color="primary" (click)="
+                                        goToOrganization(row.organizationID)
+                                    " mat-dialog-close>
+                                Go to Org
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns">
+                    </mat-row>
+                </mat-table>
+
+                <div *ngIf="!loaded">
+                    <mat-spinner></mat-spinner>
+                </div>
+                <mat-paginator (page)="handlePageEvent($event)" [length]="orgCount"
+                    [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>

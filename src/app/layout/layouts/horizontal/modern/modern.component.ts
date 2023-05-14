@@ -11,8 +11,6 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { GetUserService } from '../../../../core/services/user/get-user.service';
 import { InOrgService } from '../../../../core/services/user/in-org.service';
-import { DirectorService } from '../../../../core/services/user/director.service';
-// import { User } from 'app/core/user/user.types';
 @Component({
     selector: 'modern-layout',
     templateUrl: './modern.component.html',
@@ -46,8 +44,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         private _authService: AuthService,
         private _getUserService: GetUserService,
         private _inOrgService: InOrgService,
-        private _directorService: DirectorService
-    ) {}
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
@@ -88,6 +85,10 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             this.isLoggedIn = authenticated;
         });
 
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
+
         console.log('1 - this.isLoggedIn', this.isLoggedIn);
 
         if (this.isLoggedIn) {
@@ -100,21 +101,9 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                 this.currentUser = JSON.parse(
                     localStorage.getItem('currentUser')
                 );
-                console.log('toolbar - ', this.currentUser);
+                // console.log('toolbar - ', this.currentUser);
                 this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
-
-                console.log('toolbar - this.accessLevel', this.accessLevel);
-
-                if (this.accessLevel > 1) {
-                    this.isDirector = true;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                } else {
-                    this.isDirector = false;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                }
 
                 this.getOrganizations();
             }
@@ -129,6 +118,10 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             this.isLoggedIn = authenticated;
         });
 
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
+
         console.log('2 - this.isLoggedIn', this.isLoggedIn);
 
         if (this.isLoggedIn) {
@@ -141,25 +134,13 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                 this.currentUser = JSON.parse(
                     localStorage.getItem('currentUser')
                 ); // contains token
-                console.log('toolbar - username ', this.currentUser.username);
                 this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
-
-                if (this.accessLevel > 1) {
-                    this.isDirector = true;
-
-                    // this.directorService.changeMessage(this.isDirector)
-                } else {
-                    this.isDirector = false;
-
-                    // this.directorService.changeMessage(this.IsDirector)
-                }
 
                 // TODO
                 this.getOrganizations();
             }
 
-            // this.LoggedIn = true;
         }
     }
 

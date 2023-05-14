@@ -261,6 +261,23 @@ export class AuthService {
         return this.signInUsingToken();
     }
 
+    /**
+     * Check the Director status
+     */
+    checkDirector(): Observable<boolean> {
+        // Check the access token availability
+        if (!this.accessToken) {
+            return of(false);
+        }
+
+        if (AuthUtils.isDirector(this.accessToken)) {
+            return of(true);
+        }
+        else {
+            return of(false);
+        }
+    }
+
     setBackendURL(): void {
         if (environment.production === true) {
             this.apiUrl = sessionStorage.getItem('backend_url');

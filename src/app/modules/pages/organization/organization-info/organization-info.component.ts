@@ -44,6 +44,10 @@ export class OrganizationInfoComponent implements OnInit {
     @Input()
     org: any;
     @Output() refreshOrg = new EventEmitter<boolean>();
+    @Input()
+    isDirector: any;
+    @Input()
+    inOrg: any; //used for director
 
     // multiple form
     public mode: 'view' | 'edit' = 'view';
@@ -134,6 +138,8 @@ export class OrganizationInfoComponent implements OnInit {
 
     editing = false;
     editingLegalName: boolean = false;
+
+    directorEditing = false;
 
     formContactPerson: FormGroup;
 
@@ -1040,10 +1046,21 @@ export class OrganizationInfoComponent implements OnInit {
 
         this.resetFormValues();
 
+        this.checkEditing(mode);
+    }
+
+    toggleDirectorEdit(): void {
+        this.directorEditing = !this.directorEditing;
+        this.mode = 'view';
+        this.checkEditing(this.mode);
+    }
+
+    checkEditing(mode): void {
         if (mode === 'view') {
             this.editing = false;
         } else {
             this.editing = true;
         }
     }
+
 }

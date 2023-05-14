@@ -15,7 +15,7 @@ export class AuthInterceptor implements HttpInterceptor {
     /**
      * Constructor
      */
-    constructor(private _authService: AuthService) {}
+    constructor(private _authService: AuthService) { }
 
     /**
      * Intercept
@@ -27,7 +27,7 @@ export class AuthInterceptor implements HttpInterceptor {
         req: HttpRequest<any>,
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
-        console.log('intercept!', req);
+        console.log('intercept!', req); //TODO: Debug
 
         // Clone the request object
         let newReq = req.clone();
@@ -44,6 +44,7 @@ export class AuthInterceptor implements HttpInterceptor {
             this._authService.accessToken &&
             !AuthUtils.isTokenExpired(this._authService.accessToken)
         ) {
+
             newReq = req.clone({
                 headers: req.headers.set(
                     'Authorization',

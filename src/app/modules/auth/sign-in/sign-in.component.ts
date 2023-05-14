@@ -46,7 +46,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _fuseConfigService: FuseConfigService
-    ) {}
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -56,6 +56,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+
         // Create the form
         this.signInForm = this._formBuilder.group({
             email: ['', [Validators.required, Validators.email]],
