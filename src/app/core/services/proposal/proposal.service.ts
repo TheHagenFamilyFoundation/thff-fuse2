@@ -69,4 +69,32 @@ export class ProposalService {
 
         return this.http.patch(urlString, body);
     }
+
+
+    //TODO: pass in sort
+    getProps(skip: number, limit: number, filter: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposal?skip=${skip}&limit=${limit}`;
+
+        //empty string
+        if (filter.trim().length !== 0) {
+            urlString += `&where={\"projectTitle\":{\"contains\":\"${filter}\"}}`;
+        }
+
+        console.log('urlString', urlString);
+
+        return this.http.get(urlString);
+    }
+
+    //returns count of proposals in database
+    getProposalCount(filter?: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposalCount`;
+
+        //empty string
+        if (filter && filter.trim().length !== 0) {
+            urlString += `?filter=${filter}`;
+        }
+
+        return this.http.get(urlString);
+    }
+
 }
