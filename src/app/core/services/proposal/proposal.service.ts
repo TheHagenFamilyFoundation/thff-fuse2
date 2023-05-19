@@ -73,7 +73,7 @@ export class ProposalService {
 
     //TODO: pass in sort
     getProps(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
-        let urlString = `${this.apiUrl}/proposal?skip=${skip}&limit=${limit}`;
+        let urlString = `${this.apiUrl}/proposals?skip=${skip}&limit=${limit}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
