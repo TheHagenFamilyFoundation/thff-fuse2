@@ -67,10 +67,6 @@ export class OrganizationsComponent implements AfterViewInit {
 
         // If the user changes the sort order, reset back to the first page.
         this.sort.sortChange.subscribe(() => {
-
-            console.log('this.sort', this.sort);
-            console.log('this.sort.active', this.sort.active);
-            console.log('this.sort.direction', this.sort.direction);
             this.sortDirection = this.sort.direction;
             this.sortColumn = this.sort.active;
             this.paginator.pageIndex = 0;
@@ -81,8 +77,6 @@ export class OrganizationsComponent implements AfterViewInit {
                 startWith({}),
                 switchMap(() => {
                     this.loaded = false;
-                    console.log('trigger1');
-                    // this.getOrganizationCount(this.filterInputString);
                     return this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
                         .pipe(catchError(() => observableOf(null)));
                 }),
@@ -91,13 +85,9 @@ export class OrganizationsComponent implements AfterViewInit {
                     // Flip flag to show that loading has finished.
                     this.loaded = true;
                     // this.isRateLimitReached = data === null;
-
-                    console.log('data', data);
-
                     if (data === null) {
                         return [];
                     }
-                    console.log('trigger2');
 
                     // Only refresh the result length if there is new data. In case of rate
                     // limit errors, we do not want to reset the paginator to zero, as that
