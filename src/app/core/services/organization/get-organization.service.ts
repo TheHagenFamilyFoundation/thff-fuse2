@@ -49,7 +49,7 @@ export class GetOrganizationService {
 
     //TODO: pass in sort
     getOrgs(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
-        let urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
+        let urlString = `${this.apiUrl}/organizations?skip=${skip}&limit=${limit}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
