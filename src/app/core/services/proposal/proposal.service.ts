@@ -72,12 +72,17 @@ export class ProposalService {
 
 
     //TODO: pass in sort
-    getProps(skip: number, limit: number, filter: string): Observable<any> {
+    getProps(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
         let urlString = `${this.apiUrl}/proposal?skip=${skip}&limit=${limit}`;
 
         //empty string
-        if (filter.trim().length !== 0) {
-            urlString += `&where={\"projectTitle\":{\"contains\":\"${filter}\"}}`;
+        if (filter && filter.trim().length !== 0) {
+            urlString += `&filter=${filter}`;
+        }
+
+        //empty string
+        if (sortColumn.length !== 0 && sortDirection.length !== 0) {
+            urlString += `&sort=${sortColumn}&dir=${sortDirection}`;
         }
 
         console.log('urlString', urlString);

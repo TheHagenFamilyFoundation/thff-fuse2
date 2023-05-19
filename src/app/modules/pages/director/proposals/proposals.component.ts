@@ -23,6 +23,10 @@ export class ProposalsComponent implements AfterViewInit {
 
     skip: number;
 
+    sortColumn: string;
+
+    sortDirection: string;
+
     propCount: number;
 
     resultsLength = 0;
@@ -42,6 +46,8 @@ export class ProposalsComponent implements AfterViewInit {
         this.filterInputString = '';
         this.limit = 10;
         this.skip = 0;
+        this.sortDirection = 'desc';
+        this.sortColumn = 'createdOn';
     }
 
     getProposalCount(countFilter?: string): void {
@@ -52,26 +58,33 @@ export class ProposalsComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
 
+        this.sort.start = 'desc';
+
         this.getProposalCount(); // no need for parameter
 
         // If the user changes the sort order, reset back to the first page.
-        this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+        this.sort.sortChange.subscribe(() => {
+            console.log('this.sort', this.sort);
+            console.log('this.sort.active', this.sort.active);
+            console.log('this.sort.direction', this.sort.direction);
+            this.sortDirection = this.sort.direction;
+            this.sortColumn = this.sort.active;
+            this.paginator.pageIndex = 0;
+        });
 
         merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
                     this.loaded = false;
-                    // this.getOrganizationCount(this.filterInputString);
-                    return this.proposalService.getProps(this.skip, this.limit, this.filterInputString).pipe(catchError(() => observableOf(null)));
+                    return this.proposalService.getProps(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                        .pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
 
                     // Flip flag to show that loading has finished.
                     this.loaded = true;
                     // this.isRateLimitReached = data === null;
-
-                    console.log('data', data);
 
                     if (data === null) {
                         return [];
@@ -96,7 +109,7 @@ export class ProposalsComponent implements AfterViewInit {
                 tap((event: KeyboardEvent) => {
                     console.log(event);
                     this.filterInputString = (event.target as HTMLInputElement).value;
-                    this.proposalService.getProps(this.skip, this.limit, this.filterInputString).subscribe((data) => { this.data = data; });
+                    this.proposalService.getProps(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection).subscribe((data) => { this.data = data; });
                     this.getProposalCount(this.filterInputString);
                 })
             )
@@ -117,6 +130,7 @@ export class ProposalsComponent implements AfterViewInit {
             console.log('page size is different');
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
+            this.paginator.pageIndex = 0;
         }
         else {
             if (this.pageEvent.previousPageIndex < this.pageEvent.pageIndex) {

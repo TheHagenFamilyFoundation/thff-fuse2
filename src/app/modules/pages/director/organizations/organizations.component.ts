@@ -24,6 +24,10 @@ export class OrganizationsComponent implements AfterViewInit {
 
     skip: number;
 
+    sortColumn: string;
+
+    sortDirection: string;
+
     orgCount: number;
 
     resultsLength = 0;
@@ -43,6 +47,9 @@ export class OrganizationsComponent implements AfterViewInit {
         this.filterInputString = '';
         this.limit = 10;
         this.skip = 0;
+        this.sortDirection = 'desc';
+        this.sortColumn = 'createdOn';
+
     }
 
     getOrganizationCount(countFilter?: string): void {
@@ -53,27 +60,31 @@ export class OrganizationsComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
 
+        // console.log('this.sort', this.sort);
+        this.sort.start = 'desc';
+
         this.getOrganizationCount(); // no need for parameter
 
         // If the user changes the sort order, reset back to the first page.
-        this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+        this.sort.sortChange.subscribe(() => {
+            this.sortDirection = this.sort.direction;
+            this.sortColumn = this.sort.active;
+            this.paginator.pageIndex = 0;
+        });
 
         merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
                     this.loaded = false;
-                    // this.getOrganizationCount(this.filterInputString);
-                    return this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString).pipe(catchError(() => observableOf(null)));
+                    return this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                        .pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
 
                     // Flip flag to show that loading has finished.
                     this.loaded = true;
                     // this.isRateLimitReached = data === null;
-
-                    console.log('data', data);
-
                     if (data === null) {
                         return [];
                     }
@@ -97,7 +108,7 @@ export class OrganizationsComponent implements AfterViewInit {
                 tap((event: KeyboardEvent) => {
                     console.log(event);
                     this.filterInputString = (event.target as HTMLInputElement).value;
-                    this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString).subscribe((data) => { this.data = data; });
+                    this.getOrgService.getOrgs(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection).subscribe((data) => { this.data = data; });
                     this.getOrganizationCount(this.filterInputString);
                 })
             )
@@ -117,6 +128,10 @@ export class OrganizationsComponent implements AfterViewInit {
             console.log('page size is different');
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
+            console.log('this.limit', this.limit);
+            console.log('this.skip', this.skip);
+            // this.paginator.firstPage();
+            this.paginator.pageIndex = 0;
         }
         else {
             if (this.pageEvent.previousPageIndex < this.pageEvent.pageIndex) {
