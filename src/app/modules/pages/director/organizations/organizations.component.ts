@@ -67,6 +67,7 @@ export class OrganizationsComponent implements AfterViewInit {
 
         // If the user changes the sort order, reset back to the first page.
         this.sort.sortChange.subscribe(() => {
+            this.skip = 0; //reset;
             this.sortDirection = this.sort.direction;
             this.sortColumn = this.sort.active;
             this.paginator.pageIndex = 0;

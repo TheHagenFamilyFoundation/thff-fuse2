@@ -41,6 +41,15 @@
                         <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
                     </ng-container>
 
+                    <!-- Organization Column -->
+                    <ng-container matColumnDef="organization">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Organization
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row"> {{ row.organization?.name }} </mat-cell>
+                    </ng-container>
+
+
                     <!-- createdOn Column -->
                     <ng-container matColumnDef="createdOn">
                         <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
