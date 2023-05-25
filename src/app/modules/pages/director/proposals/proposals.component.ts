@@ -67,6 +67,7 @@ export class ProposalsComponent implements AfterViewInit {
             console.log('this.sort', this.sort);
             console.log('this.sort.active', this.sort.active);
             console.log('this.sort.direction', this.sort.direction);
+            this.skip = 0; //reset;
             this.sortDirection = this.sort.direction;
             this.sortColumn = this.sort.active;
             this.paginator.pageIndex = 0;
