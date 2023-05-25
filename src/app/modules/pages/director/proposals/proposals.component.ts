@@ -31,7 +31,7 @@ export class ProposalsComponent implements AfterViewInit {
 
     resultsLength = 0;
 
-    displayedColumns = ['projectTitle', 'createdOn', 'amountRequested', 'totalProjectCost', 'link'];
+    displayedColumns = ['projectTitle', 'organization', 'createdOn', 'amountRequested', 'totalProjectCost', 'link'];
 
     data: [];
 
@@ -89,6 +89,8 @@ export class ProposalsComponent implements AfterViewInit {
                     if (data === null) {
                         return [];
                     }
+
+                    console.log('data', data);
 
                     // Only refresh the result length if there is new data. In case of rate
                     // limit errors, we do not want to reset the paginator to zero, as that
