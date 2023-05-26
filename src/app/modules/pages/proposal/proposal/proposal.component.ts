@@ -178,6 +178,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
         }
 
         console.log('ProposalComponent - this.apiUrl', this.apiUrl);
+
+        //initialize
+        this.inOrg = false;
+
     }
 
     defaultValues(): void {
