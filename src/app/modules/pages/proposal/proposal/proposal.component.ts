@@ -17,12 +17,14 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 
 import { environment } from 'environments/environment';
 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 
 @Component({
     selector: 'proposal',
@@ -30,10 +32,18 @@ import { AuthService } from 'app/core/auth/auth.service';
     styleUrls: ['./proposal.component.scss'],
 })
 export class ProposalComponent implements OnInit, OnDestroy {
+    currentUser: any;
     proposalID: string; //generated ID
     propID: string; //mongo id
     proposal: any; // the Proposal object
+    isDirector: boolean;
+    inOrg: boolean; //applies to proposal in the organization
+    viewing: string;
+    organizationID: string;
     orgID: string;
+    org: any;
+    organizationLink: string;
+
     // multiple form
     public mode: 'view' | 'edit' = 'view';
 
@@ -97,7 +107,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
-        public authService: AuthService,
+        public _authService: AuthService,
+        public getOrgService: GetOrganizationService,
+        public snackBar: MatSnackBar,
+
         fb: FormBuilder
     ) {
         this.route.params.subscribe((params) => {
@@ -160,7 +173,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
         if (!environment.production) {
             this.apiUrl = environment.apiUrl;
         } else {
-            this.apiUrl = this.authService.getBackendURL();
+            this.apiUrl = this._authService.getBackendURL();
             console.log('ProposalComponent - this.apiUrl', this.apiUrl);
         }
 
@@ -183,6 +196,12 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         console.log('proposal - proposalID', this.proposalID);
+
+        this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        this._authService.checkDirector().subscribe((isADirector) => {
+            this.isDirector = isADirector;
+        });
 
         this.getProposal(this.proposalID);
     }
@@ -207,10 +226,15 @@ export class ProposalComponent implements OnInit, OnDestroy {
                 if (proposal.length > 0) {
                     console.log('proposal component - proposal', proposal);
 
-                    // [this.orgInfo] = orgInfo;
-
                     this.proposal = proposal[0];
                     this.propID = this.proposal.id; //mongo id
+
+                    this.org = this.proposal.organization;
+                    this.organizationLink = '/pages/organization/' + this.org.organizationID;
+
+
+                    this.getOrganization(this.org.organizationID);
+
                     this.setFields();
                 } else {
                     //send user back to welcome
@@ -223,11 +247,31 @@ export class ProposalComponent implements OnInit, OnDestroy {
     //     this.getProposal(this.proposalID); //fetch the proposal again
     // }
 
+    getOrganization(orgID): void {
+        console.log('check organizations');
+
+        // query database for that organization
+
+        this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
+            console.log('organization component - org', org);
+
+            this.org = org[0];
+            this.organizationID = this.org.id;
+
+            //checking if director and in org
+            //check if in org - this sets inOrg
+            this.checkInOrganization(this.currentUser.id);
+            //check if director
+            this.checkIsDirectorAndInOrg();
+
+        });
+    }
+
     getBackendURL(): void {
         console.log('proposal - environment', environment);
         if (environment.production) {
             console.log('environment is production');
-            this.authService.initializeBackendURL().subscribe((backendUrl) => {
+            this._authService.initializeBackendURL().subscribe((backendUrl) => {
                 console.log('proposal component - backendUrl', backendUrl.url);
 
                 if (backendUrl) {
@@ -246,6 +290,40 @@ export class ProposalComponent implements OnInit, OnDestroy {
                 // this.LoadedAPI = true;
             });
         }
+    }
+
+    checkIsDirectorAndInOrg(): void {
+        console.log('checking if director and in organization');
+
+        console.log('isDirector', this.isDirector);
+        console.log('inOrg', this.inOrg);
+
+        if (this.isDirector && !this.inOrg) {
+            this.viewing = 'Viewing: ';
+        }
+    }
+
+    checkInOrganization(id: string): void {
+
+        // finding the object whose id
+        const object = this.org.users.find((obj) => {
+            console.log('obj.id', obj.id);
+            console.log('id', id);
+            return obj.id === id;
+        });
+        console.log('object', object);
+        this.inOrg = object ? true : false;
+
+        //route to welcome if not in organization
+        if (!this.inOrg && !this.isDirector) {
+            this._router.navigate(['welcome']);
+            //show toast
+            const message = 'You are not allowed to view this Organization';
+            const snackBarRef = this.snackBar.open(message, 'OK', {
+                duration: 3000,
+            });
+        }
+
     }
 
     setFields(): void {
