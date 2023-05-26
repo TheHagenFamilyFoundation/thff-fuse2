@@ -1,5 +1,14 @@
 <section editableGroup (editableModeChange)="handleModeChange($event)" (save)="updateGroupedEdition()"
     (cancel)="cancelGroupedEdition()">
+    <div *ngIf="isDirector && !inOrg" class="py-4">
+        Edit As Director?
+        <button mat-raised-button *ngIf="!directorEditing" (click)="toggleDirectorEdit()">
+            Edit
+        </button>
+        <button mat-raised-button *ngIf="directorEditing" (click)="toggleDirectorEdit()">
+            Cancel
+        </button>
+    </div>
     <div class="flex flex-col sm:flex-row items-start justify-between">
         <div class="text-lg font-medium tracking-tight leading-6 truncate">
             Proposal Information

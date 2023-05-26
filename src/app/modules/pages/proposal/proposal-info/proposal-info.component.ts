@@ -3,6 +3,9 @@ import {
     Component,
     OnDestroy,
     OnInit,
+    EventEmitter,
+    Output,
+    Input,
     ViewEncapsulation,
 } from '@angular/core';
 import {
@@ -31,6 +34,13 @@ import { AuthService } from 'app/core/auth/auth.service';
     styleUrls: ['./proposal-info.component.scss'],
 })
 export class ProposalInfoComponent implements OnInit, OnDestroy {
+
+    @Output() refreshProp = new EventEmitter<boolean>();
+    @Input()
+    isDirector: any;
+    @Input()
+    inOrg: any; //used for director
+
     proposalID: string; //generated ID
     propID: string; //mongo id
     proposal: any; // the Proposal object
@@ -98,7 +108,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
-        public authService: AuthService,
+        public _authService: AuthService,
         fb: FormBuilder
     ) {
         this.route.params.subscribe((params) => {
@@ -161,7 +171,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         if (!environment.production) {
             this.apiUrl = environment.apiUrl;
         } else {
-            this.apiUrl = this.authService.getBackendURL();
+            this.apiUrl = this._authService.getBackendURL();
             console.log('ProposalComponent - this.apiUrl', this.apiUrl);
         }
 
@@ -228,7 +238,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         console.log('proposal - environment', environment);
         if (environment.production) {
             console.log('environment is production');
-            this.authService.initializeBackendURL().subscribe((backendUrl) => {
+            this._authService.initializeBackendURL().subscribe((backendUrl) => {
                 console.log('proposal component - backendUrl', backendUrl.url);
 
                 if (backendUrl) {
