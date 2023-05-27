@@ -80,6 +80,8 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
 
     editing = false;
 
+    directorEditing = false;
+
     public projectTitleControl: FormControl;
     public purposeControl: FormControl;
     public goalsControl: FormControl;
@@ -619,4 +621,19 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
 
         this.showMessage = false;
     }
+
+    toggleDirectorEdit(): void {
+        this.directorEditing = !this.directorEditing;
+        this.mode = 'view';
+        this.checkEditing(this.mode);
+    }
+
+    checkEditing(mode): void {
+        if (mode === 'view') {
+            this.editing = false;
+        } else {
+            this.editing = true;
+        }
+    }
+
 }
