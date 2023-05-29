@@ -322,7 +322,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
         if (!this.inOrg && !this.isDirector) {
             this._router.navigate(['welcome']);
             //show toast
-            const message = 'You are not allowed to view this Organization';
+            const message = 'You are not allowed to view this Proposal';
             const snackBarRef = this.snackBar.open(message, 'OK', {
                 duration: 3000,
             });
