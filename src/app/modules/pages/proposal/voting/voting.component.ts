@@ -62,6 +62,8 @@ export class VotingComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem('currentUser'));
         console.log('voting - user', this.user);
         this.userID = this.user.id;
+        console.log('this.userID', this.userID);
+        console.log('this.prop.votes.length', this.prop.votes.length);
 
         if (this.prop.votes.length > 0) {
             this.checkDirVote(this.prop.votes);
@@ -104,8 +106,7 @@ export class VotingComponent implements OnInit {
         this.vote = this.defaultVote;
 
         votes.forEach((vote) => {
-            if (vote.userID === this.userID && vote.voteType === 'Director') {
-                console.log('vote', vote);
+            if (vote.userID === this.userID) {
                 this.vote = vote.vote;
             }
 
@@ -114,6 +115,7 @@ export class VotingComponent implements OnInit {
     }
 
     outVote(v): void {
+
         switch (v) {
             case -1:
                 this.outputVote = 'No Vote';
