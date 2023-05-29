@@ -247,9 +247,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
             });
     }
 
-    // refreshProposal(): void {
-    //     this.getProposal(this.proposalID); //fetch the proposal again
-    // }
+    refreshProp(): void {
+        console.log('refresh proposal');
+        this.getProposal(this.proposalID); //fetch the proposal again
+    }
 
     getOrganization(orgID): void {
         console.log('check organizations');

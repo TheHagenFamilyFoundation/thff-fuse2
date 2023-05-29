@@ -502,7 +502,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
                     this.proposal.proposalID
                 );
 
-                // this.refreshProposal.emit(true);
+                this.refreshProp.emit(true);
                 this.resetFormValues();
             },
             (err) => {
@@ -538,7 +538,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
                     console.log('Proposal updated', result);
                     this.propObj = result.proposal;
 
-                    // this.refreshProp.emit(true);
+                    this.refreshProp.emit(true);
                     this.resetFormValues();
                 },
                 (err) => {
