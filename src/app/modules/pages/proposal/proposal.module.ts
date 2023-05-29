@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { MatSliderModule } from '@angular/material/slider';
 import { TranslocoModule } from '@ngneat/transloco';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -25,9 +26,10 @@ import { CreateProposalComponent } from './create-proposal/create-proposal.compo
 
 import { proposalRoutes } from './proposal.routing';
 import { ProposalInfoComponent } from './proposal-info/proposal-info.component';
+import { VotingComponent } from './voting/voting.component';
 
 @NgModule({
-    declarations: [ProposalComponent, CreateProposalComponent, ProposalInfoComponent],
+    declarations: [ProposalComponent, CreateProposalComponent, ProposalInfoComponent, VotingComponent],
     imports: [
         RouterModule.forChild(proposalRoutes),
         CommonModule,
@@ -46,7 +48,8 @@ import { ProposalInfoComponent } from './proposal-info/proposal-info.component';
         MatTabsModule,
         MatFormFieldModule,
         MatInputModule,
+        MatSliderModule,
         EditableModule,
     ],
 })
-export class ProposalModule {}
+export class ProposalModule { }
