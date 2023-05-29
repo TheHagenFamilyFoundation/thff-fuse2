@@ -13,6 +13,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTabsModule } from '@angular/material/tabs';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -37,6 +38,7 @@ import { VotingComponent } from './voting/voting.component';
         MatMenuModule,
         MatTooltipModule,
         MatTableModule,
+        MatTabsModule,
         MatPaginatorModule,
         MatSortModule,
     ],

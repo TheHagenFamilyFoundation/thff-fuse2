@@ -57,7 +57,8 @@
                                         Voting
                                     </div>
                                     <div class="flex flex-col sm:flex-row items-start mt-8">
-                                        <app-voting [isDirector]="isDirector" [prop]="proposal"></app-voting>
+                                        <app-voting (refreshProp)="refreshProp()" [isDirector]="isDirector"
+                                            [prop]="proposal"></app-voting>
                                     </div>
                                 </div>
                             </div>

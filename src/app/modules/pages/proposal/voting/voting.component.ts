@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChange } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, } from '@angular/core';
 
 import { coerceNumberProperty } from '@angular/cdk/coercion';
 
@@ -11,7 +11,7 @@ import { DirectorService } from 'app/core/services/director/director.service';
     styleUrls: ['./voting.component.scss']
 })
 export class VotingComponent implements OnInit {
-
+    @Output() refreshProp = new EventEmitter<boolean>();
     @Input()
     isDirector: any;
     @Input()
@@ -23,7 +23,7 @@ export class VotingComponent implements OnInit {
     userID: string;
 
     outputVote: string = 'No Vote';
-    defaultVote: -1;
+    defaultVote: any;
 
     autoTicks = false;
 
@@ -93,7 +93,8 @@ export class VotingComponent implements OnInit {
 
         this._directorService.vote(data).subscribe(
             (vote) => {
-                console.log('vote', vote);
+                console.log('vote 1', vote);
+                this.refreshProp.emit(true);
             },
             (err) => {
                 console.log('err', err);
@@ -107,6 +108,7 @@ export class VotingComponent implements OnInit {
 
         votes.forEach((vote) => {
             if (vote.userID === this.userID) {
+                console.log('vote2', vote);
                 this.vote = vote.vote;
             }
 
