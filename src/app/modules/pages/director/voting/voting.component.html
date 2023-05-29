@@ -16,7 +16,131 @@
     <!-- End of Header -->
 
     <!-- Main -->
-    <div class="text-center pt-4 sm:pt-6 ">
-        Main
+    <!-- <div class="text-center pt-4 sm:pt-6 "> -->
+    <div class="flex-auto border-t -mt-px pt-4 sm:pt-6">
+        <div class="w-full max-w-screen-xl mx-auto">
+            <!-- Tabs -->
+            <mat-tab-group class="sm:px-2" [animationDuration]="'0'">
+                <!-- Proposals -->
+                <mat-tab label="Proposals">
+                    <ng-template matTabContent>
+                        <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+
+                            <div class="flex justify-center ...">
+                                <div class="w-200">
+
+                                    <div>
+                                        <mat-form-field class="w-full">
+                                            <!-- <mat-label>Filter</mat-label> -->
+                                            <input matInput placeholder="Filter" #filterInput>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!--TODO: Remove -->
+                                    <!-- Debugging -->
+                                    <!-- Limit - {{limit}} Skip - {{skip}} -->
+
+                                    <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
+                                        matSortDirection="desc">
+                                        <!-- Project Title Column -->
+                                        <ng-container matColumnDef="projectTitle">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Project Title
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
+                                        </ng-container>
+
+                                        <!-- Organization Column -->
+                                        <ng-container matColumnDef="organization">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Organization
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row"> {{ row.organization?.name }} </mat-cell>
+                                        </ng-container>
+
+
+                                        <!-- createdOn Column -->
+                                        <ng-container matColumnDef="createdOn">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                                                Created On
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.createdAt | date: "MM/dd/yyyy" }}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <!-- Votes Column -->
+                                        <ng-container matColumnDef="votes">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Votes
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{row.votes.length}}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <!-- Score Column -->
+                                        <ng-container matColumnDef="score">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Score
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{row.score ? row.score : 0}}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <!-- link Column -->
+                                        <ng-container matColumnDef="link">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Link
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                <button mat-raised-button color="primary" (click)="
+                                                        goToProposal(row.proposalID)
+                                                    " mat-dialog-close>
+                                                    Go to Proposal
+                                                </button>
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns">
+                                        </mat-row>
+                                    </mat-table>
+
+                                    <div *ngIf="!loaded">
+                                        <mat-spinner></mat-spinner>
+                                    </div>
+                                    <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
+                                        [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-template>
+                </mat-tab>
+
+                <!-- Voting -->
+                <mat-tab label="Voting">
+                    <ng-template matTabContent>
+                        <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="flex flex-col items-start">
+                                <div class="text-xl font-semibold">
+                                    Voting
+                                </div>
+                                <div class="flex flex-col sm:flex-row items-start mt-8">
+                                    Proposals Scroll
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                </mat-tab>
+
+            </mat-tab-group>
+        </div>
     </div>
+
+    <!-- </div> -->
 </div>
