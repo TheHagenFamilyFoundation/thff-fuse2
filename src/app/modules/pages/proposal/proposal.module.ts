@@ -27,9 +27,10 @@ import { CreateProposalComponent } from './create-proposal/create-proposal.compo
 import { proposalRoutes } from './proposal.routing';
 import { ProposalInfoComponent } from './proposal-info/proposal-info.component';
 import { VotingComponent } from './voting/voting.component';
+import { ProposalSummaryComponent } from './proposal-summary/proposal-summary.component';
 
 @NgModule({
-    declarations: [ProposalComponent, CreateProposalComponent, ProposalInfoComponent, VotingComponent],
+    declarations: [ProposalComponent, CreateProposalComponent, ProposalInfoComponent, VotingComponent, ProposalSummaryComponent],
     imports: [
         RouterModule.forChild(proposalRoutes),
         CommonModule,
