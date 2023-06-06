@@ -102,4 +102,29 @@ export class ProposalService {
         return this.http.get(urlString);
     }
 
+    //mongo ids
+    sponsorProposal(proposal: string, user: string): Observable<any> {
+
+        const urlString = `${this.apiUrl}/proposal/${proposal}`;
+
+        const body = {
+            sponsor: user
+        };
+
+        return this.http.patch(urlString, body);
+
+    }
+
+    removeSponsorProposal(proposal: string): Observable<any> {
+
+        const urlString = `${this.apiUrl}/proposal/${proposal}`;
+
+        const body = {
+            sponsor: null
+        };
+
+        return this.http.patch(urlString, body);
+
+    }
+
 }

@@ -1,0 +1,81 @@
+<div class="flex flex-col sm:flex-row items-start justify-between">
+    <div class="text-lg font-medium tracking-tight leading-6 truncate">
+        Summary
+    </div>
+</div>
+<div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+        <!-- Purpose -->
+        <div
+            class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto lg:row-span-2 p-6 bg-card shadow rounded-2xl overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-start justify-between">
+                <div class="text-lg font-medium tracking-tight leading-6">Purpose</div>
+            </div>
+            <div>
+                {{prop?.purpose}}
+            </div>
+            <div class="grid grid-cols-2 border-t divide-x -m-6 mt-4 bg-gray-50 dark:bg-transparent">
+                <div class="flex flex-col items-center justify-center p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+                        {{prop?.amountRequested | currency}}
+                    </div>
+                    <div class="mt-1 text-center text-secondary">Amount Requested</div>
+                </div>
+                <div class="flex flex-col items-center justify-center p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+                        {{prop?.totalProjectCost | currency}}
+                    </div>
+                    <div class="mt-1 text-center text-secondary">Total Project Cost</div>
+                </div>
+            </div>
+            <div class="py-4">
+                Click on Proposal Information Tab to View More.
+            </div>
+        </div>
+        <!-- Sponsor -->
+        <div
+            class="sm:col-span-1 md:col-span-4 lg:col-span-1 lg:row-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-start justify-between">
+                <div class="text-lg font-medium tracking-tight leading-6 truncate">Sponsor</div>
+            </div>
+            <div *ngIf="hasSponsor">{{prop?.sponsor?.email}}</div>
+            <div *ngIf="hasSponsor">
+                <div>
+                    <button *ngIf="!sponsorQuestion" mat-raised-button (click)="removeSponsor()">
+                        Remove Sponsor
+                    </button>
+                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="confirmRemoveSponsor()">
+                        Confirm
+                    </button>
+                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="cancel()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            <div *ngIf=" !hasSponsor">
+                <div>
+                    Click Here to Sponsor
+                </div>
+                <div>
+                    <button *ngIf="!sponsorQuestion" mat-raised-button (click)="sponsor()">
+                        Sponsor
+                    </button>
+                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="confirmSponsor()">
+                        Confirm
+                    </button>
+                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="cancel()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Voting -->
+        <div class=" sm:col-span-1 md:col-span-4 lg:col-span-1 lg:row-span-2 flex flex-col flex-auto p-6 bg-card shadow
+                        rounded-2xl overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-start justify-between">
+                <div class="text-lg font-medium tracking-tight leading-6 truncate">Voting</div>
+            </div>
+            <app-voting (refreshProp)="refreshProposal()" [isDirector]="isDirector" [prop]="prop"></app-voting>
+        </div>
+    </div>
+</div>

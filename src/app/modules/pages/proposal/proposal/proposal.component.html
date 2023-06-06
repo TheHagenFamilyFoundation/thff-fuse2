@@ -31,13 +31,25 @@
         </div>
     </div>
     <div *ngIf="isDirector">
-
         <div class="flex-auto border-t -mt-px pt-4 sm:pt-6">
             <div class="w-full max-w-screen-xl mx-auto">
                 <!-- Tabs -->
                 <mat-tab-group class="sm:px-2" [animationDuration]="'0'">
-                    <!-- Proposal -->
-                    <mat-tab label="Proposal">
+                    <!-- Summary -->
+                    <mat-tab label="Summary">
+                        <ng-template matTabContent>
+                            <div
+                                class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                <div *ngIf="proposal">
+                                    <app-proposal-summary (refreshProp)="refreshProp()" [isDirector]="isDirector"
+                                        [prop]="proposal"></app-proposal-summary>
+                                </div>
+                                <!-- <app-proposal-summary [isDirector]="isDirector" [inOrg]="inOrg"></app-proposal-summary> -->
+                            </div>
+                        </ng-template>
+                    </mat-tab>
+                    <!-- Proposal Information-->
+                    <mat-tab label="Proposal Information">
                         <ng-template matTabContent>
                             <div
                                 class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
