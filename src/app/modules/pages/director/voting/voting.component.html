@@ -70,6 +70,16 @@
                                             </mat-cell>
                                         </ng-container>
 
+                                        <!-- Sponsored Column -->
+                                        <ng-container matColumnDef="sponsored">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Sponsored
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{row?.sponsor ? 1 : 0}}
+                                            </mat-cell>
+                                        </ng-container>
+
                                         <!-- Votes Column -->
                                         <ng-container matColumnDef="votes">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>
