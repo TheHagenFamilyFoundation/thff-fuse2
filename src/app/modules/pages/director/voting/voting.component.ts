@@ -31,7 +31,7 @@ export class VotingComponent implements AfterViewInit {
 
     resultsLength = 0;
 
-    displayedColumns = ['projectTitle', 'organization', 'createdOn', 'votes', 'score', 'link'];
+    displayedColumns = ['projectTitle', 'organization', 'createdOn', 'sponsored', 'votes', 'score', 'link'];
 
     data: [];
 
