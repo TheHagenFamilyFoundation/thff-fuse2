@@ -152,7 +152,7 @@
                         <mat-form-field>
                             <input matInput placeholder="Amount Requested" formControlName="amountRequested"
                                 maxlength="10" value="{{ amountRequested }}" (keyup)="
-                                    amountedRequested$.next($event.target.value)
+                                    amountRequested$.next($event.target.value)
                                 " required />
                             <mat-error *ngIf="
                                     groupedForm
@@ -457,12 +457,12 @@
                             </label>
                             <editable data-testid="sample-input-click" (save)="
                                 updateSingleField(
-                                    'amountedRequested',
+                                    'amountRequested',
                                     'amountRequestedControl'
                                 )
                             " (cancel)="
                                 cancelSingleField(
-                                    'amountedRequested',
+                                    'amountRequested',
                                     'amountRequestedControl'
                                 )
                             ">
