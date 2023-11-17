@@ -285,6 +285,7 @@ export class AuthService {
             this.apiUrl = environment.apiUrl;
         }
     }
+
     getBackendURL(): string {
         return this.apiUrl;
     }
