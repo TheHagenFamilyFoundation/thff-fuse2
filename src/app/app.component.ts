@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from './core/auth/auth.service';
+import { BackendService } from './core/services/backend.service';
 
 @Component({
     selector: 'app-root',
@@ -11,7 +12,7 @@ export class AppComponent implements OnInit {
     /**
      * Constructor
      */
-    constructor(public authService: AuthService) {}
+    constructor(public authService: AuthService, public _backendService: BackendService) { }
 
     ngOnInit(): void {
         console.log('app init');
@@ -27,5 +28,17 @@ export class AppComponent implements OnInit {
         } catch (e) {
             console.error(e);
         }
+
+        this.backendHealthChecker();
     }
+
+    backendHealthChecker(): void {
+
+        this._backendService
+            .health()
+            .subscribe((health) => {
+                console.log('health', health);
+            });
+    };
+
 }
