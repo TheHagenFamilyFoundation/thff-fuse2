@@ -96,7 +96,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
             (response) => {
                 console.log('sign-in - redirecting', response);
 
-                this.setScheme(response.settings.scheme);
+                this.setScheme(response.userSettings.scheme);
 
                 // Set the redirect url.
                 // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
