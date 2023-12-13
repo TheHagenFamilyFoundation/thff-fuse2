@@ -121,7 +121,7 @@ export class AuthService {
         console.log('this.apiUrl', this.apiUrl);
 
         return this._httpClient
-            .put(`${this.apiUrl}/auth/login`, credentials)
+            .post(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
                     //debug
