@@ -125,7 +125,7 @@ export class AuthService {
             .pipe(
                 switchMap((response: any) => {
                     //debug
-                    console.log('response', response);
+                    console.log('auth service - response', response);
 
                     // Store the access token in the local storage
                     this.accessToken = response.token;
@@ -208,7 +208,7 @@ export class AuthService {
         password: string;
         // company: string;
     }): Observable<any> {
-        return this._httpClient.post(`${this.apiUrl}/auth/sign-up`, user);
+        return this._httpClient.post(`${this.apiUrl}/auth/register`, user);
     }
 
     /**

@@ -113,6 +113,8 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
             (response) => {
                 console.log('sign-in - response', response);
 
+                const errorMessage = response.error.error ? response.error.error[0].msg : response.error.message;
+
                 // Re-enable the form
                 this.signInForm.enable();
 
@@ -122,7 +124,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                 // Set the alert
                 this.alert = {
                     type: 'error',
-                    message: response.error.message,
+                    message: errorMessage,
                 };
 
                 // Show the alert

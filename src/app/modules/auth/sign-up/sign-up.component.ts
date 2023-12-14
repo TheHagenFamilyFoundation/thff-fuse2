@@ -30,7 +30,7 @@ export class AuthSignUpComponent implements OnInit {
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router
-    ) {}
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -78,6 +78,8 @@ export class AuthSignUpComponent implements OnInit {
             (response) => {
                 console.log('signing up - response', response);
 
+                const errorMessage = response.error.error ? response.error.error[0].msg : response.error.message;
+
                 // Re-enable the form
                 this.signUpForm.enable();
 
@@ -87,7 +89,7 @@ export class AuthSignUpComponent implements OnInit {
                 // Set the alert
                 this.alert = {
                     type: 'error',
-                    message: response.error.message,
+                    message: errorMessage,
                 };
 
                 // Show the alert
