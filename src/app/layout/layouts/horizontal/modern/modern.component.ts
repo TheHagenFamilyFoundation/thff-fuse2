@@ -180,7 +180,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         console.log('modern - get organizations', this.email);
 
         this._getUserService
-            .getUserbyID(this.currentUser.id)
+            .getUserbyID(this.currentUser._id || this.currentUser.id)
             .subscribe((user) => {
                 console.log('user', user);
 
