@@ -35,4 +35,17 @@ export class BackendService {
         return this.http.get(urlString);
     }
 
+    pinger(): Observable<any> {
+        this.getBackendURL();
+        const urlString = `${this.apiUrl}/ping`; //TODO
+
+        console.log('Inside Pinger');
+        console.log('check localStorage', localStorage.getItem('accessToken'));
+        const token = localStorage.getItem('accessToken');
+
+        console.log('ping url - ', urlString);
+
+        return this.http.post(urlString, { token });
+    }
+
 }

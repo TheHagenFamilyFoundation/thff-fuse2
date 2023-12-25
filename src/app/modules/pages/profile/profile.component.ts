@@ -105,8 +105,10 @@ export class ProfileComponent implements OnInit {
     getOrganizations(): void {
         console.log('profile - get organizations', this.email);
 
+        console.log('this.currentUser', this.currentUser);
+
         this._getUserService
-            .getUserbyID(this.currentUser.id)
+            .getUserbyID(this.currentUser._id)
             .subscribe((user) => {
                 console.log('user', user);
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { AuthService } from './core/auth/auth.service';
 import { BackendService } from './core/services/backend.service';
@@ -8,7 +8,10 @@ import { BackendService } from './core/services/backend.service';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+
+    pinger: any;
+
     /**
      * Constructor
      */
@@ -30,6 +33,17 @@ export class AppComponent implements OnInit {
         }
 
         this.backendHealthChecker();
+        //run 30 seconds
+        this.pinger = setInterval(() => {
+            this.backendPinger();
+        }, 30000);
+
+    }
+
+    ngOnDestroy(): void {
+        if (this.pinger) {
+            clearInterval(this.pinger);
+        }
     }
 
     backendHealthChecker(): void {
@@ -40,5 +54,15 @@ export class AppComponent implements OnInit {
                 console.log('health', health);
             });
     };
+
+    //runs every 30 seconds
+    backendPinger(): void {
+        console.log('pinging backend');
+        this._backendService
+            .pinger()
+            .subscribe((health) => {
+                console.log('health', health);
+            });
+    }
 
 }
