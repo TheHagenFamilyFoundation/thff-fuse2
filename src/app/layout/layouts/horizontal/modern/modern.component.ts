@@ -184,9 +184,9 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             .subscribe((user) => {
                 console.log('user', user);
 
-                if (user.length > 0) {
-                    if (user[0].organizations.length > 0) {
-                        this.organizations = user[0].organizations;
+                if (user) {
+                    if (user.organizations.length > 0) {
+                        this.organizations = user.organizations;
 
                         console.log('this.organizations', this.organizations);
 
