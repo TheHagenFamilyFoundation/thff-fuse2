@@ -34,7 +34,7 @@ export class UpdateOrganizationInfoService {
         console.log('body', body);
 
         //http://localhost:1337/organizationinfo?organizationInfoID=id
-        const urlString = `${this.apiUrl}/organizationInfo?organizationInfoID=${orgInfoID}`;
+        const urlString = `${this.apiUrl}/organization-info?organizationInfoID=${orgInfoID}`;
 
         //should be just 1 field
         this.body = body;
