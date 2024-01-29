@@ -125,7 +125,7 @@ export class UserOrganizationComponent implements OnInit {
         this.getUserService.getUserbyID(this.user._id).subscribe((user) => {
             console.log('user-organization - checkOrganizations - user', user);
 
-            const organization = user[0]?.organizations;
+            const organization = user?.organizations;
 
             if (organization && organization.length > 0) {
                 this.inOrganization = true;
