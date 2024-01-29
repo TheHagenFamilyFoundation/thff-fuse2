@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
     /**
      * Constructor
      */
-    constructor(private _authService: AuthService, private _router: Router) {}
+    constructor(private _authService: AuthService, private _router: Router) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
