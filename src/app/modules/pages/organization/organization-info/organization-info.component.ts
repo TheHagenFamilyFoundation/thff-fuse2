@@ -412,7 +412,7 @@ export class OrganizationInfoComponent implements OnInit {
         console.log('this.org', this.org);
 
         console.log('this.org.organizationID', this.org.organizationID);
-        this.orgID = this.org.id;
+        this.orgID = this.org._id;
 
         this.getOrganizationInfo();
     }
@@ -423,11 +423,10 @@ export class OrganizationInfoComponent implements OnInit {
         this.getOrganizationInfoService
             .getOrgInfobyOrgID(this.orgID)
             .subscribe((orgInfo) => {
-                if (orgInfo.length > 0) {
+                if (orgInfo) {
                     console.log('orgInfo', orgInfo);
-                    [this.orgInfo] = orgInfo;
-
-                    console.log('this.orgInfo.id', this.orgInfo.id);
+                    this.orgInfo = orgInfo;
+                    console.log('this.orgInfo._id', this.orgInfo._id);
 
                     this.setFields();
                 } else {
@@ -443,7 +442,7 @@ export class OrganizationInfoComponent implements OnInit {
                         'org object to pass in as organization',
                         this.org
                     );
-                    this.orgInfo.organization = this.org.id;
+                    this.orgInfo.organization = this.org._id;
                     this.createOrganizationInfo(this.orgInfo);
                 }
             });
@@ -458,7 +457,7 @@ export class OrganizationInfoComponent implements OnInit {
                     console.log('Org Info Created', result.result);
                     this.orgInfo = result.result;
 
-                    console.log('new this.orgInfo.id', this.orgInfo.id);
+                    console.log('new this.orgInfo._id', this.orgInfo._id);
                 },
                 (err) => {
                     console.log(err);
@@ -470,7 +469,7 @@ export class OrganizationInfoComponent implements OnInit {
         console.log('getting Organization Info');
 
         this.deleteOrganizationInfoService
-            .deleteOrgInfobyOrgInfoID(this.orgInfo.id)
+            .deleteOrgInfobyOrgInfoID(this.orgInfo._id)
             .subscribe((result) => {
                 console.log('result', result);
 
@@ -675,7 +674,7 @@ export class OrganizationInfoComponent implements OnInit {
 
         if (this.orgInfo) {
             this.deleteOrganizationInfoService
-                .deleteOrgInfobyOrgInfoID(this.orgInfo.id)
+                .deleteOrgInfobyOrgInfoID(this.orgInfo._id)
                 .subscribe((result) => {
                     console.log('result', result);
 
