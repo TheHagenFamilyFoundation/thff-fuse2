@@ -52,26 +52,26 @@ export class OrganizationsComponent implements OnInit {
     //get user
     //set user object from localStorage
     getUser(): void {
-        console.log('user LOI - getUser');
+        console.log('Organizations - user - getUser');
 
         console.log(
-            'user LOI - currentUser',
+            'Organizations - user - currentUser',
             JSON.parse(localStorage.getItem('currentUser'))
         );
 
         this.user = JSON.parse(localStorage.getItem('currentUser'));
-        console.log('this.user', this.user);
+        console.log('Organizations - this.user', this.user);
     }
     //get organizations with userId
     // checks if user is in any organizations
     checkOrganizations(): void {
-        console.log('user-organizaiton - check organizations', this.user.id);
+        console.log('user-organizaiton - check organizations', this.user._id);
 
         // will return the organizations
-        this.getUserService.getUserbyID(this.user.id).subscribe((user) => {
+        this.getUserService.getUserbyID(this.user._id).subscribe((user) => {
             console.log('user-organization - checkOrganizations - user', user);
 
-            const organization = user[0].organizations;
+            const organization = user.organizations;
 
             if (organization && organization.length > 0) {
                 // this.inOrganization = true;
