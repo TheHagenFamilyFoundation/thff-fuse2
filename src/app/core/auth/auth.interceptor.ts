@@ -53,8 +53,6 @@ export class AuthInterceptor implements HttpInterceptor {
             });
         }
 
-        console.log('after check');
-
         // Response
         return next.handle(newReq).pipe(
             catchError((error) => {
@@ -63,6 +61,7 @@ export class AuthInterceptor implements HttpInterceptor {
                     error instanceof HttpErrorResponse &&
                     error.status === 401
                 ) {
+
                     // Sign out
                     this._authService.signOut();
 
