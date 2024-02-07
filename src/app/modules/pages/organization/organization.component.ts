@@ -121,7 +121,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     getOrganization(orgID): void {
-        console.log('get organizations');
+        console.log('get organization');
 
         // query database for that organization
 
