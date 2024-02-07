@@ -153,11 +153,11 @@ export class AuthService {
      * Sign in using the access token
      */
     signInUsingToken(): Observable<any> {
+
         // Renew token
         return this._httpClient
             .post(`${this.apiUrl}/auth/refresh-access-token`, {
-                accessToken: this.accessToken,
-                user: this.currentUser,
+                accessToken: this.accessToken
             })
             .pipe(
                 catchError(() =>
@@ -165,6 +165,7 @@ export class AuthService {
                     of(false)
                 ),
                 switchMap((response: any) => {
+
                     // Store the access token in the local storage
                     this.accessToken = response.token;
 
@@ -242,6 +243,9 @@ export class AuthService {
      * Check the authentication status
      */
     check(): Observable<boolean> {
+
+        console.log('checking');
+
         // Check if the user is logged in
         if (this._authenticated) {
             return of(true);
