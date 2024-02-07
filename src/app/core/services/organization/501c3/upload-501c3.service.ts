@@ -33,12 +33,12 @@ export class Upload501c3Service {
 
     // file from event.target.files[0]
     upload501c3(file: File, orgID: string): Observable<any> {
-        console.log('upload501c3');
+        console.log('upload501c3', file);
 
-        const urlString = `${this.apiUrl}/upload501c3/${orgID}`;
+        const urlString = `${this.apiUrl}/organization-501c3/${orgID}`;
 
         const formData = new FormData();
-        formData.append('avatar', file);
+        formData.append('doc501c3', file);
 
         const params = new HttpParams();
 
