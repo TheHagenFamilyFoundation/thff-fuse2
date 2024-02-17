@@ -227,15 +227,15 @@ export class ProposalComponent implements OnInit, OnDestroy {
         this._proposalService
             .getProposalByID(proposalID)
             .subscribe((proposal) => {
-                if (proposal.length > 0) {
+                if (proposal) {
                     console.log('proposal component - proposal', proposal);
 
-                    this.proposal = proposal[0];
-                    this.propID = this.proposal.id; //mongo id
+                    this.proposal = proposal;
+                    this.propID = this.proposal._id; //mongo id
 
                     this.org = this.proposal.organization;
+                    console.log('this.org', this.org);
                     this.organizationLink = '/pages/organization/' + this.org.organizationID;
-
 
                     this.getOrganization(this.org.organizationID);
 
@@ -253,19 +253,20 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     getOrganization(orgID): void {
-        console.log('check organizations');
+        console.log('check organizations', orgID);
 
         // query database for that organization
 
         this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
-            console.log('organization component - org', org);
+            console.log('proposal organization component - org', org);
 
-            this.org = org[0];
-            this.organizationID = this.org.id;
+            this.org = org;
+            this.organizationID = this.org._id;
+            console.log('this.organizationID', this.organizationID);
 
             //checking if director and in org
             //check if in org - this sets inOrg
-            this.checkInOrganization(this.currentUser.id);
+            this.checkInOrganization(this.currentUser._id);
             //check if director
             this.checkIsDirectorAndInOrg();
 
@@ -312,9 +313,9 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
         // finding the object whose id
         const object = this.org.users.find((obj) => {
-            console.log('obj.id', obj.id);
+            console.log('obj.id', obj._id);
             console.log('id', id);
-            return obj.id === id;
+            return obj._id === id;
         });
         console.log('object', object);
         this.inOrg = object ? true : false;
@@ -560,9 +561,9 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
     //calls the updateOrganizationService
     updateProposal(body: any): void {
-        console.log('updateProposal', body);
+        console.log('proposal - updateProposal', body);
 
-        this._proposalService.updateProposal(this.proposalID, body).subscribe(
+        this._proposalService.updateProposal(this.propID, body).subscribe(
             (result) => {
                 console.log('Proposal updated', result);
                 this.proposal = result;
@@ -602,7 +603,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
         console.log('new - this.propObj', this.propObj);
 
         this._proposalService
-            .updateProposal(this.proposalID, this.propObj)
+            .updateProposal(this.propID, this.propObj)
             .subscribe(
                 (result) => {
                     console.log('Proposal updated', result);
