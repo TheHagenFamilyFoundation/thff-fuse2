@@ -217,13 +217,13 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         this._proposalService
             .getProposalByID(proposalID)
             .subscribe((proposal) => {
-                if (proposal.length > 0) {
-                    console.log('proposal component - proposal', proposal);
+                if (proposal) {
+                    console.log('proposal info component - proposal', proposal);
 
                     // [this.orgInfo] = orgInfo;
 
-                    this.proposal = proposal[0];
-                    this.propID = this.proposal.id; //mongo id
+                    this.proposal = proposal;
+                    this.propID = this.proposal._id; //mongo id
                     this.setFields();
                 } else {
                     //send user back to welcome
@@ -490,9 +490,9 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
 
     //calls the updateOrganizationService
     updateProposal(body: any): void {
-        console.log('updateProposal', body);
+        console.log('proposal-info - updateProposal', body);
 
-        this._proposalService.updateProposal(this.proposalID, body).subscribe(
+        this._proposalService.updateProposal(this.propID, body).subscribe(
             (result) => {
                 console.log('Proposal updated', result);
                 this.proposal = result.proposal;
@@ -532,7 +532,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         console.log('new - this.propObj', this.propObj);
 
         this._proposalService
-            .updateProposal(this.proposalID, this.propObj)
+            .updateProposal(this.propID, this.propObj)
             .subscribe(
                 (result) => {
                     console.log('Proposal updated', result);
