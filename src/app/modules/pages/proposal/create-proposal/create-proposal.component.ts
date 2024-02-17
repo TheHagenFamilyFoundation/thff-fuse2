@@ -282,11 +282,13 @@ export class CreateProposalComponent implements OnInit {
             amountRequested: this.amountRequested,
             itemizedBudget: this.itemizedBudget,
             totalProjectCost: this.totalProjectCost,
-            organization: this.org, //mongo id
         };
 
+        console.log('sending this to backend', this.proposalObj);
+        console.log('this.org', this.org);
+
         // call the service
-        this.proposalService.createProposal(this.proposalObj).subscribe(
+        this.proposalService.createProposal(this.proposalObj, this.org).subscribe(
             (result) => {
                 console.log('Proposal Info Created', result);
                 this.router.navigate([`/pages/proposal/${result.proposalID}`]);
