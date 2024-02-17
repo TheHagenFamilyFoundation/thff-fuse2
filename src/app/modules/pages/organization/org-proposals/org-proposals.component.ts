@@ -45,7 +45,7 @@ export class OrgProposalsComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        console.log('org-proposals')
+        console.log('org-proposals');
         // this.email = this.user.email;
 
         if (!localStorage.getItem('currentUser')) {
@@ -60,7 +60,8 @@ export class OrgProposalsComponent implements OnInit {
     }
 
     checkProposals(): void {
-        console.log("proposals**", this.org.proposals);
+        console.log('proposals**', this.org.proposals);
+        console.log('this.org._id', this.org._id);
 
         // return the proposals
 
@@ -77,9 +78,10 @@ export class OrgProposalsComponent implements OnInit {
 
     createProposal(): void {
         console.log('create proposal');
-        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org.id } });
+        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id } });
     }
     goToProposal(proposalID: string): void {
+        console.log('proposalID', proposalID);
         this._router.navigate(['/pages/proposal/', proposalID]);
     }
 }
