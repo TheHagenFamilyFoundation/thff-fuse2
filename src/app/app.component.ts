@@ -36,17 +36,17 @@ export class AppComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         console.log('app init');
 
-        try {
-            this.authService.initializeBackendURL().subscribe((backend) => {
-                console.log('backend', backend);
-                // console.log('auth-service - this.apiUrl', this.apiUrl);
-                sessionStorage.setItem('backend_url', backend.url);
-                //set auth service
-                this.authService.setBackendURL();
-            });
-        } catch (e) {
-            console.error(e);
-        }
+        // try {
+        //     this.authService.initializeBackendURL().subscribe((backend) => {
+        //         console.log('backend', backend);
+        //         // console.log('auth-service - this.apiUrl', this.apiUrl);
+        //         sessionStorage.setItem('backend_url', backend.url);
+        //         //set auth service
+        //         this.authService.setBackendURL();
+        //     });
+        // } catch (e) {
+        //     console.error(e);
+        // }
 
         this.backendHealthChecker();
         //run 30 seconds

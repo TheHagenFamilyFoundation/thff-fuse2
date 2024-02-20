@@ -17,11 +17,10 @@ export class BackendService {
     }
 
     getBackendURL(): void {
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
+        if (environment.production === true) {
+            this.apiUrl = sessionStorage.getItem('backend_url');
         } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('BackendService - this.apiUrl', this.apiUrl);
+            this.apiUrl = environment.apiUrl;
         }
     }
 
