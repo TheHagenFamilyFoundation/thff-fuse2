@@ -15,7 +15,21 @@ export class AppComponent implements OnInit, OnDestroy {
     /**
      * Constructor
      */
-    constructor(public authService: AuthService, public _backendService: BackendService) { }
+    constructor(public authService: AuthService, public _backendService: BackendService) {
+
+        try {
+            this.authService.initializeBackendURL().subscribe((backend) => {
+                console.log('backend', backend);
+                // console.log('auth-service - this.apiUrl', this.apiUrl);
+                sessionStorage.setItem('backend_url', backend.url);
+                //set auth service
+                this.authService.setBackendURL();
+            });
+        } catch (e) {
+            console.error(e);
+        }
+
+    }
 
     ngOnInit(): void {
         console.log('app init');
