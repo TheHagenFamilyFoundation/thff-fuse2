@@ -17,6 +17,8 @@ export class AppComponent implements OnInit, OnDestroy {
      */
     constructor(public authService: AuthService, public _backendService: BackendService) {
 
+        console.log('APP CONSTRUCTOR');
+
         try {
             this.authService.initializeBackendURL().subscribe((backend) => {
                 console.log('backend', backend);
