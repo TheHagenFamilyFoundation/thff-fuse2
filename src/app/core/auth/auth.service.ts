@@ -21,7 +21,7 @@ export class AuthService {
      */
     constructor(
         private _httpClient: HttpClient,
-        private _userService: UserService
+        private _userService: UserService,
     ) {
         // console.log('auth service constructor');
         // console.log('auth service - environment', environment);
@@ -308,4 +308,5 @@ export class AuthService {
             return of(true);
         }
     }
+
 }

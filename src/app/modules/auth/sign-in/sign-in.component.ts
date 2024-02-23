@@ -11,9 +11,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { BackendService } from 'app/core/services/backend.service';
 import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
 import { FuseConfigService } from '@fuse/services/config';
 import { Subject, takeUntil } from 'rxjs';
+
 
 @Component({
     selector: 'auth-sign-in',
@@ -43,6 +45,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
+        private _backendService: BackendService,
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _fuseConfigService: FuseConfigService
@@ -97,7 +100,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                 console.log('sign-in - redirecting', response);
 
                 this.setScheme(response.userSettings.scheme);
-
+                this._backendService.startPing();
                 // Set the redirect url.
                 // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
                 // to the correct page after a successful sign in. This way, that url can be set via
