@@ -250,7 +250,9 @@ export class CreateOrganizationComponent implements OnInit {
 
             // logged in so return true
             this.user = JSON.parse(localStorage.getItem('currentUser'));
-            this.userId = this.user.id;
+            console.log('this.user', this.user);
+            this.userId = this.user._id;
+            console.log('this.user', this.userId);
             this.userEmail = this.user.email;
         } else {
             // not logged in - redirect to home?
@@ -441,7 +443,7 @@ export class CreateOrganizationComponent implements OnInit {
             website: this.website,
         };
         const body = {
-            userId: this.userId,
+            userId: this.userId, //remove
             orgInfo: this.orgObj,
             description: this.description,
         };

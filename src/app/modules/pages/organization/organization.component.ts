@@ -121,19 +121,19 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     getOrganization(orgID): void {
-        console.log('check organizations');
+        console.log('get organization');
 
         // query database for that organization
 
         this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
             console.log('organization component - org', org);
 
-            this.org = org[0];
-            this.organizationID = this.org.id;
+            this.org = org;
+            this.organizationID = this.org._id;
 
             //checking if director and in org
             //check if in org - this sets inOrg
-            this.checkInOrganization(this.currentUser.id);
+            this.checkInOrganization(this.currentUser._id);
             //check if director
             this.checkIsDirectorAndInOrg();
 
@@ -183,13 +183,13 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         }
     }
 
-    checkInOrganization(id: string): void {
+    checkInOrganization(_id: string): void {
 
         // finding the object whose id
         const object = this.org.users.find((obj) => {
-            console.log('obj.id', obj.id);
-            console.log('id', id);
-            return obj.id === id;
+            console.log('obj._id', obj._id);
+            console.log('_id', _id);
+            return obj._id === _id;
         });
         console.log('object', object);
         this.inOrg = object ? true : false;

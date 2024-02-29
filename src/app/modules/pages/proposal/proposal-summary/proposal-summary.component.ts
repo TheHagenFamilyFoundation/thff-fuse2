@@ -69,7 +69,8 @@ export class ProposalSummaryComponent implements OnInit {
 
         console.log('confirming remove sponsor');
 
-        this._proposalService.removeSponsorProposal(this.prop.id)
+        //blank string for user
+        this._proposalService.sponsorProposal(this.prop._id, '', false)
             .subscribe((proposal) => {
                 console.log('after removing sponsor proposal', proposal);
 
@@ -85,7 +86,7 @@ export class ProposalSummaryComponent implements OnInit {
     confirmSponsor(): void {
         this.sponsorQuestion = false;
 
-        this._proposalService.sponsorProposal(this.prop.id, this.currentUser.id)
+        this._proposalService.sponsorProposal(this.prop._id, this.currentUser._id, true)
             .subscribe((proposal) => {
                 console.log('after sponsoring proposal', proposal);
 
@@ -109,6 +110,5 @@ export class ProposalSummaryComponent implements OnInit {
     checkHasSponsor(): void {
         this.hasSponsor = this.prop.sponsor !== null ? this.hasSponsor = true : this.hasSponsor = true;
     }
-
 
 }

@@ -21,7 +21,7 @@ export class AuthService {
      */
     constructor(
         private _httpClient: HttpClient,
-        private _userService: UserService
+        private _userService: UserService,
     ) {
         // console.log('auth service constructor');
         // console.log('auth service - environment', environment);
@@ -121,27 +121,24 @@ export class AuthService {
         console.log('this.apiUrl', this.apiUrl);
 
         return this._httpClient
-            .put(`${this.apiUrl}/auth/login`, credentials)
+            .post(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
                     //debug
-                    console.log('response', response);
+                    console.log('auth service - response', response);
 
-                    // Store the access token in the local storage
-                    this.accessToken = response.token;
-                    this.currentUser = JSON.stringify(response.user);
+                    if (response.newPassword !== true) {
 
-                    //TODO: debug can remove
-                    // console.log(
-                    //     'currentUser - user',
-                    //     JSON.parse(this.currentUser)
-                    // );
+                        // Store the access token in the local storage
+                        this.accessToken = response.token;
+                        this.currentUser = JSON.stringify(response.user);
 
-                    // Set the authenticated flag to true
-                    this._authenticated = true;
+                        // Set the authenticated flag to true
+                        this._authenticated = true;
 
-                    // // Store the user on the user service
-                    this._userService.user = response.user;
+                        // // Store the user on the user service
+                        this._userService.user = response.user;
+                    }
 
                     // Return a new observable with the response
                     return of(response);
@@ -153,11 +150,11 @@ export class AuthService {
      * Sign in using the access token
      */
     signInUsingToken(): Observable<any> {
+
         // Renew token
         return this._httpClient
             .post(`${this.apiUrl}/auth/refresh-access-token`, {
-                accessToken: this.accessToken,
-                user: this.currentUser,
+                accessToken: this.accessToken
             })
             .pipe(
                 catchError(() =>
@@ -165,6 +162,7 @@ export class AuthService {
                     of(false)
                 ),
                 switchMap((response: any) => {
+
                     // Store the access token in the local storage
                     this.accessToken = response.token;
 
@@ -208,7 +206,7 @@ export class AuthService {
         password: string;
         // company: string;
     }): Observable<any> {
-        return this._httpClient.post(`${this.apiUrl}/auth/sign-up`, user);
+        return this._httpClient.post(`${this.apiUrl}/auth/register`, user);
     }
 
     /**
@@ -242,6 +240,9 @@ export class AuthService {
      * Check the authentication status
      */
     check(): Observable<boolean> {
+
+        console.log('checking');
+
         // Check if the user is logged in
         if (this._authenticated) {
             return of(true);
@@ -285,6 +286,7 @@ export class AuthService {
             this.apiUrl = environment.apiUrl;
         }
     }
+
     getBackendURL(): string {
         return this.apiUrl;
     }
@@ -303,4 +305,5 @@ export class AuthService {
             return of(true);
         }
     }
+
 }

@@ -35,7 +35,7 @@ export class OrgDoc501c3Component implements OnInit {
         public delete501c3Service: Delete501c3Service,
         public get501c3Service: Get501c3Service,
         public create501c3Service: Create501c3Service
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         console.log('org-doc501c3 org-', this.org);
@@ -43,11 +43,11 @@ export class OrgDoc501c3Component implements OnInit {
         this.orgID = this.org.organizationID;
         this.organizationID = this.org.id;
 
-        if (this.org.doc501c3.length > 0) {
-            console.log('has 501c3', this.org.doc501c3[0]);
+        if (this.org.doc501c3) {
+            console.log('has 501c3', this.org.doc501c3);
             this.hasUpload501c3 = true;
 
-            this.doc501c3 = this.org.doc501c3[0];
+            this.doc501c3 = this.org.doc501c3;
 
             this.status = this.doc501c3.status;
 
@@ -79,6 +79,7 @@ export class OrgDoc501c3Component implements OnInit {
 
         return this.doc501c3StatusService.getStatus(s);
     }
+
     fileChange(event): void {
         console.log('fileChange', event);
 
@@ -91,10 +92,11 @@ export class OrgDoc501c3Component implements OnInit {
             this.canUpload501c3 = false;
         }
     }
+
     get501c3(): void {
         console.log('getting 501c3');
 
-        this.get501c3Service.get501c3(this.orgID).subscribe((result) => {
+        this.get501c3Service.get501c3(this.doc501c3._id).subscribe((result) => {
             console.log('get501c3 - result', result);
 
             // route to the s3 image url
@@ -115,6 +117,8 @@ export class OrgDoc501c3Component implements OnInit {
 
         this.submitted = true;
 
+        console.log('this.file', this.file);
+
         //call upload service
         //backend deletes object and creates
         //backend does all the logic
@@ -132,12 +136,13 @@ export class OrgDoc501c3Component implements OnInit {
         );
     }
 
+    // old?
     delete501c3(): void {
         console.log('deleting 501c3');
 
         // call the delete 501c3 service
         this.delete501c3Service
-            .delete501c3byOrgID(this.orgID)
+            .delete501c3(this.doc501c3._id)
             .subscribe((result) => {
                 console.log('result', result);
 
@@ -158,17 +163,17 @@ export class OrgDoc501c3Component implements OnInit {
         this.getOrganizationService.getOrgbyID(orgID).subscribe((org) => {
             console.log('org', org);
 
-            this.org = org[0];
+            this.org = org;
 
             this.organizationID = this.org.id;
 
             // get organization s3 501c3 if exists
 
-            if (this.org.doc501c3.length > 0) {
-                console.log('has 501c3', this.org.doc501c3[0]);
+            if (this.org.doc501c3) {
+                console.log('has 501c3', this.org.doc501c3);
                 this.hasUpload501c3 = true;
 
-                this.doc501c3 = this.org.doc501c3[0];
+                this.doc501c3 = this.org.doc501c3;
 
                 this.status = this.doc501c3.status;
 
@@ -181,6 +186,7 @@ export class OrgDoc501c3Component implements OnInit {
             this.canUpload501c3 = false;
         });
     }
+
     uploadNew501c3(): void {
         // this.canUpload501c3 = true;
         this.hasUpload501c3 = false;

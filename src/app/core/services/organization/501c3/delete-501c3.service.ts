@@ -6,31 +6,31 @@ import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../auth/auth.service';
 
 @Injectable({
-  providedIn: 'root',
+    providedIn: 'root',
 })
 export class Delete501c3Service {
-  apiUrl: string;
+    apiUrl: string;
 
-  results;
+    results;
 
-  body;
+    body;
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    if (!environment.production) {
-      this.apiUrl = environment.apiUrl;
-    } else {
-      this.apiUrl = this.authService.getBackendURL();
-      console.log('Delete501c3Service - this.apiUrl', this.apiUrl);
+    constructor(private http: HttpClient, private authService: AuthService) {
+        if (!environment.production) {
+            this.apiUrl = environment.apiUrl;
+        } else {
+            this.apiUrl = this.authService.getBackendURL();
+            console.log('Delete501c3Service - this.apiUrl', this.apiUrl);
+        }
+
+        console.log('Delete501c3Service - this.apiUrl', this.apiUrl);
     }
 
-    console.log('Delete501c3Service - this.apiUrl', this.apiUrl);
-  }
+    delete501c3(id: string): Observable<any> {
+        console.log('delete501c3byOrgID');
 
-  delete501c3byOrgID(orgID: string): Observable<any> {
-    console.log('delete501c3byOrgID');
+        const urlString = `${this.apiUrl}/organization-501c3/${id}`;
 
-    const urlString = `${this.apiUrl}/delete501c3/${orgID}`;
-
-    return this.http.delete(urlString);
-  }
+        return this.http.delete(urlString);
+    }
 }

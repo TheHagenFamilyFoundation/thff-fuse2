@@ -2,7 +2,6 @@ import { Component, OnInit, Input, Output, EventEmitter, } from '@angular/core';
 
 import { coerceNumberProperty } from '@angular/cdk/coercion';
 
-
 import { DirectorService } from 'app/core/services/director/director.service';
 
 @Component({
@@ -61,8 +60,9 @@ export class VotingComponent implements OnInit {
 
         this.user = JSON.parse(localStorage.getItem('currentUser'));
         console.log('voting - user', this.user);
-        this.userID = this.user.id;
+        this.userID = this.user._id;
         console.log('this.userID', this.userID);
+        console.log('this.prop', this.prop);
         console.log('this.prop.votes.length', this.prop.votes.length);
 
         if (this.prop.votes.length > 0) {
@@ -84,7 +84,7 @@ export class VotingComponent implements OnInit {
         this.outVote(this.vote);
 
         const data = {
-            prop: this.prop.id,
+            prop: this.prop._id,
             userID: this.userID,
             vote: this.vote,
         };

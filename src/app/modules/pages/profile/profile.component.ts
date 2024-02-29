@@ -105,14 +105,16 @@ export class ProfileComponent implements OnInit {
     getOrganizations(): void {
         console.log('profile - get organizations', this.email);
 
-        this._getUserService
-            .getUserbyID(this.currentUser.id)
-            .subscribe((user) => {
-                console.log('user', user);
+        console.log('this.currentUser', this.currentUser);
 
-                if (user.length > 0) {
-                    if (user[0].organizations.length > 0) {
-                        this.organizations = user[0].organizations;
+        this._getUserService
+            .getUserbyID(this.currentUser._id)
+            .subscribe((user) => {
+                console.log('profile - user', user);
+                if (user) {
+
+                    if (user.organizations.length > 0) {
+                        this.organizations = user.organizations;
 
                         console.log(
                             'profile - this.organizations',

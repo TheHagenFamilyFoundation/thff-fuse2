@@ -34,7 +34,13 @@ export class GetOrganizationService {
     }
 
     getOrgbyID(orgID: string): Observable<any> {
-        const urlString = `${this.apiUrl}/organization?organizationID=${orgID}`;
+        const urlString = `${this.apiUrl}/organization/orgID/${orgID}`;
+
+        return this.http.get(urlString);
+    }
+
+    getOrg(id: string): Observable<any> {
+        const urlString = `${this.apiUrl}/organization/${id}`;
 
         return this.http.get(urlString);
     }
@@ -49,7 +55,7 @@ export class GetOrganizationService {
 
     //TODO: pass in sort
     getOrgs(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
-        let urlString = `${this.apiUrl}/organizations?skip=${skip}&limit=${limit}`;
+        let urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
@@ -68,7 +74,7 @@ export class GetOrganizationService {
 
     //returns count of organizations in database
     getOrganizationCount(filter?: string): Observable<any> {
-        let urlString = `${this.apiUrl}/organizationCount`;
+        let urlString = `${this.apiUrl}/organization/count`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {

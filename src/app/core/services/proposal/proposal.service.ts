@@ -27,10 +27,10 @@ export class ProposalService {
     }
 
     //get by generated id
-    getProposalByID(proposalID: string): Observable<any> {
+    getProposalByID(propID: string): Observable<any> {
         this.getBackendURL();
 
-        const urlString = `${this.apiUrl}/proposal?proposalID=${proposalID}`;
+        const urlString = `${this.apiUrl}/proposal/propID/${propID}`;
 
         return this.http.get(urlString);
     }
@@ -39,7 +39,7 @@ export class ProposalService {
     getProposalById(id: string): Observable<any> {
         this.getBackendURL();
 
-        const urlString = `${this.apiUrl}/proposal?id=${id}`;
+        const urlString = `${this.apiUrl}/proposal/${id}`;
 
         return this.http.get(urlString);
     }
@@ -54,26 +54,27 @@ export class ProposalService {
     }
 
     //create proposal - submitting
-    createProposal(proposal: any): Observable<any> {
+    createProposal(proposal: any, id: any): Observable<any> {
         this.getBackendURL();
 
         const urlString = `${this.apiUrl}/proposal`;
 
-        return this.http.post(urlString, proposal);
+        return this.http.post(urlString, { proposal, orgID: id });
     }
+
     //update proposal
-    updateProposal(proposalID: string, body: any): Observable<any> {
+    updateProposal(id: string, body: any): Observable<any> {
         this.getBackendURL();
 
-        const urlString = `${this.apiUrl}/proposal?proposalID=${proposalID}`;
+        const urlString = `${this.apiUrl}/proposal/${id}`;
 
-        return this.http.patch(urlString, body);
+        return this.http.put(urlString, body);
     }
 
 
     //TODO: pass in sort
     getProps(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
-        let urlString = `${this.apiUrl}/proposals?skip=${skip}&limit=${limit}`;
+        let urlString = `${this.apiUrl}/proposal?skip=${skip}&limit=${limit}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
@@ -92,7 +93,7 @@ export class ProposalService {
 
     //returns count of proposals in database
     getProposalCount(filter?: string): Observable<any> {
-        let urlString = `${this.apiUrl}/proposalCount`;
+        let urlString = `${this.apiUrl}/proposal/count`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
@@ -103,27 +104,13 @@ export class ProposalService {
     }
 
     //mongo ids
-    sponsorProposal(proposal: string, user: string): Observable<any> {
+    sponsorProposal(id: string, user: string, toggle: boolean): Observable<any> {
 
-        const urlString = `${this.apiUrl}/proposal/${proposal}`;
+        const urlString = `${this.apiUrl}/proposal/sponsor/${id}`;
 
-        const body = {
-            sponsor: user
-        };
+        const body = toggle === true ? { sponsor: user } : {};
 
-        return this.http.patch(urlString, body);
-
-    }
-
-    removeSponsorProposal(proposal: string): Observable<any> {
-
-        const urlString = `${this.apiUrl}/proposal/${proposal}`;
-
-        const body = {
-            sponsor: null
-        };
-
-        return this.http.patch(urlString, body);
+        return this.http.put(urlString, body);
 
     }
 
