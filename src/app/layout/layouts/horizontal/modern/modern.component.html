@@ -22,27 +22,9 @@
                     <mat-icon>home</mat-icon>
                 </button>
                 <div *ngIf="isLoggedIn">
-                    <div *ngIf="inOrganization">
-                        <!-- <button mat-button [matMenuTriggerFor]="orgMenu">
-                            Organizations
-                        </button> -->
-                        <button mat-button routerLink="/pages/organizations">
-                            Organizations
-                        </button>
-                        <!-- <mat-menu #orgMenu="matMenu">
-                            <button mat-menu-item (click)="viewOrgs()">
-                                View Organizations
-                            </button>
-                            <button mat-menu-item (click)="createOrg()">
-                                Create Organization
-                            </button>
-                        </mat-menu> -->
-                    </div>
-                    <div *ngIf="!inOrganization">
-                        <button mat-button routerLink="/pages/organization/create">
-                            Create Organization
-                        </button>
-                    </div>
+                    <button mat-button routerLink="/pages/organizations">
+                        Organizations
+                    </button>
                 </div>
                 <div *ngIf="isDirector">
                     <button mat-button (click)="routeToDirectorsPage()" fxHide="false">
