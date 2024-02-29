@@ -8,9 +8,9 @@ import { BackendService } from './core/services/backend.service';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
 
-    pinger: any;
+    // pinger: any;
 
     /**
      * Constructor
@@ -40,11 +40,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     }
 
-    ngOnDestroy(): void {
-        if (this.pinger) {
-            clearInterval(this.pinger);
-        }
-    }
+    // ngOnDestroy(): void {
+    //     if (this.pinger) {
+    //         clearInterval(this.pinger);
+    //     }
+    // }
 
     backendHealthChecker(): void {
 
