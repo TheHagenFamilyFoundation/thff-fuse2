@@ -99,19 +99,40 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
             (response) => {
                 console.log('sign-in - redirecting', response);
 
-                this.setScheme(response.userSettings.scheme);
-                this._backendService.startPing();
-                // Set the redirect url.
-                // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
-                // to the correct page after a successful sign in. This way, that url can be set via
-                // routing file and we don't have to touch here.
-                const redirectURL =
-                    this._activatedRoute.snapshot.queryParamMap.get(
-                        'redirectURL'
-                    ) || '/signed-in-redirect';
+                if (response.newPassword === true) {
+                    console.log('user needs a new password');
+                    // route
+                    this.alert = {
+                        type: 'success',
+                        message: 'A password reset email has been sent. Please create a new password.'
+                    };
 
-                // Navigate to the redirect url
-                this._router.navigateByUrl(redirectURL);
+                    // Show the alert
+                    this.showAlert = true;
+
+                    // Re-enable the form
+                    this.signInForm.enable();
+
+                    // Reset the form
+                    this.signInNgForm.resetForm();
+
+
+                } else {
+                    this.setScheme(response.userSettings.scheme);
+                    this._backendService.startPing();
+                    // Set the redirect url.
+                    // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
+                    // to the correct page after a successful sign in. This way, that url can be set via
+                    // routing file and we don't have to touch here.
+                    const redirectURL =
+                        this._activatedRoute.snapshot.queryParamMap.get(
+                            'redirectURL'
+                        ) || '/signed-in-redirect';
+
+                    // Navigate to the redirect url
+                    this._router.navigateByUrl(redirectURL);
+                }
+
             },
             (response) => {
                 console.log('sign-in - response', response);
