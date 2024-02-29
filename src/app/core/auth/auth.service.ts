@@ -127,21 +127,18 @@ export class AuthService {
                     //debug
                     console.log('auth service - response', response);
 
-                    // Store the access token in the local storage
-                    this.accessToken = response.token;
-                    this.currentUser = JSON.stringify(response.user);
+                    if (response.newPassword !== true) {
 
-                    //TODO: debug can remove
-                    // console.log(
-                    //     'currentUser - user',
-                    //     JSON.parse(this.currentUser)
-                    // );
+                        // Store the access token in the local storage
+                        this.accessToken = response.token;
+                        this.currentUser = JSON.stringify(response.user);
 
-                    // Set the authenticated flag to true
-                    this._authenticated = true;
+                        // Set the authenticated flag to true
+                        this._authenticated = true;
 
-                    // // Store the user on the user service
-                    this._userService.user = response.user;
+                        // // Store the user on the user service
+                        this._userService.user = response.user;
+                    }
 
                     // Return a new observable with the response
                     return of(response);
