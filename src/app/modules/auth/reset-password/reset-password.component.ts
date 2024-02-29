@@ -43,7 +43,7 @@ export class AuthResetPasswordComponent implements OnInit {
         private _router: Router,
         private route: ActivatedRoute,
         public snackBar: MatSnackBar
-    ) {}
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -114,6 +114,16 @@ export class AuthResetPasswordComponent implements OnInit {
                     // Show the alert
                     this.showAlert = true;
 
+                })
+            )
+            .subscribe(
+                (response) => {
+                    // Set the alert
+                    this.alert = {
+                        type: 'success',
+                        message: 'Your password has been reset. Redirecting to Sign in',
+                    };
+
                     // Redirect after the countdown
                     timer(1000, 1000)
                         .pipe(
@@ -125,15 +135,7 @@ export class AuthResetPasswordComponent implements OnInit {
                             tap(() => this.countdown--)
                         )
                         .subscribe();
-                })
-            )
-            .subscribe(
-                (response) => {
-                    // Set the alert
-                    this.alert = {
-                        type: 'success',
-                        message: 'Your password has been reset.',
-                    };
+
                 },
                 (response) => {
                     console.log(response);
@@ -141,8 +143,22 @@ export class AuthResetPasswordComponent implements OnInit {
                     // Set the alert
                     this.alert = {
                         type: 'error',
-                        message: response.error.message,
+                        message: response.error.error[0].msg,
                     };
+
+                    // Redirect after the countdown
+                    timer(1000, 1000)
+                        .pipe(
+                            finalize(() => {
+
+                                this.showAlert = false;
+                            }),
+                            takeWhile(() => this.countdown > 0),
+                            takeUntil(this._unsubscribeAll),
+                            tap(() => this.countdown--)
+                        )
+                        .subscribe();
+
                 }
             );
     }
