@@ -16,7 +16,6 @@ import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
 import { FuseConfigService } from '@fuse/services/config';
 import { Subject, takeUntil } from 'rxjs';
 
-
 @Component({
     selector: 'auth-sign-in',
     templateUrl: './sign-in.component.html',
