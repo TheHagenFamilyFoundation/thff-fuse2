@@ -60,6 +60,16 @@
                         </mat-cell>
                     </ng-container>
 
+                    <!-- sponsor Column -->
+                    <ng-container matColumnDef="sponsor">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Sponsor
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{ row?.sponsor?.email }}
+                        </mat-cell>
+                    </ng-container>
+
                     <!-- Amount Requested Column -->
                     <ng-container matColumnDef="amountRequested">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>
