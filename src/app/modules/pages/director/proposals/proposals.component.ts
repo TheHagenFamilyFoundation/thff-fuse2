@@ -31,7 +31,7 @@ export class ProposalsComponent implements AfterViewInit {
 
     resultsLength = 0;
 
-    displayedColumns = ['projectTitle', 'organization', 'createdOn', 'amountRequested', 'totalProjectCost', 'link'];
+    displayedColumns = ['projectTitle', 'organization', 'createdOn', 'sponsor', 'amountRequested', 'totalProjectCost', 'link'];
 
     data: [];
 
