@@ -8,16 +8,15 @@ app.use(express.static(`${__dirname}/dist/fuse/`));
 
 // Nice and done!
 app.get('/backend', (req, res) => {
-  res.send({ url: process.env.BE_API });
+    res.send({ url: process.env.BE_API });
 });
-
 
 // For all GET requests, send back index.html
 // so that PathLocationStrategy can be used
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/dist/fuse/index.html`));
+    res.sendFile(path.join(`${__dirname}/dist/fuse/index.html`));
 });
 
 // Start the app by listening on the default
-// Heroku port
+// AWS port
 app.listen(process.env.PORT || 8080);
