@@ -11,6 +11,9 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { GetUserService } from '../../../../core/services/user/get-user.service';
 import { InOrgService } from '../../../../core/services/user/in-org.service';
+
+import packageJson from '../../../../../../package.json';
+
 @Component({
     selector: 'modern-layout',
     templateUrl: './modern.component.html',
@@ -29,6 +32,8 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
     organizations: any;
     inOrganization: boolean;
     isLoggedIn: boolean;
+
+    version: string = packageJson.version;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
