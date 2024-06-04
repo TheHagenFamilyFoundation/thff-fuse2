@@ -3,6 +3,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
         "baseUrl": "./src",
         "outDir": "./dist/out-tsc",
         "sourceMap": true,
