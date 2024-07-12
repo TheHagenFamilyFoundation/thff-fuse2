@@ -74,6 +74,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         this._navigationService.navigation$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
+                console.log('navigation', navigation);
                 this.navigation = navigation;
             });
 
@@ -168,12 +169,13 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
      * @param name
      */
     toggleNavigation(name: string): void {
+        console.log('toggling navigation');
         // Get the navigation
         const navigation =
             this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>(
                 name
             );
-
+        console.log('navigation', navigation);
         if (navigation) {
             // Toggle the opened status
             navigation.toggle();

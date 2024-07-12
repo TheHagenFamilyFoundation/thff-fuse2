@@ -152,7 +152,10 @@ export class OrgDoc501c3Component implements OnInit {
                 this.outputStatus = '';
 
                 this.status = null;
-            });
+            },
+                (err) => {
+                    console.log('delete501c3 - err', err);
+                });
     }
 
     getOrganization(orgID): void {
@@ -184,7 +187,10 @@ export class OrgDoc501c3Component implements OnInit {
                 // this.canUpload501c3 = false;
             }
             this.canUpload501c3 = false;
-        });
+        },
+            (err) => {
+                console.log('getOrgByID - err', err);
+            });
     }
 
     uploadNew501c3(): void {

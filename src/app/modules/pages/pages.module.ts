@@ -9,6 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { TranslocoModule } from '@ngneat/transloco';
@@ -46,6 +47,8 @@ import { ProposalsComponent } from './proposals/proposals.component';
         MatTooltipModule,
         MatTableModule,
         MatPaginatorModule,
+        MatProgressSpinnerModule,
+
         FuseCardModule,
         SharedModule,
         TranslocoModule,

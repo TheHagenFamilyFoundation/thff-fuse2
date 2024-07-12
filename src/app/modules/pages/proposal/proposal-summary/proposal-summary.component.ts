@@ -79,7 +79,10 @@ export class ProposalSummaryComponent implements OnInit {
 
                 this.hasSponsor = false;
 
-            });
+            },
+                (err) => {
+                    console.log('sponsorProposal - err', err);
+                });
 
     }
 
@@ -94,7 +97,10 @@ export class ProposalSummaryComponent implements OnInit {
                 this.refreshProp.emit(true);
 
                 this.hasSponsor = true;
-            });
+            },
+                (err) => {
+                    console.log('sponsorProposal - err', err);
+                });
 
     }
 

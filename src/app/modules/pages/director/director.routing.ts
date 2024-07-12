@@ -3,6 +3,7 @@ import { DirectorComponent } from './director.component';
 import { OrganizationsComponent } from './organizations/organizations.component';
 import { ProposalsComponent } from './proposals/proposals.component';
 import { VotingComponent } from './voting/voting.component';
+import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 
 export const directorRoutes: Route[] = [
     {
@@ -20,5 +21,9 @@ export const directorRoutes: Route[] = [
     {
         path: 'director/voting',
         component: VotingComponent,
-    }
+    },
+    {
+        path: 'director/submission-years',
+        component: SubmissionYearsComponent,
+    },
 ];

@@ -30,6 +30,23 @@
                             <div class="flex justify-center ...">
                                 <div class="w-200">
 
+                                    <div class="flex flex-row justify-center">
+
+                                        <div class="px-4 py-3">
+                                            <mat-label>Year:</mat-label>
+                                        </div>
+                                        <div>
+                                            <mat-form-field>
+                                                <mat-select placeholder="Select Year" [(value)]="selectedYear"
+                                                    (selectionChange)="yearChanged($event)">
+                                                    <mat-option *ngFor="let year of years" [value]="year._id">
+                                                        {{year.year}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <mat-form-field class="w-full">
                                             <!-- <mat-label>Filter</mat-label> -->
