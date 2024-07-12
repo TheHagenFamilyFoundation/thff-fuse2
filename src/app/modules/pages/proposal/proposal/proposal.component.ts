@@ -244,7 +244,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
                     //send user back to welcome
                     this._router.navigate(['/welcome']);
                 }
-            });
+            },
+                (err) => {
+                    console.log('getProposalByID - err', err);
+                });
     }
 
     refreshProp(): void {
@@ -270,7 +273,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
             //check if director
             this.checkIsDirectorAndInOrg();
 
-        });
+        },
+            (err) => {
+                console.log('getOrgbyID - err', err);
+            });
     }
 
     getBackendURL(): void {

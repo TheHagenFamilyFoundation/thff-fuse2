@@ -14,6 +14,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -22,9 +23,10 @@ import { directorRoutes } from './director.routing';
 import { OrganizationsComponent } from './organizations/organizations.component';
 import { ProposalsComponent } from './proposals/proposals.component';
 import { VotingComponent } from './voting/voting.component';
+import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -41,6 +43,7 @@ import { VotingComponent } from './voting/voting.component';
         MatTabsModule,
         MatPaginatorModule,
         MatSortModule,
+        MatSelectModule,
     ],
 })
 export class DirectorModule { }

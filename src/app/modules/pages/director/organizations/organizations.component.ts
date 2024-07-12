@@ -55,7 +55,11 @@ export class OrganizationsComponent implements AfterViewInit {
     getOrganizationCount(countFilter?: string): void {
         this.getOrgService.getOrganizationCount(countFilter)
             .subscribe(
-                (count) => { this.orgCount = count; });
+                (count) => { this.orgCount = count; },
+                (err) => {
+                    console.log('getOrganizationCount - err', err);
+                });
+
     }
 
     ngAfterViewInit(): void {

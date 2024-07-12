@@ -6,6 +6,7 @@ import { merge, Observable, of as observableOf, fromEvent } from 'rxjs';
 import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 @Component({
     selector: 'app-voting',
     templateUrl: './voting.component.html',
@@ -41,26 +42,55 @@ export class VotingComponent implements AfterViewInit {
 
     filterInputString: string;
 
-    constructor(public proposalService: ProposalService, private _router: Router) {
+    years: any;
+
+    year: number;
+
+    selectedYear: number;
+
+    constructor(
+        public proposalService: ProposalService,
+        public submissionYearService: SubmissionYearsService,
+        private _router: Router) {
         this.loaded = false;
         this.filterInputString = '';
         this.limit = 10;
         this.skip = 0;
         this.sortDirection = 'desc';
         this.sortColumn = 'createdOn';
+        this.year = (new Date()).getFullYear();
     }
 
-    getProposalCount(countFilter?: string): void {
-        this.proposalService.getProposalCount(countFilter)
+    getProposalCount(year: number, countFilter?: string): void {
+        this.proposalService.getProposalCount(year, countFilter)
             .subscribe(
-                (count) => { this.propCount = count; });
+                (count) => { this.propCount = count; },
+                (err) => {
+                    console.log('getProposalCount - err', err);
+                });
+    }
+
+    getSubmissionYears(): void {
+
+        this.submissionYearService.getAllSubmissionYears(this.year)
+            .subscribe(
+                (years) => {
+                    console.log('years**', years);
+                    this.years = years;
+                    this.selectedYear = years[0]._id; //grab the first one, which should be most recent year
+                    console.log('selectedYear', this.selectedYear);
+                },
+                (err) => {
+                    console.log('getAllSubmissionYears - err', err);
+                });
     }
 
     ngAfterViewInit(): void {
 
         this.sort.start = 'desc';
 
-        this.getProposalCount(); // no need for parameter
+        this.getProposalCount(this.year);
+        this.getSubmissionYears();
 
         // If the user changes the sort order, reset back to the first page.
         this.sort.sortChange.subscribe(() => {
@@ -78,7 +108,7 @@ export class VotingComponent implements AfterViewInit {
                 startWith({}),
                 switchMap(() => {
                     this.loaded = false;
-                    return this.proposalService.getProps(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                    return this.proposalService.getProps(this.year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
                         .pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
@@ -97,7 +127,7 @@ export class VotingComponent implements AfterViewInit {
                     // limit errors, we do not want to reset the paginator to zero, as that
                     // would prevent users from re-triggering requests.
                     // this.orgCount = data.length;
-                    this.getProposalCount(this.filterInputString);
+                    this.getProposalCount(this.year, this.filterInputString);
                     return data;
                 }),
             )
@@ -112,8 +142,9 @@ export class VotingComponent implements AfterViewInit {
                 tap((event: KeyboardEvent) => {
                     console.log(event);
                     this.filterInputString = (event.target as HTMLInputElement).value;
-                    this.proposalService.getProps(this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection).subscribe((data) => { this.data = data; });
-                    this.getProposalCount(this.filterInputString);
+                    this.proposalService.getProps(this.year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                        .subscribe((data) => { this.data = data; });
+                    this.getProposalCount(this.year, this.filterInputString);
                 })
             )
             .subscribe();
@@ -143,6 +174,24 @@ export class VotingComponent implements AfterViewInit {
                 this.skip = this.skip - this.limit;
             }
         }
+
+    }
+
+    yearChanged(e: any): void {
+        console.log('year changed', e);
+        console.log('year id', e.value);
+        console.log('this.years', this.years);
+        console.log('year is ', this.years.find(y => y._id === e.value).year);
+        this.selectedYear = this.years.find(y => y._id === e.value)._id;
+
+        const year = this.years.find(y => y._id === e.value).year;
+        //fetch count and proposals again
+        this.getProposalCount(year);
+        this.proposalService.getProps(year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+            .subscribe((data) => { this.data = data; },
+                (err) => {
+                    console.log('getProps - err', err);
+                });
 
     }
 

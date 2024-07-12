@@ -1,46 +1,79 @@
-<div class="example-container">
-    <mat-table [dataSource]="dataSource" matSort>
-        <!-- Name Column -->
-        <ng-container matColumnDef="projectTitle">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                Project Title
-            </mat-header-cell>
-            <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
-        </ng-container>
-
-        <!-- createdOn Column -->
-        <ng-container matColumnDef="createdOn">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                Created On
-            </mat-header-cell>
-            <mat-cell *matCellDef="let row">
-                {{ row.createdAt | date : "MM/dd/yyyy" }}
-            </mat-cell>
-        </ng-container>
-
-        <!-- link Column -->
-        <ng-container matColumnDef="link">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                Link
-            </mat-header-cell>
-            <mat-cell *matCellDef="let row">
-                <button mat-raised-button color="primary" (click)="goToProposal(row.proposalID)" mat-dialog-close>
-                    Go to Proposal
-                </button>
-            </mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
-    </mat-table>
-    <div *ngIf="!loaded">
-        <mat-spinner></mat-spinner>
+<div class="flex flex-col grow">
+    <div class="text-xl font-semibold">
+        Proposals
     </div>
-    <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
-    <mat-paginator [pageSizeOptions]="[5]"></mat-paginator>
+    <div class="flex flex-row mt-4">
+        <div class="px-4 py-3">
+            <mat-label>Year:</mat-label>
+        </div>
+        <div>
+            <mat-form-field>
+                <mat-select placeholder="Select Year" [(value)]="selectedYear" (selectionChange)="yearChanged($event)">
+                    <mat-option *ngFor="let year of years" [value]="year._id">
+                        {{year.year}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="flex flex-row">
+        <mat-form-field>
+            <input matInput placeholder="Filter" #filterInput>
+        </mat-form-field>
+    </div>
+
+    <div>
+        <mat-table [dataSource]="data" matSort>
+            <!-- Name Column -->
+            <ng-container matColumnDef="projectTitle">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                    Project Title
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
+            </ng-container>
+
+            <!-- createdOn Column -->
+            <ng-container matColumnDef="createdOn">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                    Created On
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    {{ row.createdAt | date : "MM/dd/yyyy" }}
+                </mat-cell>
+            </ng-container>
+
+            <!-- link Column -->
+            <ng-container matColumnDef="link">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                    Link
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <button mat-raised-button color="primary" (click)="goToProposal(row.proposalID)" mat-dialog-close>
+                        Go to Proposal
+                    </button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+        </mat-table>
+        <div *ngIf="!loaded">
+            <mat-spinner></mat-spinner>
+        </div>
+    </div>
+    <div>
+        <mat-paginator (page)="handlePageEvent($event)" [length]="propCount" [pageSizeOptions]="[5,10]"
+            aria-label="Select page"></mat-paginator>
+    </div>
+    <div *ngIf="!portalOpen">
+        <p>
+            {{currentYear?.year}} Grant Cycle is Closed
+        </p>
+    </div>
+    <div *ngIf="portalOpen">
+        <button mat-button color="primary" (click)="createProposal()" fxHide="false">
+            <mat-icon>add</mat-icon> Create Proposal
+            <!-- <div *ngIf="org"><app-create-proposal [org]="org"></app-create-proposal></div> -->
+        </button>
+    </div>
 </div>
-<!-- 2024 Grant Cycle is Closed -->
-<button mat-button color="primary" (click)="createProposal()" fxHide="false">
-    <mat-icon>add</mat-icon> Create Proposal
-    <div *ngIf="org"><app-create-proposal [org]="org"></app-create-proposal></div>
-</button>
