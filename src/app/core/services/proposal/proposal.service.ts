@@ -71,10 +71,26 @@ export class ProposalService {
         return this.http.put(urlString, body);
     }
 
+    getProps(year: number, skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposal?year=${year}&skip=${skip}&limit=${limit}`;
 
-    //TODO: pass in sort
-    getProps(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
-        let urlString = `${this.apiUrl}/proposal?skip=${skip}&limit=${limit}`;
+        //empty string
+        if (filter && filter.trim().length !== 0) {
+            urlString += `&filter=${filter}`;
+        }
+
+        //empty string
+        if (sortColumn.length !== 0 && sortDirection.length !== 0) {
+            urlString += `&sort=${sortColumn}&dir=${sortDirection}`;
+        }
+
+        console.log('urlString', urlString);
+
+        return this.http.get(urlString);
+    }
+
+    getOrgProps(year: number, org: string, skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposal?year=${year}&org=${org}&skip=${skip}&limit=${limit}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
@@ -92,12 +108,23 @@ export class ProposalService {
     }
 
     //returns count of proposals in database
-    getProposalCount(filter?: string): Observable<any> {
-        let urlString = `${this.apiUrl}/proposal/count`;
+    getProposalCount(year: number, filter?: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposal/count?year=${year}`;
 
         //empty string
         if (filter && filter.trim().length !== 0) {
-            urlString += `?filter=${filter}`;
+            urlString += `&filter=${filter}`;
+        }
+
+        return this.http.get(urlString);
+    }
+
+    getOrgProposalCount(year: number, org: string, filter?: string): Observable<any> {
+        let urlString = `${this.apiUrl}/proposal/count?year=${year}&org=${org}`;
+        console.log('filter', filter);
+        //empty string
+        if (filter && filter.trim().length !== 0) {
+            urlString += `&filter=${filter}`;
         }
 
         return this.http.get(urlString);

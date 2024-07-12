@@ -229,7 +229,10 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
                     //send user back to welcome
                     this._router.navigate(['/welcome']);
                 }
-            });
+            },
+                (err) => {
+                    console.log('getProposalByID - err', err);
+                });
     }
 
     // refreshProposal(): void {

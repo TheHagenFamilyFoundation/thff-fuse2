@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule } from '@ngneat/transloco';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { SharedModule } from 'app/shared/shared.module';
@@ -64,6 +65,7 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         MatFormFieldModule,
         MatInputModule,
         MatSnackBarModule,
+        MatSelectModule,
         NgApexchartsModule,
         TranslocoModule,
         SharedModule,

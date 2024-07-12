@@ -59,7 +59,7 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
         private _settingsService: SettingsService,
         private _formBuilder: FormBuilder,
         private _snackBar: MatSnackBar
-    ) {}
+    ) { }
 
     // // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     // get f() {

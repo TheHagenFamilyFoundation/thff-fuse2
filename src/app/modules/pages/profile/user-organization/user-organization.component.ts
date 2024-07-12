@@ -114,7 +114,10 @@ export class UserOrganizationComponent implements OnInit {
         this.getUserService.getUserbyID(this.user._id).subscribe(() => {
             // pass in the user to the check functions
             this.checkOrganizations();
-        });
+        },
+            (err) => {
+                console.log('getUserbyID - err', err);
+            });
     }
 
     // checks if user is in any organizations
@@ -161,7 +164,10 @@ export class UserOrganizationComponent implements OnInit {
 
                 this.loaded = true;
             }
-        });
+        },
+            (err) => {
+                console.log('getUserbyID - err', err);
+            });
     } // end of checkOrganization
 
     createOrganization(): void {

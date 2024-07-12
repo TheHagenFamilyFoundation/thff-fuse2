@@ -50,16 +50,12 @@
                     <ng-template matTabContent>
                         <div
                             class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                            <div class="flex flex-col items-start">
+                            <div class="items-start">
                                 <!-- <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6"> -->
-                                <div class="text-xl font-semibold">
-                                    Proposals
+                                <div *ngIf="org">
+                                    <app-org-proposals [org]="org"></app-org-proposals>
                                 </div>
-                                <div class="flex flex-col sm:flex-row items-start mt-8">
-                                    <div *ngIf="org">
-                                        <app-org-proposals [org]="org"></app-org-proposals>
-                                    </div>
-                                </div>
+
                                 <!-- </fuse-card> -->
                             </div>
                         </div>
