@@ -55,6 +55,8 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     pageEvent: PageEvent;
 
+    portalMessage: string;
+
     constructor(
         public getUserService: GetUserService,
         public proposalService: ProposalService,
@@ -188,9 +190,13 @@ export class OrgProposalsComponent implements AfterViewInit {
                     this.currentYear = year;
                     console.log('getCurrentSubmissionyear - currentYear', this.currentYear);
                     this.portalOpen = this.currentYear.active;
+
+                    this.portalMessage = `${this.currentYear.year} Grant Cycle is Closed`;
                 },
                 (err) => {
                     console.log('getCurrentSubmissionyear - err', err);
+
+                    this.portalMessage = `${this.year} Grant Cycle Is Opening Soon`;
                 });
 
     }
