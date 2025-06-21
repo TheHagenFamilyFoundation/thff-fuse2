@@ -80,7 +80,12 @@ export class ProposalsComponent implements AfterViewInit {
                     console.log('years**', years);
                     this.years = years;
                     this.selectedYear = years[0]._id; //grab the first one, which should be most recent year
+                    this.year = years[0].year; // Update the year to match the selected year
                     console.log('selectedYear', this.selectedYear);
+                    console.log('year', this.year);
+
+                    // Load initial data after years are loaded
+                    this.getProposalCount(this.year);
                 },
                 (err) => {
                     console.log('getAllSubmissionYears - err', err);
@@ -91,7 +96,7 @@ export class ProposalsComponent implements AfterViewInit {
 
         this.sort.start = 'desc';
 
-        this.getProposalCount(this.year); // no need for parameter
+        // Don't call getProposalCount here, it will be called after years are loaded
         this.getSubmissionYears();
 
         // If the user changes the sort order, reset back to the first page.
@@ -138,14 +143,19 @@ export class ProposalsComponent implements AfterViewInit {
         // server-side filter
         fromEvent(this.input.nativeElement, 'keyup')
             .pipe(
-                filter(Boolean),
                 debounceTime(500),
                 distinctUntilChanged(),
                 tap((event: KeyboardEvent) => {
                     console.log(event);
                     this.filterInputString = (event.target as HTMLInputElement).value;
+                    // Reset pagination when filtering
+                    this.skip = 0;
+                    this.paginator.pageIndex = 0;
                     this.proposalService.getProps(this.year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
-                        .subscribe((data) => { this.data = data; });
+                        .subscribe((data) => {
+                            this.data = data;
+                            this.loaded = true;
+                        });
                     this.getProposalCount(this.year, this.filterInputString);
                 })
             )
@@ -156,6 +166,22 @@ export class ProposalsComponent implements AfterViewInit {
     //possible view Proposal
     goToProposal(propID: string): void {
         this._router.navigate(['/pages/proposal/', propID]);
+    }
+
+    // Method to clear filter
+    clearFilter(): void {
+        this.filterInputString = '';
+        this.skip = 0;
+        this.paginator.pageIndex = 0;
+        if (this.input && this.input.nativeElement) {
+            this.input.nativeElement.value = '';
+        }
+        this.proposalService.getProps(this.year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+            .subscribe((data) => {
+                this.data = data;
+                this.loaded = true;
+            });
+        this.getProposalCount(this.year, this.filterInputString);
     }
 
     handlePageEvent(e: PageEvent): void {
@@ -188,10 +214,16 @@ export class ProposalsComponent implements AfterViewInit {
 
         this.year = this.years.find(y => y._id === e.value).year;
 
+        // Clear filter and reset pagination when year changes
+        this.clearFilter();
+
         //fetch count and proposals again
         this.getProposalCount(this.year);
         this.proposalService.getProps(this.year, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
-            .subscribe((data) => { this.data = data; },
+            .subscribe((data) => {
+                this.data = data;
+                this.loaded = true;
+            },
                 (err) => {
                     console.log('getProps - err', err);
                 });
