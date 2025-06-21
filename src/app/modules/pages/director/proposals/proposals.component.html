@@ -41,6 +41,10 @@
                     <mat-form-field class="w-full">
                         <!-- <mat-label>Filter</mat-label> -->
                         <input matInput placeholder="Filter" #filterInput>
+                        <button *ngIf="filterInputString" matSuffix mat-icon-button aria-label="Clear"
+                            (click)="clearFilter()">
+                            <mat-icon>close</mat-icon>
+                        </button>
                     </mat-form-field>
                 </div>
 
