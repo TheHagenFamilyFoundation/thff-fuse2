@@ -15,11 +15,11 @@ phases:
             - npm install -g @angular/cli
     build:
         commands:
-            - echo Build started 
-            - ng build
+            - echo Build started for ${CURRENT_ENVIRONMENT}
+            - ng build --configuration ${CURRENT_ENVIRONMENT}
     post_build:
         commands:
             - cp -R node_modules/ dist/node_modules
 artifacts:
     files:
-        - '**/*'
+        - "**/*"
