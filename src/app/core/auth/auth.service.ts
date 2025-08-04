@@ -281,7 +281,7 @@ export class AuthService {
 
     setBackendURL(): void {
         if (environment.production === true) {
-            this.apiUrl = sessionStorage.getItem('backend_url');
+            this.apiUrl = environment.apiUrl;
         } else {
             this.apiUrl = environment.apiUrl;
         }
