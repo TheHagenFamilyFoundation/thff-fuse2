@@ -291,19 +291,4 @@ export class AuthService {
         return this.apiUrl;
     }
 
-    initializeBackendURL(): Observable<any> {
-        console.log('initializing backend');
-        if (environment.production === true) {
-            console.log(
-                'getting backend URL',
-                `${window.location.origin}/backend`
-            );
-            return this._httpClient.get(`${window.location.origin}/backend`);
-        } else {
-            console.log('production env', environment.production);
-
-            return of(true);
-        }
-    }
-
 }

@@ -146,30 +146,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
 
     getBackendURL(): void {
         console.log('organization - environment', environment);
-        if (environment.production) {
-            console.log('environment is production');
-            this._authService.initializeBackendURL().subscribe((backendUrl) => {
-                console.log(
-                    'organization component - backendUrl',
-                    backendUrl.url
-                );
-
-                if (backendUrl) {
-                    sessionStorage.setItem('backend_url', backendUrl.url);
-                } else {
-                    console.log(
-                        'Can´t find the backend URL, using a failover value'
-                    );
-                    sessionStorage.setItem(
-                        'backend_url',
-                        'https://failover-url.com'
-                    );
-                }
-
-                // this.API = backendUrl.url;
-                // this.LoadedAPI = true;
-            });
-        }
+        // Use environment API URL directly
     }
 
     checkIsDirectorAndInOrg(): void {
