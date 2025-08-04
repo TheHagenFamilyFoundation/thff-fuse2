@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
     envName: 'prod',
-    apiUrl: 'https://thff-be-production.herokuapp.com/',
+    apiUrl: 'https://api.hagenfamilyfoundation.org',
     hmr: false,
 };
