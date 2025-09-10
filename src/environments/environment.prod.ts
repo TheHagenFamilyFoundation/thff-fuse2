@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
     envName: 'prod',
-    apiUrl: 'https://hagenfamilyfoundation.org',
+    apiUrl: 'https://api.hagenfamilyfoundation.org',
     hmr: false,
 };
