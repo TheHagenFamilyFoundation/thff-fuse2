@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
     envName: 'staging',
-    apiUrl: 'https://r2g25rt882.us-east-1.awsapprunner.com',
+    apiUrl: 'https://staging-hagenfamilyfoundation.org',
     hmr: false,
 };
