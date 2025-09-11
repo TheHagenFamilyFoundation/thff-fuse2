@@ -33,9 +33,9 @@ jobs:
             - name: Build Angular app
               run: |
                   if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-                    ng build --configuration=production
+                    npx ng build --configuration=production
                   else
-                    ng build --configuration=staging
+                    npx ng build --configuration=staging
                   fi
               env:
                   NODE_ENV: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
