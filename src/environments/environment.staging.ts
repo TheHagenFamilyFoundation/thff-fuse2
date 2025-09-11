@@ -1,3 +1,4 @@
+// Staging environment configuration
 export const environment = {
     production: false,
     envName: 'staging',
