@@ -61,12 +61,20 @@ export class AuthInterceptor implements HttpInterceptor {
                     error instanceof HttpErrorResponse &&
                     error.status === 401
                 ) {
+                    // Skip reload for public endpoints that might not require auth
+                    // This prevents infinite reload loops on public pages
+                    const publicEndpoints = ['/submission-year', '/health', '/ping'];
+                    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+                        req.url.includes(endpoint)
+                    );
 
-                    // Sign out
-                    this._authService.signOut();
+                    if (!isPublicEndpoint) {
+                        // Sign out
+                        this._authService.signOut();
 
-                    // Reload the app
-                    location.reload();
+                        // Reload the app
+                        location.reload();
+                    }
                 }
 
                 return throwError(error);

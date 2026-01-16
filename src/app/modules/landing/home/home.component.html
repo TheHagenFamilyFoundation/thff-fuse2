@@ -11,6 +11,10 @@
                 This is a separate "module", it has its own directory and routing setup and also it's completely separated from the actual application. This is also a simple example of
                 a multiple applications setup that uses the same codebase. You can have different entry points and essentially have different applications within the same codebase.
             </p> -->
+            <p *ngIf="!loading && latestSubmissionYear">
+                <br>
+                The {{ latestSubmissionYear.year }} grant cycle is {{ portalOpen ? 'open' : 'closed' }}.
+            </p>
         </div>
         <div>
             <!-- <img src="assets/images/grant_review_timeline.jpg" alt="timeline image" height="90" /> -->
