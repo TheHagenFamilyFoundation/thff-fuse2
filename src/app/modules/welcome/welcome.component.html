@@ -16,16 +16,16 @@
         <div class="z-10 relative flex flex-col items-center">
             <div class="mt-1 text-xl sm:text-xl tracking-tight leading-tight text-center">
 
-                <img class="w-50" src="assets/images/logo/logo_2020_9.svg" width="150px" height="150px" center
+                <img class="mx-auto w-48 h-48" src="assets/images/logo/logo_2020_9.svg"
                     alt="Logo image" />
 
-                <!-- <p> <br>
-                    The 2025 grant cycle is now open. Proposals may be submitted through your
-                    Organizations page.</p> -->
-                <!-- <div class="mt-1 text-sm sm:text-sm tracking-tight leading-tight text-center">
-                    (If you do not have an Organization, visit the Organizations page to create one).</div> -->
-                <p> <br>
-                    The 2025 grant cycle is closed.</p>
+                <p *ngIf="!loading && latestSubmissionYear"> <br>
+                    The {{ latestSubmissionYear.year }} grant cycle is {{ portalOpen ? 'open' : 'closed' }}.
+                    <span *ngIf="portalOpen"> Proposals may be submitted through your Organizations page.</span>
+                </p>
+                <div *ngIf="portalOpen && !loading && latestSubmissionYear" class="mt-1 text-sm sm:text-sm tracking-tight leading-tight text-center">
+                    (If you do not have an Organization, visit the Organizations page to create one).
+                </div>
             </div>
         </div>
     </div>
