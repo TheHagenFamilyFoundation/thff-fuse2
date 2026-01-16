@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 import { AuthService } from '../../auth/auth.service';
@@ -56,6 +57,41 @@ export class SubmissionYearsService {
         console.log('this.urlString', urlString);
 
         return this.http.get(urlString);
+    }
+
+    //get latest submission year (most recent year, not necessarily current calendar year)
+    getLatestSubmissionYear(): Observable<any> {
+        this.getBackendURL();
+
+        const currentYear = new Date().getFullYear();
+        const urlString = `${this.apiUrl}/submission-year?year=${currentYear}`;
+
+        console.log('getLatestSubmissionYear - urlString', urlString);
+
+        // The backend returns all submission years sorted by most recent, but we'll sort again to ensure we get the latest
+        return this.http.get<any[]>(urlString).pipe(
+            map((years) => {
+                console.log('getLatestSubmissionYear - all years received:', years);
+
+                if (!years || years.length === 0) {
+                    console.log('getLatestSubmissionYear - no years found');
+                    return null;
+                }
+
+                // Sort by year descending (highest year first) to ensure we get the latest
+                const sortedYears = [...years].sort((a, b) => {
+                    const yearA = a?.year || 0;
+                    const yearB = b?.year || 0;
+                    return yearB - yearA; // Descending order (2026, 2025, 2024, etc.)
+                });
+
+                const latestYear = sortedYears[0];
+                console.log('getLatestSubmissionYear - sorted years:', sortedYears);
+                console.log('getLatestSubmissionYear - latest year selected:', latestYear);
+
+                return latestYear;
+            })
+        );
     }
 
     //toggle portal

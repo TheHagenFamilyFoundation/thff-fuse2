@@ -281,7 +281,7 @@ export class AuthService {
 
     setBackendURL(): void {
         if (environment.production === true) {
-            this.apiUrl = sessionStorage.getItem('backend_url');
+            this.apiUrl = environment.apiUrl;
         } else {
             this.apiUrl = environment.apiUrl;
         }
@@ -289,21 +289,6 @@ export class AuthService {
 
     getBackendURL(): string {
         return this.apiUrl;
-    }
-
-    initializeBackendURL(): Observable<any> {
-        console.log('initializing backend');
-        if (environment.production === true) {
-            console.log(
-                'getting backend URL',
-                `${window.location.origin}/backend`
-            );
-            return this._httpClient.get(`${window.location.origin}/backend`);
-        } else {
-            console.log('production env', environment.production);
-
-            return of(true);
-        }
     }
 
 }

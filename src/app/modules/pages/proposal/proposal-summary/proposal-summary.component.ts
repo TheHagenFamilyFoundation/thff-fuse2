@@ -33,27 +33,7 @@ export class ProposalSummaryComponent implements OnInit {
 
     getBackendURL(): void {
         console.log('proposal - environment', environment);
-        if (environment.production) {
-            console.log('environment is production');
-            this._authService.initializeBackendURL().subscribe((backendUrl) => {
-                console.log('proposal component - backendUrl', backendUrl.url);
-
-                if (backendUrl) {
-                    sessionStorage.setItem('backend_url', backendUrl.url);
-                } else {
-                    console.log(
-                        'Can´t find the backend URL, using a failover value'
-                    );
-                    sessionStorage.setItem(
-                        'backend_url',
-                        'https://failover-url.com'
-                    );
-                }
-
-                // this.API = backendUrl.url;
-                // this.LoadedAPI = true;
-            });
-        }
+        // Use environment API URL directly
     }
 
     sponsor(): void {

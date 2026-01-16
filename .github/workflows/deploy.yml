@@ -1,0 +1,64 @@
+name: Deploy to AWS S3 and CloudFront
+
+on:
+    push:
+        branches: [master, staging]
+    pull_request:
+        branches: [master, staging]
+
+env:
+    AWS_REGION: us-east-1
+
+jobs:
+    build-and-deploy:
+        name: Build and Deploy
+        runs-on: ubuntu-latest
+        environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "18"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: |
+                  npm config set legacy-peer-deps true
+                  npm ci
+
+            - name: Build Angular app
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                    npx ng build --configuration=production
+                  else
+                    npx ng build --configuration=staging
+                  fi
+              env:
+                  NODE_ENV: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Deploy to S3
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                    aws s3 sync dist/fuse/ s3://${{ secrets.S3_BUCKET_PROD }} --delete
+                  else
+                    aws s3 sync dist/fuse/ s3://${{ secrets.S3_BUCKET_STAGING }} --delete
+                  fi
+
+            - name: Invalidate CloudFront
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                    aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} --paths "/*"
+                  else
+                    aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }} --paths "/*"
+                  fi
