@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize, Subject, takeUntil, takeWhile, tap, timer } from 'rxjs';
@@ -13,8 +13,9 @@ import { AuthService } from 'app/core/auth/auth.service';
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
 })
-export class AuthSignUpComponent implements OnInit {
+export class AuthSignUpComponent implements OnInit, OnDestroy {
     @ViewChild('signUpNgForm') signUpNgForm: NgForm;
+
     countdown: number = 3;
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
@@ -25,66 +26,41 @@ export class AuthSignUpComponent implements OnInit {
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    /**
-     * Constructor
-     */
+
     constructor(
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router
-    ) { }
+    ) {}
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * On init
-     */
     ngOnInit(): void {
-        // Create the form
         this.signUpForm = this._formBuilder.group({
-            // name      : ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
             password: ['', Validators.required],
-            // company   : [''],
-            // agreements: ['', Validators.requiredTrue]
         });
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
 
-    /**
-     * Sign up
-     */
     signUp(): void {
-        // Do nothing if the form is invalid
         if (this.signUpForm.invalid) {
             return;
         }
 
-        // Disable the form
         this.signUpForm.disable();
-
-        // Hide the alert
         this.showAlert = false;
 
-        // Sign up
-        this._authService.signUp(this.signUpForm.value).subscribe(
-            (response) => {
-
-                // Set the alert
+        this._authService.signUp(this.signUpForm.value).subscribe({
+            next: () => {
                 this.alert = {
                     type: 'success',
-                    message: 'User Created Successfully.',
+                    message: 'Account created successfully!',
                 };
-
-                // Show the alert
                 this.showAlert = true;
 
-                // Redirect after the countdown
                 timer(1000, 1000)
                     .pipe(
                         finalize(() => {
@@ -95,31 +71,21 @@ export class AuthSignUpComponent implements OnInit {
                         tap(() => this.countdown--)
                     )
                     .subscribe();
-
-                // // Navigate to the confirmation required page
-                // this._router.navigateByUrl('/confirmation-required');
-                // this._router.navigateByUrl('/sign-in');
             },
-            (response) => {
-                console.log('signing up - response', response);
+            error: (response) => {
+                const errorMessage = response?.error?.error?.[0]?.msg
+                    || response?.error?.message
+                    || 'An error occurred while creating your account.';
 
-                const errorMessage = response.error.error ? response.error.error[0].msg : response.error.message;
-
-                // Re-enable the form
                 this.signUpForm.enable();
-
-                // Reset the form
                 this.signUpNgForm.resetForm();
 
-                // Set the alert
                 this.alert = {
                     type: 'error',
                     message: errorMessage,
                 };
-
-                // Show the alert
                 this.showAlert = true;
             }
-        );
+        });
     }
 }
