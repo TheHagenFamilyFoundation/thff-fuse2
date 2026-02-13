@@ -1,0 +1,38 @@
+<div class="flex flex-col w-full max-w-md">
+    <h2 mat-dialog-title class="text-lg font-semibold m-0 mb-1">Upload 501(c)(3) Document</h2>
+
+    <mat-dialog-content class="py-4">
+        <p class="text-sm text-gray-500 mb-4">Accepted formats: PDF, DOC, DOCX.</p>
+
+        <!-- Drop zone / file picker -->
+        <label class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-xl cursor-pointer
+                      transition-colors"
+               [ngClass]="file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-primary hover:bg-gray-50'">
+            <input type="file" class="hidden" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" />
+
+            <!-- No file selected -->
+            <ng-container *ngIf="!file">
+                <mat-icon class="icon-size-10 text-gray-300 mb-2">cloud_upload</mat-icon>
+                <span class="text-sm font-medium text-gray-600">Click to select a file</span>
+            </ng-container>
+
+            <!-- File selected -->
+            <ng-container *ngIf="file">
+                <mat-icon class="icon-size-10 text-green-500 mb-2">description</mat-icon>
+                <span class="text-sm font-semibold text-gray-800">{{ fileName }}</span>
+                <span class="text-xs text-gray-500 mt-1">Click to change file</span>
+            </ng-container>
+        </label>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="flex justify-end gap-2 pt-2">
+        <button mat-button (click)="onCancel()" [disabled]="uploading">Cancel</button>
+        <button mat-flat-button color="primary"
+                [disabled]="!file || uploading"
+                (click)="onUpload()">
+            <mat-spinner *ngIf="uploading" [diameter]="20" class="mr-2"></mat-spinner>
+            <mat-icon *ngIf="!uploading" class="mr-2 icon-size-5">upload</mat-icon>
+            <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
+        </button>
+    </mat-dialog-actions>
+</div>

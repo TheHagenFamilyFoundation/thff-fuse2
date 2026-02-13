@@ -1,82 +1,78 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            Director's Page
-                        </div>
-                    </div>
+    <div class="bg-card border-b">
+        <div class="flex items-center w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                Director's Page
+            </h1>
+        </div>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- Organizations -->
+            <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                       (click)="goToOrganizations()">
+                <div class="flex items-center mb-3">
+                    <mat-icon class="text-thff-teal icon-size-8 mr-3">business</mat-icon>
+                    <h2 class="text-xl font-semibold m-0">Organizations</h2>
                 </div>
+                <p class="text-gray-500 m-0">
+                    View and manage all registered organizations.
+                </p>
+            </fuse-card>
+
+            <!-- Proposals -->
+            <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                       (click)="goToProposals()">
+                <div class="flex items-center mb-3">
+                    <mat-icon class="text-thff-teal icon-size-8 mr-3">description</mat-icon>
+                    <h2 class="text-xl font-semibold m-0">Proposals</h2>
+                </div>
+                <p class="text-gray-500 m-0">
+                    Review grant proposals submitted by organizations.
+                </p>
+            </fuse-card>
+
+            <!-- Voting -->
+            <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                       (click)="goToVoting()">
+                <div class="flex items-center mb-3">
+                    <mat-icon class="text-thff-teal icon-size-8 mr-3">how_to_vote</mat-icon>
+                    <h2 class="text-xl font-semibold m-0">Voting</h2>
+                </div>
+                <p class="text-gray-500 m-0">
+                    Vote on proposals and view voting results.
+                </p>
+            </fuse-card>
+
+        </div>
+
+        <!-- Admin Section -->
+        <div class="mt-10">
+            <h2 class="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Admin</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <!-- Submission Years -->
+                <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                           (click)="goToSubmissionYears()">
+                    <div class="flex items-center mb-3">
+                        <mat-icon class="text-thff-teal icon-size-8 mr-3">calendar_today</mat-icon>
+                        <h2 class="text-xl font-semibold m-0">Submission Years</h2>
+                    </div>
+                    <p class="text-gray-500 m-0">
+                        Manage grant cycle years and open or close the application portal.
+                    </p>
+                </fuse-card>
+
             </div>
         </div>
-    </div>
-    <!-- End of Header -->
 
-    <!-- Main -->
-    <!-- <div class="text-center pt-4 sm:pt-6 ">
-        <div>
-            <button mat-raised-button color="primary" (click)="goToOrganizations()">
-                View Organizations
-            </button>
-        </div>
-        <div class="pt-4">
-            <button mat-raised-button color="primary" (click)="goToProposals()">
-                View Proposals
-            </button>
-        </div>
-        <div class="pt-4">
-            <button mat-raised-button color="primary" (click)="goToVoting()">
-                Vote
-            </button>
-            <-- Needs Work </div>
-                <div class="pt-4">
-                    <button mat-raised-button color="primary" (click)="goToSubmissionYears()">
-                        Submission Years
-                    </button>
-                    <-- Admin </div>
-
-                </div>
-        </div> -->
-
-    <!-- Main -->
-    <div class="flex flex-wrap justify-center w-full max-w-5xl mx-auto p-6 sm:p-8">
-        <div class="flex flex-col items-start">
-            <fuse-card class="flex flex-col max-w-140 w-full sm:p-8">
-                <div class="flex flex-col items-start">
-                    <div>
-                        <button mat-raised-button color="primary" (click)="goToOrganizations()">
-                            View Organizations
-                        </button>
-                    </div>
-                    <div class="pt-4">
-                        <button mat-raised-button color="primary" (click)="goToProposals()">
-                            View Proposals
-                        </button>
-                    </div>
-                    <div class="pt-4">
-                        <button mat-raised-button color="primary" (click)="goToVoting()">
-                            Vote
-                        </button>
-                        <-- Needs Work </div>
-                    </div>
-            </fuse-card>
-        </div>
     </div>
-    <div class="flex flex-wrap justify-center w-full max-w-5xl mx-auto">
-        <div class="flex flex-col">
-            <fuse-card class="flex flex-col max-w-140 w-full sm:p-8">
-                <div class="text-xl font-semibold pb-6">
-                    Admin
-                </div>
-                <div class="">
-                    <button mat-raised-button color="primary" (click)="goToSubmissionYears()">
-                        Submission Years
-                    </button>
-                </div>
-            </fuse-card>
-        </div>
-    </div>
+
 </div>

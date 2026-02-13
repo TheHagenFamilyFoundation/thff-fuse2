@@ -1,141 +1,125 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            View Proposals
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="bg-card border-b">
+        <div class="flex items-center justify-between w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                View Proposals
+            </h1>
+
+            <!-- Year Selector -->
+            <mat-form-field class="w-36 -mb-5">
+                <mat-label>Year</mat-label>
+                <mat-select [(value)]="selectedYear" (selectionChange)="yearChanged($event)">
+                    <mat-option *ngFor="let year of years" [value]="year._id">
+                        {{ year.year }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
         </div>
     </div>
-    <!-- End of Header -->
 
     <!-- Main -->
-    <div class="text-center pt-4 sm:pt-6 ">
-        <div class="flex justify-center ...">
-            <div class="w-200">
+    <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
 
-                <div class="flex flex-row justify-center">
+        <!-- Filter -->
+        <mat-form-field class="w-full max-w-sm mb-4">
+            <mat-icon matPrefix class="mr-2">search</mat-icon>
+            <input matInput placeholder="Filter proposals..." #filterInput>
+            <button *ngIf="filterInputString" matSuffix mat-icon-button aria-label="Clear"
+                    (click)="clearFilter()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
 
-                    <div class="px-4 py-3">
-                        <mat-label>Year:</mat-label>
-                    </div>
-                    <div>
-                        <mat-form-field>
-                            <mat-select placeholder="Select Year" [(value)]="selectedYear"
-                                (selectionChange)="yearChanged($event)">
-                                <mat-option *ngFor="let year of years" [value]="year._id">
-                                    {{year.year}}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                </div>
+        <!-- Table -->
+        <fuse-card class="flex flex-col w-full overflow-hidden">
+            <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
+                       matSortDirection="desc" class="w-full">
 
-                <div>
-                    <mat-form-field class="w-full">
-                        <!-- <mat-label>Filter</mat-label> -->
-                        <input matInput placeholder="Filter" #filterInput>
-                        <button *ngIf="filterInputString" matSuffix mat-icon-button aria-label="Clear"
-                            (click)="clearFilter()">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </mat-form-field>
-                </div>
+                <!-- Project Title Column -->
+                <ng-container matColumnDef="projectTitle">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="pl-6 font-semibold">
+                        Project Title
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="pl-6 font-medium">
+                        {{ row.projectTitle }}
+                    </mat-cell>
+                </ng-container>
 
-                <!--TODO: Remove -->
-                <!-- Debugging -->
-                <!-- Limit - {{limit}} Skip - {{skip}} -->
+                <!-- Organization Column -->
+                <ng-container matColumnDef="organization">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Organization
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.organization?.name }}
+                    </mat-cell>
+                </ng-container>
 
-                <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
-                    matSortDirection="desc">
-                    <!-- Project Title Column -->
-                    <ng-container matColumnDef="projectTitle">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Project Title
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
-                    </ng-container>
+                <!-- Created On Column -->
+                <ng-container matColumnDef="createdOn">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="font-semibold">
+                        Created On
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.createdAt | date: "MM/dd/yyyy" }}
+                    </mat-cell>
+                </ng-container>
 
-                    <!-- Organization Column -->
-                    <ng-container matColumnDef="organization">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Organization
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row"> {{ row.organization?.name }} </mat-cell>
-                    </ng-container>
+                <!-- Sponsor Column -->
+                <ng-container matColumnDef="sponsor">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Sponsor
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row?.sponsor?.email }}
+                    </mat-cell>
+                </ng-container>
 
+                <!-- Amount Requested Column -->
+                <ng-container matColumnDef="amountRequested">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Requested
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.amountRequested | currency }}
+                    </mat-cell>
+                </ng-container>
 
-                    <!-- createdOn Column -->
-                    <ng-container matColumnDef="createdOn">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
-                            Created On
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.createdAt | date: "MM/dd/yyyy" }}
-                        </mat-cell>
-                    </ng-container>
+                <!-- Total Project Cost Column -->
+                <ng-container matColumnDef="totalProjectCost">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Total Cost
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.totalProjectCost | currency }}
+                    </mat-cell>
+                </ng-container>
 
-                    <!-- sponsor Column -->
-                    <ng-container matColumnDef="sponsor">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Sponsor
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row?.sponsor?.email }}
-                        </mat-cell>
-                    </ng-container>
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                    <mat-header-cell *matHeaderCellDef class="flex-none w-16"></mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="flex-none w-16">
+                        <mat-icon class="text-gray-400 icon-size-5">chevron_right</mat-icon>
+                    </mat-cell>
+                </ng-container>
 
-                    <!-- Amount Requested Column -->
-                    <ng-container matColumnDef="amountRequested">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Amount Requested
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.amountRequested | currency}}
-                        </mat-cell>
-                    </ng-container>
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"
+                         class="org-row cursor-pointer"
+                         (click)="goToProposal(row.proposalID)">
+                </mat-row>
+            </mat-table>
 
-                    <!-- Total Project Cost Column -->
-                    <ng-container matColumnDef="totalProjectCost">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Total Project Cost
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.totalProjectCost| currency }}
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- link Column -->
-                    <ng-container matColumnDef="link">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Link
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            <button mat-raised-button color="primary" (click)="
-                                    goToProposal(row.proposalID)
-                                " mat-dialog-close>
-                                Go to Proposal
-                            </button>
-                        </mat-cell>
-                    </ng-container>
-
-                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                    <mat-row *matRowDef="let row; columns: displayedColumns">
-                    </mat-row>
-                </mat-table>
-
-                <div *ngIf="!loaded">
-                    <mat-spinner></mat-spinner>
-                </div>
-                <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
-                    [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+            <div *ngIf="!loaded" class="flex items-center justify-center py-12">
+                <mat-spinner [diameter]="40"></mat-spinner>
             </div>
-        </div>
+
+            <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
+                           [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+        </fuse-card>
+
     </div>
+
 </div>

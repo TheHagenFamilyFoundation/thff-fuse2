@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 //services
 import { Doc501c3StatusService } from 'app/core/services/organization/501c3/doc501c3-status.service';
 import { Delete501c3Service } from 'app/core/services/organization/501c3/delete-501c3.service';
@@ -8,6 +9,7 @@ import { Upload501c3Service } from 'app/core/services/organization/501c3/upload-
 import { Create501c3Service } from 'app/core/services/organization/501c3/create-501c3.service';
 
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
+import { Upload501c3DialogComponent } from './upload-501c3-dialog/upload-501c3-dialog.component';
 
 @Component({
     selector: 'app-org-doc501c3',
@@ -22,13 +24,11 @@ export class OrgDoc501c3Component implements OnInit {
     outputStatus: any;
     hasUpload501c3: boolean = false;
     rejected501c3: boolean = false;
-    canUpload501c3: boolean = false;
-    submitted: boolean = false;
-    file: File;
     doc501c3: any;
     status: any;
     constructor(
         public _router: Router,
+        private dialog: MatDialog,
         public upload501c3Service: Upload501c3Service,
         public getOrganizationService: GetOrganizationService,
         public doc501c3StatusService: Doc501c3StatusService,
@@ -55,7 +55,6 @@ export class OrgDoc501c3Component implements OnInit {
             this.setStatus(this.status);
         } else {
             this.hasUpload501c3 = false;
-            this.canUpload501c3 = false;
         }
     }
 
@@ -80,121 +79,45 @@ export class OrgDoc501c3Component implements OnInit {
         return this.doc501c3StatusService.getStatus(s);
     }
 
-    fileChange(event): void {
-        console.log('fileChange', event);
-
-        const fileList: FileList = event.target.files;
-        if (fileList.length > 0) {
-            this.file = fileList[0];
-
-            this.canUpload501c3 = true;
-        } else {
-            this.canUpload501c3 = false;
-        }
-    }
-
     get501c3(): void {
-        console.log('getting 501c3');
-
-        this.get501c3Service.get501c3(this.doc501c3._id).subscribe((result) => {
-            console.log('get501c3 - result', result);
-
-            // route to the s3 image url
-            const { url } = result;
-            console.log('url', url);
-            // this.router.navigate([result.url]);
-            this._router.navigate(['/externalRedirect', { externalUrl: url }], {
-                skipLocationChange: true,
-            });
+        this.get501c3Service.view501c3(this.doc501c3._id).subscribe((blob) => {
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, '_blank');
         });
     }
 
-    upload(): void {
-        console.log('upload replacement');
+    openUploadDialog(): void {
+        const dialogRef = this.dialog.open(Upload501c3DialogComponent, {
+            width: '480px',
+            disableClose: true,
+            data: { orgID: this.orgID }
+        });
 
-        // delete the old one
-        console.log('deleting 501c3');
-
-        this.submitted = true;
-
-        console.log('this.file', this.file);
-
-        //call upload service
-        //backend deletes object and creates
-        //backend does all the logic
-        //just pass the file to backend
-        this.upload501c3Service.upload501c3(this.file, this.orgID).subscribe(
-            (result) => {
-                console.log('result', result);
-                this.submitted = false;
+        dialogRef.afterClosed().subscribe((uploaded) => {
+            if (uploaded) {
                 this.getOrganization(this.orgID);
-            },
-            (err) => {
-                console.log(err);
-                this.submitted = false;
             }
-        );
-    }
-
-    // old?
-    delete501c3(): void {
-        console.log('deleting 501c3');
-
-        // call the delete 501c3 service
-        this.delete501c3Service
-            .delete501c3(this.doc501c3._id)
-            .subscribe((result) => {
-                console.log('result', result);
-
-                // refresh the organization
-                this.getOrganization(this.orgID);
-
-                this.outputStatus = '';
-
-                this.status = null;
-            },
-                (err) => {
-                    console.log('delete501c3 - err', err);
-                });
+        });
     }
 
     getOrganization(orgID): void {
-        console.log('check organizations');
+        this.getOrganizationService.getOrgbyID(orgID).subscribe({
+            next: (org) => {
+                this.org = org;
+                this.organizationID = this.org.id;
 
-        // query database for that organization
-
-        this.getOrganizationService.getOrgbyID(orgID).subscribe((org) => {
-            console.log('org', org);
-
-            this.org = org;
-
-            this.organizationID = this.org.id;
-
-            // get organization s3 501c3 if exists
-
-            if (this.org.doc501c3) {
-                console.log('has 501c3', this.org.doc501c3);
-                this.hasUpload501c3 = true;
-
-                this.doc501c3 = this.org.doc501c3;
-
-                this.status = this.doc501c3.status;
-
-                // set status
-                this.setStatus(this.status);
-            } else {
-                this.hasUpload501c3 = false;
-                // this.canUpload501c3 = false;
+                if (this.org.doc501c3) {
+                    this.hasUpload501c3 = true;
+                    this.doc501c3 = this.org.doc501c3;
+                    this.status = this.doc501c3.status;
+                    this.setStatus(this.status);
+                } else {
+                    this.hasUpload501c3 = false;
+                }
+            },
+            error: (err) => {
+                console.error('getOrgByID error:', err);
             }
-            this.canUpload501c3 = false;
-        },
-            (err) => {
-                console.log('getOrgByID - err', err);
-            });
-    }
-
-    uploadNew501c3(): void {
-        // this.canUpload501c3 = true;
-        this.hasUpload501c3 = false;
+        });
     }
 }

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-
 @Component({
     selector: 'app-director',
     templateUrl: './director.component.html',
@@ -9,37 +8,23 @@ import { Router } from '@angular/router';
 })
 export class DirectorComponent implements OnInit {
 
-    constructor(private _router: Router) { }
+    constructor(private _router: Router) {}
 
-    ngOnInit(): void {
-    }
+    ngOnInit(): void {}
 
     goToOrganizations(): void {
-        //route to director - organizations
-        console.log('route to organizations');
-
         this._router.navigate(['/pages/director/organizations']);
     }
 
     goToProposals(): void {
-        //route to director - proposals
-        console.log('route to proposals');
         this._router.navigate(['/pages/director/proposals']);
-
     }
 
     goToVoting(): void {
-        //route to director - voting
-        console.log('route to voting');
         this._router.navigate(['/pages/director/voting']);
-
     }
 
     goToSubmissionYears(): void {
-        //route to director - admin - submission-years
-        console.log('route to submission-years');
         this._router.navigate(['/pages/director/submission-years']);
-
     }
-
 }

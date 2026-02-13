@@ -26,9 +26,14 @@ export class Get501c3Service {
     get501c3(id: string): Observable<any> {
         const urlString = `${this.apiUrl}/organization-501c3/${id}`;
 
-        console.log('urlString', urlString);
-
         return this.http.get(urlString);
+    }
+
+    // Stream the file as a blob for inline viewing
+    view501c3(id: string): Observable<Blob> {
+        const urlString = `${this.apiUrl}/organization-501c3/${id}/view`;
+
+        return this.http.get(urlString, { responseType: 'blob' });
     }
 
     get501c3Info(orgID: string): Observable<any> {
