@@ -10,8 +10,12 @@
     margin-bottom: 0.35rem;
 }
 
+:host-context(.dark) label.block.tracking-wide {
+    color: #d4d4d4; /* neutral-300 */
+}
+
 /* Section sub-headings (Contact Person, Principal Office) */
-:host .block.tracking-wide.text-gray-700.text-base {
+:host .block.tracking-wide.text-base {
     font-weight: 700;
     font-size: 0.95rem;
     color: #334155; /* gray-700 */
@@ -20,10 +24,15 @@
     border-top: 1px solid #e2e8f0;
 }
 
+:host-context(.dark) .block.tracking-wide.text-base {
+    color: #e5e5e5; /* neutral-200 */
+    border-top-color: #525252; /* neutral-600 */
+}
+
 /* View-mode field values - make them clearly bordered */
 :host .appearance-none.block.border {
     background-color: #f8fafc; /* slate-50 */
-    border: 1px solid #e2e8f0 !important; /* slate-200 - visible border */
+    border: 1px solid #e2e8f0 !important; /* slate-200 */
     border-radius: 8px;
     padding: 0.625rem 0.875rem;
     font-size: 0.925rem;
@@ -31,10 +40,21 @@
     min-height: 2.5rem;
 }
 
+:host-context(.dark) .appearance-none.block.border {
+    background-color: rgba(82, 82, 82, 0.4) !important; /* neutral-600/40 */
+    border-color: #525252 !important; /* neutral-600 */
+    color: #e5e5e5; /* neutral-200 */
+}
+
 /* Hover state for editable fields */
 :host .appearance-none.block.border:hover {
     border-color: #94a3b8 !important; /* slate-400 */
     background-color: #f1f5f9; /* slate-100 */
+}
+
+:host-context(.dark) .appearance-none.block.border:hover {
+    border-color: #a3a3a3 !important; /* neutral-400 */
+    background-color: rgba(64, 64, 64, 0.6) !important; /* neutral-700/60 */
 }
 
 /* Form inputs fill width */

@@ -20,12 +20,6 @@
             <fuse-alert class="mt-8 -mb-4" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false"
                 [type]="alert.type" [@shake]="alert.type === 'error'">
                 {{ alert.message }}
-                <ng-container *ngIf="showAlert && countdown > 0">
-                    Redirecting in {{ countdown }}
-                </ng-container>
-                <ng-container *ngIf="countdown === 0">
-                    You are now being redirected!
-                </ng-container>
             </fuse-alert>
 
             <!-- Sign Up form -->

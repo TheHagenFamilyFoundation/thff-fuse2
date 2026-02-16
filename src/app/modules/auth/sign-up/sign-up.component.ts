@@ -1,11 +1,13 @@
-import { Component, OnInit, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { finalize, Subject, takeUntil, takeWhile, tap, timer } from 'rxjs';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
+import { FuseConfigService } from '@fuse/services/config';
 import { AuthService } from 'app/core/auth/auth.service';
+import { BackendService } from 'app/core/services/backend.service';
+import { Scheme } from 'app/core/config/app.config';
 
 @Component({
     selector: 'auth-sign-up',
@@ -13,10 +15,9 @@ import { AuthService } from 'app/core/auth/auth.service';
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
 })
-export class AuthSignUpComponent implements OnInit, OnDestroy {
+export class AuthSignUpComponent implements OnInit {
     @ViewChild('signUpNgForm') signUpNgForm: NgForm;
 
-    countdown: number = 3;
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
         message: '',
@@ -25,12 +26,14 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
     showAlert: boolean = false;
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
         private _authService: AuthService,
+        private _backendService: BackendService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _route: ActivatedRoute,
+        private _fuseConfigService: FuseConfigService
     ) {}
 
     ngOnInit(): void {
@@ -38,11 +41,17 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
             email: ['', [Validators.required, Validators.email]],
             password: ['', Validators.required],
         });
-    }
 
-    ngOnDestroy(): void {
-        this._unsubscribeAll.next(null);
-        this._unsubscribeAll.complete();
+        // Capture referral code from URL query param, stored with the current year
+        this._route.queryParams.subscribe((params) => {
+            if (params.ref) {
+                const refData = {
+                    code: params.ref,
+                    year: new Date().getFullYear()
+                };
+                localStorage.setItem('referralCode', JSON.stringify(refData));
+            }
+        });
     }
 
     signUp(): void {
@@ -54,23 +63,20 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
         this.showAlert = false;
 
         this._authService.signUp(this.signUpForm.value).subscribe({
-            next: () => {
-                this.alert = {
-                    type: 'success',
-                    message: 'Account created successfully!',
-                };
-                this.showAlert = true;
+            next: (response) => {
+                // Establish session from the register response
+                this._authService.establishSession(response);
 
-                timer(1000, 1000)
-                    .pipe(
-                        finalize(() => {
-                            this._router.navigate(['sign-in']);
-                        }),
-                        takeWhile(() => this.countdown > 0),
-                        takeUntil(this._unsubscribeAll),
-                        tap(() => this.countdown--)
-                    )
-                    .subscribe();
+                // Apply user's default scheme
+                if (response.userSettings?.scheme) {
+                    this._fuseConfigService.config = { scheme: response.userSettings.scheme as Scheme };
+                }
+
+                // Start backend session ping
+                this._backendService.startPing();
+
+                // Navigate to the app
+                this._router.navigateByUrl('/signed-in-redirect');
             },
             error: (response) => {
                 const errorMessage = response?.error?.error?.[0]?.msg

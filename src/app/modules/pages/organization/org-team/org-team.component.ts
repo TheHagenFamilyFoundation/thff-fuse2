@@ -18,6 +18,7 @@ export class OrgTeamComponent implements OnInit {
 
     emailControl = new FormControl('', [Validators.required, Validators.email]);
     adding: boolean = false;
+    resendingInviteId: string | null = null;
     currentUserId: string;
     pendingInvites: any[] = [];
 
@@ -107,6 +108,21 @@ export class OrgTeamComponent implements OnInit {
                     this.snackBar.open(message, 'OK', { duration: 5000 });
                 }
             });
+        });
+    }
+
+    resendInvite(inviteId: string): void {
+        this.resendingInviteId = inviteId;
+        this.orgTeamService.resendInvite(inviteId).subscribe({
+            next: () => {
+                this.snackBar.open('Invite resent', 'OK', { duration: 3000 });
+                this.resendingInviteId = null;
+            },
+            error: (err) => {
+                const message = err?.error?.message || 'Failed to resend invite';
+                this.snackBar.open(message, 'OK', { duration: 5000 });
+                this.resendingInviteId = null;
+            }
         });
     }
 

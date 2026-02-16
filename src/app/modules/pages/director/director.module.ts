@@ -15,6 +15,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -24,9 +29,11 @@ import { OrganizationsComponent } from './organizations/organizations.component'
 import { ProposalsComponent } from './proposals/proposals.component';
 import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
+import { ClosePortalDialogComponent } from './submission-years/close-portal-dialog.component';
+import { ReferralLinksComponent } from './referral-links/referral-links.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -44,6 +51,11 @@ import { SubmissionYearsComponent } from './submission-years/submission-years.co
         MatPaginatorModule,
         MatSortModule,
         MatSelectModule,
+        MatButtonToggleModule,
+        MatCheckboxModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
     ],
 })
 export class DirectorModule { }

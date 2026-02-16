@@ -15,12 +15,6 @@
                 <div>Don't have an account?</div>
                 <a class="ml-1 text-primary-500 hover:underline" [routerLink]="['/sign-up']">Sign up</a>
             </div>
-            <div class="mt-2">
-                <a class="inline-flex items-center text-sm text-primary-500 hover:underline" [routerLink]="['/home']">
-                    <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_solid:home'"></mat-icon>
-                    Go to home page
-                </a>
-            </div>
 
             <!-- Alert -->
             <fuse-alert class="mt-8 -mb-4" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false"
@@ -73,6 +67,14 @@
                         [mode]="'indeterminate'"></mat-progress-spinner>
                 </button>
             </form>
+
+            <!-- Home link -->
+            <div class="mt-8 text-center">
+                <a class="inline-flex items-center text-sm text-gray-500 hover:text-primary-500 transition-colors" [routerLink]="['/home']">
+                    <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_solid:arrow-left'"></mat-icon>
+                    Back to home page
+                </a>
+            </div>
         </div>
     </div>
     <div

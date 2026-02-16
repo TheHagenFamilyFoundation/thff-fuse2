@@ -23,7 +23,7 @@ export class OrgProposalsComponent implements AfterViewInit {
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild('filterInput', { static: true }) input: ElementRef;
 
-    displayedColumns = ['projectTitle', 'createdOn', 'action'];
+    displayedColumns = ['projectTitle', 'amountRequested', 'createdOn', 'action'];
 
     limit: number;
 

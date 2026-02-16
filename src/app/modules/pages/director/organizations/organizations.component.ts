@@ -5,6 +5,7 @@ import { merge, of as observableOf, fromEvent } from 'rxjs';
 import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
+import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 
 @Component({
     selector: 'app-organizations',
@@ -20,23 +21,32 @@ export class OrganizationsComponent implements AfterViewInit {
     displayedColumns = ['name', 'createdOn', 'users', 'proposals', 'action'];
     data: [];
     orgCount: number;
+    years: any;
+    selectedYear: number;
     loaded: boolean = false;
     pageEvent: PageEvent;
+    hasProposals: boolean = true;
 
     private limit: number = 10;
     private skip: number = 0;
     private sortColumn: string = 'createdOn';
     private sortDirection: string = 'desc';
     private filterInputString: string = '';
+    year: number = (new Date()).getFullYear();
 
     constructor(
         public getOrgService: GetOrganizationService,
+        public submissionYearService: SubmissionYearsService,
         private _router: Router
     ) {}
 
+    get effectiveYear(): number | undefined {
+        return this.hasProposals ? this.year : undefined;
+    }
+
     ngAfterViewInit(): void {
         this.sort.start = 'desc';
-        this.getOrganizationCount();
+        this.getSubmissionYears();
 
         this.sort.sortChange.subscribe(() => {
             this.skip = 0;
@@ -52,7 +62,7 @@ export class OrganizationsComponent implements AfterViewInit {
                     this.loaded = false;
                     return this.getOrgService.getOrgs(
                         this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection
+                        this.sortColumn, this.sortDirection, this.effectiveYear
                     ).pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
@@ -73,7 +83,7 @@ export class OrganizationsComponent implements AfterViewInit {
                     this.filterInputString = (event.target as HTMLInputElement).value;
                     this.getOrgService.getOrgs(
                         this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection
+                        this.sortColumn, this.sortDirection, this.effectiveYear
                     ).subscribe((data) => { this.data = data; });
                     this.getOrganizationCount(this.filterInputString);
                 })
@@ -100,8 +110,44 @@ export class OrganizationsComponent implements AfterViewInit {
         }
     }
 
+    yearChanged(e: any): void {
+        const selected = this.years.find(y => y._id === e.value);
+        this.selectedYear = selected._id;
+        this.year = selected.year;
+        this.refreshData();
+    }
+
+    hasProposalsChanged(): void {
+        this.refreshData();
+    }
+
+    private refreshData(): void {
+        this.skip = 0;
+        this.paginator.pageIndex = 0;
+        this.getOrganizationCount(this.filterInputString);
+        this.getOrgService.getOrgs(
+            this.skip, this.limit, this.filterInputString,
+            this.sortColumn, this.sortDirection, this.effectiveYear
+        ).subscribe({
+            next: (data) => { this.data = data; this.loaded = true; },
+            error: (err) => { console.error('getOrgs error', err); }
+        });
+    }
+
+    private getSubmissionYears(): void {
+        this.submissionYearService.getAllSubmissionYears(this.year).subscribe({
+            next: (years) => {
+                this.years = years;
+                this.selectedYear = years[0]._id;
+                this.year = years[0].year;
+                this.getOrganizationCount();
+            },
+            error: (err) => { console.error('getAllSubmissionYears error', err); }
+        });
+    }
+
     private getOrganizationCount(countFilter?: string): void {
-        this.getOrgService.getOrganizationCount(countFilter).subscribe({
+        this.getOrgService.getOrganizationCount(countFilter, this.effectiveYear).subscribe({
             next: (count) => { this.orgCount = count; },
             error: (err) => { console.error('getOrganizationCount error', err); }
         });

@@ -10,8 +10,21 @@
             [opened]="drawerOpened"
             #drawer
         >
+            <!-- Back to Profile -->
+            <div class="mx-8 mt-6 sm:mt-8">
+                <a
+                    class="inline-flex items-center text-sm font-medium text-primary hover:underline cursor-pointer"
+                    [routerLink]="['/pages/profile']"
+                >
+                    <mat-icon
+                        class="mr-1 icon-size-4"
+                        [svgIcon]="'heroicons_outline:arrow-left'"
+                    ></mat-icon>
+                    Back to Profile
+                </a>
+            </div>
             <!-- Header -->
-            <div class="flex items-center justify-between m-8 mr-6 sm:my-10">
+            <div class="flex items-center justify-between m-8 mr-6 sm:mb-10 sm:mt-4">
                 <!-- Title -->
                 <div
                     class="text-4xl font-extrabold tracking-tight leading-none"

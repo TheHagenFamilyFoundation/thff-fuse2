@@ -13,6 +13,10 @@ export class BackendService {
     apiUrl: string;
     private pingInterval: any = null;
     private readonly PING_INTERVAL_MS = 30000; // 30 seconds
+    private _isRefreshing = false;
+
+    // Refresh when less than 50% of token lifetime remains
+    private readonly REFRESH_THRESHOLD = 0.5;
 
     constructor(private http: HttpClient, private _authService: AuthService, private _router: Router) {
         this.apiUrl = environment.apiUrl;
@@ -51,17 +55,46 @@ export class BackendService {
             return;
         }
 
-        // Token expired client-side — kick out without hitting backend
+        // Check how much lifetime the token has remaining
+        const lifetimeRemaining = AuthUtils.getTokenLifetimeRemaining(token);
+
+        // If token is expired, attempt one refresh before kicking out
         if (AuthUtils.isTokenExpired(token)) {
-            this.handleExpired();
+            this.attemptRefresh();
             return;
         }
 
-        // Token looks valid client-side — ping backend to confirm server-side
-        // If the backend returns 401, the interceptor will handle sign-out
+        // If token is past the refresh threshold, proactively refresh it
+        // This keeps the session alive as long as the user is active
+        if (lifetimeRemaining !== null && lifetimeRemaining < this.REFRESH_THRESHOLD) {
+            this.attemptRefresh();
+            return;
+        }
+
+        // Token is healthy — ping backend to confirm server-side validity
         this.ping().subscribe({
             error: () => {
                 // 401 is handled by the interceptor, other errors are ignored
+            }
+        });
+    }
+
+    private attemptRefresh(): void {
+        // Prevent concurrent refresh attempts
+        if (this._isRefreshing) { return; }
+        this._isRefreshing = true;
+
+        this._authService.signInUsingToken().subscribe({
+            next: (result) => {
+                this._isRefreshing = false;
+                if (!result) {
+                    // Refresh failed — session is truly expired
+                    this.handleExpired();
+                }
+            },
+            error: () => {
+                this._isRefreshing = false;
+                this.handleExpired();
             }
         });
     }

@@ -35,25 +35,34 @@
         </h3>
         <div class="flex flex-col gap-2">
             <div *ngFor="let invite of pendingInvites"
-                 class="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50">
+                 class="flex items-center justify-between p-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900 dark:bg-opacity-30">
 
                 <div class="flex items-center min-w-0">
                     <div class="flex items-center justify-center w-9 h-9 rounded-full bg-amber-400 text-white text-sm font-bold mr-3 flex-shrink-0">
                         <mat-icon class="icon-size-5">mail_outline</mat-icon>
                     </div>
                     <div class="min-w-0">
-                        <div class="font-medium text-gray-800 truncate">{{ invite.email }}</div>
+                        <div class="font-medium text-gray-800 dark:text-gray-200 truncate">{{ invite.email }}</div>
                         <div class="text-xs text-amber-600">Invited {{ invite.createdAt | date:'MMM d, y' }}</div>
                     </div>
                 </div>
 
-                <button *ngIf="canManageTeam"
-                        mat-icon-button
-                        class="text-gray-400 hover:text-red-500 flex-shrink-0"
-                        matTooltip="Cancel invite"
-                        (click)="cancelInvite(invite._id)">
-                    <mat-icon class="icon-size-5">close</mat-icon>
-                </button>
+                <div *ngIf="canManageTeam" class="flex items-center gap-1 flex-shrink-0">
+                    <button mat-icon-button
+                            class="text-gray-400 hover:text-primary"
+                            matTooltip="Resend invite"
+                            [disabled]="resendingInviteId === invite._id"
+                            (click)="resendInvite(invite._id)">
+                        <mat-spinner *ngIf="resendingInviteId === invite._id" [diameter]="18"></mat-spinner>
+                        <mat-icon *ngIf="resendingInviteId !== invite._id" class="icon-size-5">send</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            class="text-gray-400 hover:text-red-500"
+                            matTooltip="Cancel invite"
+                            (click)="cancelInvite(invite._id)">
+                        <mat-icon class="icon-size-5">close</mat-icon>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -69,14 +78,14 @@
 
     <div class="flex flex-col gap-2">
         <div *ngFor="let user of org?.users"
-             class="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+             class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-600 dark:bg-opacity-40 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
 
             <div class="flex items-center min-w-0">
                 <div class="flex items-center justify-center w-9 h-9 rounded-full bg-thff-teal text-white text-sm font-bold mr-3 flex-shrink-0">
                     {{ (user.firstName?.[0] || user.email[0]) | uppercase }}
                 </div>
                 <div class="min-w-0">
-                    <div class="font-medium text-gray-800 truncate">
+                    <div class="font-medium text-gray-800 dark:text-gray-200 truncate">
                         {{ user.firstName && user.lastName ? user.firstName + ' ' + user.lastName : user.email }}
                     </div>
                     <div *ngIf="user.firstName" class="text-sm text-gray-500 truncate">

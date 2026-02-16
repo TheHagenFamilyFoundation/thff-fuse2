@@ -1,81 +1,93 @@
-<div class="flex flex-col sm:flex-row items-start justify-between">
-    <div class="text-lg font-medium tracking-tight leading-6 truncate">
+<div class="flex flex-col sm:flex-row items-start justify-between mb-6">
+    <div class="text-xl font-semibold tracking-tight leading-6">
         Summary
     </div>
 </div>
-<div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
-        <!-- Purpose -->
-        <div
-            class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto lg:row-span-2 p-6 bg-card shadow rounded-2xl overflow-hidden">
-            <div class="flex flex-col sm:flex-row items-start justify-between">
-                <div class="text-lg font-medium tracking-tight leading-6">Purpose</div>
-            </div>
-            <div>
-                {{prop?.purpose}}
-            </div>
-            <div class="grid grid-cols-2 border-t divide-x -m-6 mt-4 bg-gray-50 dark:bg-transparent">
-                <div class="flex flex-col items-center justify-center p-6 sm:p-8">
-                    <div class="text-5xl font-semibold leading-none tracking-tighter">
-                        {{prop?.amountRequested | currency}}
-                    </div>
-                    <div class="mt-1 text-center text-secondary">Amount Requested</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full min-w-0">
+
+    <!-- Purpose & Financials -->
+    <div class="lg:col-span-2 flex flex-col p-6 bg-gray-50 dark:bg-neutral-700 dark:bg-opacity-30 rounded-2xl">
+        <div class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Purpose</div>
+        <div class="text-gray-800 dark:text-gray-200 leading-relaxed mb-6">
+            {{ prop?.purpose }}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-auto">
+            <div class="flex flex-col items-center p-5 bg-white dark:bg-neutral-600 dark:bg-opacity-40 rounded-xl border border-gray-200 dark:border-neutral-600">
+                <div class="text-2xl sm:text-3xl font-bold tracking-tight text-thff-teal">
+                    {{ prop?.amountRequested | currency:'USD':'symbol':'1.0-0' }}
                 </div>
-                <div class="flex flex-col items-center justify-center p-6 sm:p-8">
-                    <div class="text-5xl font-semibold leading-none tracking-tighter">
-                        {{prop?.totalProjectCost | currency}}
-                    </div>
-                    <div class="mt-1 text-center text-secondary">Total Project Cost</div>
-                </div>
+                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount Requested</div>
             </div>
-            <div class="py-4">
-                Click on Proposal Information Tab to View More.
+            <div class="flex flex-col items-center p-5 bg-white dark:bg-neutral-600 dark:bg-opacity-40 rounded-xl border border-gray-200 dark:border-neutral-600">
+                <div class="text-2xl sm:text-3xl font-bold tracking-tight">
+                    {{ prop?.totalProjectCost | currency:'USD':'symbol':'1.0-0' }}
+                </div>
+                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Project Cost</div>
             </div>
         </div>
-        <!-- Sponsor -->
-        <div
-            class="sm:col-span-1 md:col-span-4 lg:col-span-1 lg:row-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-            <div class="flex flex-col sm:flex-row items-start justify-between">
-                <div class="text-lg font-medium tracking-tight leading-6 truncate">Sponsor</div>
-            </div>
-            <div *ngIf="hasSponsor">{{prop?.sponsor?.email}}</div>
-            <div *ngIf="hasSponsor">
-                <div>
-                    <button *ngIf="!sponsorQuestion" mat-raised-button (click)="removeSponsor()">
-                        Remove Sponsor
-                    </button>
-                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="confirmRemoveSponsor()">
+
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-4 mb-0">
+            View the Proposal Information tab for full details.
+        </p>
+    </div>
+
+    <!-- Right Column: Sponsor + Voting -->
+    <div class="flex flex-col gap-6">
+
+        <!-- Sponsor Card -->
+        <div class="flex flex-col p-6 bg-gray-50 dark:bg-neutral-700 dark:bg-opacity-30 rounded-2xl">
+            <div class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Sponsor</div>
+
+            <!-- Has Sponsor -->
+            <div *ngIf="hasSponsor" class="flex flex-col items-center text-center">
+                <div class="flex items-center justify-center w-14 h-14 rounded-full bg-green-100 dark:bg-green-900 dark:bg-opacity-40 mb-3">
+                    <mat-icon class="text-green-600 dark:text-green-400 icon-size-7">verified</mat-icon>
+                </div>
+                <div class="font-medium text-gray-800 dark:text-gray-200 mb-1">Sponsored</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ prop?.sponsor?.email }}</div>
+                <button *ngIf="!sponsorQuestion" mat-stroked-button color="warn" class="w-full"
+                        (click)="removeSponsor()">
+                    Remove Sponsor
+                </button>
+                <div *ngIf="sponsorQuestion" class="flex gap-2 w-full">
+                    <button mat-flat-button color="warn" class="flex-1" (click)="confirmRemoveSponsor()">
                         Confirm
                     </button>
-                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="cancel()">
+                    <button mat-stroked-button class="flex-1" (click)="cancel()">
                         Cancel
                     </button>
                 </div>
             </div>
-            <div *ngIf=" !hasSponsor">
-                <div>
-                    Click Here to Sponsor
+
+            <!-- No Sponsor -->
+            <div *ngIf="!hasSponsor" class="flex flex-col items-center text-center">
+                <div class="flex items-center justify-center w-14 h-14 rounded-full bg-gray-200 dark:bg-neutral-600 mb-3">
+                    <mat-icon class="text-gray-400 dark:text-gray-500 icon-size-7">person_add</mat-icon>
                 </div>
-                <div>
-                    <button *ngIf="!sponsorQuestion" mat-raised-button (click)="sponsor()">
-                        Sponsor
-                    </button>
-                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="confirmSponsor()">
+                <div class="font-medium text-gray-800 dark:text-gray-200 mb-1">No Sponsor Yet</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">This proposal needs a sponsor</div>
+                <button *ngIf="!sponsorQuestion" mat-flat-button color="primary" class="w-full"
+                        (click)="sponsor()">
+                    Sponsor This Proposal
+                </button>
+                <div *ngIf="sponsorQuestion" class="flex gap-2 w-full">
+                    <button mat-flat-button color="primary" class="flex-1" (click)="confirmSponsor()">
                         Confirm
                     </button>
-                    <button *ngIf="sponsorQuestion" mat-raised-button (click)="cancel()">
+                    <button mat-stroked-button class="flex-1" (click)="cancel()">
                         Cancel
                     </button>
                 </div>
             </div>
         </div>
-        <!-- Voting -->
-        <div class=" sm:col-span-1 md:col-span-4 lg:col-span-1 lg:row-span-2 flex flex-col flex-auto p-6 bg-card shadow
-                        rounded-2xl overflow-hidden">
-            <div class="flex flex-col sm:flex-row items-start justify-between">
-                <div class="text-lg font-medium tracking-tight leading-6 truncate">Voting</div>
-            </div>
+
+        <!-- Voting Card -->
+        <div class="flex flex-col p-6 bg-gray-50 dark:bg-neutral-700 dark:bg-opacity-30 rounded-2xl">
+            <div class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Your Vote</div>
             <app-voting (refreshProp)="refreshProposal()" [isDirector]="isDirector" [prop]="prop"></app-voting>
         </div>
+
     </div>
 </div>

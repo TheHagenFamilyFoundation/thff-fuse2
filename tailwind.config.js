@@ -103,7 +103,7 @@ const config = {
                 'spin-slow': 'spin 3s linear infinite'
             },
             colors                  : {
-                gray: colors.slate,
+                gray: colors.neutral,
                 'darkgray': '#35363A',
                 'lightgray': '#989494',
                 'thff-teal':'#008083',

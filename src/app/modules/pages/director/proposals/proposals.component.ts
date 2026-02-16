@@ -6,6 +6,7 @@ import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChang
 import { Router } from '@angular/router';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
     selector: 'app-proposals',
@@ -26,6 +27,8 @@ export class ProposalsComponent implements AfterViewInit {
     loaded: boolean = false;
     pageEvent: PageEvent;
     filterInputString: string = '';
+    isPresident: boolean = false;
+    archivedFilter: string = ''; // '' = active only, 'only' = archived only, 'true' = all
 
     private limit: number = 10;
     private skip: number = 0;
@@ -36,8 +39,13 @@ export class ProposalsComponent implements AfterViewInit {
     constructor(
         public proposalService: ProposalService,
         public submissionYearsService: SubmissionYearsService,
-        private _router: Router
-    ) {}
+        private _router: Router,
+        private _authService: AuthService
+    ) {
+        this._authService.checkPresident().subscribe((isP) => {
+            this.isPresident = isP;
+        });
+    }
 
     ngAfterViewInit(): void {
         this.sort.start = 'desc';
@@ -57,7 +65,7 @@ export class ProposalsComponent implements AfterViewInit {
                     this.loaded = false;
                     return this.proposalService.getProps(
                         this.year, this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection
+                        this.sortColumn, this.sortDirection, this.archivedFilter || undefined
                     ).pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
@@ -79,7 +87,7 @@ export class ProposalsComponent implements AfterViewInit {
                     this.paginator.pageIndex = 0;
                     this.proposalService.getProps(
                         this.year, this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection
+                        this.sortColumn, this.sortDirection, this.archivedFilter || undefined
                     ).subscribe((data) => {
                         this.data = data;
                         this.loaded = true;
@@ -103,7 +111,7 @@ export class ProposalsComponent implements AfterViewInit {
         }
         this.proposalService.getProps(
             this.year, this.skip, this.limit, this.filterInputString,
-            this.sortColumn, this.sortDirection
+            this.sortColumn, this.sortDirection, this.archivedFilter || undefined
         ).subscribe((data) => {
             this.data = data;
             this.loaded = true;
@@ -134,7 +142,21 @@ export class ProposalsComponent implements AfterViewInit {
         this.getProposalCount(this.year);
         this.proposalService.getProps(
             this.year, this.skip, this.limit, this.filterInputString,
-            this.sortColumn, this.sortDirection
+            this.sortColumn, this.sortDirection, this.archivedFilter || undefined
+        ).subscribe({
+            next: (data) => { this.data = data; this.loaded = true; },
+            error: (err) => { console.error('getProps error', err); }
+        });
+    }
+
+    archivedFilterChanged(value: string): void {
+        this.archivedFilter = value;
+        this.skip = 0;
+        this.paginator.pageIndex = 0;
+        this.getProposalCount(this.year, this.filterInputString);
+        this.proposalService.getProps(
+            this.year, this.skip, this.limit, this.filterInputString,
+            this.sortColumn, this.sortDirection, this.archivedFilter || undefined
         ).subscribe({
             next: (data) => { this.data = data; this.loaded = true; },
             error: (err) => { console.error('getProps error', err); }
@@ -154,7 +176,7 @@ export class ProposalsComponent implements AfterViewInit {
     }
 
     private getProposalCount(year: number, countFilter?: string): void {
-        this.proposalService.getProposalCount(year, countFilter).subscribe({
+        this.proposalService.getProposalCount(year, countFilter, this.archivedFilter || undefined).subscribe({
             next: (count) => { this.propCount = count; },
             error: (err) => { console.error('getProposalCount error', err); }
         });

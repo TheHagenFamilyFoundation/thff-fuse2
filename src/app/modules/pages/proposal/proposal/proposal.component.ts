@@ -37,6 +37,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
     propID: string; //mongo id
     proposal: any; // the Proposal object
     isDirector: boolean;
+    isPresident: boolean = false;
     inOrg: boolean; //applies to proposal in the organization
     viewing: string;
     organizationID: string;
@@ -44,10 +45,13 @@ export class ProposalComponent implements OnInit, OnDestroy {
     org: any;
     organizationLink: string;
 
+    activeTab: 'summary' | 'proposal-info' | 'voting' = 'summary';
+    archiveConfirm: boolean = false;
+
     // multiple form
     public mode: 'view' | 'edit' = 'view';
 
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
     projectTitle$ = new Subject<string>();
     purpose$ = new Subject<string>();
@@ -170,15 +174,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
         this.defaultValues();
 
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this._authService.getBackendURL();
-            console.log('ProposalComponent - this.apiUrl', this.apiUrl);
-        }
-
-        console.log('ProposalComponent - this.apiUrl', this.apiUrl);
-
         //initialize
         this.inOrg = false;
 
@@ -205,6 +200,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
         this._authService.checkDirector().subscribe((isADirector) => {
             this.isDirector = isADirector;
+        });
+
+        this._authService.checkPresident().subscribe((isAPresident) => {
+            this.isPresident = isAPresident;
         });
 
         this.getProposal(this.proposalID);
@@ -277,11 +276,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
             (err) => {
                 console.log('getOrgbyID - err', err);
             });
-    }
-
-    getBackendURL(): void {
-        console.log('proposal - environment', environment);
-        this.apiUrl = environment.apiUrl;
     }
 
     checkIsDirectorAndInOrg(): void {
@@ -616,6 +610,31 @@ export class ProposalComponent implements OnInit, OnDestroy {
         this.editing = false;
 
         this.getProposal(this.proposalID);
+    }
+
+    toggleArchive(): void {
+        this.archiveConfirm = true;
+    }
+
+    confirmArchive(): void {
+        const newArchived = !this.proposal.archived;
+        this._proposalService.archiveProposal(this.propID, newArchived).subscribe(
+            (result) => {
+                this.proposal.archived = newArchived;
+                this.archiveConfirm = false;
+                const msg = newArchived ? 'Proposal archived' : 'Proposal restored';
+                this.snackBar.open(msg, 'OK', { duration: 3000 });
+            },
+            (err) => {
+                console.error('archiveProposal error', err);
+                this.archiveConfirm = false;
+                this.snackBar.open('Error updating proposal', 'OK', { duration: 3000 });
+            }
+        );
+    }
+
+    cancelArchive(): void {
+        this.archiveConfirm = false;
     }
 
     handleModeChange(mode: 'view' | 'edit'): void {

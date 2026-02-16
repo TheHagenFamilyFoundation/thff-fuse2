@@ -2,15 +2,22 @@
 
     <!-- Header -->
     <div class="bg-card border-b">
-        <div class="flex items-center justify-between w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
-                Submission Years
-            </h1>
-            <button *ngIf="submissionYearMissing" mat-flat-button color="primary"
-                    (click)="createSubmissionYear()">
-                <mat-icon class="mr-2 icon-size-5">add</mat-icon>
-                <span>Create {{ currentYear }} Year</span>
-            </button>
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a routerLink="/pages/director"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                    Submission Years
+                </h1>
+                <button *ngIf="submissionYearMissing" mat-flat-button color="primary"
+                        (click)="createSubmissionYear()">
+                    <mat-icon class="mr-2 icon-size-5">add</mat-icon>
+                    <span>Create {{ currentYear }} Year</span>
+                </button>
+            </div>
         </div>
     </div>
 

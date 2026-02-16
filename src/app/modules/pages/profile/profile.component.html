@@ -8,61 +8,340 @@
                 <div class="text-lg font-bold leading-none">
                     {{ currentUser.email }}
                 </div>
-                <!-- <div class="text-secondary">London, UK</div> -->
             </div>
 
             <!-- Separator -->
             <div class="hidden lg:flex h-8 mx-8 border-l-2"></div>
 
-            <!-- Stats -->
-            <!-- <div class="flex items-center mt-6 lg:mt-0 space-x-6">
-                <div class="flex flex-col items-center">
-                    <span class="font-bold">200k</span>
-                    <span class="text-sm font-medium text-secondary">FOLLOWERS</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="font-bold">1.2k</span>
-                    <span class="text-sm font-medium text-secondary">FOLLOWING</span>
-                </div>
-            </div> -->
-
-            <!-- Menu -->
+            <!-- Tab Menu -->
             <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
-                <a class="font-medium" [routerLink]="['./']"> Home </a>
-                <!-- if user is in an organization-->
-                <!-- <div *ngIf="inOrganization">
-                    <a
-                        class="text-secondary"
-                        [routerLink]="['/pages/organizations']"
-                    >
-                        Organizations
-                    </a>
-                </div> -->
-                <a class="text-secondary" [routerLink]="['/pages/settings']">
+                <a
+                    class="cursor-pointer"
+                    [ngClass]="activeTab === 'home' ? 'font-medium' : 'text-secondary'"
+                    (click)="setTab('home')"
+                >
+                    Home
+                </a>
+                <a
+                    class="cursor-pointer"
+                    [ngClass]="activeTab === 'settings' ? 'font-medium' : 'text-secondary'"
+                    (click)="setTab('settings')"
+                >
                     Settings
                 </a>
             </div>
         </div>
     </div>
-    <!-- Main -->
-    <div class="flex flex-wrap justify-center w-full max-w-5xl mx-auto p-6 sm:p-8">
-        <!-- Column -->
-        <div class="flex flex-col items-start">
-            <fuse-card class="flex flex-col max-w-200 w-full p-6 sm:p-8 pb-6">
+
+    <!-- ======================== HOME TAB ======================== -->
+    <div *ngIf="activeTab === 'home'" class="flex flex-col w-full max-w-5xl mx-auto p-6 sm:p-8">
+        <div class="flex flex-col w-full">
+            <fuse-card class="flex flex-col w-full p-6 sm:p-8 pb-6">
                 <div class="text-xl font-semibold">Organizations</div>
-                <div class="flex flex-col sm:flex-row items-start mt-8">
+                <div class="flex flex-col w-full mt-8">
                     <app-user-organization [user]="user" [organizations]="organizations"></app-user-organization>
                 </div>
             </fuse-card>
         </div>
-        <!-- Column -->
-        <!-- <div class="flex flex-col items-start">
-            <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
-                <div class="text-xl font-semibold">Proposals</div>
-                <div class="flex flex-col sm:flex-row items-start mt-8">
-                    <app-user-proposals [user]="user"></app-user-proposals>
+    </div>
+
+    <!-- ======================== SETTINGS TAB ======================== -->
+    <div *ngIf="activeTab === 'settings'" class="flex flex-col lg:flex-row w-full max-w-5xl mx-auto p-6 sm:p-8 gap-8">
+        <!-- Settings Sidebar -->
+        <div class="flex flex-col w-full lg:w-72 shrink-0">
+            <div class="text-2xl font-bold tracking-tight mb-6">Settings</div>
+            <div class="flex flex-col divide-y border-t border-b">
+                <div
+                    *ngFor="let panel of panels; trackBy: trackByFn"
+                    class="flex items-center px-4 py-4 cursor-pointer"
+                    [ngClass]="{
+                        'hover:bg-gray-100 dark:hover:bg-hover': selectedPanel !== panel.id,
+                        'bg-primary-50 dark:bg-hover': selectedPanel === panel.id
+                    }"
+                    (click)="goToPanel(panel.id)"
+                >
+                    <mat-icon
+                        class="mr-3"
+                        [ngClass]="{
+                            'text-hint': selectedPanel !== panel.id,
+                            'text-primary dark:text-primary-500': selectedPanel === panel.id
+                        }"
+                        [svgIcon]="panel.icon"
+                    ></mat-icon>
+                    <div>
+                        <div
+                            class="font-medium leading-6"
+                            [ngClass]="{
+                                'text-primary dark:text-primary-500': selectedPanel === panel.id
+                            }"
+                        >
+                            {{ panel.title }}
+                        </div>
+                        <div class="text-sm text-secondary mt-0.5">
+                            {{ panel.description }}
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="flex flex-col flex-auto">
+            <fuse-card class="flex flex-col w-full p-6 sm:p-8">
+                <!-- Panel title -->
+                <div class="text-2xl font-bold tracking-tight mb-6">
+                    {{ getPanelInfo(selectedPanel).title }}
+                </div>
+
+                <!-- Panel content -->
+                <ng-container [ngSwitch]="selectedPanel">
+
+                    <!-- ===== ACCOUNT PANEL ===== -->
+                    <ng-container *ngSwitchCase="'account'">
+                        <form [formGroup]="accountForm" class="w-full max-w-xl">
+                            <!-- Alert -->
+                            <div *ngIf="accountAlert" class="mb-6">
+                                <fuse-alert
+                                    [type]="accountAlert.type"
+                                    [appearance]="'outline'"
+                                    [showIcon]="true">
+                                    {{ accountAlert.message }}
+                                </fuse-alert>
+                            </div>
+
+                            <div class="grid sm:grid-cols-2 gap-6">
+                                <!-- Email (read-only) -->
+                                <div class="sm:col-span-2">
+                                    <mat-form-field class="fuse-mat-no-subscript w-full">
+                                        <mat-label>Email</mat-label>
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:mail'"
+                                            matPrefix></mat-icon>
+                                        <input
+                                            formControlName="email"
+                                            matInput>
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:lock-closed'"
+                                            matSuffix
+                                            matTooltip="Email cannot be changed"></mat-icon>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- First Name -->
+                                <div>
+                                    <mat-form-field class="fuse-mat-no-subscript w-full">
+                                        <mat-label>First Name</mat-label>
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user'"
+                                            matPrefix></mat-icon>
+                                        <input
+                                            formControlName="firstName"
+                                            matInput
+                                            placeholder="Enter first name">
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Last Name -->
+                                <div>
+                                    <mat-form-field class="fuse-mat-no-subscript w-full">
+                                        <mat-label>Last Name</mat-label>
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user'"
+                                            matPrefix></mat-icon>
+                                        <input
+                                            formControlName="lastName"
+                                            matInput
+                                            placeholder="Enter last name">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end mt-8">
+                                <button
+                                    mat-flat-button
+                                    type="button"
+                                    [color]="'primary'"
+                                    [disabled]="accountSaving"
+                                    (click)="saveAccount()">
+                                    <span *ngIf="!accountSaving">Save</span>
+                                    <mat-progress-spinner
+                                        *ngIf="accountSaving"
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'">
+                                    </mat-progress-spinner>
+                                </button>
+                            </div>
+                        </form>
+                    </ng-container>
+
+                    <!-- ===== SECURITY PANEL ===== -->
+                    <ng-container *ngSwitchCase="'security'">
+                        <form [formGroup]="securityForm" class="w-full max-w-xl">
+                            <!-- Alert -->
+                            <div *ngIf="securityAlert" class="mb-6">
+                                <fuse-alert
+                                    [type]="securityAlert.type"
+                                    [appearance]="'outline'"
+                                    [showIcon]="true">
+                                    {{ securityAlert.message }}
+                                </fuse-alert>
+                            </div>
+
+                            <div class="text-secondary mb-6">
+                                Change your password below. Password must contain at least 10 characters, including uppercase, lowercase, number, and special character.
+                            </div>
+
+                            <div class="flex flex-col gap-6">
+                                <!-- Current Password -->
+                                <mat-form-field class="fuse-mat-no-subscript w-full">
+                                    <mat-label>Current Password</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        [svgIcon]="'heroicons_solid:key'"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        formControlName="currentPassword"
+                                        type="password"
+                                        matInput>
+                                </mat-form-field>
+
+                                <!-- New Password -->
+                                <mat-form-field class="w-full">
+                                    <mat-label>New Password</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        [svgIcon]="'heroicons_solid:key'"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        formControlName="newPassword"
+                                        type="password"
+                                        matInput>
+                                    <mat-hint>Min 10 chars: uppercase, lowercase, number, and special character</mat-hint>
+                                </mat-form-field>
+
+                                <!-- Confirm New Password -->
+                                <mat-form-field class="fuse-mat-no-subscript w-full">
+                                    <mat-label>Confirm New Password</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        [svgIcon]="'heroicons_solid:key'"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        formControlName="confirmPassword"
+                                        type="password"
+                                        matInput>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end mt-8">
+                                <button
+                                    mat-stroked-button
+                                    type="button"
+                                    (click)="securityForm.reset(); securityAlert = null">
+                                    Cancel
+                                </button>
+                                <button
+                                    class="ml-4"
+                                    mat-flat-button
+                                    type="button"
+                                    [color]="'primary'"
+                                    [disabled]="securityForm.invalid || securitySaving"
+                                    (click)="savePassword()">
+                                    <span *ngIf="!securitySaving">Change Password</span>
+                                    <mat-progress-spinner
+                                        *ngIf="securitySaving"
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'">
+                                    </mat-progress-spinner>
+                                </button>
+                            </div>
+                        </form>
+                    </ng-container>
+
+                    <!-- ===== NOTIFICATIONS PANEL ===== -->
+                    <!-- <ng-container *ngSwitchCase="'notifications'">
+                        <div class="text-secondary">Coming Soon</div>
+                    </ng-container> -->
+
+                    <!-- ===== APP SETTINGS PANEL ===== -->
+                    <ng-container *ngSwitchCase="'app'">
+                        <div class="w-full max-w-xl">
+                            <!-- Alert -->
+                            <div *ngIf="appAlert" class="mb-6">
+                                <fuse-alert
+                                    [type]="appAlert.type"
+                                    [appearance]="'outline'"
+                                    [showIcon]="true">
+                                    {{ appAlert.message }}
+                                </fuse-alert>
+                            </div>
+
+                            <div class="text-secondary mb-6">
+                                Choose your preferred color scheme.
+                            </div>
+
+                            <!-- Theme toggle -->
+                            <div class="flex items-center gap-4">
+                                <!-- Light -->
+                                <div
+                                    class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
+                                    [class.ring-2]="config?.scheme === 'light'"
+                                    (click)="setScheme('light')">
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        [svgIcon]="'heroicons_solid:sun'">
+                                    </mat-icon>
+                                    <div
+                                        class="ml-2 font-medium leading-5"
+                                        [class.text-secondary]="config?.scheme !== 'light'">
+                                        Light
+                                    </div>
+                                </div>
+
+                                <!-- Dark -->
+                                <div
+                                    class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
+                                    [class.ring-2]="config?.scheme === 'dark'"
+                                    (click)="setScheme('dark')">
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        [svgIcon]="'heroicons_solid:moon'">
+                                    </mat-icon>
+                                    <div
+                                        class="ml-2 font-medium leading-5"
+                                        [class.text-secondary]="config?.scheme !== 'dark'">
+                                        Dark
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end mt-8">
+                                <button
+                                    mat-flat-button
+                                    type="button"
+                                    [color]="'primary'"
+                                    [disabled]="!themeToggled || appSaving"
+                                    (click)="saveScheme()">
+                                    <span *ngIf="!appSaving">Save</span>
+                                    <mat-progress-spinner
+                                        *ngIf="appSaving"
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'">
+                                    </mat-progress-spinner>
+                                </button>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                </ng-container>
             </fuse-card>
-        </div> -->
+        </div>
     </div>
 </div>

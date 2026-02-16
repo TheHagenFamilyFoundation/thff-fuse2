@@ -1,7 +1,9 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+import { ClosePortalDialogComponent } from './close-portal-dialog.component';
 
 @Component({
     selector: 'app-submission-years',
@@ -19,7 +21,10 @@ export class SubmissionYearsComponent implements AfterViewInit {
 
     private years: any;
 
-    constructor(public submissionYearsService: SubmissionYearsService) {
+    constructor(
+        public submissionYearsService: SubmissionYearsService,
+        private _dialog: MatDialog
+    ) {
         this.currentYear = (new Date()).getFullYear();
         this.dataSource = new MatTableDataSource([]);
     }
@@ -31,10 +36,29 @@ export class SubmissionYearsComponent implements AfterViewInit {
 
     toggleSubmissionYear(subID: string): void {
         const yearFound = this.years.find(y => y.subID === subID);
-        this.submissionYearsService.toggleSubmissionYear(yearFound._id, !yearFound.active).subscribe({
-            next: () => { this.getSubmissionYears(); },
-            error: (err) => { console.error('toggleSubmissionYear error', err); }
-        });
+
+        if (yearFound.active) {
+            // Closing portal — show confirmation dialog
+            const dialogRef = this._dialog.open(ClosePortalDialogComponent, {
+                width: '440px',
+                data: { year: yearFound.year }
+            });
+
+            dialogRef.afterClosed().subscribe((confirmed) => {
+                if (confirmed) {
+                    this.submissionYearsService.toggleSubmissionYear(yearFound._id, false).subscribe({
+                        next: () => { this.getSubmissionYears(); },
+                        error: (err) => { console.error('toggleSubmissionYear error', err); }
+                    });
+                }
+            });
+        } else {
+            // Opening portal — no confirmation needed
+            this.submissionYearsService.toggleSubmissionYear(yearFound._id, true).subscribe({
+                next: () => { this.getSubmissionYears(); },
+                error: (err) => { console.error('toggleSubmissionYear error', err); }
+            });
+        }
     }
 
     createSubmissionYear(): void {

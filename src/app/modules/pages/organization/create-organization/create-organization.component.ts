@@ -12,7 +12,6 @@ import {
 
 import { Observable, Subject } from 'rxjs';
 
-import { AuthService } from 'app/core/auth/auth.service';
 import { CreateOrganizationService } from 'app/core/services/organization/create-organization.service';
 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -26,7 +25,7 @@ import { Router } from '@angular/router';
     styleUrls: ['./create-organization.component.scss'],
 })
 export class CreateOrganizationComponent implements OnInit {
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
     //org object
     orgObj: any;
@@ -118,7 +117,6 @@ export class CreateOrganizationComponent implements OnInit {
     constructor(
         fb: FormBuilder,
         private createOrganizationService: CreateOrganizationService,
-        private authService: AuthService,
         private router: Router
     ) {
         this.description$
@@ -227,13 +225,6 @@ export class CreateOrganizationComponent implements OnInit {
             });
 
         this.defaultValues();
-
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
-        }
     }
 
     ngOnInit(): void {

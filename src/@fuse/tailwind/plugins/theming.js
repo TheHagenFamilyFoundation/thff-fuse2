@@ -191,12 +191,12 @@ const theming = plugin.withOptions((options) => ({
                                 'bg-status-bar': colors.slate[300]
                             },
                             dark : {
-                                'bg-app-bar'   : colors.slate[900],
-                                'bg-card'      : colors.slate[800],
-                                'bg-default'   : colors.slate[900],
-                                'bg-dialog'    : colors.slate[800],
+                                'bg-app-bar'   : colors.neutral[900],
+                                'bg-card'      : colors.neutral[800],
+                                'bg-default'   : colors.neutral[900],
+                                'bg-dialog'    : colors.neutral[800],
                                 'bg-hover'     : 'rgba(255, 255, 255, 0.05)',
-                                'bg-status-bar': colors.slate[900]
+                                'bg-status-bar': colors.neutral[900]
                             }
                         },
                         foreground: {
@@ -212,13 +212,13 @@ const theming = plugin.withOptions((options) => ({
                             },
                             dark : {
                                 'text-default'  : '#FFFFFF',
-                                'text-secondary': colors.slate[400],
-                                'text-hint'     : colors.slate[500],
-                                'text-disabled' : colors.slate[600],
-                                'border'        : chroma(colors.slate[100]).alpha(0.12).css(),
-                                'divider'       : chroma(colors.slate[100]).alpha(0.12).css(),
-                                'icon'          : colors.slate[400],
-                                'mat-icon'      : colors.slate[400]
+                                'text-secondary': colors.neutral[400],
+                                'text-hint'     : colors.neutral[500],
+                                'text-disabled' : colors.neutral[600],
+                                'border'        : chroma(colors.neutral[100]).alpha(0.12).css(),
+                                'divider'       : chroma(colors.neutral[100]).alpha(0.12).css(),
+                                'icon'          : colors.neutral[400],
+                                'mat-icon'      : colors.neutral[400]
                             }
                         }
                     },

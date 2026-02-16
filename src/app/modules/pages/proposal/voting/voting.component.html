@@ -1,9 +1,44 @@
-<div>
-    <mat-slider class="example-margin" [value]="vote" [disabled]="disabled" [invert]="invert" [max]="max" [min]="min"
-        [step]="step" [thumbLabel]="thumbLabel" [tickInterval]="tickInterval" (change)="onInputChange($event)"
-        [vertical]="vertical">
-    </mat-slider>
-</div>
-<div>
-    {{outputVote}}
+<div class="flex flex-col items-center w-full">
+    <!-- Vote display -->
+    <div class="flex items-center justify-center w-24 h-24 rounded-full mb-4"
+         [ngClass]="{
+             'bg-gray-200 dark:bg-neutral-600': vote === -1,
+             'bg-red-100 dark:bg-red-900 dark:bg-opacity-40': vote === 0,
+             'bg-amber-100 dark:bg-amber-900 dark:bg-opacity-40': vote === 1,
+             'bg-green-100 dark:bg-green-900 dark:bg-opacity-40': vote === 2
+         }">
+        <mat-icon class="icon-size-12"
+                  [ngClass]="{
+                      'text-gray-400 dark:text-gray-500': vote === -1,
+                      'text-red-500 dark:text-red-400': vote === 0,
+                      'text-amber-500 dark:text-amber-400': vote === 1,
+                      'text-green-600 dark:text-green-400': vote === 2
+                  }">
+            {{ vote === -1 ? 'how_to_vote' : vote === 0 ? 'thumb_down' : vote === 1 ? 'thumbs_up_down' : 'thumb_up' }}
+        </mat-icon>
+    </div>
+
+    <div class="text-2xl font-bold mb-6"
+         [ngClass]="{
+             'text-gray-500 dark:text-gray-400': vote === -1,
+             'text-red-600 dark:text-red-400': vote === 0,
+             'text-amber-600 dark:text-amber-400': vote === 1,
+             'text-green-600 dark:text-green-400': vote === 2
+         }">
+        {{ outputVote }}
+    </div>
+
+    <!-- Slider -->
+    <div class="w-full max-w-md mt-2 px-2">
+        <mat-slider class="w-full" [value]="vote" [disabled]="disabled" [max]="max" [min]="min"
+            [step]="step" [thumbLabel]="thumbLabel" [tickInterval]="tickInterval"
+            (change)="onInputChange($event)">
+        </mat-slider>
+        <div class="flex justify-between text-sm text-gray-400 dark:text-gray-500 mt-1 px-1">
+            <span>No Vote</span>
+            <span>No</span>
+            <span>Maybe</span>
+            <span>Yes</span>
+        </div>
+    </div>
 </div>

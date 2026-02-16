@@ -35,6 +35,16 @@
                 </mat-cell>
             </ng-container>
 
+            <!-- Amount Requested Column -->
+            <ng-container matColumnDef="amountRequested">
+                <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                    Amount Requested
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" class="text-gray-600 dark:text-gray-300">
+                    {{ row.amountRequested | currency }}
+                </mat-cell>
+            </ng-container>
+
             <!-- Created On Column -->
             <ng-container matColumnDef="createdOn">
                 <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">

@@ -15,33 +15,14 @@ import { environment } from '../../../environments/environment';
 @Injectable()
 export class AuthService {
     private _authenticated: boolean = false;
-    private apiUrl: string;
+    private apiUrl = environment.apiUrl;
     /**
      * Constructor
      */
     constructor(
         private _httpClient: HttpClient,
         private _userService: UserService,
-    ) {
-        // console.log('auth service constructor');
-        // console.log('auth service - environment', environment);
-        // if (!environment.production) {
-        //     console.log('production env', environment.production);
-        //     this.apiUrl = environment.apiUrl;
-        // } else {
-        //     try {
-        //         this.initializeBackendURL().subscribe((url) => {
-        //             console.log('url', url);
-        //             console.log('initialize backend');
-        //             console.log('this.getBackendURL()', this.getBackendURL());
-        //             // this.apiUrl = this.getBackendURL();
-        //             // console.log('auth-service - this.apiUrl', this.apiUrl);
-        //         });
-        //     } catch (e) {
-        //         console.error(e);
-        //     }
-        // }
-    }
+    ) {}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
@@ -80,6 +61,22 @@ export class AuthService {
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Establish a session from a server response containing user, token, and settings.
+     * Used by both signIn and signUp flows.
+     */
+    establishSession(response: { user: any; token: string; userSettings?: any }): void {
+        this.accessToken = response.token;
+        this.currentUser = JSON.stringify(response.user);
+        this._authenticated = true;
+        this._userService.user = response.user;
+
+        // Persist user settings (scheme) so it survives page refresh
+        if (response.userSettings?.scheme) {
+            localStorage.setItem('userScheme', response.userSettings.scheme);
+        }
+    }
 
     /**
      * Forgot password
@@ -124,32 +121,21 @@ export class AuthService {
             .post(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
                 switchMap((response: any) => {
-                    //debug
-                    console.log('auth service - response', response);
-
                     if (response.newPassword !== true) {
-
-                        // Store the access token in the local storage
-                        this.accessToken = response.token;
-                        this.currentUser = JSON.stringify(response.user);
-
-                        // Set the authenticated flag to true
-                        this._authenticated = true;
-
-                        // // Store the user on the user service
-                        this._userService.user = response.user;
+                        this.establishSession(response);
                     }
 
-                    // Return a new observable with the response
                     return of(response);
                 })
             );
     }
 
     /**
-     * Sign in using the access token
+     * Sign in using the access token (refresh flow).
+     * Sends the current token to the backend which issues a fresh one.
+     * The backend accepts tokens expired within a 24-hour grace window.
      */
-    signInUsingToken(): Observable<any> {
+    signInUsingToken(): Observable<boolean> {
 
         // Renew token
         return this._httpClient
@@ -157,14 +143,21 @@ export class AuthService {
                 accessToken: this.accessToken
             })
             .pipe(
-                catchError(() =>
-                    // Return false
-                    of(false)
-                ),
+                catchError(() => {
+                    // Refresh failed — return false so callers can handle sign-out
+                    return of(false);
+                }),
                 switchMap((response: any) => {
+                    // If the refresh request failed, propagate the failure
+                    if (response === false || !response?.token) {
+                        return of(false);
+                    }
 
-                    // Store the access token in the local storage
+                    // Store the new access token
                     this.accessToken = response.token;
+
+                    // Update the stored user data
+                    this.currentUser = JSON.stringify(response.user);
 
                     // Set the authenticated flag to true
                     this._authenticated = true;
@@ -172,7 +165,11 @@ export class AuthService {
                     // Store the user on the user service
                     this._userService.user = response.user;
 
-                    // Return true
+                    // Persist user settings (scheme) so it survives page refresh
+                    if (response.userSettings?.scheme) {
+                        localStorage.setItem('userScheme', response.userSettings.scheme);
+                    }
+
                     return of(true);
                 })
             );
@@ -184,9 +181,10 @@ export class AuthService {
     signOut(): Observable<any> {
         console.log('signing out');
 
-        // Remove the access token from the local storage
+        // Remove auth data from local storage
         localStorage.removeItem('accessToken');
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('userScheme');
 
         // Set the authenticated flag to false
         this._authenticated = false;
@@ -237,11 +235,11 @@ export class AuthService {
     }
 
     /**
-     * Check the authentication status
+     * Check the authentication status.
+     * If the token exists (even if expired), attempt a refresh.
+     * The backend accepts tokens expired within a 24-hour grace window.
      */
     check(): Observable<boolean> {
-
-        console.log('checking');
 
         // Check if the user is logged in
         if (this._authenticated) {
@@ -253,12 +251,8 @@ export class AuthService {
             return of(false);
         }
 
-        // Check the access token expire date
-        if (AuthUtils.isTokenExpired(this.accessToken)) {
-            return of(false);
-        }
-
-        // If the access token exists and it didn't expire, sign in using it
+        // If the access token exists, attempt to refresh it.
+        // The backend handles the grace window — no need to reject expired tokens client-side.
         return this.signInUsingToken();
     }
 
@@ -279,16 +273,15 @@ export class AuthService {
         }
     }
 
-    setBackendURL(): void {
-        if (environment.production === true) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = environment.apiUrl;
+    /**
+     * Check the President status (accessLevel >= 3)
+     */
+    checkPresident(): Observable<boolean> {
+        if (!this.accessToken) {
+            return of(false);
         }
-    }
 
-    getBackendURL(): string {
-        return this.apiUrl;
+        return of(AuthUtils.isPresident(this.accessToken));
     }
 
 }

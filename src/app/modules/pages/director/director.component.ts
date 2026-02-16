@@ -27,4 +27,8 @@ export class DirectorComponent implements OnInit {
     goToSubmissionYears(): void {
         this._router.navigate(['/pages/director/submission-years']);
     }
+
+    goToReferralLinks(): void {
+        this._router.navigate(['/pages/director/referral-links']);
+    }
 }
