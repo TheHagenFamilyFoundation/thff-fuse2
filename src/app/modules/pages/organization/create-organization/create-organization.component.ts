@@ -443,8 +443,7 @@ export class CreateOrganizationComponent implements OnInit {
     }
 
     cancel(): void {
-        //route to main/home
-        this.router.navigate(['/welcome']);
+        this.router.navigate(['/pages/organizations']);
     }
 
     createOrganization(body): void {

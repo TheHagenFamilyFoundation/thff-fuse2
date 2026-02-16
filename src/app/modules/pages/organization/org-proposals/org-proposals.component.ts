@@ -218,7 +218,7 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     createProposal(): void {
         console.log('create proposal');
-        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id } });
+        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id, orgID: this.org.organizationID } });
     }
     goToProposal(proposalID: string): void {
         console.log('proposalID', proposalID);

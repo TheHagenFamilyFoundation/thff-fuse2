@@ -13,6 +13,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class CreateProposalComponent implements OnInit, OnDestroy {
     org: any;
+    orgID: string;
 
     // Form field values (synced from form for template char counts)
     projectTitle = '';
@@ -50,10 +51,13 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        window.scrollTo(0, 0);
+
         this.getUser();
 
         this.route.queryParams.subscribe((query) => {
             this.org = query.org;
+            this.orgID = query.orgID;
             this.loadDraft();
         });
 
