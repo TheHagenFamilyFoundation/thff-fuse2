@@ -3,75 +3,105 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { AuthUtils } from '../auth/auth.utils';
 import { environment } from 'environments/environment';
-
 
 @Injectable({
     providedIn: 'root'
 })
 export class BackendService {
     apiUrl: string;
-    pinger: any;
+    private pingInterval: any = null;
+    private readonly PING_INTERVAL_MS = 30000; // 30 seconds
+    private _isRefreshing = false;
+
+    // Refresh when less than 50% of token lifetime remains
+    private readonly REFRESH_THRESHOLD = 0.5;
 
     constructor(private http: HttpClient, private _authService: AuthService, private _router: Router) {
-        this.getBackendURL();
-
-        console.log('BackendService - this.apiUrl', this.apiUrl);
-    }
-
-    getBackendURL(): void {
         this.apiUrl = environment.apiUrl;
     }
 
     health(): Observable<any> {
-        this.getBackendURL();
-
-        const urlString = `${this.apiUrl}/health`;
-
-        console.log('health url - ', urlString);
-
-        return this.http.get(urlString);
+        return this.http.get(`${this.apiUrl}/health`);
     }
 
     ping(): Observable<any> {
-        this.getBackendURL();
-        const urlString = `${this.apiUrl}/ping`;
-
-        console.log('Inside Ping');
-        console.log('check localStorage', localStorage.getItem('accessToken'));
-        const token = localStorage.getItem('accessToken');
-
-        console.log('ping url - ', urlString);
-
-        return this.http.post(urlString, { token });
+        return this.http.post(`${this.apiUrl}/ping`, {});
     }
 
     startPing(): void {
-        console.log('starting ping');
-        this.pinger = setInterval(() => {
-            this.backendPinger();
-        }, 30000);
+        // Don't start if already running
+        if (this.pingInterval) { return; }
+
+        this.pingInterval = setInterval(() => {
+            this.checkSession();
+        }, this.PING_INTERVAL_MS);
     }
 
     stopPing(): void {
-        console.log('stopping ping');
-        this.pinger = null;
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
     }
 
-    //runs every 30 seconds
-    backendPinger(): void {
-        console.log('pinging backend');
-        this.ping()
-            .subscribe((health) => {
-                console.log('backend pinger', health);
+    private checkSession(): void {
+        const token = this._authService.accessToken;
 
-                this._authService.check().subscribe((authenticated) => {
-                    if (!authenticated) {
-                        this._router.navigate(['/sign-out']);
-                    }
-                });
+        // No token — kick out immediately
+        if (!token) {
+            this.handleExpired();
+            return;
+        }
 
-            });
+        // Check how much lifetime the token has remaining
+        const lifetimeRemaining = AuthUtils.getTokenLifetimeRemaining(token);
+
+        // If token is expired, attempt one refresh before kicking out
+        if (AuthUtils.isTokenExpired(token)) {
+            this.attemptRefresh();
+            return;
+        }
+
+        // If token is past the refresh threshold, proactively refresh it
+        // This keeps the session alive as long as the user is active
+        if (lifetimeRemaining !== null && lifetimeRemaining < this.REFRESH_THRESHOLD) {
+            this.attemptRefresh();
+            return;
+        }
+
+        // Token is healthy — ping backend to confirm server-side validity
+        this.ping().subscribe({
+            error: () => {
+                // 401 is handled by the interceptor, other errors are ignored
+            }
+        });
     }
 
+    private attemptRefresh(): void {
+        // Prevent concurrent refresh attempts
+        if (this._isRefreshing) { return; }
+        this._isRefreshing = true;
+
+        this._authService.signInUsingToken().subscribe({
+            next: (result) => {
+                this._isRefreshing = false;
+                if (!result) {
+                    // Refresh failed — session is truly expired
+                    this.handleExpired();
+                }
+            },
+            error: () => {
+                this._isRefreshing = false;
+                this.handleExpired();
+            }
+        });
+    }
+
+    private handleExpired(): void {
+        this.stopPing();
+        this._authService.signOut();
+        this._router.navigate(['/sign-out']);
+    }
 }

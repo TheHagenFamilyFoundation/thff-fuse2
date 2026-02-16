@@ -1,7 +1,7 @@
 .example-container {
     display: flex;
     flex-direction: column;
-    min-width: 300px;
+    width: 100%;
   }
   
   .example-header {
@@ -17,6 +17,18 @@
   .mat-table {
     overflow: auto;
     max-height: 500px;
+    width: 100%;
+  }
+
+  .mat-header-cell,
+  .mat-cell {
+    flex: 1;
+    padding: 0 16px;
+  }
+
+  .mat-column-link {
+    flex: 0 0 140px;
+    justify-content: center;
   }
 
   // .mat-row:hover {

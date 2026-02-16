@@ -6,6 +6,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatRippleModule } from '@angular/material/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSortModule } from '@angular/material/sort';
@@ -18,6 +21,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule } from '@ngneat/transloco';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
 import { OrganizationComponent } from './organization.component';
@@ -33,6 +37,9 @@ import { CreateOrganizationService } from 'app/core/services/organization/create
 
 import { PhoneMaskDirective } from 'app/core/directives/phone-mask.directive';
 import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
+import { OrgTeamComponent } from './org-team/org-team.component';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
+import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/upload-501c3-dialog.component';
 
 @NgModule({
     declarations: [
@@ -43,6 +50,9 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         CreateOrganizationComponent,
         OrgDoc501c3Component,
         OrgProposalsComponent,
+        OrgTeamComponent,
+        ConfirmDialogComponent,
+        Upload501c3DialogComponent,
 
     ],
     providers: [
@@ -56,6 +66,9 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         MatIconModule,
         MatMenuModule,
         MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatDialogModule,
         MatRippleModule,
         MatSidenavModule,
         MatSortModule,
@@ -68,6 +81,7 @@ import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
         MatSelectModule,
         NgApexchartsModule,
         TranslocoModule,
+        FuseCardModule,
         SharedModule,
         EditableModule
     ],

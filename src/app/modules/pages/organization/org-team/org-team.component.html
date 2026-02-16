@@ -1,0 +1,107 @@
+<div class="flex flex-col">
+
+    <!-- Add Member Form -->
+    <div *ngIf="canManageTeam" class="mb-6">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Add a Member</h3>
+        <div class="flex items-start gap-3">
+            <mat-form-field class="flex-auto">
+                <mat-icon matPrefix class="mr-2">email</mat-icon>
+                <input matInput
+                       placeholder="Enter email address..."
+                       [formControl]="emailControl"
+                       (keyup.enter)="addUser()">
+                <mat-error *ngIf="emailControl.hasError('email')">Please enter a valid email</mat-error>
+                <mat-error *ngIf="emailControl.hasError('required')">Email is required</mat-error>
+            </mat-form-field>
+            <button mat-flat-button color="primary"
+                    [disabled]="emailControl.invalid || adding"
+                    (click)="addUser()"
+                    class="mt-1">
+                <mat-icon *ngIf="!adding" class="mr-2 icon-size-5">person_add</mat-icon>
+                <mat-spinner *ngIf="adding" [diameter]="20" class="mr-2"></mat-spinner>
+                <span>Add</span>
+            </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">
+            If the email doesn't have an account yet, they'll receive an invite to sign up.
+        </p>
+    </div>
+
+    <!-- Pending Invites -->
+    <div *ngIf="pendingInvites.length > 0" class="mb-6">
+        <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider mb-3">
+            <mat-icon class="icon-size-4 mr-1 align-middle">schedule</mat-icon>
+            Pending Invites ({{ pendingInvites.length }})
+        </h3>
+        <div class="flex flex-col gap-2">
+            <div *ngFor="let invite of pendingInvites"
+                 class="flex items-center justify-between p-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900 dark:bg-opacity-30">
+
+                <div class="flex items-center min-w-0">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-full bg-amber-400 text-white text-sm font-bold mr-3 flex-shrink-0">
+                        <mat-icon class="icon-size-5">mail_outline</mat-icon>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-medium text-gray-800 dark:text-gray-200 truncate">{{ invite.email }}</div>
+                        <div class="text-xs text-amber-600">Invited {{ invite.createdAt | date:'MMM d, y' }}</div>
+                    </div>
+                </div>
+
+                <div *ngIf="canManageTeam" class="flex items-center gap-1 flex-shrink-0">
+                    <button mat-icon-button
+                            class="text-gray-400 hover:text-primary"
+                            matTooltip="Resend invite"
+                            [disabled]="resendingInviteId === invite._id"
+                            (click)="resendInvite(invite._id)">
+                        <mat-spinner *ngIf="resendingInviteId === invite._id" [diameter]="18"></mat-spinner>
+                        <mat-icon *ngIf="resendingInviteId !== invite._id" class="icon-size-5">send</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            class="text-gray-400 hover:text-red-500"
+                            matTooltip="Cancel invite"
+                            (click)="cancelInvite(invite._id)">
+                        <mat-icon class="icon-size-5">close</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Members List -->
+    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+        Members ({{ org?.users?.length || 0 }})
+    </h3>
+
+    <div *ngIf="!org?.users?.length" class="text-gray-400 py-4">
+        No members in this organization yet.
+    </div>
+
+    <div class="flex flex-col gap-2">
+        <div *ngFor="let user of org?.users"
+             class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-600 dark:bg-opacity-40 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
+
+            <div class="flex items-center min-w-0">
+                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-thff-teal text-white text-sm font-bold mr-3 flex-shrink-0">
+                    {{ (user.firstName?.[0] || user.email[0]) | uppercase }}
+                </div>
+                <div class="min-w-0">
+                    <div class="font-medium text-gray-800 dark:text-gray-200 truncate">
+                        {{ user.firstName && user.lastName ? user.firstName + ' ' + user.lastName : user.email }}
+                    </div>
+                    <div *ngIf="user.firstName" class="text-sm text-gray-500 truncate">
+                        {{ user.email }}
+                    </div>
+                </div>
+            </div>
+
+            <button *ngIf="canManageTeam"
+                    mat-icon-button
+                    class="text-gray-400 hover:text-red-500 flex-shrink-0"
+                    matTooltip="Remove from organization"
+                    (click)="removeUser(user)">
+                <mat-icon class="icon-size-5">close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+</div>

@@ -3,38 +3,20 @@ import {
     HttpClient,
     HttpParams,
     HttpRequest,
-    HttpEvent,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-
-import { AuthService } from '../../../auth/auth.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class Upload501c3Service {
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
-    results;
-
-    body;
-
-    constructor(private http: HttpClient, private authService: AuthService) {
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('Upload501c3Service - this.apiUrl', this.apiUrl);
-        }
-
-        console.log('Upload501c3Service - this.apiUrl', this.apiUrl);
-    }
+    constructor(private http: HttpClient) {}
 
     // file from event.target.files[0]
     upload501c3(file: File, orgID: string): Observable<any> {
-        console.log('upload501c3', file);
-
         const urlString = `${this.apiUrl}/organization-501c3/${orgID}`;
 
         const formData = new FormData();
@@ -48,8 +30,6 @@ export class Upload501c3Service {
         };
 
         const req = new HttpRequest('POST', urlString, formData, options);
-
-        console.log('req', req);
 
         return this.http.request(req);
     }

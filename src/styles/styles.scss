@@ -2,58 +2,41 @@
 /*  @ Import/write your custom styles here.
 /*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
-@media (min-width: 640px) {
 
-    .myImg {
-        max-width: 150px;
-        max-height: 150px;
-    }
+/* ===== Timeline Chevron Shapes (clip-path not available in Tailwind) ===== */
 
-    .myImg2 {
-        max-width: 500px;
-        max-height: 500px;
-    }
-
+/* Mobile: simple rounded rectangles (no chevrons) */
+.timeline-chevron {
+    border-radius: 6px;
 }
 
-@media (min-width: 768px) {
-
-    .myImg {
-        max-width: 150px;
-        max-height: 150px;
+/* Desktop: chevron arrows */
+@media (min-width: 600px) {
+    .timeline-chevron {
+        border-radius: 0;
+        clip-path: polygon(0% 0%, 88% 0%, 100% 50%, 88% 100%, 0% 100%, 12% 50%);
     }
 
-    .myImg2 {
-        max-width: 500px;
-        max-height: 500px;
+    /* First chevron has a flat left edge */
+    .timeline-chevron-first {
+        clip-path: polygon(0% 0%, 88% 0%, 100% 50%, 88% 100%, 0% 100%);
     }
-
 }
 
-@media (min-width: 1024px) {
+/* ===== Timeline Gradient Colours ===== */
 
-    .myImg {
-        max-width: 300px;
-        max-height: 300px;
-    }
-
-    .myImg2 {
-        max-width: 700px;
-        max-height: 700px;
-    }
-
+.bg-gradient-step-1 {
+    background: linear-gradient(to right, #e04a26, #e86830);
 }
 
-@media (min-width: 1200px) {
+.bg-gradient-step-2 {
+    background: linear-gradient(to right, #e86830, #f0a030);
+}
 
-    .myImg {
-        max-width: 300px;
-        max-height: 300px;
-    }
+.bg-gradient-step-3 {
+    background: linear-gradient(to right, #f0a030, #f0c040);
+}
 
-    .myImg2 {
-        max-width: 700px;
-        max-height: 700px;
-    }
-
+.bg-gradient-step-4 {
+    background: linear-gradient(to right, #f0c040, #f5d652);
 }

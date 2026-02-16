@@ -126,38 +126,38 @@ body .dark {
             is-dark: map.get(map.get($base-dark-theme, color), is-dark),
             foreground: (
                 base: #FFFFFF,
-                divider: rgba(241, 245, 249, 0.12), /* slate.100 + opacity */
-                dividers: rgba(241, 245, 249, 0.12), /* slate.100 + opacity */
-                disabled: #475569, /* slate.600 */
-                disabled-button: #1E293B, /* slate.800 */
-                disabled-text: #475569, /* slate.600 */
+                divider: rgba(245, 245, 245, 0.12), /* neutral.100 + opacity */
+                dividers: rgba(245, 245, 245, 0.12), /* neutral.100 + opacity */
+                disabled: #525252, /* neutral.600 */
+                disabled-button: #262626, /* neutral.800 */
+                disabled-text: #525252, /* neutral.600 */
                 elevation: #000000,
-                hint-text: #64748B, /* slate.500 */
-                secondary-text: #94A3B8, /* slate.400 */
-                icon: #F1F5F9, /* slate.100 */
-                icons: #F1F5F9, /* slate.100 */
-                mat-icon: #94A3B8, /* slate.400 */
+                hint-text: #737373, /* neutral.500 */
+                secondary-text: #A3A3A3, /* neutral.400 */
+                icon: #F5F5F5, /* neutral.100 */
+                icons: #F5F5F5, /* neutral.100 */
+                mat-icon: #A3A3A3, /* neutral.400 */
                 text: #FFFFFF,
                 slider-min: #FFFFFF,
-                slider-off: #64748B, /* slate.500 */
-                slider-off-active: #94A3B8 /* slate.400 */
+                slider-off: #737373, /* neutral.500 */
+                slider-off-active: #A3A3A3 /* neutral.400 */
             ),
             background: (
-                status-bar: #0F172A, /* slate.900 */
-                app-bar: #0F172A, /* slate.900 */
-                background: #0F172A, /* slate.900 */
+                status-bar: #171717, /* neutral.900 */
+                app-bar: #171717, /* neutral.900 */
+                background: #171717, /* neutral.900 */
                 hover: rgba(255, 255, 255, 0.05),
-                card: #1E293B, /* slate.800 */
-                dialog: #1E293B, /* slate.800 */
-                disabled-button: rgba(15, 23, 42, 0.38), /* slate.900 + opacity */
-                raised-button: #0F172A, /* slate.900 */
-                focused-button: #E2E8F0, /* slate.200 */
+                card: #262626, /* neutral.800 */
+                dialog: #262626, /* neutral.800 */
+                disabled-button: rgba(23, 23, 23, 0.38), /* neutral.900 + opacity */
+                raised-button: #171717, /* neutral.900 */
+                focused-button: #E5E5E5, /* neutral.200 */
                 selected-button: rgba(255, 255, 255, 0.05),
-                selected-disabled-button: #1E293B, /* slate.800 */
-                disabled-button-toggle: #0F172A, /* slate.900 */
-                unselected-chip: #475569, /* slate.600 */
-                disabled-list-option: #E2E8F0, /* slate.200 */
-                tooltip: #64748B /* slate.500 */
+                selected-disabled-button: #262626, /* neutral.800 */
+                disabled-button-toggle: #171717, /* neutral.900 */
+                unselected-chip: #525252, /* neutral.600 */
+                disabled-list-option: #E5E5E5, /* neutral.200 */
+                tooltip: #737373 /* neutral.500 */
             )
         )
     );

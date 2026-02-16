@@ -1,30 +1,83 @@
-<div class="flex flex-col items-center justify-center w-full h-full bg-white">
-    <div class="w-full max-w-3xl">
-        <div class="max-w-none mx-auto prose prose-sm">
-            <img class="myImg" src="assets/images/logo/logo_2020_9.svg" alt="Logo image" />
-            <p>
-                The Hagen Family Foundation provides financial grants to
-                not-for-profit organizations around the world in the areas of the arts,education,
-                environment, religion, and social services.
-            </p>
-            <!-- <p>
-                This is a separate "module", it has its own directory and routing setup and also it's completely separated from the actual application. This is also a simple example of
-                a multiple applications setup that uses the same codebase. You can have different entry points and essentially have different applications within the same codebase.
-            </p> -->
-            <p *ngIf="!loading && latestSubmissionYear">
-                <br>
-                The {{ latestSubmissionYear.year }} grant cycle is {{ portalOpen ? 'open' : 'closed' }}.
-            </p>
-        </div>
-        <div>
-            <!-- <img src="assets/images/grant_review_timeline.jpg" alt="timeline image" height="90" /> -->
-            <img src="assets/images/grant_review_timeline.jpg" class="myImg2" alt="timeline image" />
-        </div>
-        <div>
-            <a class="mt-8" mat-flat-button [color]="'primary'" [routerLink]="'/sign-in'">
-                <span>Sign in here</span>
-                <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
-            </a>
+<div class="flex flex-col items-center justify-center min-h-full w-full bg-white px-6 py-8">
+
+    <!-- Hero -->
+    <div class="w-full max-w-160 text-center mb-10">
+        <img class="w-50 sm:w-60 md:w-70 h-auto mx-auto mb-6"
+             src="assets/images/logo/logo_2020_9.svg"
+             alt="The Hagen Family Foundation logo" />
+
+        <p class="text-lg leading-relaxed text-gray-600 mb-4">
+            The Hagen Family Foundation provides financial grants to
+            not-for-profit organizations around the world in the areas of the arts, education,
+            environment, religion, and social services.
+        </p>
+
+        <p class="text-lg text-gray-700" *ngIf="!loading && latestSubmissionYear">
+            The {{ latestSubmissionYear.year }} grant cycle is
+            <span class="font-semibold" [ngClass]="portalOpen ? 'text-green-600' : 'text-red-600'">
+                {{ portalOpen ? 'open' : 'closed' }}
+            </span>.
+        </p>
+    </div>
+
+    <!-- Grant Review Timeline -->
+    <div class="w-full max-w-200 mb-10">
+        <h2 class="text-3xl font-bold text-center mb-6" style="color: #4a6fa5;">
+            Grant Review Timeline
+        </h2>
+
+        <!-- Mobile: vertical stack / Desktop: horizontal row -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-0">
+
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center text-center flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-700 mb-2 min-h-10 flex items-end justify-center leading-tight px-1">
+                    Application Portal Opens
+                </div>
+                <div class="timeline-chevron timeline-chevron-first bg-gradient-step-1 w-full h-12 sm:h-13 flex items-center justify-center text-white font-bold text-base">
+                    February
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center text-center flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-700 mb-2 min-h-10 flex items-end justify-center leading-tight px-1">
+                    Proposals Due
+                </div>
+                <div class="timeline-chevron bg-gradient-step-2 w-full h-12 sm:h-13 flex items-center justify-center text-white font-bold text-base">
+                    May 1
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center text-center flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-700 mb-2 min-h-10 flex items-end justify-center leading-tight px-1">
+                    Applicants Notified of Final Decisions
+                </div>
+                <div class="timeline-chevron bg-gradient-step-3 w-full h-12 sm:h-13 flex items-center justify-center text-white font-bold text-base">
+                    June/July
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center text-center flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-700 mb-2 min-h-10 flex items-end justify-center leading-tight px-1">
+                    Awards Distributed
+                </div>
+                <div class="timeline-chevron bg-gradient-step-4 w-full h-12 sm:h-13 flex items-center justify-center text-white font-bold text-base">
+                    August
+                </div>
+            </div>
+
         </div>
     </div>
+
+    <!-- Sign In -->
+    <div>
+        <a mat-flat-button [color]="'primary'" [routerLink]="'/sign-in'">
+            <span>Sign in here</span>
+            <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
+        </a>
+    </div>
+
 </div>

@@ -1,15 +1,8 @@
-.example-container {
-    display: flex;
-    flex-direction: column;
-}
+/* Clickable table rows */
+.org-row {
+    transition: background-color 150ms ease;
 
-.mat-form-field {
-    width: 100%;
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
 }
-
-// .mat-footer-row,
-// .mat-header-row,
-// .mat-row {
-//     display: inline-flex;
-//     min-width: 100%;
-// }

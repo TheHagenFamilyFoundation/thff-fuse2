@@ -1,84 +1,132 @@
 <div class="flex flex-col flex-auto min-w-0">
     <!-- Header -->
-    <div class="bg-card">
+    <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+            <!-- Back link -->
+            <a [routerLink]="[organizationLink]"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mt-6 -mb-2 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Organization
+            </a>
             <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <!-- Avatar and name -->
                 <div class="flex flex-auto items-center min-w-0">
-                    <!-- <div class="flex flex-col min-w-0 ml-4"> -->
-                    <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                        {{viewing}} {{ proposal?.projectTitle }}
+                    <div class="flex items-center gap-3">
+                        <div class="text-xl md:text-2xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
+                            {{viewing}} {{ proposal?.projectTitle }}
+                        </div>
+                        <!-- Archived Badge -->
+                        <span *ngIf="proposal?.archived"
+                              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300">
+                            <mat-icon class="icon-size-3.5">archive</mat-icon>
+                            Archived
+                        </span>
                     </div>
                     <div class="hidden lg:flex h-8 mx-8 border-l-2"></div>
-                    Organization:
-                    <div class="px-6 text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate cursor-pointer"
+                    <span class="hidden lg:inline text-sm text-gray-500 dark:text-gray-400">Organization:</span>
+                    <a class="hidden lg:inline px-2 text-sm font-medium text-primary hover:underline cursor-pointer"
                         [routerLink]="[organizationLink]">
-                        {{ org?.name}}
+                        {{ org?.name }}
+                    </a>
+                </div>
+                <!-- President Archive Action -->
+                <div *ngIf="isPresident" class="mt-4 sm:mt-0 sm:ml-auto flex-shrink-0">
+                    <ng-container *ngIf="!archiveConfirm">
+                        <button *ngIf="!proposal?.archived" mat-stroked-button color="warn" (click)="toggleArchive()"
+                                class="flex items-center gap-1">
+                            <mat-icon class="icon-size-5">archive</mat-icon>
+                            Archive Proposal
+                        </button>
+                        <button *ngIf="proposal?.archived" mat-stroked-button color="primary" (click)="toggleArchive()"
+                                class="flex items-center gap-1">
+                            <mat-icon class="icon-size-5">unarchive</mat-icon>
+                            Restore Proposal
+                        </button>
+                    </ng-container>
+                    <div *ngIf="archiveConfirm" class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ proposal?.archived ? 'Restore this proposal?' : 'Archive this proposal?' }}
+                        </span>
+                        <button mat-flat-button [color]="proposal?.archived ? 'primary' : 'warn'" (click)="confirmArchive()">
+                            Confirm
+                        </button>
+                        <button mat-stroked-button (click)="cancelArchive()">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- End of Header -->
+
+    <!-- Non-Director View -->
     <div *ngIf="!isDirector">
         <div class="flex-auto border-t -mt-px pt-4 sm:pt-6 my-6">
             <div class="w-5/6 max-w-screen-xl mx-auto">
-                <div
-                    class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                <fuse-card class="flex flex-col w-full p-6 sm:p-8">
                     <app-proposal-info [isDirector]="isDirector" [inOrg]="inOrg"></app-proposal-info>
-                </div>
+                </fuse-card>
             </div>
         </div>
     </div>
+
+    <!-- Director View -->
     <div *ngIf="isDirector">
-        <div class="flex-auto border-t -mt-px pt-4 sm:pt-6">
-            <div class="w-full max-w-screen-xl mx-auto">
-                <!-- Tabs -->
-                <mat-tab-group class="sm:px-2" [animationDuration]="'0'">
-                    <!-- Summary -->
-                    <mat-tab label="Summary">
-                        <ng-template matTabContent>
-                            <div
-                                class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div *ngIf="proposal">
-                                    <app-proposal-summary (refreshProp)="refreshProp()" [isDirector]="isDirector"
-                                        [prop]="proposal"></app-proposal-summary>
-                                </div>
-                                <!-- <app-proposal-summary [isDirector]="isDirector" [inOrg]="inOrg"></app-proposal-summary> -->
-                            </div>
-                        </ng-template>
-                    </mat-tab>
-                    <!-- Proposal Information-->
-                    <mat-tab label="Proposal Information">
-                        <ng-template matTabContent>
-                            <div
-                                class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <app-proposal-info (refreshProp)="refreshProp()" [isDirector]="isDirector"
-                                    [inOrg]="inOrg"></app-proposal-info>
-                            </div>
-                        </ng-template>
-                    </mat-tab>
 
-                    <!-- Voting -->
-                    <mat-tab label="Voting">
-                        <ng-template matTabContent>
-                            <div
-                                class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex flex-col items-start">
-                                    <div class="text-xl font-semibold">
-                                        Voting
-                                    </div>
-                                    <div class="flex flex-col sm:flex-row items-start mt-8">
-                                        <app-voting (refreshProp)="refreshProp()" [isDirector]="isDirector"
-                                            [prop]="proposal"></app-voting>
-                                    </div>
-                                </div>
-                            </div>
-                        </ng-template>
-                    </mat-tab>
+        <!-- Section Nav -->
+        <div class="sticky top-0 z-10 bg-card border-b shadow-sm">
+            <nav class="flex items-center gap-1 w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-2">
+                <a (click)="activeTab = 'summary'"
+                   class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors"
+                   [ngClass]="activeTab === 'summary'
+                       ? 'text-primary bg-primary bg-opacity-10 dark:bg-opacity-20'
+                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-white'">
+                    Summary
+                </a>
+                <a (click)="activeTab = 'proposal-info'"
+                   class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors"
+                   [ngClass]="activeTab === 'proposal-info'
+                       ? 'text-primary bg-primary bg-opacity-10 dark:bg-opacity-20'
+                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-white'">
+                    Proposal Information
+                </a>
+                <a (click)="activeTab = 'voting'"
+                   class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors"
+                   [ngClass]="activeTab === 'voting'
+                       ? 'text-primary bg-primary bg-opacity-10 dark:bg-opacity-20'
+                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-white'">
+                    Voting
+                </a>
+            </nav>
+        </div>
 
-                </mat-tab-group>
-            </div>
+        <!-- Content -->
+        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+
+            <!-- Summary -->
+            <fuse-card *ngIf="activeTab === 'summary'" class="flex flex-col w-full p-6 sm:p-8">
+                <div *ngIf="proposal">
+                    <app-proposal-summary (refreshProp)="refreshProp()" [isDirector]="isDirector"
+                        [prop]="proposal"></app-proposal-summary>
+                </div>
+            </fuse-card>
+
+            <!-- Proposal Information -->
+            <fuse-card *ngIf="activeTab === 'proposal-info'" class="flex flex-col w-full p-6 sm:p-8">
+                <app-proposal-info (refreshProp)="refreshProp()" [isDirector]="isDirector"
+                    [inOrg]="inOrg"></app-proposal-info>
+            </fuse-card>
+
+            <!-- Voting -->
+            <fuse-card *ngIf="activeTab === 'voting'" class="flex flex-col w-full max-w-2xl mx-auto p-8 sm:p-12">
+                <div class="text-xl font-semibold text-center mb-2">Cast Your Vote</div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">
+                    Use the slider below to vote on this proposal
+                </p>
+                <app-voting (refreshProp)="refreshProp()" [isDirector]="isDirector"
+                    [prop]="proposal"></app-voting>
+            </fuse-card>
+
         </div>
     </div>
 </div>

@@ -1,82 +1,85 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <ng-container *transloco="let t">
-                            <div
-                                class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                                Organizations
-                            </div>
-                        </ng-container>
-                    </div>
-                </div>
-            </div>
+    <div class="bg-card border-b">
+        <div class="flex items-center justify-between w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                Organizations
+            </h1>
+            <button mat-flat-button color="primary" (click)="createOrganization()">
+                <mat-icon class="mr-2 icon-size-5">add</mat-icon>
+                <span>Create Organization</span>
+            </button>
         </div>
     </div>
 
     <!-- Main -->
-    <div class="flex flex-wrap justify-center w-full max-w-5xl mx-auto p-6 sm:p-8">
-        <div class="flex flex-col items-start">
-            <fuse-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
-                <!-- <div class="text-xl font-semibold">Organizations</div> -->
-                <div class="flex flex-col items-start mt-8">
+    <div class="w-full max-w-screen-lg mx-auto p-6 sm:p-8">
 
-                    <div>
-                        <mat-table [dataSource]="dataSource" matSort>
-                            <!-- Name Column -->
-                            <ng-container matColumnDef="name">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                    Name
-                                </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    {{ row.name }}
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- createdOn Column -->
-                            <ng-container matColumnDef="createdOn">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                    Created On
-                                </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    {{ row.createdAt | date : "MM/dd/yyyy" }}
-                                </mat-cell>
-                            </ng-container>
-
-                            <!-- link Column -->
-                            <ng-container matColumnDef="link">
-                                <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                    Link
-                                </mat-header-cell>
-                                <mat-cell *matCellDef="let row">
-                                    <button mat-raised-button color="primary" (click)="
-                                            goToOrganization(row.organizationID)
-                                        " mat-dialog-close>
-                                        Go to Org
-                                    </button>
-                                </mat-cell>
-                            </ng-container>
-
-                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                            <mat-row *matRowDef="let row; columns: displayedColumns">
-                            </mat-row>
-                        </mat-table>
-                        <div *ngIf="!loaded">
-                            <mat-spinner></mat-spinner>
-                        </div>
-                        <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
-                        <mat-paginator [pageSizeOptions]="[5]"></mat-paginator>
-                    </div>
-                    <div>
-                        <button mat-button color="primary" (click)="createOrganization()" fxHide="false">
-                            <mat-icon>add</mat-icon> Create Organization
-                        </button>
-                    </div>
-                </div>
-            </fuse-card>
+        <!-- Loading State -->
+        <div *ngIf="!loaded" class="flex items-center justify-center py-20">
+            <mat-spinner [diameter]="48"></mat-spinner>
         </div>
+
+        <!-- Empty State -->
+        <div *ngIf="loaded && !hasOrganizations"
+             class="flex flex-col items-center justify-center py-20 text-center">
+            <mat-icon class="icon-size-16 text-gray-300 mb-4">business</mat-icon>
+            <h2 class="text-xl font-semibold text-gray-700 mb-2">No organizations yet</h2>
+            <p class="text-gray-500 mb-6 max-w-sm">
+                Create an organization to start submitting grant proposals to The Hagen Family Foundation.
+            </p>
+            <button mat-flat-button color="primary" (click)="createOrganization()">
+                <mat-icon class="mr-2 icon-size-5">add</mat-icon>
+                <span>Create Organization</span>
+            </button>
+        </div>
+
+        <!-- Table -->
+        <fuse-card *ngIf="loaded && hasOrganizations" class="flex flex-col w-full overflow-hidden">
+
+            <mat-table [dataSource]="dataSource" matSort class="w-full">
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="pl-6 font-semibold">
+                        Name
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="pl-6 font-medium">
+                        {{ row.name }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Created On Column -->
+                <ng-container matColumnDef="createdOn">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Created On
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.createdAt | date : "MM/dd/yyyy" }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                    <mat-header-cell *matHeaderCellDef class="flex-none w-24"></mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="flex-none w-24">
+                        <mat-icon class="text-gray-400 icon-size-5">chevron_right</mat-icon>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"
+                         class="org-row cursor-pointer"
+                         (click)="goToOrganization(row.organizationID)">
+                </mat-row>
+
+            </mat-table>
+
+            <mat-paginator [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
+
+        </fuse-card>
+
     </div>
+
 </div>

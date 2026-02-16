@@ -41,6 +41,35 @@ export class AuthUtils {
         return !(date.valueOf() > new Date().valueOf() + offsetSeconds * 1000);
     }
 
+    /**
+     * Get the fraction of token lifetime remaining (1.0 = just issued, 0.0 = expired).
+     * Returns null if the token can't be decoded or has no exp/iat claims.
+     */
+    static getTokenLifetimeRemaining(token: string): number | null {
+        if (!token || token === '') {
+            return null;
+        }
+
+        try {
+            const decoded = this._decodeToken(token);
+            if (!decoded || !decoded.exp || !decoded.iat) {
+                return null;
+            }
+
+            const now = Math.floor(Date.now() / 1000);
+            const totalLifetime = decoded.exp - decoded.iat;
+            const remaining = decoded.exp - now;
+
+            if (totalLifetime <= 0) {
+                return null;
+            }
+
+            return Math.max(0, remaining / totalLifetime);
+        } catch {
+            return null;
+        }
+    }
+
     static isDirector(token: string): boolean {
 
         // Return if there is no token
@@ -52,6 +81,15 @@ export class AuthUtils {
         console.log('decodedToken', decodedToken);
         return (decodedToken.accessLevel > 1);
 
+    }
+
+    static isPresident(token: string): boolean {
+        if (!token || token === '') {
+            return false;
+        }
+
+        const decodedToken = this._decodeToken(token);
+        return (decodedToken.accessLevel >= 3);
     }
 
     // -----------------------------------------------------------------------------------------------------

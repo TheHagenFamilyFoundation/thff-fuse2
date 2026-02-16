@@ -9,7 +9,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FuseCardModule } from '@fuse/components/card';
+import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
 import { ProfileComponent } from 'app/modules/pages/profile/profile.component';
 import { profileRoutes } from 'app/modules/pages/profile/profile.routing';
@@ -30,11 +32,12 @@ import { SelectedOrganizationComponent } from './user-organization/selected-orga
         MatTooltipModule,
         MatTableModule,
         MatPaginatorModule,
+        MatProgressSpinnerModule,
         FuseCardModule,
+        FuseAlertModule,
         SharedModule,
     ],
     entryComponents: [
-        // SelectedLetterOfIntentComponent,
         SelectedOrganizationComponent,
     ],
 })
