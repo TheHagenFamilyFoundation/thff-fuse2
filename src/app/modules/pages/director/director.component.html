@@ -64,6 +64,27 @@
 
         </div>
 
+        <!-- Meeting Section -->
+        <div class="mt-10">
+            <h2 class="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Meetings</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <!-- Meetings -->
+                <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                           (click)="goToMeeting()">
+                    <div class="flex items-center mb-3">
+                        <mat-icon class="text-thff-teal icon-size-8 mr-3">groups</mat-icon>
+                        <h2 class="text-xl font-semibold m-0">Meetings</h2>
+                    </div>
+                    <p class="text-gray-500 m-0">
+                        Run the annual grant meeting, set the budget, and allocate funds to proposals.
+                    </p>
+                </fuse-card>
+
+            </div>
+        </div>
+
         <!-- Admin Section -->
         <div class="mt-10">
             <h2 class="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Admin</h2>

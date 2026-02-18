@@ -31,4 +31,8 @@ export class DirectorComponent implements OnInit {
     goToReferralLinks(): void {
         this._router.navigate(['/pages/director/referral-links']);
     }
+
+    goToMeeting(): void {
+        this._router.navigate(['/pages/director/meeting']);
+    }
 }
