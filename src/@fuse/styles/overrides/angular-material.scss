@@ -523,7 +523,7 @@
             border-radius: 6px;
             padding: 0 16px;
             border-width: 1px;
-            @apply shadow-sm bg-white border-gray-300 dark:bg-black dark:bg-opacity-5 dark:border-gray-500 #{'!important'};
+            @apply shadow-sm bg-white border-gray-300 dark:bg-neutral-600 dark:bg-opacity-40 dark:border-neutral-500 #{'!important'};
 
             .mat-form-field-prefix {
 
@@ -1091,6 +1091,11 @@
 /* ----------------------------------------------------------------------------------------------------- */
 .mat-input-element {
 
+    .dark & {
+        color: #FFFFFF !important;
+        caret-color: #FFFFFF !important;
+    }
+
     &::placeholder {
         transition: none !important;
         @apply text-hint #{'!important'};
@@ -1109,6 +1114,22 @@
     &:-ms-input-placeholder {
         transition: none !important;
         @apply text-hint #{'!important'};
+    }
+
+    .dark &::placeholder {
+        color: #a3a3a3 !important; /* neutral-400 - brighter than neutral-500 hint */
+    }
+
+    .dark &::-moz-placeholder {
+        color: #a3a3a3 !important;
+    }
+
+    .dark &::-webkit-input-placeholder {
+        color: #a3a3a3 !important;
+    }
+
+    .dark &:-ms-input-placeholder {
+        color: #a3a3a3 !important;
     }
 }
 

@@ -1,101 +1,116 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            View Organizations
-                        </div>
-                    </div>
-                </div>
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a routerLink="/pages/director"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                    View Organizations
+                </h1>
+
+                <!-- Year Selector -->
+                <mat-form-field class="w-36 -mb-5">
+                    <mat-label>Year</mat-label>
+                    <mat-select [(value)]="selectedYear" (selectionChange)="yearChanged($event)">
+                        <mat-option *ngFor="let year of years" [value]="year._id">
+                            {{ year.year }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
         </div>
     </div>
-    <!-- End of Header -->
 
     <!-- Main -->
-    <div class="text-center pt-4 sm:pt-6 ">
-        <div class="flex justify-center ...">
-            <div class="w-200">
+    <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
 
-                <div>
-                    <mat-form-field class="w-full">
-                        <!-- <mat-label>Filter</mat-label> -->
-                        <input matInput placeholder="Filter" #filterInput>
-                    </mat-form-field>
-                </div>
+        <!-- Filter Row -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
+            <mat-form-field class="w-full max-w-sm -mb-5">
+                <mat-label>Search</mat-label>
+                <mat-icon matPrefix class="mr-2">search</mat-icon>
+                <input matInput placeholder="Filter organizations..." #filterInput>
+            </mat-form-field>
 
-                <!--TODO: Remove -->
-                <!-- Debugging -->
-                <!-- Limit - {{limit}} Skip - {{skip}} -->
-
-                <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
-                    matSortDirection="desc">
-                    <!-- Name Column -->
-                    <ng-container matColumnDef="name">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Name
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
-                    </ng-container>
-
-                    <!-- createdOn Column -->
-                    <ng-container matColumnDef="createdOn">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
-                            Created On
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.createdAt | date: "MM/dd/yyyy" }}
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- users Column -->
-                    <ng-container matColumnDef="users">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Users
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.users.length }}
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- proposals Column -->
-                    <ng-container matColumnDef="proposals">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>
-                            Proposals
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            {{ row.proposals.length }}
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- link Column -->
-                    <ng-container matColumnDef="link">
-                        <mat-header-cell *matHeaderCellDef>
-                            Link
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            <button mat-raised-button color="primary" (click)="
-                                        goToOrganization(row.organizationID)
-                                    " mat-dialog-close>
-                                Go to Org
-                            </button>
-                        </mat-cell>
-                    </ng-container>
-
-                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                    <mat-row *matRowDef="let row; columns: displayedColumns">
-                    </mat-row>
-                </mat-table>
-
-                <div *ngIf="!loaded">
-                    <mat-spinner></mat-spinner>
-                </div>
-                <mat-paginator (page)="handlePageEvent($event)" [length]="orgCount"
-                    [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
-            </div>
+            <mat-checkbox [(ngModel)]="hasProposals" (change)="hasProposalsChanged()"
+                          class="sm:mt-7">
+                Has proposals in {{ year }}
+            </mat-checkbox>
         </div>
+
+        <!-- Table -->
+        <fuse-card class="flex flex-col w-full overflow-hidden">
+            <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
+                       matSortDirection="desc" class="w-full">
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="pl-6 font-semibold">
+                        Name
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="pl-6 font-medium">
+                        {{ row.name }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Created On Column -->
+                <ng-container matColumnDef="createdOn">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="font-semibold">
+                        Created On
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.createdAt | date: "MM/dd/yyyy" }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Users Column -->
+                <ng-container matColumnDef="users">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Users
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.users.length }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Proposals Column -->
+                <ng-container matColumnDef="proposals">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                        Proposals
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="text-gray-500">
+                        {{ row.proposals.length }}
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                    <mat-header-cell *matHeaderCellDef class="flex-none w-16"></mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="flex-none w-16">
+                        <mat-icon class="text-gray-400 icon-size-5">chevron_right</mat-icon>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"
+                         class="org-row cursor-pointer"
+                         (click)="goToOrganization(row.organizationID)">
+                </mat-row>
+            </mat-table>
+
+            <div *ngIf="!loaded" class="flex items-center justify-center py-12">
+                <mat-spinner [diameter]="40"></mat-spinner>
+            </div>
+
+            <mat-paginator (page)="handlePageEvent($event)" [length]="orgCount"
+                           [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+        </fuse-card>
+
     </div>
+
 </div>

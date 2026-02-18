@@ -1,40 +1,63 @@
-<div *ngIf="!hasUpload501c3">
-    <input
-        type="file"
-        (change)="fileChange($event)"
-        placeholder="Upload file"
-        accept=".pdf,.doc,.docx"
-    />
-    <div *ngIf="canUpload501c3 && !submitted">
-        <div align="center">
-            <button mat-raised-button (click)="upload()">Upload</button>
+<div class="max-w-lg">
+
+    <!-- No document yet -->
+    <div *ngIf="!hasUpload501c3">
+        <div class="flex flex-col items-center p-8 text-center border-2 border-dashed border-gray-300 rounded-xl">
+            <mat-icon class="icon-size-12 text-gray-300 mb-4">upload_file</mat-icon>
+            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">No 501(c)(3) Document</h3>
+            <p class="text-gray-500 text-sm mb-6">
+                Upload your organization's 501(c)(3) determination letter.
+            </p>
+            <button mat-flat-button color="primary" (click)="openUploadDialog()">
+                <mat-icon class="mr-2 icon-size-5">upload</mat-icon>
+                Upload Document
+            </button>
         </div>
     </div>
-    <div *ngIf="submitted">
-        <mat-spinner></mat-spinner>
-    </div>
-</div>
-<div *ngIf="hasUpload501c3">
-    <button mat-raised-button (click)="get501c3()">View 501c3</button>
-    <button mat-raised-button (click)="uploadNew501c3()">
-        Upload new 501c3
-    </button>
-</div>
-<div>
-    <h4>Status</h4>
-    <div>{{ outputStatus }}</div>
-    <div *ngIf="rejected501c3">
-        <div>Please upload another.</div>
-        <input
-            type="file"
-            (change)="fileChange($event)"
-            placeholder="Upload file"
-            accept=".pdf,.doc,.docx"
-        />
-        <div *ngIf="canUpload501c3">
-            <div align="center">
-                <button mat-raised-button (click)="upload()">Upload</button>
+
+    <!-- Document Exists -->
+    <div *ngIf="hasUpload501c3">
+        <div class="flex items-center mb-4">
+            <mat-icon class="text-green-600 icon-size-8 mr-3">check_circle</mat-icon>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 m-0">501(c)(3) on File</h3>
+                <p class="text-sm text-gray-500 m-0">Your document has been uploaded.</p>
             </div>
         </div>
+
+        <div class="flex gap-3">
+            <button mat-stroked-button color="primary" (click)="get501c3()">
+                <mat-icon class="mr-2 icon-size-5">visibility</mat-icon>
+                View Document
+            </button>
+            <button mat-stroked-button (click)="openUploadDialog()">
+                <mat-icon class="mr-2 icon-size-5">upload</mat-icon>
+                Upload New
+            </button>
+        </div>
     </div>
+
+    <!-- Status -->
+    <div class="mt-6 pt-6 border-t">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Review Status</h3>
+        <div class="flex items-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="{
+                      'bg-yellow-100 text-yellow-800': !rejected501c3 && outputStatus,
+                      'bg-red-100 text-red-800': rejected501c3,
+                      'bg-gray-100 text-gray-600': !outputStatus
+                  }">
+                {{ outputStatus || 'No status' }}
+            </span>
+        </div>
+
+        <div *ngIf="rejected501c3" class="mt-4">
+            <p class="text-red-600 text-sm font-medium mb-3">Your document was rejected. Please upload a new one.</p>
+            <button mat-flat-button color="primary" (click)="openUploadDialog()">
+                <mat-icon class="mr-2 icon-size-5">upload</mat-icon>
+                Upload Replacement
+            </button>
+        </div>
+    </div>
+
 </div>

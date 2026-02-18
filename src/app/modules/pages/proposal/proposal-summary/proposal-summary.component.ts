@@ -1,8 +1,6 @@
 import { Component, OnInit, Output, Input, EventEmitter } from '@angular/core';
 
-import { AuthService } from 'app/core/auth/auth.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
-import { environment } from 'environments/environment';
 
 @Component({
     selector: 'app-proposal-summary',
@@ -20,7 +18,7 @@ export class ProposalSummaryComponent implements OnInit {
 
     sponsorQuestion: boolean = false;
 
-    constructor(private _proposalService: ProposalService, private _authService: AuthService) { }
+    constructor(private _proposalService: ProposalService) { }
 
     ngOnInit(): void {
         if (this.prop.sponsor) {
@@ -29,11 +27,6 @@ export class ProposalSummaryComponent implements OnInit {
 
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-    }
-
-    getBackendURL(): void {
-        console.log('proposal - environment', environment);
-        // Use environment API URL directly
     }
 
     sponsor(): void {

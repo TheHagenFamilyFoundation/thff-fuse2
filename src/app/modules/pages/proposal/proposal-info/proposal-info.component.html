@@ -10,8 +10,14 @@
         </button>
     </div>
     <div class="flex flex-col sm:flex-row items-start justify-between">
-        <div class="text-lg font-medium tracking-tight leading-6 truncate">
-            Proposal Information
+        <div>
+            <div class="text-lg font-medium tracking-tight leading-6 truncate">
+                Proposal Information
+            </div>
+            <p *ngIf="(inOrg || directorEditing) && !editing" class="text-xs text-gray-400 dark:text-gray-500 mt-1 mb-0 flex items-center gap-1">
+                <mat-icon class="icon-size-3.5">edit</mat-icon>
+                Click any field to edit it inline
+            </p>
         </div>
         <!-- Buttons -->
         <div *ngIf="inOrg || directorEditing" class="mt-3 sm:mt-0 sm:ml-2">
@@ -260,7 +266,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputProjectTitle
                                             ? 'border-red-600'
                                             : ''
@@ -270,7 +276,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <input class="form-control" editableFocusable
                                             data-testid="sample-input-click-edit" maxLength="100"
                                             placeholder="Project Title" type="text"
@@ -303,7 +309,7 @@
                                 cancelSingleField('purpose', 'purposeControl')
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputPurpose
                                             ? 'border-red-600'
                                             : ''
@@ -313,7 +319,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
                                             rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                             placeholder="Purpose" [formControl]="purposeControl" required></textarea>
@@ -338,7 +344,7 @@
                                 cancelSingleField('goals', 'goalsControl')
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputGoals
                                             ? 'border-red-600'
                                             : ''
@@ -348,7 +354,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
                                             rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                             placeholder="Goals" [formControl]="goalsControl" required></textarea>
@@ -383,7 +389,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputNarrative
                                             ? 'border-red-600'
                                             : ''
@@ -393,7 +399,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
                                             rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="2000"
                                             placeholder="Narrative" [formControl]="narrativeControl"
@@ -425,7 +431,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputTimeTable
                                             ? 'border-red-600'
                                             : ''
@@ -435,7 +441,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
                                             rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                             placeholder="Time Table" [formControl]="timeTableControl"
@@ -467,7 +473,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputAmountRequested
                                             ? 'border-red-600'
                                             : ''
@@ -477,7 +483,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <input class="form-control" editableFocusable currencyMask maxLength="10"
                                             data-testid="sample-input-click-edit" placeholder="Amount Requested"
                                             type="text" [formControl]="amountRequestedControl" />
@@ -509,7 +515,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputItemizedBudget
                                             ? 'border-red-600'
                                             : ''
@@ -519,7 +525,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <textarea class="resize-none" editableFocusable matInput matTextareaAutosize
                                             rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5" maxLength="500"
                                             placeholder="Itemized Budget" [formControl]="itemizedBudgetControl"
@@ -552,7 +558,7 @@
                                 )
                             ">
                                 <ng-template viewMode>
-                                    <div class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 hover:bg-slate-200 {{
+                                    <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputTotalProjectCost
                                             ? 'border-red-600'
                                             : ''
@@ -562,7 +568,7 @@
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
-                                        class="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 focus:outline focus:bg-white focus:border-gray-500">
+                                        class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
                                         <input class="form-control" editableFocusable currencyMask maxLength="10"
                                             data-testid="sample-input-click-edit" placeholder="Total Project Cost"
                                             type="text" [formControl]="totalProjectCostControl" />
@@ -591,7 +597,7 @@
                                 Project Title
                             </label>
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.projectTitle }}
                             </div>
                         </div>
@@ -602,7 +608,7 @@
                                 Describe the purpose of your project:
                             </label>
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.purpose }}
                             </div>
                         </div>
@@ -614,7 +620,7 @@
                                 outcomes of your project:
                             </label>
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.goals }}
                             </div>
                         </div>
@@ -629,7 +635,7 @@
                                 success? Do you anticipate partnering with any other organizations?
                             </label>
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.narrative }}
                             </div>
                         </div>
@@ -641,7 +647,7 @@
                             </label>
 
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.timeTable }}
                             </div>
                         </div>
@@ -652,7 +658,7 @@
                                 Amount Requested
                             </label>
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.amountRequested | currency }}
                             </div>
                         </div>
@@ -666,7 +672,7 @@
                             </label>
 
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.itemizedBudget }}
                             </div>
                         </div>
@@ -678,7 +684,7 @@
                             </label>
 
                             <div
-                                class="appearance-none block w-full text-gray-700 border border-white rounded py-3 px-4 mb-3 leading-tight">
+                                class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
                                 {{ propObj.totalProjectCost | currency }}
                             </div>
                         </div>

@@ -2,19 +2,19 @@
 
 
     <!-- Header -->
-    <div class="relative flex-0 py-8 px-4 sm:p-16 overflow-hidden bg-gray-800 dark">
+    <div class="relative flex-0 py-8 px-4 sm:p-16 overflow-hidden bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700">
         <!-- Background - @formatter:off -->
         <!-- Rings -->
         <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width="100%" height="100%"
             preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
-                <circle r="234" cx="196" cy="23"></circle>
-                <circle r="234" cx="790" cy="491"></circle>
+            <g fill="none" stroke-width="100">
+                <circle class="stroke-gray-200 dark:stroke-[#008083]" style="opacity: 0.5" r="234" cx="196" cy="23"></circle>
+                <circle class="stroke-gray-200 dark:stroke-[#008083]" style="opacity: 0.5" r="234" cx="790" cy="491"></circle>
             </g>
         </svg>
         <!-- @formatter:on -->
         <div class="z-10 relative flex flex-col items-center">
-            <div class="mt-1 text-xl sm:text-xl tracking-tight leading-tight text-center">
+            <div class="mt-1 text-xl sm:text-xl tracking-tight leading-tight text-center text-gray-800 dark:text-white">
 
                 <img class="mx-auto w-48 h-48" src="assets/images/logo/logo_2020_9.svg"
                     alt="Logo image" />
@@ -23,7 +23,7 @@
                     The {{ latestSubmissionYear.year }} grant cycle is {{ portalOpen ? 'open' : 'closed' }}.
                     <span *ngIf="portalOpen"> Proposals may be submitted through your Organizations page.</span>
                 </p>
-                <div *ngIf="portalOpen && !loading && latestSubmissionYear" class="mt-1 text-sm sm:text-sm tracking-tight leading-tight text-center">
+                <div *ngIf="portalOpen && !loading && latestSubmissionYear" class="mt-1 text-sm sm:text-sm tracking-tight leading-tight text-center text-gray-500 dark:text-gray-300">
                     (If you do not have an Organization, visit the Organizations page to create one).
                 </div>
             </div>
@@ -31,10 +31,94 @@
     </div>
 
 
-    <!-- Main -->
-    <!-- <div class="flex-auto p-6 sm:p-10">
-        Main
+    <!-- Main Content -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="max-w-screen-lg mx-auto space-y-8">
 
-    </div> -->
+            <!-- Draft Proposals -->
+            <div *ngIf="drafts.length > 0">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <mat-icon class="text-amber-500">edit_note</mat-icon>
+                    Draft Proposals
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div *ngFor="let draft of drafts"
+                         (click)="continueDraft(draft)"
+                         class="flex items-center gap-4 p-4 bg-card rounded-xl border border-amber-200 dark:border-amber-700 shadow-sm cursor-pointer hover:shadow-md hover:border-amber-400 dark:hover:border-amber-500 transition-all">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900 dark:bg-opacity-40 flex-shrink-0">
+                            <mat-icon class="text-amber-600 dark:text-amber-400 icon-size-5">description</mat-icon>
+                        </div>
+                        <div class="min-w-0 flex-auto">
+                            <div class="font-medium text-gray-800 dark:text-gray-200 truncate">{{ draft.title }}</div>
+                            <div class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Draft — click to continue editing</div>
+                        </div>
+                        <mat-icon class="text-gray-400 dark:text-gray-500 flex-shrink-0">arrow_forward</mat-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Proposals -->
+            <div *ngIf="!loading">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <mat-icon class="text-thff-teal">assignment</mat-icon>
+                    {{ latestSubmissionYear?.year }} Proposals
+                </h2>
+
+                <!-- Loading state -->
+                <div *ngIf="proposalsLoading" class="flex items-center justify-center py-12">
+                    <mat-spinner [diameter]="32"></mat-spinner>
+                </div>
+
+                <!-- No proposals -->
+                <div *ngIf="!proposalsLoading && proposals.length === 0"
+                     class="text-center py-12 bg-card rounded-xl border border-gray-200 dark:border-neutral-700 shadow-sm">
+                    <mat-icon class="icon-size-12 text-gray-300 dark:text-gray-600 mb-3">folder_open</mat-icon>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No proposals submitted yet for {{ latestSubmissionYear?.year }}.</p>
+                    <p *ngIf="portalOpen" class="text-gray-400 dark:text-gray-500 text-xs mt-1">
+                        Submit a proposal from your Organization page.
+                    </p>
+                </div>
+
+                <!-- Proposal cards -->
+                <div *ngIf="!proposalsLoading && proposals.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div *ngFor="let proposal of proposals"
+                         (click)="viewProposal(proposal)"
+                         class="flex flex-col p-5 bg-card rounded-xl border border-gray-200 dark:border-neutral-700 shadow-sm cursor-pointer hover:shadow-md hover:border-gray-300 dark:hover:border-neutral-500 transition-all">
+
+                        <!-- Status badge -->
+                        <div class="flex items-center gap-1.5 mb-3">
+                            <mat-icon class="{{ getProposalStatus(proposal).color }} icon-size-4">
+                                {{ getProposalStatus(proposal).icon }}
+                            </mat-icon>
+                            <span class="text-xs font-semibold uppercase tracking-wider {{ getProposalStatus(proposal).color }}">
+                                {{ getProposalStatus(proposal).label }}
+                            </span>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="font-medium text-gray-800 dark:text-gray-200 leading-snug mb-2 line-clamp-2">
+                            {{ proposal.projectTitle }}
+                        </h3>
+
+                        <!-- Organization name -->
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                            {{ proposal.organization?.name }}
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-neutral-700">
+                            <span class="text-xs text-gray-400 dark:text-gray-500">
+                                {{ proposal.createdAt | date:'MMM d, y' }}
+                            </span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                {{ proposal.amountRequested | currency }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
 </div>

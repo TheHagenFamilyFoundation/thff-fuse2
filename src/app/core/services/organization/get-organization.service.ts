@@ -3,22 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-import { AuthService } from '../../auth/auth.service';
-
 @Injectable()
 export class GetOrganizationService {
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient, private authService: AuthService) {
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
-        }
-
-        console.log('GetOrganizationService - this.apiUrl', this.apiUrl);
-    }
+    constructor(private http: HttpClient) {}
 
     // get Organization by director
     getOrgbyDirector(username: string): Observable<any> {
@@ -54,7 +43,7 @@ export class GetOrganizationService {
     }
 
     //TODO: pass in sort
-    getOrgs(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string): Observable<any> {
+    getOrgs(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string, year?: number): Observable<any> {
         let urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
 
         //empty string
@@ -67,18 +56,28 @@ export class GetOrganizationService {
             urlString += `&sort=${sortColumn}&dir=${sortDirection}`;
         }
 
-        console.log('urlString', urlString);
+        if (year) {
+            urlString += `&year=${year}`;
+        }
 
         return this.http.get(urlString);
     }
 
     //returns count of organizations in database
-    getOrganizationCount(filter?: string): Observable<any> {
+    getOrganizationCount(filter?: string, year?: number): Observable<any> {
         let urlString = `${this.apiUrl}/organization/count`;
+        const params: string[] = [];
 
-        //empty string
         if (filter && filter.trim().length !== 0) {
-            urlString += `?filter=${filter}`;
+            params.push(`filter=${filter}`);
+        }
+
+        if (year) {
+            params.push(`year=${year}`);
+        }
+
+        if (params.length > 0) {
+            urlString += '?' + params.join('&');
         }
 
         return this.http.get(urlString);

@@ -1,173 +1,159 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            Voting
-                        </div>
-                    </div>
-                </div>
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a routerLink="/pages/director"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                    Voting
+                </h1>
+
+                <!-- Year Selector -->
+                <mat-form-field class="w-36 -mb-5">
+                    <mat-label>Year</mat-label>
+                    <mat-select [(value)]="selectedYear" (selectionChange)="yearChanged($event)">
+                        <mat-option *ngFor="let year of years" [value]="year._id">
+                            {{ year.year }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
         </div>
     </div>
-    <!-- End of Header -->
 
     <!-- Main -->
-    <!-- <div class="text-center pt-4 sm:pt-6 "> -->
-    <div class="flex-auto border-t -mt-px pt-4 sm:pt-6">
-        <div class="w-full max-w-screen-xl mx-auto">
-            <!-- Tabs -->
-            <mat-tab-group class="sm:px-2" [animationDuration]="'0'">
-                <!-- Proposals -->
-                <mat-tab label="Proposals">
-                    <ng-template matTabContent>
-                        <div
-                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+    <div class="flex-auto">
+        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
 
-                            <div class="flex justify-center ...">
-                                <div class="w-200">
+            <div>
 
-                                    <div class="flex flex-row justify-center">
+                <!-- Filter Row -->
+                <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
+                    <mat-form-field class="w-full max-w-sm -mb-5">
+                        <mat-label>Search</mat-label>
+                        <mat-icon matPrefix class="mr-2">search</mat-icon>
+                        <input matInput placeholder="Filter proposals..." #filterInput>
+                    </mat-form-field>
 
-                                        <div class="px-4 py-3">
-                                            <mat-label>Year:</mat-label>
-                                        </div>
-                                        <div>
-                                            <mat-form-field>
-                                                <mat-select placeholder="Select Year" [(value)]="selectedYear"
-                                                    (selectionChange)="yearChanged($event)">
-                                                    <mat-option *ngFor="let year of years" [value]="year._id">
-                                                        {{year.year}}
-                                                    </mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
+                    <!-- Archived Filter (president/admin only) -->
+                    <div *ngIf="isPresident" class="flex items-start gap-1">
+                        <mat-form-field class="w-40 -mb-5">
+                            <mat-label>Status</mat-label>
+                            <mat-select [value]="archivedFilter" (selectionChange)="archivedFilterChanged($event.value)">
+                                <mat-option value="">Active</mat-option>
+                                <mat-option value="only">Archived</mat-option>
+                                <mat-option value="true">All</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-icon class="icon-size-4 text-gray-400 mt-7 cursor-help"
+                                  matTooltip="Active: proposals available for director voting. Archived: proposals removed from voting by the President."
+                                  matTooltipPosition="above">
+                            info_outline
+                        </mat-icon>
+                    </div>
+                </div>
 
-                                    <div>
-                                        <mat-form-field class="w-full">
-                                            <!-- <mat-label>Filter</mat-label> -->
-                                            <input matInput placeholder="Filter" #filterInput>
-                                        </mat-form-field>
-                                    </div>
+                <!-- Table -->
+                <fuse-card class="flex flex-col w-full overflow-hidden">
+                    <mat-table [dataSource]="data" matSort matSortActive="createdOn"
+                               matSortDisableClear matSortDirection="desc" class="w-full">
 
-                                    <!--TODO: Remove -->
-                                    <!-- Debugging -->
-                                    <!-- Limit - {{limit}} Skip - {{skip}} -->
+                        <!-- Project Title Column -->
+                        <ng-container matColumnDef="projectTitle">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="pl-6 font-semibold">
+                                Project Title
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="pl-6 font-medium">
+                                <span>{{ row.projectTitle }}</span>
+                                <span *ngIf="row.archived"
+                                      class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-600 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300">
+                                    Archived
+                                </span>
+                            </mat-cell>
+                        </ng-container>
 
-                                    <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
-                                        matSortDirection="desc">
-                                        <!-- Project Title Column -->
-                                        <ng-container matColumnDef="projectTitle">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Project Title
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row"> {{ row.projectTitle }} </mat-cell>
-                                        </ng-container>
+                        <!-- Organization Column -->
+                        <ng-container matColumnDef="organization">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                                Organization
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                {{ row.organization?.name }}
+                            </mat-cell>
+                        </ng-container>
 
-                                        <!-- Organization Column -->
-                                        <ng-container matColumnDef="organization">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Organization
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row"> {{ row.organization?.name }} </mat-cell>
-                                        </ng-container>
+                        <!-- Created On Column -->
+                        <ng-container matColumnDef="createdOn">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="font-semibold">
+                                Created On
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                {{ row.createdAt | date: "MM/dd/yyyy" }}
+                            </mat-cell>
+                        </ng-container>
 
+                        <!-- Sponsored Column -->
+                        <ng-container matColumnDef="sponsored">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                                Sponsored
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row">
+                                <mat-icon *ngIf="row?.sponsor" class="text-green-600 icon-size-5">check_circle</mat-icon>
+                                <mat-icon *ngIf="!row?.sponsor" class="text-gray-300 dark:text-gray-600 icon-size-5">cancel</mat-icon>
+                            </mat-cell>
+                        </ng-container>
 
-                                        <!-- createdOn Column -->
-                                        <ng-container matColumnDef="createdOn">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
-                                                Created On
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{ row.createdAt | date: "MM/dd/yyyy" }}
-                                            </mat-cell>
-                                        </ng-container>
+                        <!-- Votes Column -->
+                        <ng-container matColumnDef="votes">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                                Votes
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                {{ row.votes.length }}
+                            </mat-cell>
+                        </ng-container>
 
-                                        <!-- Sponsored Column -->
-                                        <ng-container matColumnDef="sponsored">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Sponsored
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{row?.sponsor ? 1 : 0}}
-                                            </mat-cell>
-                                        </ng-container>
+                        <!-- Score Column -->
+                        <ng-container matColumnDef="score">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
+                                Score
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="font-semibold">
+                                {{ row.score ? row.score : 0 }}
+                            </mat-cell>
+                        </ng-container>
 
-                                        <!-- Votes Column -->
-                                        <ng-container matColumnDef="votes">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Votes
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{row.votes.length}}
-                                            </mat-cell>
-                                        </ng-container>
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <mat-header-cell *matHeaderCellDef class="flex-none w-16"></mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="flex-none w-16">
+                                <mat-icon class="text-gray-400 icon-size-5">chevron_right</mat-icon>
+                            </mat-cell>
+                        </ng-container>
 
-                                        <!-- Score Column -->
-                                        <ng-container matColumnDef="score">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Score
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{row.score ? row.score : 0}}
-                                            </mat-cell>
-                                        </ng-container>
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns"
+                                 class="org-row cursor-pointer"
+                                 (click)="goToProposal(row.proposalID)">
+                        </mat-row>
+                    </mat-table>
 
-                                        <!-- link Column -->
-                                        <ng-container matColumnDef="link">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                                Link
-                                            </mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                <button mat-raised-button color="primary" (click)="
-                                                        goToProposal(row.proposalID)
-                                                    " mat-dialog-close>
-                                                    Go to Proposal
-                                                </button>
-                                            </mat-cell>
-                                        </ng-container>
+                    <div *ngIf="!loaded" class="flex items-center justify-center py-12">
+                        <mat-spinner [diameter]="40"></mat-spinner>
+                    </div>
 
-                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                                        <mat-row *matRowDef="let row; columns: displayedColumns">
-                                        </mat-row>
-                                    </mat-table>
+                    <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
+                                   [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+                </fuse-card>
 
-                                    <div *ngIf="!loaded">
-                                        <mat-spinner></mat-spinner>
-                                    </div>
-                                    <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
-                                        [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
-                                </div>
-                            </div>
+            </div>
 
-                        </div>
-                    </ng-template>
-                </mat-tab>
-
-                <!-- Voting -->
-                <mat-tab label="Voting">
-                    <ng-template matTabContent>
-                        <div
-                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                            <div class="flex flex-col items-start">
-                                <div class="text-xl font-semibold">
-                                    Voting
-                                </div>
-                                <div class="flex flex-col sm:flex-row items-start mt-8">
-                                    Proposals Scroll
-                                </div>
-                            </div>
-                        </div>
-                    </ng-template>
-                </mat-tab>
-
-            </mat-tab-group>
         </div>
     </div>
 
-    <!-- </div> -->
 </div>

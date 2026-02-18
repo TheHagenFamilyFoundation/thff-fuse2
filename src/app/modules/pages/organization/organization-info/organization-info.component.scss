@@ -1,122 +1,67 @@
-.example-container {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .example-container > * {
-    width: 90%;
-  }
+/* ===== Field Styling ===== */
 
-  .year-founded-width {
-    width: 100px;
-  }
+/* Labels - make them prominent */
+:host label.block.tracking-wide {
+    font-weight: 600;
+    color: #475569; /* gray-600 */
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+}
 
-  .titles-gray {
-    color: gray;
-  }
+:host-context(.dark) label.block.tracking-wide {
+    color: #d4d4d4; /* neutral-300 */
+}
 
-  .org-info {
-    width: 900px;
-  }
+/* Section sub-headings (Contact Person, Principal Office) */
+:host .block.tracking-wide.text-base {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #334155; /* gray-700 */
+    padding-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+}
 
-  .zip-width {
-    width: 60px;
-  }
+:host-context(.dark) .block.tracking-wide.text-base {
+    color: #e5e5e5; /* neutral-200 */
+    border-top-color: #525252; /* neutral-600 */
+}
 
-  .mat-form-field {
-    width: 100%
-  }
+/* View-mode field values - make them clearly bordered */
+:host .appearance-none.block.border {
+    background-color: #f8fafc; /* slate-50 */
+    border: 1px solid #e2e8f0 !important; /* slate-200 */
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.925rem;
+    color: #1e293b; /* slate-800 */
+    min-height: 2.5rem;
+}
 
+:host-context(.dark) .appearance-none.block.border {
+    background-color: rgba(82, 82, 82, 0.4) !important; /* neutral-600/40 */
+    border-color: #525252 !important; /* neutral-600 */
+    color: #e5e5e5; /* neutral-200 */
+}
 
-  // :host {
-  //   width: 100%;
-  //   display: flex;
-  //   flex-direction: column;
-  //   // align-items: center;
-  // }
-  
-  // button {
-  //   margin: 10px;
-  // }
-  
-    input {
-      width: 100%;
-    }
+/* Hover state for editable fields */
+:host .appearance-none.block.border:hover {
+    border-color: #94a3b8 !important; /* slate-400 */
+    background-color: #f1f5f9; /* slate-100 */
+}
 
-  // input {
-  //   height: 25px;
-  //   padding: 2px;
-  //   margin: 0;
-  //   border: 1px solid black;
-  //   border-radius: 4px;
-  // }
-  
-  // section {
-  //   border-radius: 4px;
-  //   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  //   padding: 1rem;
-  //   margin-bottom: 0.3rem;
-  //   min-width: 40rem;
-  //   height: fit-content;
-  // }
-  
-  // article {
-  //   min-height: 40px;
-  // }
-  
-  // .sample-radio {
-  //   display: flex;
-  //   align-items: center;
-  //   label {
-  //     margin-right: 0.5rem;
-  //   }
-  // }
-  
-  // h1 {
-  //   text-align: center;
-  // }
-  
-  // h1,
-  // h4 {
-  //   color: teal;
-  // }
-  
-  // @media screen and (max-width: 700px) {
-  //   section {
-  //     min-width: 90%;
-  //     margin-left: 1rem;
-  //     margin-right: 1rem;
-  //   }
-  // }
-  
-  // aside {
-  //   display: flex;
-  // }
-  
-  // .display {
-  //   display: block;
-  // }
-  
-  // .hide {
-  //   display: none;
-  // }
-  
-  // .form-group {
-  //   width: fit-content;
-  // }
-  
-  // .name {
-  //   width: 152px;
-  // }
-  
-  // .role {
-  //   width: 295px;
-  // }
-  
-  // .active {
-  //   width: 161px;
-  // }
-  
-  // tr {
-  //   height: 83px;
-  // }
+:host-context(.dark) .appearance-none.block.border:hover {
+    border-color: #a3a3a3 !important; /* neutral-400 */
+    background-color: rgba(64, 64, 64, 0.6) !important; /* neutral-700/60 */
+}
+
+/* Form inputs fill width */
+input {
+    width: 100%;
+}
+
+.mat-form-field {
+    width: 100%;
+}

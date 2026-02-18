@@ -24,9 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { environment } from 'environments/environment';
 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-// import { ProposalService } from '../../../core/services/proposal/proposal.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
-import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
     selector: 'app-proposal-info',
@@ -48,7 +46,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
     // multiple form
     public mode: 'view' | 'edit' = 'view';
 
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
     projectTitle$ = new Subject<string>();
     purpose$ = new Subject<string>();
@@ -110,7 +108,6 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
-        public _authService: AuthService,
         fb: FormBuilder
     ) {
         this.route.params.subscribe((params) => {
@@ -169,15 +166,6 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
             });
 
         this.defaultValues();
-
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this._authService.getBackendURL();
-            console.log('ProposalComponent - this.apiUrl', this.apiUrl);
-        }
-
-        console.log('ProposalComponent - this.apiUrl', this.apiUrl);
     }
 
     defaultValues(): void {
@@ -238,11 +226,6 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
     // refreshProposal(): void {
     //     this.getProposal(this.proposalID); //fetch the proposal again
     // }
-
-    getBackendURL(): void {
-        console.log('proposal - environment', environment);
-        this.apiUrl = environment.apiUrl;
-    }
 
     setFields(): void {
         console.log('setting fields');

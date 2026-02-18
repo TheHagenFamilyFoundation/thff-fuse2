@@ -1,77 +1,84 @@
 <div class="flex flex-col flex-auto min-w-0">
+
     <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <div class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            Submission Years
-                        </div>
-                    </div>
-                </div>
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a routerLink="/pages/director"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                    Submission Years
+                </h1>
+                <button *ngIf="submissionYearMissing" mat-flat-button color="primary"
+                        (click)="createSubmissionYear()">
+                    <mat-icon class="mr-2 icon-size-5">add</mat-icon>
+                    <span>Create {{ currentYear }} Year</span>
+                </button>
             </div>
         </div>
     </div>
-    <!-- End of Header -->
 
     <!-- Main -->
-    <div class="text-center pt-4 sm:pt-6 ">
-        <div class="flex flex-col justify-center px-8">
+    <div class="w-full max-w-screen-lg mx-auto p-6 sm:p-8">
+
+        <fuse-card class="flex flex-col w-full overflow-hidden">
             <table mat-table [dataSource]="dataSource" matSort class="w-full">
 
                 <!-- Year Column -->
                 <ng-container matColumnDef="year">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Year </th>
-                    <td mat-cell *matCellDef="let row"> {{row.year}} </td>
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-6 font-semibold"> Year </th>
+                    <td mat-cell *matCellDef="let row" class="pl-6 font-medium"> {{ row.year }} </td>
                 </ng-container>
 
-                <!-- CreatedOn Column -->
+                <!-- Created On Column -->
                 <ng-container matColumnDef="createdAt">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header> CreatedOn </th>
-                    <td mat-cell *matCellDef="let row"> {{ row.createdAt | date: "MM/dd/yyyy" }} </td>
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold"> Created </th>
+                    <td mat-cell *matCellDef="let row" class="text-gray-500"> {{ row.createdAt | date: "MM/dd/yyyy" }} </td>
                 </ng-container>
 
-                <!-- UpdatedOn Column -->
+                <!-- Updated On Column -->
                 <ng-container matColumnDef="updatedAt">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header> UpdatedOn </th>
-                    <td mat-cell *matCellDef="let row"> {{ row.updatedAt | date: "MM/dd/yyyy" }} </td>
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold"> Updated </th>
+                    <td mat-cell *matCellDef="let row" class="text-gray-500"> {{ row.updatedAt | date: "MM/dd/yyyy" }} </td>
                 </ng-container>
 
                 <!-- Active Column -->
                 <ng-container matColumnDef="active">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Active </th>
-                    <td mat-cell *matCellDef="let row"> {{ row.active }} </td>
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold"> Status </th>
+                    <td mat-cell *matCellDef="let row">
+                        <span *ngIf="row.active"
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            Active
+                        </span>
+                        <span *ngIf="!row.active"
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                            Closed
+                        </span>
+                    </td>
                 </ng-container>
 
                 <!-- Toggle Column -->
                 <ng-container matColumnDef="toggle">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Toggle </th>
-                    <mat-cell *matCellDef="let row">
-                        <button mat-raised-button color="primary" [disabled]="!row.active && row.year !== currentYear"
-                            (click)="toggleSubmissionYear(row.subID)">
-                            {{ row.active ? 'Close Portal'
-                            : row.year !== currentYear ?
-                            'Closed Portal' : 'Open Portal'}}
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"> Action </th>
+                    <td mat-cell *matCellDef="let row">
+                        <button mat-stroked-button
+                                [color]="row.active ? 'warn' : 'primary'"
+                                [disabled]="!row.active && row.year !== currentYear"
+                                (click)="toggleSubmissionYear(row.subID)">
+                            {{ row.active ? 'Close Portal' : 'Open Portal' }}
                         </button>
-                    </mat-cell>
+                    </td>
                 </ng-container>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
             </table>
-
-            <!-- <mat-paginator [pageSizeOptions]="[10, 25]"
-                    aria-label="Select page of submission years"></mat-paginator> -->
-
-        </div>
-        <div *ngIf="submissionYearMissing">
-            <button mat-button color="primary" (click)="createSubmissionYear()" fxHide="false">
-                <mat-icon>add</mat-icon> Create Submission Year
-            </button>
-        </div>
-
+        </fuse-card>
 
     </div>
+
 </div>

@@ -4,6 +4,7 @@ import { OrganizationsComponent } from './organizations/organizations.component'
 import { ProposalsComponent } from './proposals/proposals.component';
 import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
+import { ReferralLinksComponent } from './referral-links/referral-links.component';
 
 export const directorRoutes: Route[] = [
     {
@@ -25,5 +26,9 @@ export const directorRoutes: Route[] = [
     {
         path: 'director/submission-years',
         component: SubmissionYearsComponent,
+    },
+    {
+        path: 'director/referral-links',
+        component: ReferralLinksComponent,
     },
 ];

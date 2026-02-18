@@ -23,7 +23,7 @@ export class OrgProposalsComponent implements AfterViewInit {
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild('filterInput', { static: true }) input: ElementRef;
 
-    displayedColumns = ['projectTitle', 'createdOn', 'link'];
+    displayedColumns = ['projectTitle', 'amountRequested', 'createdOn', 'action'];
 
     limit: number;
 
@@ -218,7 +218,7 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     createProposal(): void {
         console.log('create proposal');
-        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id } });
+        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id, orgID: this.org.organizationID } });
     }
     goToProposal(proposalID: string): void {
         console.log('proposalID', proposalID);

@@ -31,8 +31,6 @@ import { UpdateOrganizationInfoService } from 'app/core/services/organization/or
 import { GetOrganizationInfoService } from 'app/core/services/organization/organization-info/get-organization-info.service';
 import { DeleteOrganizationInfoService } from 'app/core/services/organization/organization-info/delete-organization-info.service';
 
-import { AuthService } from 'app/core/auth/auth.service';
-
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -52,7 +50,7 @@ export class OrganizationInfoComponent implements OnInit {
     // multiple form
     public mode: 'view' | 'edit' = 'view';
 
-    apiUrl: string;
+    apiUrl = environment.apiUrl;
 
     orgID: any;
 
@@ -233,7 +231,6 @@ export class OrganizationInfoComponent implements OnInit {
         private updateOrganizationInfoService: UpdateOrganizationInfoService,
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
-        private authService: AuthService,
         fb: FormBuilder
     ) {
         //main edit mode
@@ -358,15 +355,6 @@ export class OrganizationInfoComponent implements OnInit {
             });
 
         this.defaultValues();
-
-        if (!environment.production) {
-            this.apiUrl = environment.apiUrl;
-        } else {
-            this.apiUrl = this.authService.getBackendURL();
-            console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
-        }
-
-        console.log('OrganizationInfoComponent - this.apiUrl', this.apiUrl);
 
         // const invalidInputMap = new Map<string, boolean>([
         //     ['legalName', false],
