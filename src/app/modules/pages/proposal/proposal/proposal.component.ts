@@ -44,6 +44,8 @@ export class ProposalComponent implements OnInit, OnDestroy {
     orgID: string;
     org: any;
     organizationLink: string;
+    backLink: string;
+    backLabel: string;
 
     activeTab: 'summary' | 'proposal-info' | 'voting' = 'summary';
     archiveConfirm: boolean = false;
@@ -120,6 +122,13 @@ export class ProposalComponent implements OnInit, OnDestroy {
         this.route.params.subscribe((params) => {
             console.log(params);
             this.proposalID = params.id;
+        });
+
+        this.route.queryParams.subscribe((qp) => {
+            if (qp.from === 'meeting' && qp.meetingId) {
+                this.backLink = '/pages/director/meeting/' + qp.meetingId;
+                this.backLabel = 'Back to Meeting';
+            }
         });
 
         this.projectTitle$
@@ -235,6 +244,11 @@ export class ProposalComponent implements OnInit, OnDestroy {
                     this.org = this.proposal.organization;
                     console.log('this.org', this.org);
                     this.organizationLink = '/pages/organization/' + this.org.organizationID;
+
+                    if (!this.backLink) {
+                        this.backLink = this.organizationLink;
+                        this.backLabel = 'Back to Organization';
+                    }
 
                     this.getOrganization(this.org.organizationID);
 

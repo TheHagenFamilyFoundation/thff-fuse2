@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -33,6 +33,7 @@ export class MeetingDetailComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private meetingService: MeetingService,
         private authService: AuthService,
         private snackBar: MatSnackBar
@@ -196,6 +197,12 @@ export class MeetingDetailComponent implements OnInit {
             case 'completed': return 'Finalized';
             default: return status;
         }
+    }
+
+    goToProposal(proposalID: string): void {
+        this.router.navigate(['/pages/proposal/', proposalID], {
+            queryParams: { from: 'meeting', meetingId: this.meeting._id }
+        });
     }
 
     getStatusColor(status: string): string {
