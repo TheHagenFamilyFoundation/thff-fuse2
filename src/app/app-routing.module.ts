@@ -126,6 +126,13 @@ export const appRoutes: Routes = [
                         (m) => m.LandingHomeModule
                     ),
             },
+            {
+                path: 'referral',
+                loadChildren: () =>
+                    import('app/modules/auth/referral/referral.module').then(
+                        (m) => m.ReferralModule
+                    ),
+            },
         ],
     },
     // Authenticated routes

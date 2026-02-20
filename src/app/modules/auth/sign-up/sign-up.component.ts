@@ -42,14 +42,10 @@ export class AuthSignUpComponent implements OnInit {
             password: ['', Validators.required],
         });
 
-        // Capture referral code from URL query param, stored with the current year
+        // Old referral links point to /sign-up?ref=CODE — redirect to the new /referral route
         this._route.queryParams.subscribe((params) => {
             if (params.ref) {
-                const refData = {
-                    code: params.ref,
-                    year: new Date().getFullYear()
-                };
-                localStorage.setItem('referralCode', JSON.stringify(refData));
+                this._router.navigate(['/referral'], { queryParams: { ref: params.ref } });
             }
         });
     }
@@ -62,7 +58,23 @@ export class AuthSignUpComponent implements OnInit {
         this.signUpForm.disable();
         this.showAlert = false;
 
-        this._authService.signUp(this.signUpForm.value).subscribe({
+        const payload: any = { ...this.signUpForm.value };
+
+        // Attach referral code from localStorage so it's persisted on the user record
+        const stored = localStorage.getItem('referralCode');
+        if (stored) {
+            try {
+                const refData = JSON.parse(stored);
+                if (refData.code) {
+                    payload.referralCode = refData.code;
+                }
+            } catch {
+                // Legacy plain-string format
+                payload.referralCode = stored;
+            }
+        }
+
+        this._authService.signUp(payload).subscribe({
             next: (response) => {
                 // Establish session from the register response
                 this._authService.establishSession(response);
@@ -74,6 +86,9 @@ export class AuthSignUpComponent implements OnInit {
 
                 // Start backend session ping
                 this._backendService.startPing();
+
+                // Referral code is now on the User record — clean up localStorage
+                localStorage.removeItem('referralCode');
 
                 // Navigate to the app
                 this._router.navigateByUrl('/signed-in-redirect');

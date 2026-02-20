@@ -30,7 +30,7 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
     {
-        return this._check();
+        return this._check(route);
     }
 
     /**
@@ -64,7 +64,7 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
      *
      * @private
      */
-    private _check(): Observable<boolean>
+    private _check(route?: ActivatedRouteSnapshot): Observable<boolean>
     {
         // Check the authentication status
         return this._authService.check()
@@ -74,8 +74,13 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
                            // If the user is authenticated...
                            if ( authenticated )
                            {
-                               // Redirect to the root
-                               this._router.navigate(['']);
+                               // If there's a referral code, redirect to /referral so it gets applied
+                               const ref = route?.queryParams?.ref;
+                               if (ref) {
+                                   this._router.navigate(['/referral'], { queryParams: { ref } });
+                               } else {
+                                   this._router.navigate(['']);
+                               }
 
                                // Prevent the access
                                return of(false);

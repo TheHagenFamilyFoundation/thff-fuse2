@@ -11,6 +11,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
+import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { AppConfig, Scheme } from 'app/core/config/app.config';
 import { FuseConfigService } from '@fuse/services/config';
 import { Subject, takeUntil } from 'rxjs';
@@ -40,6 +41,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _backendService: BackendService,
+        private _referralCodeService: ReferralCodeService,
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _fuseConfigService: FuseConfigService
@@ -84,6 +86,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                 } else {
                     this.setScheme(response.userSettings.scheme);
                     this._backendService.startPing();
+                    this._applyPendingReferralCode();
                     const redirectURL =
                         this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
                     this._router.navigateByUrl(redirectURL);
@@ -108,5 +111,29 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
 
     setScheme(scheme: Scheme): void {
         this._fuseConfigService.config = { scheme };
+    }
+
+    private _applyPendingReferralCode(): void {
+        const stored = localStorage.getItem('referralCode');
+        if (!stored) { return; }
+
+        let code: string;
+        try {
+            const refData = JSON.parse(stored);
+            code = refData.code;
+        } catch {
+            code = stored;
+        }
+
+        if (!code) { return; }
+
+        this._referralCodeService.setMyReferralCode(code).subscribe({
+            next: () => {
+                localStorage.removeItem('referralCode');
+            },
+            error: () => {
+                localStorage.removeItem('referralCode');
+            }
+        });
     }
 }

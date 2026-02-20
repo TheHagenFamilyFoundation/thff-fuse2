@@ -223,6 +223,50 @@
                         </div>
                     </form>
 
+                    <!-- Referral / Sponsor -->
+                    <div class="mb-6 p-5 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <mat-icon class="icon-size-5 text-secondary">person_add</mat-icon>
+                            <span class="text-base font-medium">Referral / Sponsor</span>
+                        </div>
+
+                        <!-- Sponsor is set -->
+                        <div *ngIf="sponsorName" class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-on-primary text-sm font-bold">
+                                    {{ sponsorName.charAt(0) }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium">{{ sponsorName }}</div>
+                                    <div class="text-xs text-secondary">Sponsor ({{ sponsorCode }})</div>
+                                </div>
+                            </div>
+                            <button mat-icon-button (click)="clearSponsor()" matTooltip="Remove sponsor">
+                                <mat-icon class="icon-size-5 text-gray-400">close</mat-icon>
+                            </button>
+                        </div>
+
+                        <!-- No sponsor — allow manual entry -->
+                        <div *ngIf="!sponsorName">
+                            <p class="text-sm text-secondary mb-3 m-0">
+                                If a director referred you, enter their referral code below.
+                            </p>
+                            <div class="flex items-start gap-3">
+                                <mat-form-field class="flex-auto -mb-5">
+                                    <input matInput [(ngModel)]="manualReferralCode"
+                                        placeholder="Enter referral code"
+                                        (keyup.enter)="applyReferralCode()" />
+                                    <mat-error *ngIf="referralError">{{ referralError }}</mat-error>
+                                </mat-form-field>
+                                <button mat-stroked-button (click)="applyReferralCode()"
+                                    [disabled]="referralValidating || !manualReferralCode?.trim()"
+                                    class="mt-1">
+                                    {{ referralValidating ? 'Checking...' : 'Apply' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Footer -->
                     <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t">
                         <button mat-stroked-button (click)="cancel()">
