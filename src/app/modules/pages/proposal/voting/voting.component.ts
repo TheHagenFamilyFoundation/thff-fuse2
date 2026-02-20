@@ -59,11 +59,7 @@ export class VotingComponent implements OnInit {
     ngOnInit(): void {
 
         this.user = JSON.parse(localStorage.getItem('currentUser'));
-        console.log('voting - user', this.user);
         this.userID = this.user._id;
-        console.log('this.userID', this.userID);
-        console.log('this.prop', this.prop);
-        console.log('this.prop.votes.length', this.prop.votes.length);
 
         if (this.prop.votes.length > 0) {
             this.checkDirVote(this.prop.votes);
@@ -77,8 +73,6 @@ export class VotingComponent implements OnInit {
     }
 
     onInputChange(event: any): void {
-        console.log('This is emitted as the thumb slides', event);
-
         this.vote = event.value;
 
         this.outVote(this.vote);
@@ -89,17 +83,11 @@ export class VotingComponent implements OnInit {
             vote: this.vote,
         };
 
-        console.log('director proposal voting - data', data);
-
         this._directorService.vote(data).subscribe(
             (vote) => {
-                console.log('vote 1', vote);
                 this.refreshProp.emit(true);
             },
-            (err) => {
-                console.log('err', err);
-            },
-            // () => {},
+            () => {}
         );
     }
 
@@ -108,7 +96,6 @@ export class VotingComponent implements OnInit {
 
         votes.forEach((vote) => {
             if (vote.userID === this.userID) {
-                console.log('vote2', vote);
                 this.vote = vote.vote;
             }
 
@@ -132,7 +119,7 @@ export class VotingComponent implements OnInit {
                 this.outputVote = 'Yes';
                 break;
             default:
-                console.log('error - invalid vote');
+                break;
         }
     }
 

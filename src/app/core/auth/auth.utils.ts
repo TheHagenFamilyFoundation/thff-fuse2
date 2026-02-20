@@ -78,7 +78,6 @@ export class AuthUtils {
         }
 
         const decodedToken = this._decodeToken(token);
-        console.log('decodedToken', decodedToken);
         return (decodedToken.accessLevel > 1);
 
     }

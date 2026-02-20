@@ -18,17 +18,11 @@ export class SelectedOrganizationComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        // will log the entire data object
-        console.log('this.data', this.data);
-
         this.orgID = this.data.orgID;
 
         this.link = this.orgLink + this.data.orgID;
-
-        console.log('this is the link', this.link);
     }
 
     cancel(): void {
-        console.log('cancel pressed');
     }
 }

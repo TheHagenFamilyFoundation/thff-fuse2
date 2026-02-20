@@ -74,7 +74,6 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         this._navigationService.navigation$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
-                console.log('navigation', navigation);
                 this.navigation = navigation;
             });
 
@@ -86,7 +85,6 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                 this.isScreenSmall = !matchingAliases.includes('md');
             });
 
-        // console.log('expired', this._authService.check());
         this._authService.check().subscribe((authenticated) => {
             this.isLoggedIn = authenticated;
         });
@@ -95,19 +93,11 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             this.isDirector = isADirector;
         });
 
-        console.log('1 - this.isLoggedIn', this.isLoggedIn);
-
         if (this.isLoggedIn) {
-            console.log(
-                'toolbar - currentUser',
-                localStorage.getItem('currentUser')
-            );
-
             if (localStorage.getItem('currentUser')) {
                 this.currentUser = JSON.parse(
                     localStorage.getItem('currentUser')
                 );
-                // console.log('toolbar - ', this.currentUser);
                 this.email = this.currentUser.email;
                 this.accessLevel = this.currentUser.accessLevel;
 
@@ -118,8 +108,6 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
     }
 
     checkLoggedIn(): void {
-        console.log('toolbar - checkLoggedIn');
-
         this._authService.check().subscribe((authenticated) => {
             this.isLoggedIn = authenticated;
         });
@@ -128,14 +116,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             this.isDirector = isADirector;
         });
 
-        console.log('2 - this.isLoggedIn', this.isLoggedIn);
-
         if (this.isLoggedIn) {
-            console.log(
-                'toolbar - checkLoggedIn - currentUser',
-                localStorage.getItem('currentUser')
-            );
-
             if (localStorage.getItem('currentUser')) {
                 this.currentUser = JSON.parse(
                     localStorage.getItem('currentUser')
@@ -169,13 +150,10 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
      * @param name
      */
     toggleNavigation(name: string): void {
-        console.log('toggling navigation');
-        // Get the navigation
         const navigation =
             this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>(
                 name
             );
-        console.log('navigation', navigation);
         if (navigation) {
             // Toggle the opened status
             navigation.toggle();
@@ -184,47 +162,35 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
 
     // check if user is in an organization
     getOrganizations(): void {
-        console.log('modern - get organizations', this.email);
-
         this._getUserService
             .getUserbyID(this.currentUser._id || this.currentUser.id)
             .subscribe((user) => {
-                console.log('user', user);
-
                 if (user) {
                     if (user.organizations.length > 0) {
                         this.organizations = user.organizations;
-
-                        console.log('this.organizations', this.organizations);
 
                         this.inOrganization = true;
 
                         this._inOrgService.changeMessage(true);
                     } else {
-                        console.log('not in any organizations');
-
                         this.inOrganization = false;
 
                         this._inOrgService.changeMessage(false);
                     }
                 } else {
-                    console.log('no user');
                 }
             });
     } // end of getOrganizations
 
     viewOrgs(): void {
-        console.log('go to view orgs page');
         this._router.navigate(['/pages/organizations']);
     }
 
     createOrg(): void {
-        console.log('go to create org page');
         this._router.navigate(['/pages/organization/create']);
     }
 
     routeToDirectorsPage(): void {
-        console.log('go to directors page');
         this._router.navigate(['/pages/director']);
     }
 }

@@ -234,16 +234,8 @@ export class CreateOrganizationComponent implements OnInit {
     //retrieve the user from localStorage
     getUser(): void {
         if (localStorage.getItem('currentUser')) {
-            console.log(
-                'localStorage. currentUser',
-                localStorage.getItem('currentUser')
-            );
-
-            // logged in so return true
             this.user = JSON.parse(localStorage.getItem('currentUser'));
-            console.log('this.user', this.user);
             this.userId = this.user._id;
-            console.log('this.user', this.userId);
             this.userEmail = this.user.email;
         } else {
             // not logged in - redirect to home?
@@ -252,101 +244,66 @@ export class CreateOrganizationComponent implements OnInit {
     } // end of getUserName
 
     descriptionChange(): void {
-        console.log('descriptionChange');
-
         this.showMessage = false;
     }
 
     legalNameChange(): void {
-        console.log('legalNameChange');
-
         this.showMessage = false;
     }
 
     yearFoundedChange(): void {
-        console.log('yearFoundedChange');
-
         this.showMessage = false;
     }
 
     currentOperatingBudgetChange(): void {
-        console.log('currentOperatingBudgetChange');
         this.showMessage = false;
     }
 
     directorChange(): void {
-        console.log('directorChange');
-
         this.showMessage = false;
     }
 
     stateChange(): void {
-        console.log('stateChange');
-
         this.showMessage = false;
     }
 
     cityChange(): void {
-        console.log('cityChange');
-
         this.showMessage = false;
     }
 
     addressChange(): void {
-        console.log('addressChange');
-
         this.showMessage = false;
     }
 
     emailChange(): void {
-        console.log('emailChange');
-
         this.showMessage = false;
     }
 
     contactPersonChange(): void {
-        console.log('contactPersonChange');
-
         this.showMessage = false;
     }
 
     contactPersonTitleChange(): void {
-        console.log('contactPersonTitleChange');
-
         this.showMessage = false;
     }
 
     contactPersonPhoneNumberChange(): void {
-        console.log('contactPersonPhoneNumberChange');
-
         this.showMessage = false;
     }
 
     phoneChange(): void {
-        console.log('phoneChange');
-
         this.showMessage = false;
     }
 
     zipChange(): void {
-        console.log('zipChange');
-
         this.showMessage = false;
     }
 
     websiteChange(): void {
-        console.log('websiteChange');
-
         this.showMessage = false;
     }
 
     defaultValues(): void {
-        console.log('default values');
-
-        // //organization object
-        // this.description = '';
-
-        // //org information object
         this.orgObj = {
             legalName: '',
             yearFounded: 0,
@@ -364,33 +321,10 @@ export class CreateOrganizationComponent implements OnInit {
             website: '',
         };
 
-        /*********** Testing *********/
-        // this.orgObj = {
-        //     legalName: 'Test Organization 61',
-        //     yearFounded: 2023,
-        //     currentOperatingBudget: 1,
-        //     director: 'test',
-        //     phone: '1231233211',
-        //     contactPerson: 'test',
-        //     contactPersonTitle: 'test title',
-        //     contactPersonPhoneNumber: '1231233211',
-        //     email: 'test@mailinator.com',
-        //     address: '123 all street',
-        //     city: 'test',
-        //     state: 'fl',
-        //     zip: 32323,
-        //     website: '',
-        // };
-        //part of testing too
-        // this.description = 'testing description';
-
         this.initGroupedForm();
     }
 
     initGroupedForm(): void {
-        console.log('initializing grouped form');
-        console.log('org obj - ', this.orgObj.legalName);
-
         this.groupedForm = new FormGroup({
             description: new FormControl(this.description),
             legalName: new FormControl(this.orgObj.legalName),
@@ -416,7 +350,6 @@ export class CreateOrganizationComponent implements OnInit {
     }
 
     createOrg(): void {
-        console.log('creating organization');
         this.orgObj = {
             legalName: this.legalName, //changed
             yearFounded: this.yearFounded,
@@ -438,7 +371,6 @@ export class CreateOrganizationComponent implements OnInit {
             orgInfo: this.orgObj,
             description: this.description,
         };
-        console.log('body before create', body);
         this.createOrganization(body);
     }
 
@@ -450,15 +382,12 @@ export class CreateOrganizationComponent implements OnInit {
         // call the service
         this.createOrganizationService.createOrganization(body).subscribe(
             (result) => {
-                console.log('Org Info Created', result);
-                //route to the org page
                 // this.router.navigate(['pages/organization/']);
                 this.router.navigate([
                     `/pages/organization/${result.org.organizationID}`,
                 ]);
             },
             (err) => {
-                console.log(err);
                 this.message = err.error.message;
                 this.showMessage = true;
                 setTimeout(() => {
