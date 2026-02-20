@@ -1,0 +1,7 @@
+:host ::ng-deep .mat-row {
+    transition: background-color 150ms ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}

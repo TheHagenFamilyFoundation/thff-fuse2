@@ -3,10 +3,10 @@
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
             <!-- Back link -->
-            <a [routerLink]="[organizationLink]"
+            <a [routerLink]="[backLink || organizationLink]"
                class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mt-6 -mb-2 cursor-pointer">
                 <mat-icon class="icon-size-4">arrow_back</mat-icon>
-                Back to Organization
+                {{ backLabel || 'Back to Organization' }}
             </a>
             <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
                 <div class="flex flex-auto items-center min-w-0">

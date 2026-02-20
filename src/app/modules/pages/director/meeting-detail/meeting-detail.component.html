@@ -1,0 +1,287 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Header -->
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a routerLink="/pages/director/meeting"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Meetings
+            </a>
+            <div class="flex items-center justify-between" *ngIf="meeting">
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                        {{ meeting.year }} Meeting
+                    </h1>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          [ngClass]="getStatusColor(meeting.status)">
+                        {{ getStatusLabel(meeting.status) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="!loaded" class="flex items-center justify-center py-24">
+        <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="loaded && meeting" class="flex-auto">
+        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+
+            <!-- Budget & Stats Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <fuse-card class="flex flex-col p-5">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Budget</span>
+                    <span class="text-2xl font-bold mt-1">{{ meeting.totalBudget | currency:'USD':'symbol':'1.0-0' }}</span>
+                </fuse-card>
+
+                <fuse-card class="flex flex-col p-5">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Allocated</span>
+                    <span class="text-2xl font-bold mt-1" [ngClass]="{ 'text-red-600': totalAllocated > meeting.totalBudget }">
+                        {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }}
+                    </span>
+                </fuse-card>
+
+                <fuse-card class="flex flex-col p-5">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining</span>
+                    <span class="text-2xl font-bold mt-1"
+                          [ngClass]="{ 'text-red-600': remainingBudget < 0, 'text-green-600': remainingBudget > 0 }">
+                        {{ remainingBudget | currency:'USD':'symbol':'1.0-0' }}
+                    </span>
+                </fuse-card>
+
+                <fuse-card class="flex flex-col p-5">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Proposals</span>
+                    <span class="text-2xl font-bold mt-1">{{ meeting.allocations?.length || 0 }}</span>
+                </fuse-card>
+            </div>
+
+            <!-- Budget Progress Bar -->
+            <div class="mb-6" *ngIf="meeting.totalBudget > 0">
+                <div class="flex justify-between text-sm text-gray-500 mb-1">
+                    <span>Budget Usage</span>
+                    <span>{{ (totalAllocated / meeting.totalBudget * 100) | number:'1.0-1' }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div class="h-3 rounded-full transition-all duration-300"
+                         [ngClass]="totalAllocated > meeting.totalBudget ? 'bg-red-500' : 'bg-thff-teal'"
+                         [ngStyle]="{ 'width': (totalAllocated / meeting.totalBudget * 100 | number:'1.0-1') + '%' }">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setup Mode: Edit Budget (president/admin) -->
+            <div *ngIf="meeting.status === 'setup' && isPresidentOrAdmin" class="mb-6">
+                <fuse-card class="flex flex-col p-6">
+                    <h3 class="text-lg font-semibold m-0 mb-4">Meeting Setup</h3>
+                    <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                        <mat-form-field class="w-full sm:w-48 -mb-5">
+                            <mat-label>Total Budget</mat-label>
+                            <span matPrefix class="pl-2">$&nbsp;</span>
+                            <input matInput type="number" [(ngModel)]="totalBudget">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full sm:flex-1 -mb-5">
+                            <mat-label>Notes</mat-label>
+                            <input matInput [(ngModel)]="meetingNotes" placeholder="Meeting notes...">
+                        </mat-form-field>
+
+                        <div class="flex gap-2">
+                            <button mat-stroked-button (click)="updateBudget()">
+                                Save
+                            </button>
+                            <button mat-flat-button color="primary" (click)="startMeeting()">
+                                <mat-icon class="mr-1">play_arrow</mat-icon>
+                                Start Meeting
+                            </button>
+                        </div>
+                    </div>
+                </fuse-card>
+            </div>
+
+            <!-- Allocations Table (in_progress or completed, or setup for non-admin) -->
+            <div *ngIf="meeting.status !== 'setup' || !isPresidentOrAdmin">
+
+                <!-- Action bar for president/admin during in_progress -->
+                <div *ngIf="meeting.status === 'in_progress' && isPresidentOrAdmin"
+                     class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                    <div class="flex items-center gap-3">
+                        <mat-form-field class="w-48 -mb-5">
+                            <mat-label>Total Budget</mat-label>
+                            <span matPrefix class="pl-2">$&nbsp;</span>
+                            <input matInput type="number" [(ngModel)]="totalBudget" (blur)="updateBudget()">
+                        </mat-form-field>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button mat-stroked-button
+                                [disabled]="!hasUnsavedChanges"
+                                (click)="saveAllocations()">
+                            <mat-icon class="mr-1">save</mat-icon>
+                            Save Allocations
+                        </button>
+                        <button mat-flat-button color="primary" (click)="completeMeeting()">
+                            <mat-icon class="mr-1">check_circle</mat-icon>
+                            Finalize Meeting
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <fuse-card class="flex flex-col w-full overflow-hidden">
+                    <mat-table [dataSource]="meeting.allocations" class="w-full">
+
+                        <ng-container matColumnDef="organization">
+                            <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">
+                                Organization
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="pl-6">
+                                {{ row.organization?.name }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="projectTitle">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                Project Title
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="font-medium">
+                                <a class="text-primary hover:underline cursor-pointer"
+                                   (click)="goToProposal(row.proposal?.proposalID)">
+                                    {{ row.proposal?.projectTitle }}
+                                </a>
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="amountRequested">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                Requested
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                {{ row.amountRequested | currency:'USD':'symbol':'1.0-0' }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="score">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                Score
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                {{ row.proposal?.score || 0 }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="amountGranted">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold pr-6">
+                                Amount Granted
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="pr-6">
+                                <div *ngIf="isPresidentOrAdmin && meeting.status === 'in_progress'"
+                                     class="inline-flex items-center border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800">
+                                    <span class="text-gray-400 text-sm mr-1">$</span>
+                                    <input type="number"
+                                           class="w-20 bg-transparent outline-none text-sm font-medium"
+                                           [value]="getAllocationValue(row)"
+                                           (input)="onAllocationChange(row._id, $event.target.value * 1)">
+                                </div>
+                                <span *ngIf="!isPresidentOrAdmin || meeting.status !== 'in_progress'"
+                                      class="font-semibold"
+                                      [ngClass]="{ 'text-green-600': row.amountGranted > 0 }">
+                                    {{ (row.amountGranted || 0) | currency:'USD':'symbol':'1.0-0' }}
+                                </span>
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+                    </mat-table>
+
+                    <div *ngIf="!meeting.allocations?.length" class="flex items-center justify-center py-12 text-gray-400">
+                        No proposals found for this year.
+                    </div>
+                </fuse-card>
+            </div>
+
+            <!-- Completed Meeting Summary -->
+            <div *ngIf="meeting.status === 'completed' && summary" class="mt-8">
+                <h2 class="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Meeting Summary</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <fuse-card class="flex flex-col p-5">
+                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Given</span>
+                        <span class="text-2xl font-bold text-green-600 mt-1">
+                            {{ summary.totals.allocated | currency:'USD':'symbol':'1.0-0' }}
+                        </span>
+                    </fuse-card>
+                    <fuse-card class="flex flex-col p-5">
+                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Organizations Funded</span>
+                        <span class="text-2xl font-bold mt-1">{{ summary.totals.fundedCount }}</span>
+                    </fuse-card>
+                    <fuse-card class="flex flex-col p-5">
+                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Budget Remaining</span>
+                        <span class="text-2xl font-bold mt-1">
+                            {{ summary.totals.remaining | currency:'USD':'symbol':'1.0-0' }}
+                        </span>
+                    </fuse-card>
+                </div>
+
+                <div *ngIf="summary.funded.length > 0" class="mb-6">
+                    <h3 class="text-md font-semibold mb-3">Funded Proposals</h3>
+                    <fuse-card class="overflow-hidden">
+                        <div *ngFor="let item of summary.funded"
+                             class="flex items-center justify-between px-6 py-4 border-b last:border-b-0">
+                            <div>
+                                <a class="font-medium text-primary hover:underline cursor-pointer"
+                                   (click)="goToProposal(item.proposal?.proposalID)">
+                                    {{ item.proposal?.projectTitle }}
+                                </a>
+                                <div class="text-sm text-gray-500">{{ item.organization?.name }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">
+                                    {{ item.amountGranted | currency:'USD':'symbol':'1.0-0' }}
+                                </div>
+                                <div class="text-xs text-gray-400">
+                                    of {{ item.amountRequested | currency:'USD':'symbol':'1.0-0' }} requested
+                                </div>
+                            </div>
+                        </div>
+                    </fuse-card>
+                </div>
+
+                <div *ngIf="summary.unfunded.length > 0">
+                    <h3 class="text-md font-semibold mb-3 text-gray-500">Not Funded</h3>
+                    <fuse-card class="overflow-hidden">
+                        <div *ngFor="let item of summary.unfunded"
+                             class="flex items-center justify-between px-6 py-4 border-b last:border-b-0 opacity-60">
+                            <div>
+                                <a class="font-medium text-primary hover:underline cursor-pointer"
+                                   (click)="goToProposal(item.proposal?.proposalID)">
+                                    {{ item.proposal?.projectTitle }}
+                                </a>
+                                <div class="text-sm text-gray-500">{{ item.organization?.name }}</div>
+                            </div>
+                            <div class="text-right text-sm text-gray-400">
+                                {{ item.amountRequested | currency:'USD':'symbol':'1.0-0' }} requested
+                            </div>
+                        </div>
+                    </fuse-card>
+                </div>
+
+                <div class="mt-6 text-sm text-gray-400">
+                    <p *ngIf="meeting.startedBy">
+                        Started by {{ meeting.startedBy.firstName }} {{ meeting.startedBy.lastName }}
+                    </p>
+                    <p *ngIf="meeting.completedBy">
+                        Finalized by {{ meeting.completedBy.firstName }} {{ meeting.completedBy.lastName }}
+                        on {{ meeting.completedAt | date:'MMM d, yyyy \'at\' h:mm a' }}
+                    </p>
+                    <p *ngIf="meeting.notes">Notes: {{ meeting.notes }}</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
