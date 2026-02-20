@@ -26,4 +26,16 @@ export class ReferralCodeService {
     validateReferralCode(code: string): Observable<any> {
         return this.http.get(`${this.apiUrl}/referral-code/validate/${code}`);
     }
+
+    getMySponsor(): Observable<any> {
+        return this.http.get(`${this.apiUrl}/referral-code/my-sponsor`);
+    }
+
+    setMyReferralCode(code: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/referral-code/my-sponsor`, { code });
+    }
+
+    clearMyReferralCode(): Observable<any> {
+        return this.http.put(`${this.apiUrl}/referral-code/my-sponsor`, {});
+    }
 }

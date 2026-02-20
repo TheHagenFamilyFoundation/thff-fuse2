@@ -68,7 +68,7 @@ export class ReferralLinksComponent implements OnInit {
     }
 
     getLink(code: string): string {
-        return `${this.feUrl}/sign-up?ref=${code}`;
+        return `${this.feUrl}/referral?ref=${code}`;
     }
 
     copyLink(code: string): void {

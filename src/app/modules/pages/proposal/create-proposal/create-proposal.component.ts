@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -32,6 +33,13 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     draftSaved = false;
     hasDraft = false;
 
+    // Referral/sponsor state
+    sponsorName: string = '';
+    sponsorCode: string = '';
+    manualReferralCode: string = '';
+    referralValidating: boolean = false;
+    referralError: string = '';
+
     user: any;
     userId: any;
     userEmail: string;
@@ -44,6 +52,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
 
     constructor(
         private proposalService: ProposalService,
+        private referralCodeService: ReferralCodeService,
         private router: Router,
         private route: ActivatedRoute
     ) {
@@ -54,6 +63,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         window.scrollTo(0, 0);
 
         this.getUser();
+        this.loadSponsorInfo();
 
         this.route.queryParams.subscribe((query) => {
             this.org = query.org;
@@ -168,7 +178,52 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         this.router.navigate(['/welcome']);
     }
 
+    loadSponsorInfo(): void {
+        this.referralCodeService.getMySponsor().subscribe({
+            next: (result) => {
+                if (result.hasSponsor) {
+                    this.sponsorName = result.sponsor.name;
+                    this.sponsorCode = result.code;
+                }
+            },
+            error: () => {}
+        });
+    }
+
+    applyReferralCode(): void {
+        const code = this.manualReferralCode.trim();
+        if (!code) { return; }
+
+        this.referralValidating = true;
+        this.referralError = '';
+
+        this.referralCodeService.setMyReferralCode(code).subscribe({
+            next: (result) => {
+                this.referralValidating = false;
+                this.sponsorName = result.sponsor.name;
+                this.sponsorCode = result.code;
+                this.manualReferralCode = '';
+            },
+            error: (err) => {
+                this.referralValidating = false;
+                this.referralError = err.error?.message || 'Invalid referral code';
+            }
+        });
+    }
+
+    clearSponsor(): void {
+        this.referralCodeService.clearMyReferralCode().subscribe();
+        this.sponsorName = '';
+        this.sponsorCode = '';
+    }
+
     private getActiveReferralCode(): string | undefined {
+        // If a sponsor is set (from account or manual entry), use that code
+        if (this.sponsorCode) {
+            return this.sponsorCode;
+        }
+
+        // Fall back to localStorage for backwards compatibility
         const stored = localStorage.getItem('referralCode');
         if (!stored) { return undefined; }
 
@@ -177,11 +232,9 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
             if (refData.year === new Date().getFullYear()) {
                 return refData.code;
             }
-            // Expired (different year), clean up
             localStorage.removeItem('referralCode');
             return undefined;
         } catch {
-            // Legacy format (plain string) — use it but don't persist
             localStorage.removeItem('referralCode');
             return stored;
         }
