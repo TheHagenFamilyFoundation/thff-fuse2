@@ -31,9 +31,11 @@ import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 import { ClosePortalDialogComponent } from './submission-years/close-portal-dialog.component';
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
+import { MeetingComponent } from './meeting/meeting.component';
+import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, MeetingComponent, MeetingDetailComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
