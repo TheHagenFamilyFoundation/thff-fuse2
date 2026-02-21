@@ -44,7 +44,15 @@ export class MeetingService {
         return this.http.put(`${this.apiUrl}/meeting/${id}/complete`, {});
     }
 
+    reopenMeeting(id: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/meeting/${id}/reopen`, {});
+    }
+
     archiveMeeting(id: string, archived: boolean): Observable<any> {
         return this.http.put(`${this.apiUrl}/meeting/${id}/archive`, { archived });
+    }
+
+    removeAllocation(meetingId: string, allocationId: string): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/meeting/${meetingId}/allocation/${allocationId}`);
     }
 }

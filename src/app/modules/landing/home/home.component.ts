@@ -25,7 +25,6 @@ export class LandingHomeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('check if user is logged in ');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('currentUser');
         this.getLatestSubmissionYear();
@@ -36,9 +35,6 @@ export class LandingHomeComponent implements OnInit {
         this._submissionYearsService.getLatestSubmissionYear()
             .subscribe({
                 next: (year) => {
-                    console.log('getLatestSubmissionYear - received year object:', year);
-                    console.log('getLatestSubmissionYear - year.year:', year?.year);
-                    console.log('getLatestSubmissionYear - year.active:', year?.active);
                     this.latestSubmissionYear = year;
                     if (year) {
                         this.portalOpen = year.active;
@@ -46,7 +42,6 @@ export class LandingHomeComponent implements OnInit {
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.log('getLatestSubmissionYear - err', err);
                     this.loading = false;
                     // Don't let errors propagate to avoid triggering reload loops
                     // Set default values if API call fails

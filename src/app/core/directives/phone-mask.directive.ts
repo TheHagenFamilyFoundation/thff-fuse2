@@ -6,7 +6,6 @@ import { NgControl } from '@angular/forms';
 })
 export class PhoneMaskDirective {
   constructor(public ngControl: NgControl) {
-    console.log('inside phone mask directive constructor'); // can delete
   }
 
   @HostListener('ngModelChange', ['$event'])

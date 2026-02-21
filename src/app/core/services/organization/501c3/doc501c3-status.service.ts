@@ -27,7 +27,6 @@ export class Doc501c3StatusService {
         status = 'Needs Work'
         break;
       default:
-        console.log('default')
         break;
     }
 

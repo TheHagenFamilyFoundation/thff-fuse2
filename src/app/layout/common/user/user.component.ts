@@ -51,8 +51,6 @@ export class UserComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        console.log('ngOnInit - getting user');
-
         // this.currentUserSubject = new BehaviorSubject<User>(
         //     JSON.parse(localStorage.getItem('currentUser'))
         // );
@@ -62,8 +60,6 @@ export class UserComponent implements OnInit, OnDestroy {
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user: User) => {
-                console.log('user-component - user', user);
-
                 this.user = user;
 
                 // Mark for check

@@ -73,17 +73,14 @@ export class UserOrganizationComponent implements OnInit {
             this.inOrgCheck = message;
         });
 
-        console.log('user-organization - setting', this.user);
         this.email = this.user.email;
 
         if (!this.user) {
-            console.log('user-org - kick out user');
             this.router.navigate(['/pages/auth/logout']);
         }
 
         this.dataSource = new MatTableDataSource([]);
 
-        // console.log('user-organization - check organizations 2');
         this.checkOrganizations();
     }
 
@@ -104,95 +101,56 @@ export class UserOrganizationComponent implements OnInit {
     }
 
     getUser(): void {
-        console.log('user LOI - getUser');
-
-        console.log(
-            'user LOI - currentUser',
-            JSON.parse(localStorage.getItem('currentUser')).user
-        );
-
         this.getUserService.getUserbyID(this.user._id).subscribe(() => {
             // pass in the user to the check functions
             this.checkOrganizations();
         },
             (err) => {
-                console.log('getUserbyID - err', err);
             });
     }
 
     // checks if user is in any organizations
     checkOrganizations(): void {
-        console.log('user-organization - check organizations', this.user._id);
-
-        // will return the organizations
         this.getUserService.getUserbyID(this.user._id).subscribe((user) => {
-            console.log('user-organization - checkOrganizations - user', user);
-
             const organization = user?.organizations;
 
             if (organization && organization.length > 0) {
                 this.inOrganization = true;
 
-                console.log(
-                    'user-organizations - organization list ',
-                    organization
-                );
-
                 this.dataSource = new MatTableDataSource(organization);
-
-                console.log(
-                    'debug - user-organizations - organization list ',
-                    this.dataSource
-                );
 
                 this.dataSource.paginator = this.paginator;
                 this.dataSource.sort = this.sort;
-
-                console.log(
-                    'after dataSource paginator - user-organizations - organization list ',
-                    this.dataSource
-                );
 
                 this.inOrg.changeMessage(true);
 
                 this.loaded = true;
             } else {
-                // no organizations
-                console.log('not in any organizations');
-
                 this.inOrganization = false;
 
                 this.loaded = true;
             }
         },
             (err) => {
-                console.log('getUserbyID - err', err);
             });
     } // end of checkOrganization
 
     createOrganization(): void {
-        console.log('create organization');
         this.router.navigate(['/pages/organization/create']);
     }
 
     // this might be kept
     openSelectedOrgDialog(org): void {
-        console.log('org.organizationID', org.organizationID);
-
         const dialogRef = this.dialog.open(SelectedOrganizationComponent, {
             width: '400px',
             data: { name: org.name, orgID: org.organizationID },
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-            console.log('The dialog was closed'); // debug
-            console.log('result', result); // debug
         });
     }
 
     onRowClicked(row): void {
-        console.log('Row clicked: ', row);
-
         this.openSelectedOrgDialog(row); // pass in the org from row object
     }
 

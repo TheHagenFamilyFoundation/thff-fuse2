@@ -40,22 +40,14 @@ export class ProposalSummaryComponent implements OnInit {
     confirmRemoveSponsor(): void {
         this.sponsorQuestion = false;
 
-        console.log('confirming remove sponsor');
-
-        //blank string for user
         this._proposalService.sponsorProposal(this.prop._id, '', false)
             .subscribe((proposal) => {
-                console.log('after removing sponsor proposal', proposal);
-
-                //send to backend
                 this.refreshProp.emit(true);
 
                 this.hasSponsor = false;
 
             },
-                (err) => {
-                    console.log('sponsorProposal - err', err);
-                });
+                () => {});
 
     }
 
@@ -64,16 +56,11 @@ export class ProposalSummaryComponent implements OnInit {
 
         this._proposalService.sponsorProposal(this.prop._id, this.currentUser._id, true)
             .subscribe((proposal) => {
-                console.log('after sponsoring proposal', proposal);
-
-                //send to backend
                 this.refreshProp.emit(true);
 
                 this.hasSponsor = true;
             },
-                (err) => {
-                    console.log('sponsorProposal - err', err);
-                });
+                () => {});
 
     }
 

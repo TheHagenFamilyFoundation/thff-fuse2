@@ -42,7 +42,6 @@ export class AuthService {
     //  * Setter & getter for current user
     //  */
     // set currentUser(currentUser: any) {
-    //     console.log('storing currentUser', currentUser);
     //     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     // }
 
@@ -114,9 +113,6 @@ export class AuthService {
             return throwError('User is already logged in.');
         }
 
-        console.log('creds', credentials);
-        console.log('this.apiUrl', this.apiUrl);
-
         return this._httpClient
             .post(`${this.apiUrl}/auth/login`, credentials)
             .pipe(
@@ -179,8 +175,6 @@ export class AuthService {
      * Sign out
      */
     signOut(): Observable<any> {
-        console.log('signing out');
-
         // Remove auth data from local storage
         localStorage.removeItem('accessToken');
         localStorage.removeItem('currentUser');

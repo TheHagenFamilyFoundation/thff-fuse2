@@ -23,7 +23,7 @@ export class OrgProposalsComponent implements AfterViewInit {
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild('filterInput', { static: true }) input: ElementRef;
 
-    displayedColumns = ['projectTitle', 'amountRequested', 'createdOn', 'action'];
+    displayedColumns = ['projectTitle', 'amountRequested', 'sponsor', 'createdOn', 'action'];
 
     limit: number;
 
@@ -78,19 +78,14 @@ export class OrgProposalsComponent implements AfterViewInit {
 
         //TODO: use the store
         if (!localStorage.getItem('currentUser')) {
-            console.log('user-org - kick out user');
             this._router.navigate(['/pages/auth/logout']);
         }
-        console.log('this.year', this.year);
         this.getOrgProposalCount(this.year, this.org._id); // no need for parameter
         this.getSubmissionYears();
         this.getCurrentSubmissionYear();
 
         // If the user changes the sort order, reset back to the first page.
         this.sort.sortChange.subscribe(() => {
-            console.log('this.sort', this.sort);
-            console.log('this.sort.active', this.sort.active);
-            console.log('this.sort.direction', this.sort.direction);
             this.skip = 0; //reset;
             this.sortDirection = this.sort.direction;
             this.sortColumn = this.sort.active;
@@ -115,8 +110,6 @@ export class OrgProposalsComponent implements AfterViewInit {
                         return [];
                     }
 
-                    console.log('data', data);
-
                     // Only refresh the result length if there is new data. In case of rate
                     // limit errors, we do not want to reset the paginator to zero, as that
                     // would prevent users from re-triggering requests.
@@ -134,7 +127,6 @@ export class OrgProposalsComponent implements AfterViewInit {
                 debounceTime(500),
                 distinctUntilChanged(),
                 tap((event: KeyboardEvent) => {
-                    console.log(event);
                     this.filterInputString = (event.target as HTMLInputElement).value;
                     this.proposalService.getOrgProps(this.year, this.org._id, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
                         .subscribe((data) => { this.data = data; });
@@ -148,10 +140,8 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     handlePageEvent(e: PageEvent): void {
         this.pageEvent = e;
-        console.log('this.pageEvent', this.pageEvent);
 
         if (this.pageEvent.pageSize !== this.limit) {
-            console.log('page size is different');
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
             this.paginator.pageIndex = 0;
@@ -172,14 +162,10 @@ export class OrgProposalsComponent implements AfterViewInit {
         this.submissionYearsService.getAllSubmissionYears(this.year)
             .subscribe(
                 (years) => {
-                    console.log('years**', years);
                     this.years = years;
                     this.selectedYear = years[0]._id; //grab the first one, which should be most recent year
-                    console.log('selectedYear', this.selectedYear);
                 },
-                (err) => {
-                    console.log('getAllSubmissionYears - err', err);
-                });
+                () => {});
     }
 
     getCurrentSubmissionYear(): void {
@@ -188,14 +174,11 @@ export class OrgProposalsComponent implements AfterViewInit {
             .subscribe(
                 (year) => {
                     this.currentYear = year;
-                    console.log('getCurrentSubmissionyear - currentYear', this.currentYear);
                     this.portalOpen = this.currentYear.active;
 
                     this.portalMessage = `${this.currentYear.year} Grant Cycle is Closed`;
                 },
-                (err) => {
-                    console.log('getCurrentSubmissionyear - err', err);
-
+                () => {
                     this.portalMessage = `${this.year} Grant Cycle Is Opening Soon`;
                 });
 
@@ -204,9 +187,6 @@ export class OrgProposalsComponent implements AfterViewInit {
     // check if org has proposals, phase this out
     //TODO: phase out
     checkProposals(): void {
-        console.log('proposals**', this.org.proposals);
-        console.log('this.org._id', this.org._id);
-
         this.sort.start = 'desc';
 
         //filter out current year proposals
@@ -217,11 +197,9 @@ export class OrgProposalsComponent implements AfterViewInit {
     }
 
     createProposal(): void {
-        console.log('create proposal');
         this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id, orgID: this.org.organizationID } });
     }
     goToProposal(proposalID: string): void {
-        console.log('proposalID', proposalID);
         this._router.navigate(['/pages/proposal/', proposalID]);
     }
 
@@ -229,17 +207,11 @@ export class OrgProposalsComponent implements AfterViewInit {
         this.proposalService.getOrgProposalCount(year, this.org._id, countFilter)
             .subscribe(
                 (count) => { this.propCount = count; },
-                (err) => {
-                    console.log('getOrgProposalCount - err', err);
-                });
+                () => {});
 
     }
 
     yearChanged(e: any): void {
-        console.log('year changed', e);
-        console.log('year id', e.value);
-        console.log('this.years', this.years);
-        console.log('year is ', this.years.find(y => y._id === e.value).year);
         this.selectedYear = this.years.find(y => y._id === e.value)._id;
 
         this.year = this.years.find(y => y._id === e.value).year;
@@ -250,9 +222,7 @@ export class OrgProposalsComponent implements AfterViewInit {
             .subscribe((data) => {
                 this.data = data;
             },
-                (err) => {
-                    console.log('getOrgProps - err', err);
-                });
+                () => {});
 
     }
 
