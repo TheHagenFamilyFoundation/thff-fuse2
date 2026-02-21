@@ -40,20 +40,12 @@ export class AuthConfirmationComponent implements OnInit {
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
             this.confirmCode = params.code; // (+) converts string 'id' to a number
-
-            //TODO: delete
-            console.log('this.confirmCode');
-            console.log(this.confirmCode);
         });
 
         this.checkConfirmCode();
     }
 
     checkConfirmCode(): void {
-        console.log('checking confirm code');
-        console.log('this.confirmCode');
-        console.log(this.confirmCode);
-
         // Send the request to the server
         this._authService
             .confirmUser(this.confirmCode)
@@ -74,8 +66,6 @@ export class AuthConfirmationComponent implements OnInit {
             )
             .subscribe(
                 (response) => {
-                    console.log(response);
-
                     // Set the alert
                     this.alert = {
                         type: 'success',
@@ -83,8 +73,6 @@ export class AuthConfirmationComponent implements OnInit {
                     };
                 },
                 (response) => {
-                    console.log(response);
-
                     // Set the alert
                     this.alert = {
                         type: 'error',

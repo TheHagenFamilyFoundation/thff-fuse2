@@ -45,6 +45,20 @@
                 </mat-cell>
             </ng-container>
 
+            <!-- Sponsor Column -->
+            <ng-container matColumnDef="sponsor">
+                <mat-header-cell *matHeaderCellDef class="font-semibold">
+                    Sponsor
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" class="text-gray-600 dark:text-gray-300">
+                    <span *ngIf="row.sponsor" class="inline-flex items-center gap-1.5">
+                        <mat-icon class="icon-size-4 text-primary">person</mat-icon>
+                        {{ row.sponsor.firstName || row.sponsor.email || 'Sponsor' }}
+                    </span>
+                    <span *ngIf="!row.sponsor" class="text-gray-400">—</span>
+                </mat-cell>
+            </ng-container>
+
             <!-- Created On Column -->
             <ng-container matColumnDef="createdOn">
                 <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">

@@ -29,7 +29,7 @@ export class MeetingComponent implements OnInit {
     // Archive filter: '' = active, 'only' = archived, 'true' = all
     archivedFilter: string = '';
 
-    displayedColumns = ['year', 'created', 'startedBy', 'budget', 'status', 'action'];
+    displayedColumns = ['year', 'created', 'startedBy', 'budget', 'allocated', 'status', 'action'];
 
     constructor(
         private meetingService: MeetingService,
@@ -120,6 +120,14 @@ export class MeetingComponent implements OnInit {
 
     goToMeeting(id: string): void {
         this.router.navigate(['/pages/director/meeting', id]);
+    }
+
+    getUserName(user: any): string {
+        if (!user) return '';
+        if (user.firstName || user.lastName) {
+            return [user.firstName, user.lastName].filter(Boolean).join(' ');
+        }
+        return user.email || '';
     }
 
     getStatusLabel(status: string): string {

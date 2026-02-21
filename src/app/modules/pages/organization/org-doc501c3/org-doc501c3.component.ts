@@ -38,13 +38,10 @@ export class OrgDoc501c3Component implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        console.log('org-doc501c3 org-', this.org);
-
         this.orgID = this.org.organizationID;
         this.organizationID = this.org.id;
 
         if (this.org.doc501c3) {
-            console.log('has 501c3', this.org.doc501c3);
             this.hasUpload501c3 = true;
 
             this.doc501c3 = this.org.doc501c3;
@@ -59,11 +56,7 @@ export class OrgDoc501c3Component implements OnInit {
     }
 
     setStatus(s: number): void {
-        console.log('setStatus', s);
-
         this.outputStatus = this.configureStatus(s);
-
-        console.log('outputStatus', this.outputStatus);
 
         if (s === 3) {
             this.rejected501c3 = true;
@@ -74,8 +67,6 @@ export class OrgDoc501c3Component implements OnInit {
 
     // takes in a status s that is a number
     configureStatus(s: number): string {
-        console.log('configureStatus', s);
-
         return this.doc501c3StatusService.getStatus(s);
     }
 

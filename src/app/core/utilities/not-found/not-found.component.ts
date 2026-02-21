@@ -16,9 +16,6 @@ export class NotFoundComponent implements OnInit {
             // TODO: fix this hack?
             // this._router.navigate(['/']);
             // this._location.back();
-            // console.log('this._location', this._location.path);
-            // this._location.;
-            // this._router.navigate(['/']);
             window.location.reload();
         }, 2000); //2s
     }

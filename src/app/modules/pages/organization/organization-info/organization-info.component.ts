@@ -374,9 +374,6 @@ export class OrganizationInfoComponent implements OnInit {
     } // end of constructor
 
     defaultValues(): void {
-        console.log('defaulting values');
-
-        //main
         this.legalName = '';
         this.yearFounded = 0;
         this.currentOperatingBudget = 0;
@@ -397,39 +394,23 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('this.org', this.org);
-
-        console.log('this.org.organizationID', this.org.organizationID);
         this.orgID = this.org._id;
 
         this.getOrganizationInfo();
     }
 
     getOrganizationInfo(): void {
-        console.log('getting Organization Info');
-
         this.getOrganizationInfoService
             .getOrgInfobyOrgID(this.orgID)
             .subscribe((orgInfo) => {
                 if (orgInfo) {
-                    console.log('orgInfo', orgInfo);
                     this.orgInfo = orgInfo;
-                    console.log('this.orgInfo._id', this.orgInfo._id);
 
                     this.setFields();
                 } else {
-                    // default values
-                    //create one
-                    console.log('no orgInfo');
                     this.setFields();
                     this.orgInfo = this.orgObj;
 
-                    //create orgInfo
-                    console.log('creating org Info - body:', this.orgInfo);
-                    console.log(
-                        'org object to pass in as organization',
-                        this.org
-                    );
                     this.orgInfo.organization = this.org._id;
                     this.createOrganizationInfo(this.orgInfo);
                 }
@@ -442,37 +423,23 @@ export class OrganizationInfoComponent implements OnInit {
             .createOrganizationInfo(body)
             .subscribe(
                 (result) => {
-                    console.log('Org Info Created', result.result);
                     this.orgInfo = result.result;
-
-                    console.log('new this.orgInfo._id', this.orgInfo._id);
                 },
-                (err) => {
-                    console.log(err);
-                }
+                () => {}
             );
     }
 
     deleteOrganizationInfo(): void {
-        console.log('getting Organization Info');
-
         this.deleteOrganizationInfoService
             .deleteOrgInfobyOrgInfoID(this.orgInfo._id)
             .subscribe((result) => {
-                console.log('result', result);
-
                 return result;
             });
     }
 
     setFields(): void {
-        console.log('setting fields');
-
         if (this.orgInfo) {
-            console.log('yes');
-
             if (this.orgInfo.legalName) {
-                console.log('this.orgInfo.legalName', this.orgInfo.legalName);
                 this.legalName = this.orgInfo.legalName;
             }
 
@@ -551,8 +518,6 @@ export class OrganizationInfoComponent implements OnInit {
                 website: this.website,
             };
         } else {
-            console.log('default values');
-
             this.orgObj = {
                 legalName: '',
                 yearFounded: 0,
@@ -576,8 +541,6 @@ export class OrganizationInfoComponent implements OnInit {
 
     //when toggling the full form
     resetFormValues(): void {
-        console.log('reseting form values');
-
         this.formOrganization.setValue({
             legalName: this.legalName,
             yearFounded: this.yearFounded,
@@ -606,8 +569,6 @@ export class OrganizationInfoComponent implements OnInit {
 
     //maybe old
     edit(): void {
-        console.log('edit pressed');
-
         this.formOrganization.setValue({
             legalName: this.legalName,
             yearFounded: this.yearFounded,
@@ -635,9 +596,6 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     save(): void {
-        console.log('save pressed');
-        // the first time is create - the second time is a delete and create
-
         this.editing = false;
 
         const body = {
@@ -658,14 +616,10 @@ export class OrganizationInfoComponent implements OnInit {
             organization: this.orgID,
         };
 
-        console.log('body', body);
-
         if (this.orgInfo) {
             this.deleteOrganizationInfoService
                 .deleteOrgInfobyOrgInfoID(this.orgInfo._id)
                 .subscribe((result) => {
-                    console.log('result', result);
-
                     this.createOrganizationInfo(body);
                 });
         } else {
@@ -681,95 +635,65 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     legalNameChange(): void {
-        console.log('legalNameChange');
-
         this.showMessage = false;
     }
 
     yearFoundedChange(): void {
-        console.log('yearFoundedChange');
-
         this.showMessage = false;
     }
 
     currentOperatingBudgetChange(): void {
-        console.log('currentOperatingBudgetChange');
         this.showMessage = false;
     }
 
     directorChange(): void {
-        console.log('directorChange');
-
         this.showMessage = false;
     }
 
     stateChange(): void {
-        console.log('stateChange');
-
         this.showMessage = false;
     }
 
     cityChange(): void {
-        console.log('cityChange');
-
         this.showMessage = false;
     }
 
     addressChange(): void {
-        console.log('addressChange');
-
         this.showMessage = false;
     }
 
     emailChange(): void {
-        console.log('emailChange');
-
         this.showMessage = false;
     }
 
     contactPersonChange(): void {
-        console.log('contactPersonChange');
-
         this.showMessage = false;
     }
 
     contactPersonTitleChange(): void {
-        console.log('contactPersonTitleChange');
-
         this.showMessage = false;
     }
 
     contactPersonPhoneNumberChange(): void {
-        console.log('contactPersonPhoneNumberChange');
-
         this.showMessage = false;
     }
 
     phoneChange(): void {
-        console.log('phoneChange');
-
         this.showMessage = false;
     }
 
     zipChange(): void {
-        console.log('zipChange');
-
         this.showMessage = false;
     }
 
     websiteChange(): void {
-        console.log('websiteChange');
-
         this.showMessage = false;
     }
 
     receiveChildData(data): void {
-        console.log(data);
     }
 
     editLegalName(): void {
-        console.log('editLegalName - editing legal name');
-
         this.editingLegalName = true;
 
         // //check for change
@@ -779,9 +703,6 @@ export class OrganizationInfoComponent implements OnInit {
     //new stuff
 
     initGroupedForm(): void {
-        console.log('initializing grouped form');
-        console.log('org obj - ', this.orgObj.legalName);
-
         this.groupedForm = new FormGroup({
             legalName: new FormControl(this.orgObj.legalName),
             yearFounded: new FormControl(this.orgObj.yearFounded),
@@ -808,10 +729,6 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     initFormControls(): void {
-        console.log('initializing form controls');
-        console.log('this.legalName', this.legalName);
-
-        // this.inputControl = new FormControl(this.identity.country);
         // this.nameControl = new FormControl(this.identity.name);
         this.legalNameControl = new FormControl(this.legalName);
         this.yearFoundedControl = new FormControl(this.yearFounded);
@@ -838,14 +755,7 @@ export class OrganizationInfoComponent implements OnInit {
     //sets the fields to the updated value
     //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
-        console.log('prop', prop);
-        console.log('control', control);
-        console.log('org info - updateSingleField', this[control].value);
-
         if (this[control].value === '') {
-            console.log('blank value');
-            //reset the value
-            console.log('old value', this.orgObj[prop]);
             this[control].value = this.orgObj[prop];
 
             this.checkInvalidProp(prop, true);
@@ -866,9 +776,6 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     checkInvalidProp(prop: string, flag: boolean): void {
-        // console.log('checkInvalidProp - prop',prop);
-        // console.log('checkInvalidProp - flag',flag);
-
         switch (prop) {
             case 'legalName': {
                 this.invalidInputLegalName = flag;
@@ -931,51 +838,29 @@ export class OrganizationInfoComponent implements OnInit {
 
     //takes in the field that changed
     saveSingleField(change: any): void {
-        console.log('save single field');
-
         const body = change;
-
-        console.log('saveSingleField - body', body);
         this.updateOrganizationInfo(body);
     }
 
     //calls the updateOrganizationService
     updateOrganizationInfo(body: any): void {
-        console.log('updateOrganizationInfo', body);
-
         this.updateOrganizationInfoService
             .updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
             .subscribe(
                 (result) => {
-                    console.log('Org Info updated', result);
                     this.orgInfo = result.info;
-
-                    console.log(
-                        'new this.orgInfo.organizationInfoID',
-                        this.orgInfo.organizationInfoID
-                    );
-
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
                 },
-                (err) => {
-                    console.log(err);
-                }
+                () => {}
             );
     }
 
     cancelSingleField(prop: string, control: any): void {
-        console.log('org info - cancelSingleField', this[control].value);
         (this[control] as AbstractControl).setValue(this[prop]);
     }
 
     updateGroupedEdition(): void {
-        console.log('change - this.legalName', this.legalName);
-
-        // console.log('org info - updateGroupedEdition',this.groupedForm.value);
-        console.log('old - this.orgObj', this.orgObj);
-
-        // this.orgObj = this.groupedForm.value; //out of date
         this.orgObj = {
             legalName: this.legalName, //changed
             yearFounded: this.yearFounded,
@@ -994,8 +879,6 @@ export class OrganizationInfoComponent implements OnInit {
             organization: this.orgID,
         };
 
-        console.log('new - this.orgObj', this.orgObj);
-
         this.updateOrganizationInfoService
             .updateOrganizationInfo(
                 this.orgInfo.organizationInfoID,
@@ -1003,24 +886,15 @@ export class OrganizationInfoComponent implements OnInit {
             )
             .subscribe(
                 (result) => {
-                    console.log('Org Info updated', result);
                     this.orgInfo = result.info;
-
-                    console.log(
-                        'new this.orgInfo.organizationInfoID',
-                        this.orgInfo.organizationInfoID
-                    );
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
                 },
-                (err) => {
-                    console.log(err);
-                }
+                () => {}
             );
     }
 
     cancelGroupedEdition(): void {
-        console.log('org info - cancelGroupedEdition');
         // this.groupedForm.setValue(this.orgObj);
 
         //reset values
@@ -1028,7 +902,6 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     handleModeChange(mode: 'view' | 'edit'): void {
-        console.log('org info - toggle mode change', mode);
         this.mode = mode;
 
         this.resetFormValues();

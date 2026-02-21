@@ -103,7 +103,7 @@
                         <ng-container matColumnDef="startedBy">
                             <mat-header-cell *matHeaderCellDef class="font-semibold">Started By</mat-header-cell>
                             <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
-                                <span *ngIf="row.startedBy">{{ row.startedBy.firstName }} {{ row.startedBy.lastName }}</span>
+                                <span *ngIf="row.startedBy">{{ getUserName(row.startedBy) }}</span>
                                 <span *ngIf="!row.startedBy">&mdash;</span>
                             </mat-cell>
                         </ng-container>
@@ -112,7 +112,25 @@
                         <ng-container matColumnDef="budget">
                             <mat-header-cell *matHeaderCellDef class="font-semibold">Budget</mat-header-cell>
                             <mat-cell *matCellDef="let row" class="font-medium">
-                                {{ row.totalBudget | currency:'USD':'symbol':'1.0-0' }}
+                                <span>{{ row.totalBudget | currency:'USD':'symbol':'1.0-0' }}</span>
+                                <span *ngIf="row.originalBudget && row.originalBudget !== row.totalBudget"
+                                      class="text-xs text-gray-400 ml-1"
+                                      [matTooltip]="'Original budget: ' + (row.originalBudget | currency:'USD':'symbol':'1.0-0')">
+                                    (was {{ row.originalBudget | currency:'USD':'symbol':'1.0-0' }})
+                                </span>
+                            </mat-cell>
+                        </ng-container>
+
+                        <!-- Allocated Column -->
+                        <ng-container matColumnDef="allocated">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">Given</mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="font-medium">
+                                <span *ngIf="row.status === 'completed'" class="text-green-600">
+                                    {{ row.totalAllocated | currency:'USD':'symbol':'1.0-0' }}
+                                </span>
+                                <span *ngIf="row.status !== 'completed'" class="text-gray-300 dark:text-gray-600">
+                                    &mdash;
+                                </span>
                             </mat-cell>
                         </ng-container>
 

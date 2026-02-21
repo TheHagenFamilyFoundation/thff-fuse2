@@ -20,15 +20,9 @@ export class EditableComponent implements OnInit {
   outputText: string = 'Hi ... message from child';
 
   constructor() {
-
-    console.log('editable - constructor');
-
   }
 
   ngOnInit(): void {
-
-    console.log('editable - fieldName value', - this.fieldNameValue);
-
   }
 
   sendDataToParent(): void {

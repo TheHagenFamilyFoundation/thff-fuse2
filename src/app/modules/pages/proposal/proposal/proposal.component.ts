@@ -120,7 +120,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
         fb: FormBuilder
     ) {
         this.route.params.subscribe((params) => {
-            console.log(params);
             this.proposalID = params.id;
         });
 
@@ -189,8 +188,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     defaultValues(): void {
-        console.log('defaulting values');
-
         //main
         this.projectTitle = '';
         this.purpose = '';
@@ -203,8 +200,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log('proposal - proposalID', this.proposalID);
-
         this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
         this._authService.checkDirector().subscribe((isADirector) => {
@@ -228,21 +223,16 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     getProposal(proposalID): void {
-        console.log('check proposals');
-
         // query database for that proposal
 
         this._proposalService
             .getProposalByID(proposalID)
             .subscribe((proposal) => {
                 if (proposal) {
-                    console.log('proposal component - proposal', proposal);
-
                     this.proposal = proposal;
                     this.propID = this.proposal._id; //mongo id
 
                     this.org = this.proposal.organization;
-                    console.log('this.org', this.org);
                     this.organizationLink = '/pages/organization/' + this.org.organizationID;
 
                     if (!this.backLink) {
@@ -258,27 +248,19 @@ export class ProposalComponent implements OnInit, OnDestroy {
                     this._router.navigate(['/welcome']);
                 }
             },
-                (err) => {
-                    console.log('getProposalByID - err', err);
-                });
+                () => {});
     }
 
     refreshProp(): void {
-        console.log('refresh proposal');
         this.getProposal(this.proposalID); //fetch the proposal again
     }
 
     getOrganization(orgID): void {
-        console.log('check organizations', orgID);
-
         // query database for that organization
 
         this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
-            console.log('proposal organization component - org', org);
-
             this.org = org;
             this.organizationID = this.org._id;
-            console.log('this.organizationID', this.organizationID);
 
             //checking if director and in org
             //check if in org - this sets inOrg
@@ -287,17 +269,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
             this.checkIsDirectorAndInOrg();
 
         },
-            (err) => {
-                console.log('getOrgbyID - err', err);
-            });
+            () => {});
     }
 
     checkIsDirectorAndInOrg(): void {
-        console.log('checking if director and in organization');
-
-        console.log('isDirector', this.isDirector);
-        console.log('inOrg', this.inOrg);
-
         if (this.isDirector && !this.inOrg) {
             this.viewing = 'Viewing: ';
         }
@@ -306,12 +281,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
     checkInOrganization(id: string): void {
 
         // finding the object whose id
-        const object = this.org.users.find((obj) => {
-            console.log('obj.id', obj._id);
-            console.log('id', id);
-            return obj._id === id;
-        });
-        console.log('object', object);
+        const object = this.org.users.find((obj) => obj._id === id);
         this.inOrg = object ? true : false;
 
         //route to welcome if not in organization
@@ -327,16 +297,8 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     setFields(): void {
-        console.log('setting fields');
-
         if (this.proposal) {
-            console.log('proposal object exists');
-
             if (this.proposal.projectTitle) {
-                console.log(
-                    'proposal - this.proposal.projectTitle',
-                    this.proposal.projectTitle
-                );
                 this.projectTitle = this.proposal.projectTitle;
             }
 
@@ -379,8 +341,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
                 itemizedBudget: this.itemizedBudget,
             };
         } else {
-            console.log('default values');
-
             this.propObj = {
                 projectTitle: '',
                 purpose: '',
@@ -398,8 +358,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
     //when toggling the full form
     resetFormValues(): void {
-        console.log('reseting form values');
-
         // this.formOrganization.setValue({
         //     legalName: this.legalName,
         //     yearFounded: this.yearFounded,
@@ -427,9 +385,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     initGroupedForm(): void {
-        console.log('initializing grouped form');
-        console.log('prop obj - projectTitle', this.propObj.projectTitle);
-
         this.groupedForm = new FormGroup({
             projectTitle: new FormControl(this.propObj.projectTitle),
             purpose: new FormControl(this.propObj.purpose),
@@ -451,9 +406,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     initFormControls(): void {
-        console.log('initializing form controls');
-        console.log('this.projectTitle', this.projectTitle);
-
         this.projectTitleControl = new FormControl(this.projectTitle);
         this.purposeControl = new FormControl(this.purpose);
         this.goalsControl = new FormControl(this.goals);
@@ -467,14 +419,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
     //sets the fields to the updated value
     //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
-        console.log('prop', prop);
-        console.log('control', control);
-        console.log('proposal - updateSingleField', this[control].value);
-
         if (this[control].value === '') {
-            console.log('blank value');
-            //reset the value
-            console.log('old value', this.propObj[prop]);
             this[control].value = this.propObj[prop];
 
             this.checkInvalidProp(prop, true);
@@ -495,9 +440,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     checkInvalidProp(prop: string, flag: boolean): void {
-        // console.log('checkInvalidProp - prop',prop);
-        // console.log('checkInvalidProp - flag',flag);
-
         switch (prop) {
             case 'projectTitle': {
                 this.invalidInputProjectTitle = flag;
@@ -540,48 +482,28 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
     //takes in the field that changed
     saveSingleField(change: any): void {
-        console.log('save single field');
-
         const body = change;
 
-        console.log('saveSingleField - body', body);
         this.updateProposal(body);
     }
 
     cancelSingleField(prop: string, control: any): void {
-        console.log('org info - cancelSingleField', this[control].value);
         (this[control] as AbstractControl).setValue(this[prop]);
     }
 
     //calls the updateOrganizationService
     updateProposal(body: any): void {
-        console.log('proposal - updateProposal', body);
-
         this._proposalService.updateProposal(this.propID, body).subscribe(
             (result) => {
-                console.log('Proposal updated', result);
                 this.proposal = result;
 
-                console.log(
-                    'new this.orgInfo.organizationInfoID',
-                    this.proposal.proposalID
-                );
-
-                // this.refreshProposal.emit(true);
                 this.resetFormValues();
             },
-            (err) => {
-                console.log(err);
-            }
+            () => {}
         );
     }
 
     updateGroupedEdition(): void {
-        console.log('change - this.projectTitle', this.projectTitle);
-
-        console.log('old - this.propObj', this.propObj);
-
-        // this.orgObj = this.groupedForm.value; //out of date
         this.propObj = {
             projectTitle: this.projectTitle, //changed
             purpose: this.purpose,
@@ -594,28 +516,19 @@ export class ProposalComponent implements OnInit, OnDestroy {
             organization: this.orgID,
         };
 
-        console.log('new - this.propObj', this.propObj);
-
         this._proposalService
             .updateProposal(this.propID, this.propObj)
             .subscribe(
                 (result) => {
-                    console.log('Proposal updated', result);
                     this.propObj = result.info;
 
-                    // this.refreshProp.emit(true);
                     this.resetFormValues();
                 },
-                (err) => {
-                    console.log(err);
-                }
+                () => {}
             );
     }
 
     cancelGroupedEdition(): void {
-        console.log('proposal - cancelGroupedEdition');
-        // this.groupedForm.setValue(this.orgObj);
-
         //reset values
         this.setFields();
     }
@@ -652,7 +565,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     handleModeChange(mode: 'view' | 'edit'): void {
-        console.log('proposal - toggle mode change', mode);
         this.mode = mode;
 
         this.resetFormValues();
@@ -665,50 +577,34 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     projectTitleChange(): void {
-        console.log('projectTitleChange');
-
         this.showMessage = false;
     }
 
     purposeChange(): void {
-        console.log('purposeChange');
-
         this.showMessage = false;
     }
 
     goalsChange(): void {
-        console.log('goalsChange');
-
         this.showMessage = false;
     }
 
     narrativeChange(): void {
-        console.log('narrativeChange');
-
         this.showMessage = false;
     }
 
     timeTableChange(): void {
-        console.log('timeTableChange');
-
         this.showMessage = false;
     }
 
     amountRequestedChange(): void {
-        console.log('amountRequestedChange');
-
         this.showMessage = false;
     }
 
     totalProjectCostChange(): void {
-        console.log('totalProjectCostChange');
-
         this.showMessage = false;
     }
 
     itemizedBudgetChange(): void {
-        console.log('itemizedBudgetChange');
-
         this.showMessage = false;
     }
 }
