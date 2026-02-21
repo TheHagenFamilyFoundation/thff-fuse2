@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { ReopenMeetingDialogComponent } from './reopen-meeting-dialog.component';
 
 @Component({
     selector: 'app-meeting-detail',
@@ -29,14 +32,21 @@ export class MeetingDetailComponent implements OnInit {
     pendingAllocations: Map<string, number> = new Map();
     hasUnsavedChanges = false;
 
-    displayedColumns = ['organization', 'projectTitle', 'amountRequested', 'score', 'amountGranted'];
+    // Summary collapse state
+    fundedCollapsed = false;
+    unfundedCollapsed = true;
+
+    displayedColumns = ['projectTitle', 'organization', 'sponsor', 'amountRequested', 'score', 'amountGranted'];
+    setupColumns = ['projectTitle', 'organization', 'sponsor', 'amountRequested', 'score', 'actions'];
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private meetingService: MeetingService,
+        private proposalService: ProposalService,
         private authService: AuthService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private dialog: MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -184,10 +194,46 @@ export class MeetingDetailComponent implements OnInit {
         });
     }
 
+    reopenMeeting(): void {
+        if (!this.meeting) return;
+
+        const dialogRef = this.dialog.open(ReopenMeetingDialogComponent, {
+            width: '420px',
+            data: { year: this.meeting.year }
+        });
+
+        dialogRef.afterClosed().subscribe(confirmed => {
+            if (!confirmed) return;
+
+            this.meetingService.reopenMeeting(this.meeting._id).subscribe({
+                next: (meeting) => {
+                    this.meeting = meeting;
+                    this.summary = null;
+                    this.recalcTotals();
+                    this.pendingAllocations.clear();
+                    this.hasUnsavedChanges = false;
+                    this.snackBar.open('Meeting reopened for editing', 'Close', { duration: 3000 });
+                },
+                error: (err) => {
+                    const msg = err.error?.message || 'Error reopening meeting';
+                    this.snackBar.open(msg, 'Close', { duration: 5000 });
+                }
+            });
+        });
+    }
+
     private recalcTotals(): void {
         if (!this.meeting?.allocations) return;
         this.totalAllocated = this.meeting.allocations.reduce((sum: number, a: any) => sum + (a.amountGranted || 0), 0);
         this.remainingBudget = this.meeting.totalBudget - this.totalAllocated;
+    }
+
+    getUserName(user: any): string {
+        if (!user) return '';
+        if (user.firstName || user.lastName) {
+            return [user.firstName, user.lastName].filter(Boolean).join(' ');
+        }
+        return user.email || '';
     }
 
     getStatusLabel(status: string): string {
@@ -203,6 +249,46 @@ export class MeetingDetailComponent implements OnInit {
         this.router.navigate(['/pages/proposal/', proposalID], {
             queryParams: { from: 'meeting', meetingId: this.meeting._id }
         });
+    }
+
+    goToOrganization(orgID: string): void {
+        this.router.navigate(['/pages/organization/', orgID]);
+    }
+
+    archiveProposalFromMeeting(allocation: any): void {
+        if (!this.meeting || !allocation) return;
+
+        const proposalTitle = allocation.proposal?.projectTitle || 'this proposal';
+        if (!confirm(`Archive "${proposalTitle}"? This will remove it from the meeting.`)) {
+            return;
+        }
+
+        this.proposalService.archiveProposal(allocation.proposal?._id, true).subscribe({
+            next: () => {
+                this.meetingService.removeAllocation(this.meeting._id, allocation._id).subscribe({
+                    next: (updated) => {
+                        this.meeting = updated;
+                        this.recalcTotals();
+                        this.snackBar.open(`"${proposalTitle}" archived and removed from meeting`, 'Close', { duration: 3000 });
+                    },
+                    error: (err) => {
+                        const msg = err.error?.message || 'Error removing allocation';
+                        this.snackBar.open(msg, 'Close', { duration: 5000 });
+                    }
+                });
+            },
+            error: (err) => {
+                const msg = err.error?.message || 'Error archiving proposal';
+                this.snackBar.open(msg, 'Close', { duration: 5000 });
+            }
+        });
+    }
+
+    getActiveColumns(): string[] {
+        if (this.meeting?.status === 'setup') {
+            return this.isPresidentOrAdmin ? this.setupColumns : this.setupColumns.filter(c => c !== 'actions');
+        }
+        return this.displayedColumns;
     }
 
     getStatusColor(status: string): string {

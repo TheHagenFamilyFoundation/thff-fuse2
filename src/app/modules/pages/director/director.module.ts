@@ -33,9 +33,10 @@ import { ClosePortalDialogComponent } from './submission-years/close-portal-dial
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
+import { ReopenMeetingDialogComponent } from './meeting-detail/reopen-meeting-dialog.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, MeetingComponent, MeetingDetailComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, MeetingComponent, MeetingDetailComponent, ReopenMeetingDialogComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,

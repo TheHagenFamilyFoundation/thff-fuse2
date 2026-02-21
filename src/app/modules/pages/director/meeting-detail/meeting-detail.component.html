@@ -36,6 +36,10 @@
                 <fuse-card class="flex flex-col p-5">
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Budget</span>
                     <span class="text-2xl font-bold mt-1">{{ meeting.totalBudget | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span *ngIf="meeting.originalBudget && meeting.originalBudget !== meeting.totalBudget"
+                          class="text-xs text-gray-400 mt-0.5">
+                        Originally {{ meeting.originalBudget | currency:'USD':'symbol':'1.0-0' }}
+                    </span>
                 </fuse-card>
 
                 <fuse-card class="flex flex-col p-5">
@@ -102,8 +106,15 @@
                 </fuse-card>
             </div>
 
-            <!-- Allocations Table (in_progress or completed, or setup for non-admin) -->
-            <div *ngIf="meeting.status !== 'setup' || !isPresidentOrAdmin">
+            <!-- Proposals Table (setup & in_progress — hidden when completed since summary tables take over) -->
+            <div *ngIf="meeting.status !== 'completed'">
+
+                <!-- Setup info for non-admin -->
+                <div *ngIf="meeting.status === 'setup' && !isPresidentOrAdmin"
+                     class="flex items-center gap-2 mb-4 text-gray-500">
+                    <mat-icon class="icon-size-5">info</mat-icon>
+                    <span class="text-sm">Meeting is being set up. Proposals are listed below for review.</span>
+                </div>
 
                 <!-- Action bar for president/admin during in_progress -->
                 <div *ngIf="meeting.status === 'in_progress' && isPresidentOrAdmin"
@@ -133,24 +144,45 @@
                 <fuse-card class="flex flex-col w-full overflow-hidden">
                     <mat-table [dataSource]="meeting.allocations" class="w-full">
 
-                        <ng-container matColumnDef="organization">
-                            <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">
-                                Organization
-                            </mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="pl-6">
-                                {{ row.organization?.name }}
-                            </mat-cell>
-                        </ng-container>
-
                         <ng-container matColumnDef="projectTitle">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                            <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">
                                 Project Title
                             </mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="font-medium">
+                            <mat-cell *matCellDef="let row" class="pl-6 font-medium">
                                 <a class="text-primary hover:underline cursor-pointer"
                                    (click)="goToProposal(row.proposal?.proposalID)">
                                     {{ row.proposal?.projectTitle }}
                                 </a>
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="organization">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                Organization
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row">
+                                <a class="text-primary hover:underline cursor-pointer"
+                                   (click)="goToOrganization(row.organization?.organizationID)">
+                                    {{ row.organization?.name }}
+                                </a>
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="sponsor">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                Sponsor
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                                <span *ngIf="row.proposal?.sponsor && row.proposal.sponsor.firstName">
+                                    {{ getUserName(row.proposal.sponsor) }}
+                                </span>
+                                <span *ngIf="row.proposal?.sponsor && !row.proposal.sponsor.firstName"
+                                      class="text-gray-400">
+                                    {{ row.proposal.sponsor.email || row.proposal.sponsor }}
+                                </span>
+                                <span *ngIf="!row.proposal?.sponsor" class="text-gray-300 dark:text-gray-600">
+                                    —
+                                </span>
                             </mat-cell>
                         </ng-container>
 
@@ -193,8 +225,21 @@
                             </mat-cell>
                         </ng-container>
 
-                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+                        <ng-container matColumnDef="actions">
+                            <mat-header-cell *matHeaderCellDef class="font-semibold pr-6 flex justify-end">
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let row" class="pr-6 flex justify-end">
+                                <button mat-icon-button
+                                        color="warn"
+                                        matTooltip="Archive proposal and remove from meeting"
+                                        (click)="archiveProposalFromMeeting(row)">
+                                    <mat-icon class="icon-size-5">archive</mat-icon>
+                                </button>
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="getActiveColumns()"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: getActiveColumns()"></mat-row>
                     </mat-table>
 
                     <div *ngIf="!meeting.allocations?.length" class="flex items-center justify-center py-12 text-gray-400">
@@ -203,8 +248,112 @@
                 </fuse-card>
             </div>
 
+            <!-- Reopen Button for completed meetings -->
+            <div *ngIf="meeting.status === 'completed' && isPresidentOrAdmin" class="flex justify-end mb-4">
+                <button mat-stroked-button color="warn" (click)="reopenMeeting()">
+                    <mat-icon class="mr-1">lock_open</mat-icon>
+                    Reopen Meeting
+                </button>
+            </div>
+
             <!-- Completed Meeting Summary -->
-            <div *ngIf="meeting.status === 'completed' && summary" class="mt-8">
+            <div *ngIf="meeting.status === 'completed' && summary" class="mt-0">
+
+                <!-- Funded Proposals (collapsible) -->
+                <div *ngIf="summary.funded.length > 0" class="mb-4">
+                    <div class="flex items-center gap-2 mb-3 cursor-pointer select-none"
+                         (click)="fundedCollapsed = !fundedCollapsed">
+                        <mat-icon class="icon-size-5 text-gray-400 transition-transform duration-200"
+                                  [ngClass]="{ '-rotate-90': fundedCollapsed }">
+                            expand_more
+                        </mat-icon>
+                        <h3 class="text-md font-semibold m-0">
+                            Funded ({{ summary.funded.length }})
+                        </h3>
+                    </div>
+                    <fuse-card *ngIf="!fundedCollapsed" class="flex flex-col w-full overflow-hidden">
+                        <mat-table [dataSource]="summary.funded" class="w-full">
+                            <ng-container matColumnDef="projectTitle">
+                                <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="pl-6 font-medium">
+                                    <a class="text-primary hover:underline cursor-pointer"
+                                       (click)="goToProposal(row.proposal?.proposalID)">
+                                        {{ row.proposal?.projectTitle }}
+                                    </a>
+                                </mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="organization">
+                                <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
+                                <mat-cell *matCellDef="let row">
+                                    <a class="text-primary hover:underline cursor-pointer"
+                                       (click)="goToOrganization(row.organization?.organizationID)">
+                                        {{ row.organization?.name }}
+                                    </a>
+                                </mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="amountRequested">
+                                <mat-header-cell *matHeaderCellDef class="font-semibold">Requested</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="text-gray-500">
+                                    {{ row.amountRequested | currency:'USD':'symbol':'1.0-0' }}
+                                </mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="amountGranted">
+                                <mat-header-cell *matHeaderCellDef class="font-semibold pr-6">Granted</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="font-semibold text-green-600 pr-6">
+                                    {{ row.amountGranted | currency:'USD':'symbol':'1.0-0' }}
+                                </mat-cell>
+                            </ng-container>
+                            <mat-header-row *matHeaderRowDef="['projectTitle','organization','amountRequested','amountGranted']"></mat-header-row>
+                            <mat-row *matRowDef="let row; columns: ['projectTitle','organization','amountRequested','amountGranted']"></mat-row>
+                        </mat-table>
+                    </fuse-card>
+                </div>
+
+                <!-- Not Funded (collapsible, collapsed by default) -->
+                <div *ngIf="summary.unfunded.length > 0" class="mb-6">
+                    <div class="flex items-center gap-2 mb-3 cursor-pointer select-none"
+                         (click)="unfundedCollapsed = !unfundedCollapsed">
+                        <mat-icon class="icon-size-5 text-gray-400 transition-transform duration-200"
+                                  [ngClass]="{ '-rotate-90': unfundedCollapsed }">
+                            expand_more
+                        </mat-icon>
+                        <h3 class="text-md font-semibold text-gray-500 m-0">
+                            Not Funded ({{ summary.unfunded.length }})
+                        </h3>
+                    </div>
+                    <fuse-card *ngIf="!unfundedCollapsed" class="flex flex-col w-full overflow-hidden">
+                        <mat-table [dataSource]="summary.unfunded" class="w-full">
+                            <ng-container matColumnDef="projectTitle">
+                                <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="pl-6 font-medium opacity-60">
+                                    <a class="text-primary hover:underline cursor-pointer"
+                                       (click)="goToProposal(row.proposal?.proposalID)">
+                                        {{ row.proposal?.projectTitle }}
+                                    </a>
+                                </mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="organization">
+                                <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="opacity-60">
+                                    <a class="text-primary hover:underline cursor-pointer"
+                                       (click)="goToOrganization(row.organization?.organizationID)">
+                                        {{ row.organization?.name }}
+                                    </a>
+                                </mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="amountRequested">
+                                <mat-header-cell *matHeaderCellDef class="font-semibold pr-6">Requested</mat-header-cell>
+                                <mat-cell *matCellDef="let row" class="text-gray-400 pr-6">
+                                    {{ row.amountRequested | currency:'USD':'symbol':'1.0-0' }}
+                                </mat-cell>
+                            </ng-container>
+                            <mat-header-row *matHeaderRowDef="['projectTitle','organization','amountRequested']"></mat-header-row>
+                            <mat-row *matRowDef="let row; columns: ['projectTitle','organization','amountRequested']"></mat-row>
+                        </mat-table>
+                    </fuse-card>
+                </div>
+
+                <!-- Meeting Summary Stats -->
                 <h2 class="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Meeting Summary</h2>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -226,55 +375,12 @@
                     </fuse-card>
                 </div>
 
-                <div *ngIf="summary.funded.length > 0" class="mb-6">
-                    <h3 class="text-md font-semibold mb-3">Funded Proposals</h3>
-                    <fuse-card class="overflow-hidden">
-                        <div *ngFor="let item of summary.funded"
-                             class="flex items-center justify-between px-6 py-4 border-b last:border-b-0">
-                            <div>
-                                <a class="font-medium text-primary hover:underline cursor-pointer"
-                                   (click)="goToProposal(item.proposal?.proposalID)">
-                                    {{ item.proposal?.projectTitle }}
-                                </a>
-                                <div class="text-sm text-gray-500">{{ item.organization?.name }}</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-semibold text-green-600">
-                                    {{ item.amountGranted | currency:'USD':'symbol':'1.0-0' }}
-                                </div>
-                                <div class="text-xs text-gray-400">
-                                    of {{ item.amountRequested | currency:'USD':'symbol':'1.0-0' }} requested
-                                </div>
-                            </div>
-                        </div>
-                    </fuse-card>
-                </div>
-
-                <div *ngIf="summary.unfunded.length > 0">
-                    <h3 class="text-md font-semibold mb-3 text-gray-500">Not Funded</h3>
-                    <fuse-card class="overflow-hidden">
-                        <div *ngFor="let item of summary.unfunded"
-                             class="flex items-center justify-between px-6 py-4 border-b last:border-b-0 opacity-60">
-                            <div>
-                                <a class="font-medium text-primary hover:underline cursor-pointer"
-                                   (click)="goToProposal(item.proposal?.proposalID)">
-                                    {{ item.proposal?.projectTitle }}
-                                </a>
-                                <div class="text-sm text-gray-500">{{ item.organization?.name }}</div>
-                            </div>
-                            <div class="text-right text-sm text-gray-400">
-                                {{ item.amountRequested | currency:'USD':'symbol':'1.0-0' }} requested
-                            </div>
-                        </div>
-                    </fuse-card>
-                </div>
-
-                <div class="mt-6 text-sm text-gray-400">
+                <div class="text-sm text-gray-400">
                     <p *ngIf="meeting.startedBy">
-                        Started by {{ meeting.startedBy.firstName }} {{ meeting.startedBy.lastName }}
+                        Started by {{ getUserName(meeting.startedBy) }}
                     </p>
                     <p *ngIf="meeting.completedBy">
-                        Finalized by {{ meeting.completedBy.firstName }} {{ meeting.completedBy.lastName }}
+                        Finalized by {{ getUserName(meeting.completedBy) }}
                         on {{ meeting.completedAt | date:'MMM d, yyyy \'at\' h:mm a' }}
                     </p>
                     <p *ngIf="meeting.notes">Notes: {{ meeting.notes }}</p>
