@@ -268,14 +268,22 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t">
-                        <button mat-stroked-button (click)="cancel()">
-                            Cancel
-                        </button>
-                        <button mat-raised-button [color]="'primary'"
-                            [disabled]="!groupedForm.valid" (click)="createProposal()">
-                            Create Proposal
-                        </button>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
+                        <div class="text-sm text-secondary">
+                            Need help creating your proposal?
+                            <a class="text-primary-500 hover:underline" href="mailto:support@hagenfamilyfoundation.org">
+                                Contact support
+                            </a>.
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button mat-stroked-button (click)="cancel()">
+                                Cancel
+                            </button>
+                            <button mat-raised-button [color]="'primary'"
+                                [disabled]="!groupedForm.valid" (click)="createProposal()">
+                                Create Proposal
+                            </button>
+                        </div>
                     </div>
 
                     <div *ngIf="showMessage" class="text-center my-4">

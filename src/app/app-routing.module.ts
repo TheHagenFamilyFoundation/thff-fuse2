@@ -127,6 +127,13 @@ export const appRoutes: Routes = [
                     ),
             },
             {
+                path: 'support',
+                loadChildren: () =>
+                    import('app/modules/pages/support/support.module').then(
+                        (m) => m.SupportModule
+                    ),
+            },
+            {
                 path: 'referral',
                 loadChildren: () =>
                     import('app/modules/auth/referral/referral.module').then(
@@ -157,6 +164,13 @@ export const appRoutes: Routes = [
                 loadChildren: () =>
                     import('app/modules/welcome/welcome.module').then(
                         (m) => m.WelcomeModule
+                    ),
+            },
+            {
+                path: 'pages/support',
+                loadChildren: () =>
+                    import('app/modules/pages/support/support.module').then(
+                        (m) => m.SupportModule
                     ),
             },
             // Pages
