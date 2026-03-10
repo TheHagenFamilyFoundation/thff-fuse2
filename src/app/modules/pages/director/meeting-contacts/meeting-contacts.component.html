@@ -1,0 +1,87 @@
+<div class="flex flex-col flex-auto min-w-0">
+    <div class="bg-card border-b no-print">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+            <a [routerLink]="['/pages/director/meeting', meeting?._id || meetingId]"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Meeting
+            </a>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight m-0">
+                        Funded Organization Contacts
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1" *ngIf="meeting">
+                        {{ meeting.year }} Meeting • {{ contacts.length }} funded organizations
+                    </p>
+                </div>
+
+                <button mat-flat-button color="primary" (click)="printPdf()">
+                    <mat-icon class="mr-1">picture_as_pdf</mat-icon>
+                    Export PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!loaded" class="flex items-center justify-center py-24">
+        <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+
+    <div *ngIf="loaded" class="flex-auto">
+        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+            <fuse-card class="flex flex-col p-5 mb-6" *ngIf="meeting">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-gray-500">Meeting</div>
+                        <div class="font-semibold">{{ meeting.year }} Meeting</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-gray-500">Budget</div>
+                        <div class="font-semibold">{{ meeting.totalBudget | currency:'USD':'symbol':'1.0-0' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-gray-500">Total Given</div>
+                        <div class="font-semibold text-green-600">{{ meeting.totalAllocated | currency:'USD':'symbol':'1.0-0' }}</div>
+                    </div>
+                </div>
+            </fuse-card>
+
+            <div *ngIf="contacts.length === 0">
+                <fuse-card class="flex flex-col items-center p-12">
+                    <mat-icon class="text-gray-300 dark:text-gray-600 mb-4"
+                              style="font-size: 64px; width: 64px; height: 64px;">contacts</mat-icon>
+                    <h2 class="text-xl font-semibold text-gray-500 m-0">No funded organizations yet</h2>
+                    <p class="text-gray-400 mt-2 text-center">
+                        Once proposals are funded, their organization contacts will appear here.
+                    </p>
+                </fuse-card>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" *ngIf="contacts.length > 0">
+                <fuse-card class="flex flex-col p-5" *ngFor="let c of contacts">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold m-0">{{ c.organizationName }}</h3>
+                            <p class="text-sm text-gray-500 mt-1 mb-0">
+                                Funded {{ c.totals.granted | currency:'USD':'symbol':'1.0-0' }}
+                                • Requested {{ c.totals.requested | currency:'USD':'symbol':'1.0-0' }}
+                            </p>
+                        </div>
+                        <span class="text-xs text-gray-400">#{{ c.organizationId || 'N/A' }}</span>
+                    </div>
+
+                    <div class="mt-4 space-y-1 text-sm">
+                        <p class="m-0"><span class="text-gray-500">Contact:</span> {{ c.contact.contactPerson || '—' }}</p>
+                        <p class="m-0"><span class="text-gray-500">Title:</span> {{ c.contact.contactPersonTitle || '—' }}</p>
+                        <p class="m-0"><span class="text-gray-500">Email:</span> {{ c.contact.email || '—' }}</p>
+                        <p class="m-0"><span class="text-gray-500">Phone:</span> {{ c.contact.phone || '—' }}</p>
+                        <p class="m-0"><span class="text-gray-500">Address:</span> {{ formatAddress(c.contact) || '—' }}</p>
+                        <p class="m-0"><span class="text-gray-500">Website:</span> {{ c.contact.website || '—' }}</p>
+                    </div>
+                </fuse-card>
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,6 +18,10 @@
                         {{ getStatusLabel(meeting.status) }}
                     </span>
                 </div>
+                <a mat-stroked-button [routerLink]="['/pages/director/meeting', meeting._id, 'contacts']">
+                    <mat-icon class="mr-1">contacts</mat-icon>
+                    Contacts / PDF
+                </a>
             </div>
         </div>
     </div>
@@ -106,8 +110,8 @@
                 </fuse-card>
             </div>
 
-            <!-- Proposals Table (setup & in_progress — hidden when completed since summary tables take over) -->
-            <div *ngIf="meeting.status !== 'completed'">
+            <!-- Proposals Table (always visible during setup/in_progress; editable in completed for president/admin) -->
+            <div *ngIf="meeting.status !== 'completed' || isPresidentOrAdmin" class="mb-6">
 
                 <!-- Setup info for non-admin -->
                 <div *ngIf="meeting.status === 'setup' && !isPresidentOrAdmin"
@@ -140,9 +144,64 @@
                     </div>
                 </div>
 
+                <!-- Add back proposal -->
+                <div *ngIf="isPresidentOrAdmin && (meeting.status !== 'completed' || editingCompletedMeeting) && addableProposals.length > 0"
+                     class="flex flex-col sm:flex-row sm:items-end gap-3 mb-4">
+                    <mat-form-field class="w-full sm:w-[28rem] -mb-5">
+                        <mat-label>Add Proposal Back</mat-label>
+                        <mat-select [(value)]="selectedAddBackProposalId">
+                            <mat-option *ngFor="let p of addableProposals" [value]="p._id">
+                                {{ p.projectTitle }} — {{ p.organization?.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <button mat-stroked-button color="primary"
+                            [disabled]="!selectedAddBackProposalId"
+                            (click)="addBackProposal()">
+                        <mat-icon class="mr-1">add</mat-icon>
+                        Add Back
+                    </button>
+                </div>
+
+                <!-- Action bar for president/admin during completed -->
+                <div *ngIf="meeting.status === 'completed' && isPresidentOrAdmin"
+                     class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                    <div class="flex items-center gap-3">
+                        <mat-form-field *ngIf="editingCompletedMeeting" class="w-48 -mb-5">
+                            <mat-label>Total Budget</mat-label>
+                            <span matPrefix class="pl-2">$&nbsp;</span>
+                            <input matInput type="number" [(ngModel)]="totalBudget" (blur)="updateBudget()">
+                        </mat-form-field>
+                        <div *ngIf="!editingCompletedMeeting" class="text-sm text-gray-500">
+                            View mode. Click Edit to modify budget and allocations.
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button *ngIf="!editingCompletedMeeting"
+                                mat-stroked-button color="primary"
+                                (click)="startCompletedEdit()">
+                            <mat-icon class="mr-1">edit</mat-icon>
+                            Edit
+                        </button>
+                        <button *ngIf="editingCompletedMeeting"
+                                mat-stroked-button
+                                [disabled]="!hasUnsavedChanges"
+                                (click)="saveAllocations()">
+                            <mat-icon class="mr-1">save</mat-icon>
+                            Save Changes
+                        </button>
+                        <button *ngIf="editingCompletedMeeting"
+                                mat-stroked-button
+                                (click)="cancelCompletedEdit()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Table -->
-                <fuse-card class="flex flex-col w-full overflow-hidden">
-                    <mat-table [dataSource]="meeting.allocations" class="w-full">
+                <fuse-card *ngIf="meeting.status !== 'completed' || editingCompletedMeeting"
+                           class="flex flex-col w-full overflow-hidden">
+                    <mat-table [dataSource]="getTableAllocations()" class="w-full meeting-table">
 
                         <ng-container matColumnDef="projectTitle">
                             <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">
@@ -209,7 +268,7 @@
                                 Amount Granted
                             </mat-header-cell>
                             <mat-cell *matCellDef="let row" class="pr-6">
-                                <div *ngIf="isPresidentOrAdmin && meeting.status === 'in_progress'"
+                                <div *ngIf="isPresidentOrAdmin && (meeting.status === 'in_progress' || (meeting.status === 'completed' && editingCompletedMeeting))"
                                      class="inline-flex items-center border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800">
                                     <span class="text-gray-400 text-sm mr-1">$</span>
                                     <input type="number"
@@ -217,7 +276,7 @@
                                            [value]="getAllocationValue(row)"
                                            (input)="onAllocationChange(row._id, $event.target.value * 1)">
                                 </div>
-                                <span *ngIf="!isPresidentOrAdmin || meeting.status !== 'in_progress'"
+                                <span *ngIf="!isPresidentOrAdmin || (meeting.status !== 'in_progress' && !(meeting.status === 'completed' && editingCompletedMeeting))"
                                       class="font-semibold"
                                       [ngClass]="{ 'text-green-600': row.amountGranted > 0 }">
                                     {{ (row.amountGranted || 0) | currency:'USD':'symbol':'1.0-0' }}
@@ -248,19 +307,11 @@
                 </fuse-card>
             </div>
 
-            <!-- Reopen Button for completed meetings -->
-            <div *ngIf="meeting.status === 'completed' && isPresidentOrAdmin" class="flex justify-end mb-4">
-                <button mat-stroked-button color="warn" (click)="reopenMeeting()">
-                    <mat-icon class="mr-1">lock_open</mat-icon>
-                    Reopen Meeting
-                </button>
-            </div>
-
             <!-- Completed Meeting Summary -->
-            <div *ngIf="meeting.status === 'completed' && summary" class="mt-0">
+            <div *ngIf="meeting.status === 'completed' && summary" class="mt-6 space-y-6">
 
                 <!-- Funded Proposals (collapsible) -->
-                <div *ngIf="summary.funded.length > 0" class="mb-4">
+                <div *ngIf="summary.funded.length > 0">
                     <div class="flex items-center gap-2 mb-3 cursor-pointer select-none"
                          (click)="fundedCollapsed = !fundedCollapsed">
                         <mat-icon class="icon-size-5 text-gray-400 transition-transform duration-200"
@@ -272,7 +323,7 @@
                         </h3>
                     </div>
                     <fuse-card *ngIf="!fundedCollapsed" class="flex flex-col w-full overflow-hidden">
-                        <mat-table [dataSource]="summary.funded" class="w-full">
+                        <mat-table [dataSource]="summary.funded" class="w-full meeting-table">
                             <ng-container matColumnDef="projectTitle">
                                 <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="pl-6 font-medium">
@@ -310,7 +361,7 @@
                 </div>
 
                 <!-- Not Funded (collapsible, collapsed by default) -->
-                <div *ngIf="summary.unfunded.length > 0" class="mb-6">
+                <div *ngIf="summary.unfunded.length > 0 && isPresidentOrAdmin && editingCompletedMeeting">
                     <div class="flex items-center gap-2 mb-3 cursor-pointer select-none"
                          (click)="unfundedCollapsed = !unfundedCollapsed">
                         <mat-icon class="icon-size-5 text-gray-400 transition-transform duration-200"
@@ -322,7 +373,7 @@
                         </h3>
                     </div>
                     <fuse-card *ngIf="!unfundedCollapsed" class="flex flex-col w-full overflow-hidden">
-                        <mat-table [dataSource]="summary.unfunded" class="w-full">
+                        <mat-table [dataSource]="summary.unfunded" class="w-full meeting-table">
                             <ng-container matColumnDef="projectTitle">
                                 <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="pl-6 font-medium opacity-60">
