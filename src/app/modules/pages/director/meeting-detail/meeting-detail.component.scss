@@ -5,3 +5,9 @@
         background-color: rgba(0, 0, 0, 0.04);
     }
 }
+
+:host ::ng-deep .meeting-table .mat-header-cell,
+:host ::ng-deep .meeting-table .mat-cell {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+}

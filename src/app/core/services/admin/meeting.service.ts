@@ -28,6 +28,14 @@ export class MeetingService {
         return this.http.get(`${this.apiUrl}/meeting/${id}/summary`);
     }
 
+    getFundedContacts(id: string): Observable<any> {
+        return this.http.get(`${this.apiUrl}/meeting/${id}/funded-contacts`);
+    }
+
+    getAddableProposals(id: string): Observable<any> {
+        return this.http.get(`${this.apiUrl}/meeting/${id}/addable-proposals`);
+    }
+
     createMeeting(data: { submissionYear: string; year: number; totalBudget?: number; notes?: string }): Observable<any> {
         return this.http.post(`${this.apiUrl}/meeting`, data);
     }
@@ -40,12 +48,12 @@ export class MeetingService {
         return this.http.put(`${this.apiUrl}/meeting/${id}/allocations`, { allocations });
     }
 
-    completeMeeting(id: string): Observable<any> {
-        return this.http.put(`${this.apiUrl}/meeting/${id}/complete`, {});
+    addAllocation(id: string, proposalId: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/meeting/${id}/allocations/add`, { proposalId });
     }
 
-    reopenMeeting(id: string): Observable<any> {
-        return this.http.put(`${this.apiUrl}/meeting/${id}/reopen`, {});
+    completeMeeting(id: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/meeting/${id}/complete`, {});
     }
 
     archiveMeeting(id: string, archived: boolean): Observable<any> {

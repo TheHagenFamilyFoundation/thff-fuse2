@@ -7,6 +7,7 @@ import { SubmissionYearsComponent } from './submission-years/submission-years.co
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
+import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
 
 export const directorRoutes: Route[] = [
     {
@@ -40,5 +41,9 @@ export const directorRoutes: Route[] = [
     {
         path: 'director/meeting/:id',
         component: MeetingDetailComponent,
+    },
+    {
+        path: 'director/meeting/:id/contacts',
+        component: MeetingContactsComponent,
     },
 ];

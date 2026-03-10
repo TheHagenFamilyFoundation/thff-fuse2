@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
-import { ReopenMeetingDialogComponent } from './reopen-meeting-dialog.component';
 
 @Component({
     selector: 'app-meeting-detail',
@@ -16,6 +14,7 @@ export class MeetingDetailComponent implements OnInit {
 
     isPresidentOrAdmin = false;
     loaded = false;
+    meetingId: string = null;
 
     meeting: any = null;
     summary: any = null;
@@ -31,6 +30,9 @@ export class MeetingDetailComponent implements OnInit {
     // Pending edits
     pendingAllocations: Map<string, number> = new Map();
     hasUnsavedChanges = false;
+    editingCompletedMeeting = false;
+    addableProposals: any[] = [];
+    selectedAddBackProposalId: string = null;
 
     // Summary collapse state
     fundedCollapsed = false;
@@ -45,8 +47,7 @@ export class MeetingDetailComponent implements OnInit {
         private meetingService: MeetingService,
         private proposalService: ProposalService,
         private authService: AuthService,
-        private snackBar: MatSnackBar,
-        private dialog: MatDialog
+        private snackBar: MatSnackBar
     ) {}
 
     ngOnInit(): void {
@@ -56,6 +57,7 @@ export class MeetingDetailComponent implements OnInit {
 
         const id = this.route.snapshot.paramMap.get('id');
         if (id) {
+            this.meetingId = id;
             this.loadMeetingDetails(id);
         }
     }
@@ -70,6 +72,8 @@ export class MeetingDetailComponent implements OnInit {
                 this.recalcTotals();
                 this.pendingAllocations.clear();
                 this.hasUnsavedChanges = false;
+                this.editingCompletedMeeting = false;
+                this.loadAddableProposals();
 
                 if (meeting.status === 'completed') {
                     this.loadSummary(id);
@@ -86,6 +90,23 @@ export class MeetingDetailComponent implements OnInit {
         this.meetingService.getMeetingSummary(id).subscribe({
             next: (summary) => {
                 this.summary = summary;
+            }
+        });
+    }
+
+    loadAddableProposals(): void {
+        if (!this.meeting?._id || !this.isPresidentOrAdmin) {
+            this.addableProposals = [];
+            this.selectedAddBackProposalId = null;
+            return;
+        }
+
+        this.meetingService.getAddableProposals(this.meeting._id).subscribe({
+            next: (proposals) => {
+                this.addableProposals = proposals || [];
+                if (!this.addableProposals.some(p => p._id === this.selectedAddBackProposalId)) {
+                    this.selectedAddBackProposalId = null;
+                }
             }
         });
     }
@@ -125,6 +146,9 @@ export class MeetingDetailComponent implements OnInit {
                 this.meeting = meeting;
                 this.recalcTotals();
                 this.snackBar.open('Budget updated', 'Close', { duration: 3000 });
+                if (this.meeting.status === 'completed') {
+                    this.loadSummary(this.meeting._id);
+                }
             },
             error: (err) => {
                 const msg = err.error?.message || 'Error updating budget';
@@ -151,6 +175,26 @@ export class MeetingDetailComponent implements OnInit {
         return (pending !== undefined) ? pending : (alloc.amountGranted || 0);
     }
 
+    getTableAllocations(): any[] {
+        if (!this.meeting?.allocations) {
+            return [];
+        }
+
+        // During completed edit mode, prioritize funded proposals at the top.
+        if (this.meeting.status === 'completed' && this.editingCompletedMeeting) {
+            return [...this.meeting.allocations].sort((a, b) => {
+                const aFunded = (a.amountGranted || 0) > 0 ? 1 : 0;
+                const bFunded = (b.amountGranted || 0) > 0 ? 1 : 0;
+                if (aFunded !== bFunded) {
+                    return bFunded - aFunded;
+                }
+                return (b.amountGranted || 0) - (a.amountGranted || 0);
+            });
+        }
+
+        return this.meeting.allocations;
+    }
+
     saveAllocations(): void {
         if (!this.meeting || this.pendingAllocations.size === 0) return;
 
@@ -166,6 +210,10 @@ export class MeetingDetailComponent implements OnInit {
                 this.pendingAllocations.clear();
                 this.hasUnsavedChanges = false;
                 this.snackBar.open('Allocations saved', 'Close', { duration: 3000 });
+                if (this.meeting.status === 'completed') {
+                    this.editingCompletedMeeting = false;
+                    this.loadSummary(this.meeting._id);
+                }
             },
             error: (err) => {
                 const msg = err.error?.message || 'Error saving allocations';
@@ -185,7 +233,7 @@ export class MeetingDetailComponent implements OnInit {
             next: (meeting) => {
                 this.meeting = meeting;
                 this.loadSummary(meeting._id);
-                this.snackBar.open('Meeting finalized! Allocations are now locked.', 'Close', { duration: 5000 });
+                this.snackBar.open('Meeting finalized. You can still edit budget and allocations here if needed.', 'Close', { duration: 5000 });
             },
             error: (err) => {
                 const msg = err.error?.message || 'Error completing meeting';
@@ -194,32 +242,40 @@ export class MeetingDetailComponent implements OnInit {
         });
     }
 
-    reopenMeeting(): void {
-        if (!this.meeting) return;
+    addBackProposal(): void {
+        if (!this.meeting?._id || !this.selectedAddBackProposalId) return;
 
-        const dialogRef = this.dialog.open(ReopenMeetingDialogComponent, {
-            width: '420px',
-            data: { year: this.meeting.year }
-        });
-
-        dialogRef.afterClosed().subscribe(confirmed => {
-            if (!confirmed) return;
-
-            this.meetingService.reopenMeeting(this.meeting._id).subscribe({
-                next: (meeting) => {
-                    this.meeting = meeting;
-                    this.summary = null;
-                    this.recalcTotals();
-                    this.pendingAllocations.clear();
-                    this.hasUnsavedChanges = false;
-                    this.snackBar.open('Meeting reopened for editing', 'Close', { duration: 3000 });
-                },
-                error: (err) => {
-                    const msg = err.error?.message || 'Error reopening meeting';
-                    this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.meetingService.addAllocation(this.meeting._id, this.selectedAddBackProposalId).subscribe({
+            next: (meeting) => {
+                this.meeting = meeting;
+                this.recalcTotals();
+                this.pendingAllocations.clear();
+                this.hasUnsavedChanges = false;
+                this.selectedAddBackProposalId = null;
+                this.loadAddableProposals();
+                if (this.meeting.status === 'completed') {
+                    this.loadSummary(this.meeting._id);
                 }
-            });
+                this.snackBar.open('Proposal added back to meeting', 'Close', { duration: 3000 });
+            },
+            error: (err) => {
+                const msg = err.error?.message || 'Error adding proposal back';
+                this.snackBar.open(msg, 'Close', { duration: 5000 });
+            }
         });
+    }
+
+    startCompletedEdit(): void {
+        this.editingCompletedMeeting = true;
+    }
+
+    cancelCompletedEdit(): void {
+        this.editingCompletedMeeting = false;
+        this.pendingAllocations.clear();
+        this.hasUnsavedChanges = false;
+        this.totalBudget = this.meeting?.totalBudget || 0;
+        this.meetingNotes = this.meeting?.notes || '';
+        this.recalcTotals();
     }
 
     private recalcTotals(): void {
