@@ -25,8 +25,6 @@ export class LandingHomeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('currentUser');
         this.getLatestSubmissionYear();
     }
 
