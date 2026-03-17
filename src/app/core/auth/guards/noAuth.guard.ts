@@ -79,7 +79,7 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
                                if (ref) {
                                    this._router.navigate(['/referral'], { queryParams: { ref } });
                                } else {
-                                   this._router.navigate(['']);
+                                   this._router.navigate(['/welcome']);
                                }
 
                                // Prevent the access
