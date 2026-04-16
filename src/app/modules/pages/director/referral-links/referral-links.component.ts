@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
-import { environment } from 'environments/environment';
 
 @Component({
     selector: 'app-referral-links',
@@ -11,8 +10,8 @@ import { environment } from 'environments/environment';
 export class ReferralLinksComponent implements OnInit {
 
     codes: any[] = [];
-    loaded: boolean = false;
-    newLabel: string = '';
+    loaded = false;
+    newLabel = '';
     feUrl: string;
 
     constructor(

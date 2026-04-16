@@ -44,6 +44,10 @@ export class DirectorComponent implements OnInit {
         this._router.navigate(['/pages/director/referral-links']);
     }
 
+    goToSolicitationEmails(): void {
+        this._router.navigate(['/pages/director/solicitation-emails']);
+    }
+
     goToMeeting(): void {
         this._router.navigate(['/pages/director/meeting']);
     }

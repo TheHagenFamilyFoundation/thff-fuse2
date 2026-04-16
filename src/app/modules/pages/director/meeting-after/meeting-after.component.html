@@ -1,0 +1,86 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <a [routerLink]="['/pages/director/meeting', meetingId]"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to meeting
+            </a>
+            <div *ngIf="meeting">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight m-0">
+                    After meeting — Grant emails
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">
+                    {{ meeting.year }} meeting · Notifications sent to funded organizations
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!loaded" class="flex items-center justify-center py-24">
+        <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+
+    <div *ngIf="loaded && meeting" class="w-full max-w-screen-xl mx-auto p-6 sm:p-8 space-y-6">
+
+        <fuse-card class="flex flex-col p-6" *ngIf="meeting.status !== 'completed'">
+            <p class="m-0 text-gray-600 dark:text-gray-400">
+                This meeting is not marked complete yet. Grant notification emails are only available after the meeting is completed and allocations are final.
+            </p>
+        </fuse-card>
+
+        <fuse-card class="flex flex-col p-6" *ngIf="meeting.status === 'completed'">
+            <h2 class="text-lg font-semibold m-0 mb-2">Send grant notifications</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mb-4">
+                Sends one email per funded organization using the contact email on file (from organization profile).
+                Organizations without an email are skipped and listed in the response.
+            </p>
+            <button mat-flat-button color="primary"
+                    (click)="sendGrantEmails()"
+                    [disabled]="!isPresidentOrAdmin || sending">
+                <mat-icon class="mr-1 icon-size-5">send</mat-icon>
+                {{ sending ? 'Sending…' : 'Send grant notification emails' }}
+            </button>
+            <p *ngIf="!isPresidentOrAdmin" class="text-xs text-gray-500 mt-3 m-0">
+                Only the president or admin can send these emails.
+            </p>
+        </fuse-card>
+
+        <fuse-card class="flex flex-col p-6">
+            <h2 class="text-lg font-semibold m-0 mb-4">Emails sent</h2>
+
+            <div *ngIf="!emailsLoaded" class="flex justify-center py-8">
+                <mat-spinner [diameter]="36"></mat-spinner>
+            </div>
+
+            <div *ngIf="emailsLoaded && emails.length === 0" class="text-sm text-gray-500 py-4">
+                No grant notification emails have been logged for this meeting yet.
+            </div>
+
+            <div *ngIf="emailsLoaded && emails.length > 0" class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500">
+                            <th class="py-2 pr-4 font-medium">Sent</th>
+                            <th class="py-2 pr-4 font-medium">To</th>
+                            <th class="py-2 pr-4 font-medium">Organization</th>
+                            <th class="py-2 pr-4 font-medium">Amount</th>
+                            <th class="py-2 pr-4 font-medium">Sent by</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let e of emails" class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-2 pr-4 whitespace-nowrap">{{ e.createdAt | date: 'short' }}</td>
+                            <td class="py-2 pr-4">{{ e.to }}</td>
+                            <td class="py-2 pr-4">{{ e.organizationName || e.organization?.name || '—' }}</td>
+                            <td class="py-2 pr-4">{{ e.amountGranted | currency:'USD':'symbol':'1.0-0' }}</td>
+                            <td class="py-2 pr-4">{{ senderLabel(e) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fuse-card>
+    </div>
+
+</div>

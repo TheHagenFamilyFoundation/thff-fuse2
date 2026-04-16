@@ -1,0 +1,9 @@
+:host {
+    display: block;
+    max-width: min(720px, 92vw);
+}
+
+.email-preview-inner img {
+    max-width: 100%;
+    height: auto;
+}

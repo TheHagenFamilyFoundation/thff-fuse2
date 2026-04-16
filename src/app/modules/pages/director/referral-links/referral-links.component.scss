@@ -1,0 +1,10 @@
+.referral-codes-card {
+    .codes-table-wrap {
+        max-height: min(70vh, 28rem);
+        overflow-y: auto;
+    }
+
+    .codes-table {
+        border-collapse: collapse;
+    }
+}

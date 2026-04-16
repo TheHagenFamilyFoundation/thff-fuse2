@@ -18,10 +18,18 @@
                         {{ getStatusLabel(meeting.status) }}
                     </span>
                 </div>
-                <a mat-stroked-button [routerLink]="['/pages/director/meeting', meeting._id, 'contacts']">
-                    <mat-icon class="mr-1">contacts</mat-icon>
-                    Contacts / PDF
-                </a>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a *ngIf="meeting.status === 'completed'"
+                       mat-stroked-button
+                       [routerLink]="['/pages/director/meeting', meeting._id, 'after']">
+                        <mat-icon class="mr-1">mark_email_read</mat-icon>
+                        After meeting
+                    </a>
+                    <a mat-stroked-button [routerLink]="['/pages/director/meeting', meeting._id, 'contacts']">
+                        <mat-icon class="mr-1">contacts</mat-icon>
+                        Contacts / PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>

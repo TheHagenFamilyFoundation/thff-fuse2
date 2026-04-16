@@ -1,0 +1,147 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <div class="bg-card border-b">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <a routerLink="/pages/director"
+               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+                    Solicitation emails
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">
+                    Start a new email to walk through choosing a referral code, editing the letter, previewing, and entering the recipient last.
+                    Referral codes are for a submission year and roll over after December 31—generate new codes on
+                    <a routerLink="/pages/director/referral-links" class="text-primary hover:underline">Referral links</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+
+        <fuse-card class="flex flex-col p-4 sm:p-5">
+            <h2 class="text-base font-semibold m-0 mb-1">Send solicitation</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 m-0 mb-4">
+                Opens a short stepper: referral code, message, preview, then recipient email.
+            </p>
+
+            <div *ngIf="!codesLoaded" class="flex justify-center py-6">
+                <mat-spinner [diameter]="32"></mat-spinner>
+            </div>
+
+            <div *ngIf="codesLoaded && codes.length === 0" class="text-sm text-gray-500 py-2">
+                Create a referral code on
+                <a routerLink="/pages/director/referral-links" class="text-primary hover:underline">Referral links</a>
+                first.
+            </div>
+
+            <div *ngIf="codesLoaded && codes.length > 0">
+                <button mat-flat-button color="primary" type="button" (click)="openSendSolicitation()">
+                    <mat-icon class="mr-1 icon-size-5">mail</mat-icon>
+                    New solicitation email
+                </button>
+            </div>
+        </fuse-card>
+
+        <fuse-card class="flex flex-col p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                <h2 class="text-base font-semibold m-0">Sent solicitations</h2>
+                <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3 w-full sm:w-auto">
+                    <mat-form-field class="w-full sm:w-44 -mb-5"
+                                     matTooltip="Referral codes created in this calendar year (submission cycle).">
+                        <mat-label>Submission year</mat-label>
+                        <mat-select [(ngModel)]="filterYear" (selectionChange)="onFilterChange()">
+                            <mat-option value="">All years</mat-option>
+                            <mat-option *ngFor="let y of yearFilterOptions" [value]="'' + y">{{ y }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="w-full sm:w-52 -mb-5">
+                        <mat-label>Referral code</mat-label>
+                        <mat-select [(ngModel)]="filterReferralCodeId" (selectionChange)="onFilterChange()">
+                            <mat-option value="">All codes</mat-option>
+                            <mat-option *ngFor="let c of codes" [value]="c._id">
+                                <span class="font-mono">{{ c.code }}</span><span *ngIf="c.label"> — {{ c.label }}</span>
+                                <span *ngIf="c.createdAt" class="text-xs text-gray-500"> ({{ c.createdAt | date: 'y' }} cycle)</span>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div *ngIf="!solLoaded" class="flex justify-center py-6">
+                <mat-spinner [diameter]="32"></mat-spinner>
+            </div>
+
+            <div *ngIf="solLoaded && totalSolicitations === 0" class="text-sm text-gray-500 py-2">
+                No solicitation emails sent yet.
+            </div>
+
+            <div *ngIf="solLoaded && totalSolicitations > 0" class="sent-solicitations-table overflow-x-auto -mx-1">
+                <mat-table [dataSource]="solicitationEmails" class="w-full min-w-[600px] text-sm">
+
+                    <ng-container matColumnDef="sent">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold text-xs uppercase tracking-wide text-gray-500">
+                            Sent
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let e" class="whitespace-nowrap text-xs">
+                            {{ e.createdAt | date: 'short' }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="to">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold text-xs uppercase tracking-wide text-gray-500">
+                            To
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let e" class="break-all">
+                            {{ e.to }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="code">
+                        <mat-header-cell *matHeaderCellDef
+                                         class="font-semibold text-xs uppercase tracking-wide text-gray-500"
+                                         matTooltip="Referral code and submission cycle (codes are for use through Dec 31 of that year; generate a new code for the next year).">
+                            Referral / cycle
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let e" class="text-xs">
+                            <span class="font-mono">{{ codeLabel(e) }}</span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef class="justify-end font-semibold text-xs uppercase tracking-wide text-gray-500">
+                            &nbsp;
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let e" class="justify-end whitespace-nowrap">
+                            <button mat-stroked-button type="button" class="mr-1" (click)="viewSolicitation(e)"
+                                    [disabled]="solResendId === e._id">
+                                View
+                            </button>
+                            <button mat-stroked-button type="button" (click)="resendSolicitation(e)"
+                                    [disabled]="solResendId === e._id">
+                                {{ solResendId === e._id ? '…' : 'Resend' }}
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="sentSolicitationColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: sentSolicitationColumns"></mat-row>
+                </mat-table>
+
+                <mat-paginator
+                    class="sent-solicitations-paginator border-t border-gray-200 dark:border-gray-700 mt-2"
+                    [length]="totalSolicitations"
+                    [pageIndex]="pageIndex"
+                    [pageSize]="pageSize"
+                    [pageSizeOptions]="[5, 10, 25, 50]"
+                    [showFirstLastButtons]="true"
+                    (page)="onPageChange($event)">
+                </mat-paginator>
+            </div>
+        </fuse-card>
+    </div>
+
+</div>

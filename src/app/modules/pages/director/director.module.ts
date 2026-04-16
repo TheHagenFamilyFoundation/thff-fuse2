@@ -15,7 +15,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -31,12 +30,16 @@ import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 import { ClosePortalDialogComponent } from './submission-years/close-portal-dialog.component';
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
+import { SolicitationEmailsComponent } from './solicitation-emails/solicitation-emails.component';
+import { SolicitationEmailPreviewDialogComponent } from './solicitation-emails/solicitation-email-preview-dialog.component';
+import { SolicitationPreviewSendDialogComponent } from './solicitation-emails/solicitation-preview-send-dialog.component';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
 import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
+import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, MeetingComponent, MeetingDetailComponent, MeetingContactsComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -54,7 +57,6 @@ import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.co
         MatPaginatorModule,
         MatSortModule,
         MatSelectModule,
-        MatButtonToggleModule,
         MatCheckboxModule,
         MatDialogModule,
         MatSnackBarModule,
