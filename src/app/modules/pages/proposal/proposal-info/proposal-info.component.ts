@@ -27,6 +27,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 
 @Component({
+    standalone: false,
     selector: 'app-proposal-info',
     templateUrl: './proposal-info.component.html',
     styleUrls: ['./proposal-info.component.scss'],

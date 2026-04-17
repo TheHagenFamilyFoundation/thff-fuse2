@@ -21,6 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService } from 'app/core/services/user/settings.service';
 import { Subject, takeUntil, finalize } from 'rxjs';
 @Component({
+    standalone: false,
     selector: 'settings-app',
     templateUrl: './app-settings.component.html',
     styleUrls: ['./app-settings.component.scss'],

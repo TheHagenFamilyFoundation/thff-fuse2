@@ -9,6 +9,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'app-proposals',
     templateUrl: './proposals.component.html',
     styleUrls: ['./proposals.component.scss']

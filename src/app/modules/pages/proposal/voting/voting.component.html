@@ -30,9 +30,9 @@
 
     <!-- Slider -->
     <div class="w-full max-w-md mt-2 px-2">
-        <mat-slider class="w-full" [value]="vote" [disabled]="disabled" [max]="max" [min]="min"
-            [step]="step" [thumbLabel]="thumbLabel" [tickInterval]="tickInterval"
-            (change)="onInputChange($event)">
+        <mat-slider class="w-full" [disabled]="disabled" [max]="max" [min]="min"
+            [step]="step" [discrete]="thumbLabel" [showTickMarks]="showTicks">
+            <input matSliderThumb [value]="vote" (valueChange)="onInputChange($event)" />
         </mat-slider>
         <div class="flex justify-between text-sm text-gray-400 dark:text-gray-500 mt-1 px-1">
             <span>No Vote</span>

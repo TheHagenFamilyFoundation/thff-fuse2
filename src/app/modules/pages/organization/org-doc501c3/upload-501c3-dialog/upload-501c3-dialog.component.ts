@@ -8,6 +8,7 @@ export interface Upload501c3DialogData {
 }
 
 @Component({
+    standalone: false,
     selector: 'app-upload-501c3-dialog',
     templateUrl: './upload-501c3-dialog.component.html',
 })

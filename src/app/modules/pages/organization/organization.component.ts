@@ -14,6 +14,7 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'organization',
     templateUrl: './organization.component.html',
     encapsulation: ViewEncapsulation.None,

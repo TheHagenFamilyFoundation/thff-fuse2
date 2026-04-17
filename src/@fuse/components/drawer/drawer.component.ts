@@ -6,6 +6,7 @@ import { FuseUtilsService } from '@fuse/services/utils/utils.service';
 import { BooleanInput, coerceBooleanProperty } from '@angular/cdk/coercion';
 
 @Component({
+    standalone: false,
     selector     : 'fuse-drawer',
     templateUrl  : './drawer.component.html',
     styleUrls    : ['./drawer.component.scss'],
@@ -88,7 +89,7 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
      * @private
      */
     @HostListener('mouseenter')
-    private _onMouseenter(): void
+    _onMouseenter(): void
     {
         // Enable the animations
         this._enableAnimations();
@@ -103,7 +104,7 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
      * @private
      */
     @HostListener('mouseleave')
-    private _onMouseleave(): void
+    _onMouseleave(): void
     {
         // Enable the animations
         this._enableAnimations();
@@ -130,7 +131,7 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
             this.fixed = coerceBooleanProperty(changes.fixed.currentValue);
 
             // Execute the observable
-            this.fixedChanged.next(this.fixed);
+            this.fixedChanged.emit(this.fixed);
         }
 
         // Mode
@@ -162,7 +163,7 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
             }
 
             // Execute the observable
-            this.modeChanged.next(currentMode);
+            this.modeChanged.emit(currentMode);
 
             // Enable the animations after a delay
             // The delay must be bigger than the current transition-duration
@@ -186,7 +187,7 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
         if ( 'position' in changes )
         {
             // Execute the observable
-            this.positionChanged.next(this.position);
+            this.positionChanged.emit(this.position);
         }
 
         // Transparent overlay
@@ -432,6 +433,6 @@ export class FuseDrawerComponent implements OnChanges, OnInit, OnDestroy
         }
 
         // Execute the observable
-        this.openedChanged.next(open);
+        this.openedChanged.emit(open);
     }
 }

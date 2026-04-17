@@ -8,6 +8,7 @@ import { ReferralCodeService } from 'app/core/services/director/referral-code.se
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
+    standalone: false,
     selector: 'app-create-proposal',
     templateUrl: './create-proposal.component.html',
     styleUrls: ['./create-proposal.component.scss'],

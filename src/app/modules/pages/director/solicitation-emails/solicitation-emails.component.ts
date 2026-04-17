@@ -8,6 +8,7 @@ import { SolicitationEmailPreviewDialogComponent } from './solicitation-email-pr
 import { SolicitationPreviewSendDialogComponent } from './solicitation-preview-send-dialog.component';
 
 @Component({
+    standalone: false,
     selector: 'app-solicitation-emails',
     templateUrl: './solicitation-emails.component.html',
     styleUrls: ['./solicitation-emails.component.scss']

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import * as moment from 'moment';
+import { formatSubtractDaysAgo } from '../../lib/mock-dates';
 
 export const project = {
     githubIssues      : {
@@ -148,12 +148,12 @@ export const project = {
     weeklyExpenses    : {
         amount: 17663,
         labels: [
-            moment().subtract(47, 'days').format('DD MMM') + ' - ' + moment().subtract(40, 'days').format('DD MMM'),
-            moment().subtract(39, 'days').format('DD MMM') + ' - ' + moment().subtract(32, 'days').format('DD MMM'),
-            moment().subtract(31, 'days').format('DD MMM') + ' - ' + moment().subtract(24, 'days').format('DD MMM'),
-            moment().subtract(23, 'days').format('DD MMM') + ' - ' + moment().subtract(16, 'days').format('DD MMM'),
-            moment().subtract(15, 'days').format('DD MMM') + ' - ' + moment().subtract(8, 'days').format('DD MMM'),
-            moment().subtract(7, 'days').format('DD MMM') + ' - ' + moment().format('DD MMM')
+            formatSubtractDaysAgo(47) + ' - ' + formatSubtractDaysAgo(40),
+            formatSubtractDaysAgo(39) + ' - ' + formatSubtractDaysAgo(32),
+            formatSubtractDaysAgo(31) + ' - ' + formatSubtractDaysAgo(24),
+            formatSubtractDaysAgo(23) + ' - ' + formatSubtractDaysAgo(16),
+            formatSubtractDaysAgo(15) + ' - ' + formatSubtractDaysAgo(8),
+            formatSubtractDaysAgo(7) + ' - ' + formatSubtractDaysAgo(0)
         ],
         series: [
             {
@@ -165,10 +165,10 @@ export const project = {
     monthlyExpenses   : {
         amount: 54663,
         labels: [
-            moment().subtract(31, 'days').format('DD MMM') + ' - ' + moment().subtract(24, 'days').format('DD MMM'),
-            moment().subtract(23, 'days').format('DD MMM') + ' - ' + moment().subtract(16, 'days').format('DD MMM'),
-            moment().subtract(15, 'days').format('DD MMM') + ' - ' + moment().subtract(8, 'days').format('DD MMM'),
-            moment().subtract(7, 'days').format('DD MMM') + ' - ' + moment().format('DD MMM')
+            formatSubtractDaysAgo(31) + ' - ' + formatSubtractDaysAgo(24),
+            formatSubtractDaysAgo(23) + ' - ' + formatSubtractDaysAgo(16),
+            formatSubtractDaysAgo(15) + ' - ' + formatSubtractDaysAgo(8),
+            formatSubtractDaysAgo(7) + ' - ' + formatSubtractDaysAgo(0)
         ],
         series: [
             {
@@ -180,16 +180,16 @@ export const project = {
     yearlyExpenses    : {
         amount: 648813,
         labels: [
-            moment().subtract(79, 'days').format('DD MMM') + ' - ' + moment().subtract(72, 'days').format('DD MMM'),
-            moment().subtract(71, 'days').format('DD MMM') + ' - ' + moment().subtract(64, 'days').format('DD MMM'),
-            moment().subtract(63, 'days').format('DD MMM') + ' - ' + moment().subtract(56, 'days').format('DD MMM'),
-            moment().subtract(55, 'days').format('DD MMM') + ' - ' + moment().subtract(48, 'days').format('DD MMM'),
-            moment().subtract(47, 'days').format('DD MMM') + ' - ' + moment().subtract(40, 'days').format('DD MMM'),
-            moment().subtract(39, 'days').format('DD MMM') + ' - ' + moment().subtract(32, 'days').format('DD MMM'),
-            moment().subtract(31, 'days').format('DD MMM') + ' - ' + moment().subtract(24, 'days').format('DD MMM'),
-            moment().subtract(23, 'days').format('DD MMM') + ' - ' + moment().subtract(16, 'days').format('DD MMM'),
-            moment().subtract(15, 'days').format('DD MMM') + ' - ' + moment().subtract(8, 'days').format('DD MMM'),
-            moment().subtract(7, 'days').format('DD MMM') + ' - ' + moment().format('DD MMM')
+            formatSubtractDaysAgo(79) + ' - ' + formatSubtractDaysAgo(72),
+            formatSubtractDaysAgo(71) + ' - ' + formatSubtractDaysAgo(64),
+            formatSubtractDaysAgo(63) + ' - ' + formatSubtractDaysAgo(56),
+            formatSubtractDaysAgo(55) + ' - ' + formatSubtractDaysAgo(48),
+            formatSubtractDaysAgo(47) + ' - ' + formatSubtractDaysAgo(40),
+            formatSubtractDaysAgo(39) + ' - ' + formatSubtractDaysAgo(32),
+            formatSubtractDaysAgo(31) + ' - ' + formatSubtractDaysAgo(24),
+            formatSubtractDaysAgo(23) + ' - ' + formatSubtractDaysAgo(16),
+            formatSubtractDaysAgo(15) + ' - ' + formatSubtractDaysAgo(8),
+            formatSubtractDaysAgo(7) + ' - ' + formatSubtractDaysAgo(0)
         ],
         series: [
             {

@@ -4,6 +4,7 @@ import { AvailableLangs, TranslocoService } from '@ngneat/transloco';
 import { FuseNavigationService, FuseVerticalNavigationComponent } from '@fuse/components/navigation';
 
 @Component({
+    standalone: false,
     selector       : 'languages',
     templateUrl    : './languages.component.html',
     encapsulation  : ViewEncapsulation.None,

@@ -1,11 +1,5 @@
 <!doctype html>
-<html lang="en">
-<script>
-    var host = "www.hagenfamilyfoundation.org";
-    if ((host == window.location.host) && (window.location.protocol != "https:")) {
-        window.location.protocol = "https";
-    }
-</script>
+<html id="fuse" lang="en">
 
 <head>
     <title>The Hagen Family Foundation</title>
@@ -18,6 +12,9 @@
 
     <base href="/">
 
+    <!-- Fuse 21 global theme (Tailwind v4 output; linked asset — avoids PostCSS/Tailwind v3 on this file) -->
+    <link href="assets/styles/fuse-theme.compiled.css" rel="stylesheet">
+
     <!-- Favicon -->
     <!-- <link
         rel="icon"
@@ -26,7 +23,7 @@
     <link rel="icon" type="image/png" href="favicon-16x16.png">
     <link rel="icon" type="image/png" href="favicon-32x32.png">
 
-    <!-- Fonts -->
+    <!-- Fonts (legacy Inter + IBM Plex Mono; Geist is loaded via fuse-next-styles when /fonts/geist/* exist) -->
     <link href="assets/fonts/inter/inter.css" rel="stylesheet">
 
     <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -39,9 +36,19 @@
     <!-- Splash screen styles -->
     <link href="assets/styles/splash-screen.css" rel="stylesheet">
 
+    <script>
+        var host = "www.hagenfamilyfoundation.org";
+        if ((host == window.location.host) && (window.location.protocol != "https:")) {
+            window.location.protocol = "https";
+        }
+    </script>
 </head>
 
 <body>
+    <!-- Apply light/dark scheme class before paint (matches Fuse 21) -->
+    <script>
+        !function(){try{const e=document.documentElement.classList;e.remove("scheme-dark","scheme-light");const c=localStorage.getItem("scheme"),t=window.matchMedia("(prefers-color-scheme: dark)").matches,s="dark"===c||"system"===c&&t?"scheme-dark":"scheme-light";e.add(s)}catch(e){}}();
+    </script>
 
     <!-- Splash screen -->
     <fuse-splash-screen>

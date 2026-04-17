@@ -12,6 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
+    standalone: false,
     selector: 'settings',
     templateUrl: './settings.component.html',
     encapsulation: ViewEncapsulation.None,

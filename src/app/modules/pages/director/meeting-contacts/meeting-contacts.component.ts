@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting-contacts',
     templateUrl: './meeting-contacts.component.html',
     styleUrls: ['./meeting-contacts.component.scss']

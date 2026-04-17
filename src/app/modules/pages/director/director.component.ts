@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 
 @Component({
+    standalone: false,
     selector: 'app-director',
     templateUrl: './director.component.html',
     styleUrls: ['./director.component.scss']

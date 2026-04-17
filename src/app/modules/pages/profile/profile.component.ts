@@ -16,6 +16,7 @@ import { FuseConfigService } from '@fuse/services/config';
 import { AppConfig, Scheme } from 'app/core/config/app.config';
 
 @Component({
+    standalone: false,
     selector: 'profile',
     templateUrl: './profile.component.html',
     encapsulation: ViewEncapsulation.None,

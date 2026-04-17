@@ -56,7 +56,7 @@
 <div
     class="fuse-vertical-navigation-item-children"
     *ngIf="!isCollapsed"
-    @expandCollapse>
+    [@expandCollapse]>
 
     <ng-container *ngFor="let item of item.children; trackBy: trackByFn">
 

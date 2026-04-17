@@ -7,6 +7,7 @@ import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 import { GetUserService } from 'app/core/services/user/get-user.service';
 
 @Component({
+    standalone: false,
     selector: 'app-organizations',
     templateUrl: './organizations.component.html',
     styleUrls: ['./organizations.component.scss'],

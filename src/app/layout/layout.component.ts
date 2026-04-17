@@ -9,6 +9,7 @@ import { Layout } from 'app/layout/layout.types';
 import { AppConfig } from 'app/core/config/app.config';
 
 @Component({
+    standalone: false,
     selector     : 'layout',
     templateUrl  : './layout.component.html',
     styleUrls    : ['./layout.component.scss'],

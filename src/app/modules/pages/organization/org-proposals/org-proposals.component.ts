@@ -11,6 +11,7 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 
 @Component({
+    standalone: false,
     selector: 'app-org-proposals',
     templateUrl: './org-proposals.component.html',
     styleUrls: ['./org-proposals.component.scss'],

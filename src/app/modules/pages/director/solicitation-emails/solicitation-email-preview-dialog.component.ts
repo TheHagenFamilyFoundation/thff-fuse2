@@ -10,6 +10,7 @@ export interface SolicitationEmailPreviewData {
 }
 
 @Component({
+    standalone: false,
     selector: 'app-solicitation-email-preview-dialog',
     templateUrl: './solicitation-email-preview-dialog.component.html',
     styleUrls: ['./solicitation-email-preview-dialog.component.scss']

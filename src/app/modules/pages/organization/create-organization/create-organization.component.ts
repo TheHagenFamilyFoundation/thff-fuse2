@@ -20,6 +20,7 @@ import { environment } from 'environments/environment';
 import { Router } from '@angular/router';
 
 @Component({
+    standalone: false,
     selector: 'app-create-organization',
     templateUrl: './create-organization.component.html',
     styleUrls: ['./create-organization.component.scss'],

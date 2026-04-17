@@ -6,6 +6,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting',
     templateUrl: './meeting.component.html',
     styleUrls: ['./meeting.component.scss']

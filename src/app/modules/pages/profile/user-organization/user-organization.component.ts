@@ -19,6 +19,7 @@ import { SelectedOrganizationComponent } from './selected-organization/selected-
 
 import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 @Component({
+    standalone: false,
     selector: 'app-user-organization',
     templateUrl: './user-organization.component.html',
     styleUrls: ['./user-organization.component.scss'],

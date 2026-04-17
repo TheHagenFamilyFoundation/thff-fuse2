@@ -5,6 +5,7 @@ import { coerceNumberProperty } from '@angular/cdk/coercion';
 import { DirectorService } from 'app/core/services/director/director.service';
 
 @Component({
+    standalone: false,
     selector: 'app-voting',
     templateUrl: './voting.component.html',
     styleUrls: ['./voting.component.scss']
@@ -72,8 +73,8 @@ export class VotingComponent implements OnInit {
 
     }
 
-    onInputChange(event: any): void {
-        this.vote = event.value;
+    onInputChange(value: number): void {
+        this.vote = value;
 
         this.outVote(this.vote);
 

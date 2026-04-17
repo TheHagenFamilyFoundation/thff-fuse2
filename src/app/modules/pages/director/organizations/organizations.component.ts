@@ -8,6 +8,7 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 
 @Component({
+    standalone: false,
     selector: 'app-organizations',
     templateUrl: './organizations.component.html',
     styleUrls: ['./organizations.component.scss']

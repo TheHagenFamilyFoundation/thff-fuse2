@@ -10,6 +10,7 @@ export interface ConfirmDialogData {
 }
 
 @Component({
+    standalone: false,
     selector: 'app-confirm-dialog',
     templateUrl: './confirm-dialog.component.html',
 })

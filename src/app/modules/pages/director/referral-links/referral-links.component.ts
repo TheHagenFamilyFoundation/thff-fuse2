@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 
 @Component({
+    standalone: false,
     selector: 'app-referral-links',
     templateUrl: './referral-links.component.html',
     styleUrls: ['./referral-links.component.scss']

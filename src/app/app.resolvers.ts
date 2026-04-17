@@ -4,7 +4,8 @@ import {
     Resolve,
     RouterStateSnapshot,
 } from '@angular/router';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 import { MessagesService } from 'app/layout/common/messages/messages.service';
 import { NavigationService } from 'app/core/navigation/navigation.service';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
@@ -42,14 +43,19 @@ export class InitialDataResolver implements Resolve<any> {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<any> {
-        // Fork join multiple API endpoint calls to wait all of them to finish
+        // Fork join multiple API endpoint calls to wait all of them to finish.
+        // Timeout + fallback so a hung or failing API cannot block authenticated layout forever.
         return forkJoin([
             this._navigationService.get(),
             this._messagesService.getAll(),
             this._notificationsService.getAll(),
             this._quickChatService.getChats(),
             this._shortcutsService.getAll(),
-            // this._userService.get()
-        ]);
+        ]).pipe(
+            timeout(45000),
+            catchError(() =>
+                of([null, [], [], [], []] as const)
+            )
+        );
     }
 }

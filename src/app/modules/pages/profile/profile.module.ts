@@ -20,7 +20,7 @@ import { UserOrganizationComponent } from './user-organization/user-organization
 import { SelectedOrganizationComponent } from './user-organization/selected-organization/selected-organization.component';
 
 @NgModule({
-    declarations: [ProfileComponent, UserOrganizationComponent],
+    declarations: [ProfileComponent, UserOrganizationComponent, SelectedOrganizationComponent],
     imports: [
         RouterModule.forChild(profileRoutes),
         MatButtonModule,
@@ -36,9 +36,6 @@ import { SelectedOrganizationComponent } from './user-organization/selected-orga
         FuseCardModule,
         FuseAlertModule,
         SharedModule,
-    ],
-    entryComponents: [
-        SelectedOrganizationComponent,
     ],
 })
 export class ProfileModule { }

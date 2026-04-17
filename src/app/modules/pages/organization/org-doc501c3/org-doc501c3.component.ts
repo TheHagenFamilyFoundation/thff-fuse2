@@ -12,6 +12,7 @@ import { GetOrganizationService } from 'app/core/services/organization/get-organ
 import { Upload501c3DialogComponent } from './upload-501c3-dialog/upload-501c3-dialog.component';
 
 @Component({
+    standalone: false,
     selector: 'app-org-doc501c3',
     templateUrl: './org-doc501c3.component.html',
     styleUrls: ['./org-doc501c3.component.scss'],

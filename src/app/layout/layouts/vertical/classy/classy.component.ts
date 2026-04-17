@@ -12,6 +12,7 @@ import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/services/user/user.service';
 
 @Component({
+    standalone: false,
     selector: 'classy-layout',
     templateUrl: './classy.component.html',
     encapsulation: ViewEncapsulation.None,

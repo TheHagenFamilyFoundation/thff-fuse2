@@ -15,8 +15,10 @@ import { InOrgService } from '../../../../core/services/user/in-org.service';
 import packageJson from '../../../../../../package.json';
 
 @Component({
+    standalone: false,
     selector: 'modern-layout',
     templateUrl: './modern.component.html',
+    styleUrls: ['./modern.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class ModernLayoutComponent implements OnInit, OnDestroy {
@@ -188,9 +190,5 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
 
     createOrg(): void {
         this._router.navigate(['/pages/organization/create']);
-    }
-
-    routeToDirectorsPage(): void {
-        this._router.navigate(['/pages/director']);
     }
 }

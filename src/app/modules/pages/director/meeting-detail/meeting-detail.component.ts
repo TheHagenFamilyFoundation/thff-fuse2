@@ -6,6 +6,7 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting-detail',
     templateUrl: './meeting-detail.component.html',
     styleUrls: ['./meeting-detail.component.scss']

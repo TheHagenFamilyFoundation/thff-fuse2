@@ -6,6 +6,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { ClosePortalDialogComponent } from './close-portal-dialog.component';
 
 @Component({
+    standalone: false,
     selector: 'app-submission-years',
     templateUrl: './submission-years.component.html',
     styleUrls: ['./submission-years.component.scss']

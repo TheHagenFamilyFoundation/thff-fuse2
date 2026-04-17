@@ -6,6 +6,7 @@ import { OrgTeamService } from 'app/core/services/organization/org-team.service'
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
+    standalone: false,
     selector: 'app-org-team',
     templateUrl: './org-team.component.html',
     styleUrls: ['./org-team.component.scss']

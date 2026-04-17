@@ -7,6 +7,7 @@ import { FuseConfigService } from '@fuse/services/config';
 import { Scheme } from './core/config/app.config';
 
 @Component({
+    standalone: false,
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],

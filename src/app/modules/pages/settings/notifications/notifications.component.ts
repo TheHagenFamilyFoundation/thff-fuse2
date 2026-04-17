@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
+    standalone: false,
     selector       : 'settings-notifications',
     templateUrl    : './notifications.component.html',
     encapsulation  : ViewEncapsulation.None,

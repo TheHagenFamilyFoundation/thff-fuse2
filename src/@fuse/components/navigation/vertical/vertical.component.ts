@@ -11,6 +11,7 @@ import { FuseUtilsService } from '@fuse/services/utils/utils.service';
 import { BooleanInput, coerceBooleanProperty } from '@angular/cdk/coercion';
 
 @Component({
+    standalone: false,
     selector       : 'fuse-vertical-navigation',
     templateUrl    : './vertical.component.html',
     styleUrls      : ['./vertical.component.scss'],
@@ -162,7 +163,7 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
      * @private
      */
     @HostListener('mouseenter')
-    private _onMouseenter(): void
+    _onMouseenter(): void
     {
         // Enable the animations
         this._enableAnimations();
@@ -177,7 +178,7 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
      * @private
      */
     @HostListener('mouseleave')
-    private _onMouseleave(): void
+    _onMouseleave(): void
     {
         // Enable the animations
         this._enableAnimations();
@@ -201,7 +202,7 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
         if ( 'appearance' in changes )
         {
             // Execute the observable
-            this.appearanceChanged.next(changes.appearance.currentValue);
+            this.appearanceChanged.emit(changes.appearance.currentValue);
         }
 
         // Inner
@@ -243,7 +244,7 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
             }
 
             // Execute the observable
-            this.modeChanged.next(currentMode);
+            this.modeChanged.emit(currentMode);
 
             // Enable the animations after a delay
             // The delay must be bigger than the current transition-duration
@@ -274,7 +275,7 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
         if ( 'position' in changes )
         {
             // Execute the observable
-            this.positionChanged.next(changes.position.currentValue);
+            this.positionChanged.emit(changes.position.currentValue);
         }
 
         // Transparent overlay
@@ -740,6 +741,6 @@ export class FuseVerticalNavigationComponent implements OnChanges, OnInit, After
         }
 
         // Execute the observable
-        this.openedChanged.next(open);
+        this.openedChanged.emit(open);
     }
 }

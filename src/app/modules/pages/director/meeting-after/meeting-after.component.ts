@@ -6,6 +6,7 @@ import { OutboundEmailService } from 'app/core/services/director/outbound-email.
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting-after',
     templateUrl: './meeting-after.component.html',
     styleUrls: ['./meeting-after.component.scss']

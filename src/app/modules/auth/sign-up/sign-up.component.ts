@@ -10,6 +10,7 @@ import { BackendService } from 'app/core/services/backend.service';
 import { Scheme } from 'app/core/config/app.config';
 
 @Component({
+    standalone: false,
     selector: 'auth-sign-up',
     templateUrl: './sign-up.component.html',
     encapsulation: ViewEncapsulation.None,

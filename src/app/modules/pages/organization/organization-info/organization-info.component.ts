@@ -34,6 +34,7 @@ import { DeleteOrganizationInfoService } from 'app/core/services/organization/or
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
+    standalone: false,
     selector: 'app-organization-info',
     templateUrl: './organization-info.component.html',
     styleUrls: ['./organization-info.component.scss'],
@@ -561,7 +562,7 @@ export class OrganizationInfoComponent implements OnInit {
         this.addressFormControl.setValue(this.address);
         this.cityFormControl.setValue(this.city);
         this.stateFormControl.setValue(this.state);
-        this.zipFormControl.setValue(this.zip);
+        this.zipFormControl.setValue(this.zip != null ? String(this.zip) : '');
 
         // this.initFormControls();
         this.initGroupedForm();
@@ -589,7 +590,7 @@ export class OrganizationInfoComponent implements OnInit {
         this.addressFormControl.setValue(this.address);
         this.cityFormControl.setValue(this.city);
         this.stateFormControl.setValue(this.state);
-        this.zipFormControl.setValue(this.zip);
+        this.zipFormControl.setValue(this.zip != null ? String(this.zip) : '');
 
         // this.formOrganization.get;
         this.editing = true;

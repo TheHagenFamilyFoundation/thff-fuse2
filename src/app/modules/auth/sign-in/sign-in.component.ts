@@ -17,6 +17,7 @@ import { FuseConfigService } from '@fuse/services/config';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
+    standalone: false,
     selector: 'auth-sign-in',
     templateUrl: './sign-in.component.html',
     encapsulation: ViewEncapsulation.None,

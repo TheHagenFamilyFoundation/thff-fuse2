@@ -9,8 +9,8 @@
     <div
         class="absolute inset-0 flex items-center shrink-0 z-99 bg-card"
         *ngIf="opened"
-        @slideInTop
-        @slideOutTop>
+        [@slideInTop]
+        [@slideOutTop]>
         <mat-icon
             class="absolute ml-6 sm:ml-8"
             [svgIcon]="'heroicons_outline:search'"></mat-icon>

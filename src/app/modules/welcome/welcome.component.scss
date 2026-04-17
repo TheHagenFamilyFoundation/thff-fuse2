@@ -1,0 +1,30 @@
+/* Fill the router-outlet slot; two-row split needs height: 100% on the chain */
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+.welcome-split {
+    min-height: 0;
+}
+
+/* Box that receives the flex height budget; img scales down to fit (never clipped) */
+.welcome-logo-frame {
+    /* Ensure flex child can shrink below intrinsic image size */
+    min-height: 0;
+}
+
+.welcome-logo {
+    /* Fit inside .welcome-logo-frame: do not use vh here — pane height already accounts for layout */
+    max-width: min(100%, 360px);
+    height: auto;
+    max-height: 100%;
+}
+
+.welcome-hero-copy {
+    line-height: 1.35;
+}

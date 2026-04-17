@@ -27,6 +27,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 
 @Component({
+    standalone: false,
     selector: 'proposal',
     templateUrl: './proposal.component.html',
     styleUrls: ['./proposal.component.scss'],

@@ -19,6 +19,7 @@ const STEP_PREVIEW = 2;
 const STEP_SEND = 3;
 
 @Component({
+    standalone: false,
     selector: 'app-solicitation-preview-send-dialog',
     templateUrl: './solicitation-preview-send-dialog.component.html',
     styleUrls: ['./solicitation-preview-send-dialog.component.scss']
