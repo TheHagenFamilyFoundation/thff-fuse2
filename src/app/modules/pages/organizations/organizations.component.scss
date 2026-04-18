@@ -1,3 +1,10 @@
+/* Align with Director header row height — global MDC primary buttons use min-height ~2.75rem */
+:host ::ng-deep .orgs-header-create.mat-mdc-unelevated-button {
+    min-height: 2.5rem;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+}
+
 /* Clickable table rows */
 .org-row {
     transition: background-color 150ms ease;

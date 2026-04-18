@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { filter, map } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -13,12 +15,17 @@ import { AuthService } from 'app/core/auth/auth.service';
 })
 export class MeetingDetailComponent implements OnInit {
 
+    private readonly destroyRef = inject(DestroyRef);
+
     isPresidentOrAdmin = false;
     loaded = false;
     meetingId: string = null;
 
     meeting: any = null;
     summary: any = null;
+
+    /** Stable array for mat-table (avoid calling a method from the template each CD cycle). */
+    displayAllocations: any[] = [];
 
     // Setup form
     totalBudget: number = 0;
@@ -48,19 +55,29 @@ export class MeetingDetailComponent implements OnInit {
         private meetingService: MeetingService,
         private proposalService: ProposalService,
         private authService: AuthService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
-        this.authService.checkPresident().subscribe(isP => {
+        this.authService.checkPresident().subscribe((isP) => {
             this.isPresidentOrAdmin = isP;
+            if (this.meeting) {
+                this.loadAddableProposals();
+            }
+            this._changeDetectorRef.markForCheck();
         });
 
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id) {
-            this.meetingId = id;
-            this.loadMeetingDetails(id);
-        }
+        this.route.paramMap
+            .pipe(
+                map((p) => p.get('id')),
+                filter((id): id is string => !!id),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe((id) => {
+                this.meetingId = id;
+                this.loadMeetingDetails(id);
+            });
     }
 
     loadMeetingDetails(id: string): void {
@@ -80,9 +97,13 @@ export class MeetingDetailComponent implements OnInit {
                     this.loadSummary(id);
                 }
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             },
             error: () => {
+                this.meeting = null;
+                this.displayAllocations = [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -91,6 +112,19 @@ export class MeetingDetailComponent implements OnInit {
         this.meetingService.getMeetingSummary(id).subscribe({
             next: (summary) => {
                 this.summary = summary;
+                if (this.summary) {
+                    if (!Array.isArray(this.summary.funded)) {
+                        this.summary.funded = [];
+                    }
+                    if (!Array.isArray(this.summary.unfunded)) {
+                        this.summary.unfunded = [];
+                    }
+                }
+                this._changeDetectorRef.markForCheck();
+            },
+            error: () => {
+                this.summary = null;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -104,10 +138,15 @@ export class MeetingDetailComponent implements OnInit {
 
         this.meetingService.getAddableProposals(this.meeting._id).subscribe({
             next: (proposals) => {
-                this.addableProposals = proposals || [];
+                this.addableProposals = Array.isArray(proposals) ? proposals : [];
                 if (!this.addableProposals.some(p => p._id === this.selectedAddBackProposalId)) {
                     this.selectedAddBackProposalId = null;
                 }
+                this._changeDetectorRef.markForCheck();
+            },
+            error: () => {
+                this.addableProposals = [];
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -159,48 +198,57 @@ export class MeetingDetailComponent implements OnInit {
     }
 
     onAllocationChange(allocationId: string, value: number): void {
-        this.pendingAllocations.set(allocationId, value);
+        const key = String(allocationId);
+        this.pendingAllocations.set(key, value);
         this.hasUnsavedChanges = true;
 
         let total = 0;
         for (const alloc of this.meeting.allocations) {
-            const pending = this.pendingAllocations.get(alloc._id);
+            const id = String(alloc._id);
+            const pending = this.pendingAllocations.get(id);
             total += (pending !== undefined) ? pending : (alloc.amountGranted || 0);
         }
         this.totalAllocated = total;
         this.remainingBudget = this.meeting.totalBudget - total;
+        this.syncDisplayAllocations();
     }
 
     getAllocationValue(alloc: any): number {
-        const pending = this.pendingAllocations.get(alloc._id);
+        const id = String(alloc._id);
+        const pending = this.pendingAllocations.get(id);
         return (pending !== undefined) ? pending : (alloc.amountGranted || 0);
     }
 
-    getTableAllocations(): any[] {
+    private syncDisplayAllocations(): void {
+        this.displayAllocations = this.buildDisplayAllocations();
+    }
+
+    private buildDisplayAllocations(): any[] {
         if (!this.meeting?.allocations) {
             return [];
         }
 
-        // During completed edit mode, prioritize funded proposals at the top.
         if (this.meeting.status === 'completed' && this.editingCompletedMeeting) {
             return [...this.meeting.allocations].sort((a, b) => {
-                const aFunded = (a.amountGranted || 0) > 0 ? 1 : 0;
-                const bFunded = (b.amountGranted || 0) > 0 ? 1 : 0;
+                const aGranted = this.getAllocationValue(a);
+                const bGranted = this.getAllocationValue(b);
+                const aFunded = aGranted > 0 ? 1 : 0;
+                const bFunded = bGranted > 0 ? 1 : 0;
                 if (aFunded !== bFunded) {
                     return bFunded - aFunded;
                 }
-                return (b.amountGranted || 0) - (a.amountGranted || 0);
+                return bGranted - aGranted;
             });
         }
 
-        return this.meeting.allocations;
+        return [...this.meeting.allocations];
     }
 
     saveAllocations(): void {
         if (!this.meeting || this.pendingAllocations.size === 0) return;
 
-        const allocations = Array.from(this.pendingAllocations.entries()).map(([_id, amountGranted]) => ({
-            _id,
+        const allocations = Array.from(this.pendingAllocations.entries()).map(([id, amountGranted]) => ({
+            _id: id,
             amountGranted
         }));
 
@@ -226,21 +274,43 @@ export class MeetingDetailComponent implements OnInit {
     completeMeeting(): void {
         if (!this.meeting) return;
 
-        if (this.hasUnsavedChanges) {
-            this.saveAllocations();
-        }
+        const finalize = () => {
+            this.meetingService.completeMeeting(this.meeting._id).subscribe({
+                next: (meeting) => {
+                    this.meeting = meeting;
+                    this.recalcTotals();
+                    this.loadSummary(meeting._id);
+                    this.snackBar.open('Meeting finalized. You can still edit budget and allocations here if needed.', 'Close', { duration: 5000 });
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: (err) => {
+                    const msg = err.error?.message || 'Error completing meeting';
+                    this.snackBar.open(msg, 'Close', { duration: 5000 });
+                }
+            });
+        };
 
-        this.meetingService.completeMeeting(this.meeting._id).subscribe({
-            next: (meeting) => {
-                this.meeting = meeting;
-                this.loadSummary(meeting._id);
-                this.snackBar.open('Meeting finalized. You can still edit budget and allocations here if needed.', 'Close', { duration: 5000 });
-            },
-            error: (err) => {
-                const msg = err.error?.message || 'Error completing meeting';
-                this.snackBar.open(msg, 'Close', { duration: 5000 });
-            }
-        });
+        if (this.hasUnsavedChanges && this.pendingAllocations.size > 0) {
+            const allocations = Array.from(this.pendingAllocations.entries()).map(([id, amountGranted]) => ({
+                _id: id,
+                amountGranted
+            }));
+            this.meetingService.updateAllocations(this.meeting._id, allocations).subscribe({
+                next: (meeting) => {
+                    this.meeting = meeting;
+                    this.recalcTotals();
+                    this.pendingAllocations.clear();
+                    this.hasUnsavedChanges = false;
+                    finalize();
+                },
+                error: (err) => {
+                    const msg = err.error?.message || 'Error saving allocations before completing';
+                    this.snackBar.open(msg, 'Close', { duration: 5000 });
+                }
+            });
+        } else {
+            finalize();
+        }
     }
 
     addBackProposal(): void {
@@ -268,6 +338,7 @@ export class MeetingDetailComponent implements OnInit {
 
     startCompletedEdit(): void {
         this.editingCompletedMeeting = true;
+        this.syncDisplayAllocations();
     }
 
     cancelCompletedEdit(): void {
@@ -280,9 +351,15 @@ export class MeetingDetailComponent implements OnInit {
     }
 
     private recalcTotals(): void {
-        if (!this.meeting?.allocations) return;
+        if (!this.meeting?.allocations?.length) {
+            this.totalAllocated = 0;
+            this.remainingBudget = (this.meeting?.totalBudget ?? 0) - 0;
+            this.syncDisplayAllocations();
+            return;
+        }
         this.totalAllocated = this.meeting.allocations.reduce((sum: number, a: any) => sum + (a.amountGranted || 0), 0);
         this.remainingBudget = this.meeting.totalBudget - this.totalAllocated;
+        this.syncDisplayAllocations();
     }
 
     getUserName(user: any): string {

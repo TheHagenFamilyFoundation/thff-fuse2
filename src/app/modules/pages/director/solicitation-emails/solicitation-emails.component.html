@@ -18,9 +18,20 @@
                 </p>
             </div>
         </div>
+
+        <div *ngIf="pageBusy"
+             class="border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40"
+             role="status"
+             [attr.aria-label]="loadingMessage">
+            <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+            <p class="text-sm text-center text-gray-700 dark:text-gray-200 py-2.5 px-4 m-0 font-medium">
+                {{ loadingMessage }}
+            </p>
+        </div>
     </div>
 
-    <div class="w-full max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div class="w-full max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6"
+         [attr.aria-busy]="pageBusy">
 
         <fuse-card class="flex flex-col p-4 sm:p-5">
             <h2 class="text-base font-semibold m-0 mb-1">Send solicitation</h2>
@@ -40,7 +51,7 @@
 
             <div *ngIf="codesLoaded && codes.length > 0">
                 <button mat-flat-button color="primary" type="button" (click)="openSendSolicitation()">
-                    <mat-icon class="mr-1 icon-size-5">mail</mat-icon>
+                    <mat-icon class="mr-1 icon-size-5 solicitation-email-btn-icon">mail</mat-icon>
                     New solicitation email
                 </button>
             </div>
@@ -53,14 +64,16 @@
                     <mat-form-field class="w-full sm:w-44 -mb-5"
                                      matTooltip="Referral codes created in this calendar year (submission cycle).">
                         <mat-label>Submission year</mat-label>
-                        <mat-select [(ngModel)]="filterYear" (selectionChange)="onFilterChange()">
+                        <mat-select [(ngModel)]="filterYear" (selectionChange)="onFilterChange()"
+                                    [disabled]="!solLoaded">
                             <mat-option value="">All years</mat-option>
                             <mat-option *ngFor="let y of yearFilterOptions" [value]="'' + y">{{ y }}</mat-option>
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field class="w-full sm:w-52 -mb-5">
                         <mat-label>Referral code</mat-label>
-                        <mat-select [(ngModel)]="filterReferralCodeId" (selectionChange)="onFilterChange()">
+                        <mat-select [(ngModel)]="filterReferralCodeId" (selectionChange)="onFilterChange()"
+                                    [disabled]="!solLoaded">
                             <mat-option value="">All codes</mat-option>
                             <mat-option *ngFor="let c of codes" [value]="c._id">
                                 <span class="font-mono">{{ c.code }}</span><span *ngIf="c.label"> — {{ c.label }}</span>
@@ -71,16 +84,23 @@
                 </div>
             </div>
 
-            <div *ngIf="!solLoaded" class="flex justify-center py-6">
-                <mat-spinner [diameter]="32"></mat-spinner>
+            <div *ngIf="!solLoaded && totalSolicitations === 0"
+                 class="flex flex-col sm:flex-row items-center justify-center gap-3 py-10 text-sm text-gray-600 dark:text-gray-300">
+                <mat-spinner [diameter]="36"></mat-spinner>
+                <span>Fetching sent solicitation emails…</span>
             </div>
 
             <div *ngIf="solLoaded && totalSolicitations === 0" class="text-sm text-gray-500 py-2">
                 No solicitation emails sent yet.
             </div>
 
-            <div *ngIf="solLoaded && totalSolicitations > 0" class="sent-solicitations-table overflow-x-auto -mx-1">
-                <mat-table [dataSource]="solicitationEmails" class="w-full min-w-[600px] text-sm">
+            <div *ngIf="totalSolicitations > 0" class="relative sent-solicitations-table overflow-x-auto -mx-1">
+                <div *ngIf="!solLoaded"
+                     class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg">
+                    <mat-spinner [diameter]="36"></mat-spinner>
+                </div>
+                <mat-table [dataSource]="solicitationEmails" class="w-full min-w-[600px] text-sm"
+                           [class.opacity-40]="!solLoaded" [class.pointer-events-none]="!solLoaded">
 
                     <ng-container matColumnDef="sent">
                         <mat-header-cell *matHeaderCellDef class="font-semibold text-xs uppercase tracking-wide text-gray-500">
@@ -117,11 +137,11 @@
                         </mat-header-cell>
                         <mat-cell *matCellDef="let e" class="justify-end whitespace-nowrap">
                             <button mat-stroked-button type="button" class="mr-1" (click)="viewSolicitation(e)"
-                                    [disabled]="solResendId === e._id">
-                                View
+                                    [disabled]="solResendId === e._id || viewLoadingId === e._id">
+                                {{ viewLoadingId === e._id ? '…' : 'View' }}
                             </button>
                             <button mat-stroked-button type="button" (click)="resendSolicitation(e)"
-                                    [disabled]="solResendId === e._id">
+                                    [disabled]="solResendId === e._id || viewLoadingId === e._id">
                                 {{ solResendId === e._id ? '…' : 'Resend' }}
                             </button>
                         </mat-cell>
@@ -138,6 +158,7 @@
                     [pageSize]="pageSize"
                     [pageSizeOptions]="[5, 10, 25, 50]"
                     [showFirstLastButtons]="true"
+                    [disabled]="!solLoaded"
                     (page)="onPageChange($event)">
                 </mat-paginator>
             </div>

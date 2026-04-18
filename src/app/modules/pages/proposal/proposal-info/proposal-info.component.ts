@@ -1,11 +1,13 @@
 import {
-    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
+    OnChanges,
     OnDestroy,
     OnInit,
     EventEmitter,
     Output,
     Input,
+    SimpleChanges,
     ViewEncapsulation,
 } from '@angular/core';
 import {
@@ -32,7 +34,7 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
     templateUrl: './proposal-info.component.html',
     styleUrls: ['./proposal-info.component.scss'],
 })
-export class ProposalInfoComponent implements OnInit, OnDestroy {
+export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     @Output() refreshProp = new EventEmitter<boolean>();
     @Input()
@@ -109,12 +111,9 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
+        private _cdr: ChangeDetectorRef,
         fb: FormBuilder
     ) {
-        this.route.params.subscribe((params) => {
-            this.proposalID = params.id;
-        });
-
         this.projectTitle$
             .pipe(debounceTime(400), distinctUntilChanged())
             .subscribe((term) => {
@@ -181,7 +180,21 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.getProposal(this.proposalID);
+        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
+            const id = pm.get('id');
+            if (!id) {
+                return;
+            }
+            this.proposalID = id;
+            this.getProposal(id);
+        });
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // Parent sets `inOrg` after org loads; view block *ngIf="directorEditing || inOrg" must repaint
+        if (changes['inOrg'] || changes['isDirector']) {
+            this._cdr.detectChanges();
+        }
     }
 
     /**
@@ -203,6 +216,9 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
                     this.proposal = proposal;
                     this.propID = this.proposal._id; //mongo id
                     this.setFields();
+                    this.loaded = true;
+                    this._cdr.detectChanges();
+                    Promise.resolve().then(() => this._cdr.detectChanges());
                 } else {
                     //send user back to welcome
                     this._router.navigate(['/welcome']);
@@ -273,6 +289,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         }
 
         this.initGroupedForm();
+        this._cdr.detectChanges();
     }
 
     //when toggling the full form

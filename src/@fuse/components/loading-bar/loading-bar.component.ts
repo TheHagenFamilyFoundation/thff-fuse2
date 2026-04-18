@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { Subject, takeUntil } from 'rxjs';
 import { FuseLoadingService } from '@fuse/services/loading';
@@ -22,7 +22,10 @@ export class FuseLoadingBarComponent implements OnChanges, OnInit, OnDestroy
     /**
      * Constructor
      */
-    constructor(private _fuseLoadingService: FuseLoadingService)
+    constructor(
+        private _fuseLoadingService: FuseLoadingService,
+        private _changeDetectorRef: ChangeDetectorRef
+    )
     {
     }
 
@@ -50,23 +53,38 @@ export class FuseLoadingBarComponent implements OnChanges, OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        // Subscribe to the service
+        // Defer applying service state to the next microtask so we never update bindings in the same
+        // change-detection pass that already checked this component (e.g. HTTP interceptor toggles
+        // loading while a child’s ngOnInit kicked off a request) — avoids NG0100.
+        const apply = (fn: () => void): void => {
+            queueMicrotask(() => {
+                fn();
+                this._changeDetectorRef.markForCheck();
+            });
+        };
+
         this._fuseLoadingService.mode$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
-                this.mode = value;
+                apply(() => {
+                    this.mode = value;
+                });
             });
 
         this._fuseLoadingService.progress$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
-                this.progress = value;
+                apply(() => {
+                    this.progress = value ?? 0;
+                });
             });
 
         this._fuseLoadingService.show$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
-                this.show = value;
+                apply(() => {
+                    this.show = value;
+                });
             });
 
     }

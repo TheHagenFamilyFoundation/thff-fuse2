@@ -19,6 +19,7 @@ export class SubmissionYearsComponent implements AfterViewInit {
     dataSource: MatTableDataSource<any>;
     currentYear: number;
     submissionYearMissing: boolean = false;
+    tableLoaded = false;
 
     private years: any;
 
@@ -70,14 +71,19 @@ export class SubmissionYearsComponent implements AfterViewInit {
     }
 
     private getSubmissionYears(): void {
+        this.tableLoaded = false;
         this.submissionYearsService.getAllSubmissionYears(undefined).subscribe({
             next: (years) => {
                 this.years = years;
                 this.dataSource = new MatTableDataSource(this.years);
                 this.dataSource.sort = this.sort;
                 this.checkCurrentYearSubmissionYear();
+                this.tableLoaded = true;
             },
-            error: (err) => { console.error('getAllSubmissionYears error', err); }
+            error: (err) => {
+                console.error('getAllSubmissionYears error', err);
+                this.tableLoaded = true;
+            }
         });
     }
 

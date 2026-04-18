@@ -51,7 +51,17 @@ export class ProposalService {
         return this.http.put(urlString, body);
     }
 
-    getProps(year: number, skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string, showArchived?: string): Observable<any> {
+    getProps(
+        year: number,
+        skip: number,
+        limit: number,
+        filter: string,
+        sortColumn: string,
+        sortDirection: string,
+        showArchived?: string,
+        /** When true, API returns `{ items, total }` (one round trip vs separate /count). */
+        includeTotal?: boolean
+    ): Observable<any> {
         let urlString = `${this.apiUrl}/proposal?year=${year}&skip=${skip}&limit=${limit}`;
 
         //empty string
@@ -66,6 +76,10 @@ export class ProposalService {
 
         if (showArchived) {
             urlString += `&showArchived=${showArchived}`;
+        }
+
+        if (includeTotal) {
+            urlString += '&includeTotal=1';
         }
 
         return this.http.get(urlString);

@@ -132,7 +132,8 @@ export class UserOrganizationComponent implements OnInit {
                 this.loaded = true;
             }
         },
-            (err) => {
+            () => {
+                this.loaded = true;
             });
     } // end of checkOrganization
 

@@ -1,5 +1,6 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -25,7 +26,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     orgID: any;
     organizationID: any;
     org: any;
-    isDirector: boolean;
+    isDirector: boolean = false;
     inOrg: boolean;
     viewing: string;
 
@@ -38,10 +39,8 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         public getOrgService: GetOrganizationService,
         public _authService: AuthService,
         public snackBar: MatSnackBar,
+        private _cdr: ChangeDetectorRef,
     ) {
-        this.route.params.subscribe((params) => {
-            this.orgID = params.id;
-        });
         this.inOrg = false;
     }
 
@@ -50,9 +49,17 @@ export class OrganizationComponent implements OnInit, OnDestroy {
 
         this._authService.checkDirector().subscribe((isADirector) => {
             this.isDirector = isADirector;
+            this._cdr.detectChanges();
         });
 
-        this.getOrganization(this.orgID);
+        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
+            const id = pm.get('id');
+            if (!id) {
+                return;
+            }
+            this.orgID = id;
+            this.getOrganization(id);
+        });
     }
 
     ngOnDestroy(): void {
@@ -66,6 +73,8 @@ export class OrganizationComponent implements OnInit, OnDestroy {
             this.organizationID = this.org._id;
             this.checkInOrganization(this.currentUser._id);
             this.checkIsDirectorAndInOrg();
+            this._cdr.detectChanges();
+            Promise.resolve().then(() => this._cdr.detectChanges());
         });
     }
 
@@ -84,7 +93,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         this.inOrg = !!object;
 
         if (!this.inOrg && !this.isDirector) {
-            this._router.navigate(['welcome']);
+            this._router.navigate(['/welcome']);
             this.snackBar.open('You are not allowed to view this Organization', 'OK', {
                 duration: 3000,
             });

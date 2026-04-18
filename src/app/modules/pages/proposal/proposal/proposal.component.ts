@@ -1,5 +1,5 @@
 import {
-    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -37,7 +37,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
     proposalID: string; //generated ID
     propID: string; //mongo id
     proposal: any; // the Proposal object
-    isDirector: boolean;
+    isDirector: boolean = false;
     isPresident: boolean = false;
     inOrg: boolean; //applies to proposal in the organization
     viewing: string;
@@ -117,20 +117,10 @@ export class ProposalComponent implements OnInit, OnDestroy {
         public _authService: AuthService,
         public getOrgService: GetOrganizationService,
         public snackBar: MatSnackBar,
+        private _cdr: ChangeDetectorRef,
 
         fb: FormBuilder
     ) {
-        this.route.params.subscribe((params) => {
-            this.proposalID = params.id;
-        });
-
-        this.route.queryParams.subscribe((qp) => {
-            if (qp.from === 'meeting' && qp.meetingId) {
-                this.backLink = '/pages/director/meeting/' + qp.meetingId;
-                this.backLabel = 'Back to Meeting';
-            }
-        });
-
         this.projectTitle$
             .pipe(debounceTime(400), distinctUntilChanged())
             .subscribe((term) => {
@@ -205,13 +195,35 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
         this._authService.checkDirector().subscribe((isADirector) => {
             this.isDirector = isADirector;
+            this._cdr.detectChanges();
         });
 
         this._authService.checkPresident().subscribe((isAPresident) => {
             this.isPresident = isAPresident;
+            this._cdr.detectChanges();
         });
 
-        this.getProposal(this.proposalID);
+        const qpm = this.route.snapshot.queryParamMap;
+        if (qpm.get('from') === 'meeting' && qpm.get('meetingId')) {
+            this.backLink = '/pages/director/meeting/' + qpm.get('meetingId');
+            this.backLabel = 'Back to Meeting';
+        }
+
+        // Load when :id is available (avoid racing ngOnInit before params emit)
+        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
+            const id = pm.get('id');
+            if (!id) {
+                return;
+            }
+            this.proposalID = id;
+            this.getProposal(id);
+        });
+    }
+
+    /** Use segment array — a single string like `/pages/org/x` inside `[]` breaks RouterLink */
+    get organizationRouterLink(): string[] | null {
+        const oid = this.org?.organizationID;
+        return oid ? ['/pages', 'organization', oid] : null;
     }
 
     /**
@@ -236,20 +248,27 @@ export class ProposalComponent implements OnInit, OnDestroy {
                     this.org = this.proposal.organization;
                     this.organizationLink = '/pages/organization/' + this.org.organizationID;
 
-                    if (!this.backLink) {
-                        this.backLink = this.organizationLink;
+                    if (!this.backLabel) {
                         this.backLabel = 'Back to Organization';
                     }
 
                     this.getOrganization(this.org.organizationID);
 
                     this.setFields();
+                    this._cdr.detectChanges();
+                    Promise.resolve().then(() => this._cdr.detectChanges());
                 } else {
                     //send user back to welcome
                     this._router.navigate(['/welcome']);
                 }
             },
-                () => {});
+                (err) => {
+                    console.error('getProposalByID failed', err);
+                    this.snackBar.open('Could not load this proposal. Try again or open it from your organization.', 'OK', {
+                        duration: 5000,
+                    });
+                    this._router.navigate(['/welcome']);
+                });
     }
 
     refreshProp(): void {
@@ -269,6 +288,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
             //check if director
             this.checkIsDirectorAndInOrg();
 
+            this._cdr.detectChanges();
         },
             () => {});
     }
@@ -287,7 +307,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
         //route to welcome if not in organization
         if (!this.inOrg && !this.isDirector) {
-            this._router.navigate(['welcome']);
+            this._router.navigate(['/welcome']);
             //show toast
             const message = 'You are not allowed to view this Proposal';
             const snackBarRef = this.snackBar.open(message, 'OK', {

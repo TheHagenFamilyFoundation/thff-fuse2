@@ -33,53 +33,94 @@
         <fuse-card class="flex flex-col p-6" *ngIf="meeting.status === 'completed'">
             <h2 class="text-lg font-semibold m-0 mb-2">Send grant notifications</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mb-4">
-                Sends one email per funded organization using the contact email on file (from organization profile).
-                Organizations without an email are skipped and listed in the response.
+                Review who will receive mail (organization profile email), then send one grant notification per funded organization.
+                Rows without an email are skipped.
             </p>
-            <button mat-flat-button color="primary"
-                    (click)="sendGrantEmails()"
-                    [disabled]="!isPresidentOrAdmin || sending">
-                <mat-icon class="mr-1 icon-size-5">send</mat-icon>
-                {{ sending ? 'Sending…' : 'Send grant notification emails' }}
+            <button mat-flat-button
+                    color="primary"
+                    type="button"
+                    class="grant-notify-btn"
+                    (click)="openGrantEmailPreview()">
+                <mat-icon class="grant-notify-btn__icon">send</mat-icon>
+                <span>Review recipients &amp; send</span>
             </button>
             <p *ngIf="!isPresidentOrAdmin" class="text-xs text-gray-500 mt-3 m-0">
-                Only the president or admin can send these emails.
+                Directors can open the preview; only the president or admin can send.
             </p>
         </fuse-card>
 
-        <fuse-card class="flex flex-col p-6">
-            <h2 class="text-lg font-semibold m-0 mb-4">Emails sent</h2>
+        <h2 class="text-lg font-semibold m-0 mb-4">Emails sent</h2>
 
-            <div *ngIf="!emailsLoaded" class="flex justify-center py-8">
-                <mat-spinner [diameter]="36"></mat-spinner>
+        <fuse-card class="flex flex-col w-full overflow-hidden relative">
+            <div *ngIf="!emailsLoaded"
+                 class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 role="status"
+                 aria-label="Loading emails">
+                <mat-spinner [diameter]="40"></mat-spinner>
             </div>
 
-            <div *ngIf="emailsLoaded && emails.length === 0" class="text-sm text-gray-500 py-4">
+            <div *ngIf="emailsLoaded && emailTotal === 0"
+                 class="flex items-center justify-center min-h-[200px] text-sm text-gray-500 dark:text-gray-400 px-6 py-8">
                 No grant notification emails have been logged for this meeting yet.
             </div>
 
-            <div *ngIf="emailsLoaded && emails.length > 0" class="overflow-x-auto">
-                <table class="w-full text-sm border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500">
-                            <th class="py-2 pr-4 font-medium">Sent</th>
-                            <th class="py-2 pr-4 font-medium">To</th>
-                            <th class="py-2 pr-4 font-medium">Organization</th>
-                            <th class="py-2 pr-4 font-medium">Amount</th>
-                            <th class="py-2 pr-4 font-medium">Sent by</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let e of emails" class="border-b border-gray-100 dark:border-gray-800">
-                            <td class="py-2 pr-4 whitespace-nowrap">{{ e.createdAt | date: 'short' }}</td>
-                            <td class="py-2 pr-4">{{ e.to }}</td>
-                            <td class="py-2 pr-4">{{ e.organizationName || e.organization?.name || '—' }}</td>
-                            <td class="py-2 pr-4">{{ e.amountGranted | currency:'USD':'symbol':'1.0-0' }}</td>
-                            <td class="py-2 pr-4">{{ senderLabel(e) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <mat-table *ngIf="emailsLoaded && emailTotal > 0"
+                       [dataSource]="emails"
+                       class="w-full min-h-[200px]">
+
+                <ng-container matColumnDef="organization">
+                    <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Organization</mat-header-cell>
+                    <mat-cell *matCellDef="let e" class="pl-6 font-medium">
+                        {{ e.organizationName || e.organization?.name || '—' }}
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="sent">
+                    <mat-header-cell *matHeaderCellDef class="font-semibold">Sent</mat-header-cell>
+                    <mat-cell *matCellDef="let e" class="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {{ e.createdAt | date: 'MM/dd/yyyy, h:mm a' }}
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="to">
+                    <mat-header-cell *matHeaderCellDef class="font-semibold">To</mat-header-cell>
+                    <mat-cell *matCellDef="let e" class="text-gray-500 dark:text-gray-400 font-mono text-xs break-all">
+                        {{ e.to }}
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="sentBy">
+                    <mat-header-cell *matHeaderCellDef class="font-semibold">Sent by</mat-header-cell>
+                    <mat-cell *matCellDef="let e" class="text-gray-500 dark:text-gray-400">
+                        {{ senderLabel(e) }}
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="view">
+                    <mat-header-cell *matHeaderCellDef class="w-14 pr-4 font-semibold"></mat-header-cell>
+                    <mat-cell *matCellDef="let e" class="pr-2 w-14">
+                        <button mat-icon-button
+                                type="button"
+                                (click)="openSentEmailViewer(e)"
+                                matTooltip="View email"
+                                [attr.aria-label]="'View email for ' + (e.organizationName || e.organization?.name || 'organization')">
+                            <mat-icon class="icon-size-5 text-gray-500">visibility</mat-icon>
+                        </button>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedEmailColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedEmailColumns" class="org-row"></mat-row>
+            </mat-table>
+
+            <mat-paginator *ngIf="emailTotal > 0"
+                           (page)="handleEmailPage($event)"
+                           [length]="emailTotal"
+                           [pageIndex]="emailPageIndex"
+                           [pageSize]="emailPageSize"
+                           [pageSizeOptions]="[10, 25, 100]"
+                           [disabled]="!emailsLoaded">
+            </mat-paginator>
         </fuse-card>
     </div>
 

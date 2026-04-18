@@ -115,7 +115,7 @@
                             <textarea class="resize-none" matInput formControlName="narrative" value="{{ narrative }}"
                                 type="text" id="narrative" matTextareaAutosize rows="5" matAutosizeMinRows="5"
                                 matAutosizeMaxRows="5" maxlength="2000" placeholder="Narrative"
-                                (keyup)="phone$.next($event.target.value)" required></textarea>
+                                (keyup)="narrative$.next($event.target.value)" required></textarea>
                             <mat-hint align="end">{{ narrative.length }} /2000</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm

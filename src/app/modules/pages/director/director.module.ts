@@ -19,6 +19,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -37,9 +39,11 @@ import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
 import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
 import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
+import { GrantEmailPreviewDialogComponent } from './meeting-after/grant-email-preview-dialog.component';
+import { SentGrantEmailViewDialogComponent } from './meeting-after/sent-grant-email-view-dialog.component';
 
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent, GrantEmailPreviewDialogComponent, SentGrantEmailViewDialogComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -61,6 +65,8 @@ import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
         MatDialogModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatExpansionModule,
     ],
 })
 export class DirectorModule { }

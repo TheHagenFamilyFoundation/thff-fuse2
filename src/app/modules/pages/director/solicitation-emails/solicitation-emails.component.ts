@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,7 @@ export class SolicitationEmailsComponent implements OnInit {
     solicitationEmails: any[] = [];
     solLoaded = false;
     solResendId: string | null = null;
+    viewLoadingId: string | null = null;
 
     filterReferralCodeId = '';
     /** Submission cycle year (referral code created in this calendar year); '' = all years. */
@@ -34,17 +35,44 @@ export class SolicitationEmailsComponent implements OnInit {
     pageSize = 10;
     totalSolicitations = 0;
 
+    /** Suppress duplicate filter reloads when mat-select emits after enable (same year + code). */
+    private _filterSnapshot = '';
+
+    /** True while initial or refreshed list/codes are in flight — drives header progress UI. */
+    get pageBusy(): boolean {
+        return !this.codesLoaded || !this.solLoaded;
+    }
+
+    get loadingMessage(): string {
+        if (!this.codesLoaded && !this.solLoaded) {
+            return 'Loading referral codes and sent solicitations…';
+        }
+        if (!this.codesLoaded) {
+            return 'Loading referral codes…';
+        }
+        if (!this.solLoaded) {
+            return 'Loading sent solicitations…';
+        }
+        return '';
+    }
+
     constructor(
         private referralCodeService: ReferralCodeService,
         private outboundEmailService: OutboundEmailService,
         private snackBar: MatSnackBar,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
         this.rebuildYearFilterOptions();
+        this._filterSnapshot = this._currentFilterSnapshot();
         this.loadCodes();
         this.loadSolicitationEmails();
+    }
+
+    private _currentFilterSnapshot(): string {
+        return `${this.filterYear}|${this.filterReferralCodeId}`;
     }
 
     loadCodes(): void {
@@ -54,9 +82,11 @@ export class SolicitationEmailsComponent implements OnInit {
                 this.codes = codes;
                 this.rebuildYearFilterOptions();
                 this.codesLoaded = true;
+                this._changeDetectorRef.markForCheck();
             },
             error: () => {
                 this.codesLoaded = true;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -92,19 +122,29 @@ export class SolicitationEmailsComponent implements OnInit {
                     }
                     this.solicitationEmails = items;
                     this.solLoaded = true;
+                    this._changeDetectorRef.markForCheck();
                 },
                 error: () => {
                     this.solLoaded = true;
+                    this._changeDetectorRef.markForCheck();
                 }
             });
     }
 
     onFilterChange(): void {
+        const snap = this._currentFilterSnapshot();
+        if (snap === this._filterSnapshot) {
+            return;
+        }
+        this._filterSnapshot = snap;
         this.pageIndex = 0;
         this.loadSolicitationEmails();
     }
 
     onPageChange(ev: PageEvent): void {
+        if (ev.pageIndex === this.pageIndex && ev.pageSize === this.pageSize) {
+            return;
+        }
         this.pageIndex = ev.pageIndex;
         this.pageSize = ev.pageSize;
         this.loadSolicitationEmails();
@@ -139,20 +179,36 @@ export class SolicitationEmailsComponent implements OnInit {
                     });
             },
             error: () => {
+                this.codesLoaded = true;
+                this._changeDetectorRef.markForCheck();
                 this.snackBar.open('Could not load referral codes', 'OK', { duration: 4000 });
             }
         });
     }
 
     viewSolicitation(row: any): void {
-        this.dialog.open(SolicitationEmailPreviewDialogComponent, {
-            width: '720px',
-            maxWidth: '95vw',
-            data: {
-                subject: row?.subject,
-                to: row?.to,
-                html: row?.htmlBody || null,
-                missingPreview: !row?.htmlBody
+        const id = row?._id;
+        if (!id) {
+            return;
+        }
+        this.viewLoadingId = String(id);
+        this.outboundEmailService.getSolicitationEmailById(String(id)).subscribe({
+            next: (doc) => {
+                this.viewLoadingId = null;
+                this.dialog.open(SolicitationEmailPreviewDialogComponent, {
+                    width: '720px',
+                    maxWidth: '95vw',
+                    data: {
+                        subject: doc?.subject,
+                        to: doc?.to,
+                        html: doc?.htmlBody || null,
+                        missingPreview: !doc?.htmlBody
+                    }
+                });
+            },
+            error: () => {
+                this.viewLoadingId = null;
+                this.snackBar.open('Could not load email preview', 'OK', { duration: 4000 });
             }
         });
     }

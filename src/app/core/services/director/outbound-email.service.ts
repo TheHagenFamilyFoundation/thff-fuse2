@@ -31,6 +31,11 @@ export class OutboundEmailService {
         );
     }
 
+    /** Full document including htmlBody (for view preview). */
+    getSolicitationEmailById(id: string): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/outbound-email/solicitations/${id}`);
+    }
+
     previewSolicitation(body: {
         referralCodeId: string;
         /** Omit to use the server default body text. */
@@ -54,11 +59,41 @@ export class OutboundEmailService {
         return this.http.post(`${this.apiUrl}/outbound-email/solicitation/${id}/resend`, {});
     }
 
-    getMeetingGrantEmails(meetingId: string): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/meeting/${meetingId}/outbound-emails`);
+    getMeetingGrantEmails(
+        meetingId: string,
+        page = 1,
+        pageSize = 10
+    ): Observable<{ items: any[]; total: number; page: number; pageSize: number }> {
+        const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+        return this.http.get<{ items: any[]; total: number; page: number; pageSize: number }>(
+            `${this.apiUrl}/meeting/${meetingId}/outbound-emails`,
+            { params }
+        );
     }
 
-    sendGrantNotifications(meetingId: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/meeting/${meetingId}/send-grant-notifications`, {});
+    /** Single grant notification including htmlBody (must belong to the meeting). */
+    getMeetingGrantEmailById(meetingId: string, emailId: string): Observable<{
+        subject?: string;
+        to?: string;
+        htmlBody?: string | null;
+        createdAt?: string;
+        organizationName?: string;
+        proposalTitle?: string;
+    }> {
+        return this.http.get(`${this.apiUrl}/meeting/${meetingId}/outbound-emails/${emailId}`);
+    }
+
+    sendGrantNotifications(
+        meetingId: string,
+        body?: {
+            customizations?: Array<{
+                organizationId: string;
+                subject: string;
+                /** Editable plain paragraph (server converts to HTML; same as preview). */
+                messagePlain: string;
+            }>;
+        }
+    ): Observable<any> {
+        return this.http.post(`${this.apiUrl}/meeting/${meetingId}/send-grant-notifications`, body ?? {});
     }
 }

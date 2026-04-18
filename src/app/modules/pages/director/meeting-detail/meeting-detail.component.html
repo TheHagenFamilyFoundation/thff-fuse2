@@ -209,7 +209,7 @@
                 <!-- Table -->
                 <fuse-card *ngIf="meeting.status !== 'completed' || editingCompletedMeeting"
                            class="flex flex-col w-full overflow-hidden">
-                    <mat-table [dataSource]="getTableAllocations()" class="w-full meeting-table">
+                    <mat-table [dataSource]="displayAllocations" class="w-full meeting-table">
 
                         <ng-container matColumnDef="projectTitle">
                             <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">

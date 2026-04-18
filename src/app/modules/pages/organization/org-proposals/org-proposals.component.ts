@@ -129,8 +129,20 @@ export class OrgProposalsComponent implements AfterViewInit {
                 distinctUntilChanged(),
                 tap((event: KeyboardEvent) => {
                     this.filterInputString = (event.target as HTMLInputElement).value;
+                    this.skip = 0;
+                    this.paginator.pageIndex = 0;
+                    this.loaded = false;
                     this.proposalService.getOrgProps(this.year, this.org._id, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
-                        .subscribe((data) => { this.data = data; });
+                        .subscribe({
+                            next: (data) => {
+                                this.data = data;
+                                this.loaded = true;
+                            },
+                            error: () => {
+                                this.loaded = true;
+                                this.data = [];
+                            }
+                        });
                     this.getOrgProposalCount(this.year, this.filterInputString);
                 })
             )

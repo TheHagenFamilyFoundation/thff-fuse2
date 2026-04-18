@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 
@@ -14,13 +14,20 @@ export class DirectorComponent implements OnInit {
 
     constructor(
         private _router: Router,
-        private _meetingService: MeetingService
+        private _meetingService: MeetingService,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
         this._meetingService.getMeetings().subscribe({
             next: (meetings) => {
-                this.activeMeeting = meetings.find((m: any) => m.status !== 'completed') || null;
+                const list = Array.isArray(meetings) ? meetings : [];
+                this.activeMeeting = list.find((m: any) => m.status !== 'completed') || null;
+                this._changeDetectorRef.markForCheck();
+            },
+            error: () => {
+                this.activeMeeting = null;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }

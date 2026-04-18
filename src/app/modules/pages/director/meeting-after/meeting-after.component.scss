@@ -3,3 +3,39 @@
     flex: 1;
     flex-direction: column;
 }
+
+/* Not full-width; compact height — default MDC buttons can stretch and grow very tall in flex layouts */
+.grant-notify-btn {
+    align-self: flex-start;
+    width: auto;
+    min-height: 2.5rem;
+    height: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.grant-notify-btn .grant-notify-btn__icon {
+    /* Icon must match label on primary filled buttons (theme was leaving it low-contrast) */
+    color: var(--mat-sys-on-primary, var(--mdc-filled-button-label-text-color, #fff));
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.grant-notify-btn[disabled] .grant-notify-btn__icon {
+    opacity: 0.6;
+}
+
+/* Match proposals / voting / organizations table row hover */
+.org-row {
+    transition: background-color 150ms ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}

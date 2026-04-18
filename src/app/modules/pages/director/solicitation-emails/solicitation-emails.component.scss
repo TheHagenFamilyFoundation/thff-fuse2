@@ -4,3 +4,8 @@
     flex: 1;
     min-width: 0;
 }
+
+/* Theme defaults mat-icon to slate/neutral; primary filled buttons need on-primary contrast. */
+.solicitation-email-btn-icon {
+    color: var(--mat-sys-on-primary) !important;
+}

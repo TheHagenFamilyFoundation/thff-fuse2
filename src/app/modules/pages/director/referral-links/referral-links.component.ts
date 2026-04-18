@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 
@@ -17,7 +17,8 @@ export class ReferralLinksComponent implements OnInit {
 
     constructor(
         private referralCodeService: ReferralCodeService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {
         this.feUrl = window.location.origin;
     }
@@ -30,12 +31,15 @@ export class ReferralLinksComponent implements OnInit {
         this.loaded = false;
         this.referralCodeService.getMyReferralCodes().subscribe({
             next: (codes) => {
-                this.codes = codes;
+                this.codes = Array.isArray(codes) ? codes : [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             },
             error: (err) => {
                 console.error('Error loading referral codes', err);
+                this.codes = [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }

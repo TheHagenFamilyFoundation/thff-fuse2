@@ -79,9 +79,9 @@
             </div>
 
             <!-- Meetings Table -->
-            <div *ngIf="meetings.length > 0">
+            <div *ngIf="dataSource.data.length > 0">
                 <fuse-card class="flex flex-col w-full overflow-hidden">
-                    <mat-table [dataSource]="meetings" class="w-full">
+                    <mat-table [dataSource]="dataSource" class="w-full">
 
                         <!-- Year Column -->
                         <ng-container matColumnDef="year">
@@ -178,7 +178,7 @@
             </div>
 
             <!-- Empty State -->
-            <div *ngIf="meetings.length === 0">
+            <div *ngIf="loaded && dataSource.data.length === 0">
                 <fuse-card class="flex flex-col items-center p-12">
                     <mat-icon class="text-gray-300 dark:text-gray-600 mb-4"
                               style="font-size: 64px; width: 64px; height: 64px;">groups</mat-icon>
