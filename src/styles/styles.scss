@@ -167,6 +167,22 @@ $thff-btn-cta-shadow:
     filter: brightness(0.97);
 }
 
+/* Theme often sets mat-icon to a neutral slate; match filled button label contrast. */
+.mat-mdc-unelevated-button.mat-primary:not(:disabled) .mat-icon,
+.mat-mdc-raised-button.mat-primary:not(:disabled) .mat-icon {
+    color: #fff !important;
+}
+
+.mat-mdc-unelevated-button.mat-accent:not(:disabled) .mat-icon,
+.mat-mdc-raised-button.mat-accent:not(:disabled) .mat-icon {
+    color: rgb(var(--fuse-on-accent-600-rgb)) !important;
+}
+
+.mat-mdc-unelevated-button.mat-warn:not(:disabled) .mat-icon,
+.mat-mdc-raised-button.mat-warn:not(:disabled) .mat-icon {
+    color: #fff !important;
+}
+
 /* Outlined / stroked: neutral “secondary” chrome (home “Need help?”) */
 .mat-mdc-outlined-button:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(:disabled) {
     border-radius: 0.5rem !important;

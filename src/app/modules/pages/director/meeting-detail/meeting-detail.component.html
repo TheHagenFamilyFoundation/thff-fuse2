@@ -147,7 +147,7 @@
                         </button>
                         <button mat-flat-button color="primary" (click)="completeMeeting()">
                             <mat-icon class="mr-1">check_circle</mat-icon>
-                            Finalize Meeting
+                            Complete meeting
                         </button>
                     </div>
                 </div>
@@ -439,7 +439,7 @@
                         Started by {{ getUserName(meeting.startedBy) }}
                     </p>
                     <p *ngIf="meeting.completedBy">
-                        Finalized by {{ getUserName(meeting.completedBy) }}
+                        Completed by {{ getUserName(meeting.completedBy) }}
                         on {{ meeting.completedAt | date:'MMM d, yyyy \'at\' h:mm a' }}
                     </p>
                     <p *ngIf="meeting.notes">Notes: {{ meeting.notes }}</p>

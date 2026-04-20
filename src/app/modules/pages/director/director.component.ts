@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { meetingStatusLabel } from './meeting-status.labels';
 
 @Component({
     standalone: false,
@@ -67,12 +68,7 @@ export class DirectorComponent implements OnInit {
     }
 
     getStatusLabel(status: string): string {
-        switch (status) {
-            case 'setup': return 'Not Started';
-            case 'in_progress': return 'In Progress';
-            case 'completed': return 'Finalized';
-            default: return status;
-        }
+        return meetingStatusLabel(status);
     }
 
     getStatusColor(status: string): string {

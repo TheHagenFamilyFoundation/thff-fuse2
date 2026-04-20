@@ -140,9 +140,9 @@ export class MeetingAfterComponent implements OnInit {
             return;
         }
         this.dialog.open(SentGrantEmailViewDialogComponent, {
-            width: '720px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
+            width: 'min(960px, 96vw)',
+            maxWidth: '96vw',
+            maxHeight: '96vh',
             autoFocus: 'dialog',
             data: {
                 meetingId: this.meetingId,
@@ -157,9 +157,10 @@ export class MeetingAfterComponent implements OnInit {
         }
         this.dialog
             .open(GrantEmailPreviewDialogComponent, {
-                width: 'min(1000px, 98vw)',
-                maxWidth: '98vw',
-                maxHeight: '94vh',
+                width: 'min(1280px, 99vw)',
+                maxWidth: '99vw',
+                maxHeight: '98vh',
+                panelClass: 'grant-email-preview-dialog-panel',
                 autoFocus: 'dialog',
                 data: {
                     meetingId: this.meetingId,

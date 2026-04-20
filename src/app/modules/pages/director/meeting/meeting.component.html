@@ -66,9 +66,18 @@
                 </fuse-card>
             </div>
 
-            <!-- Filter Row -->
-            <div *ngIf="isPresidentOrAdmin" class="flex items-center gap-3 mb-4">
-                <mat-form-field class="w-40 -mb-5">
+            <!-- Filters: year + show — horizontal row -->
+            <div
+                class="meeting-filters mb-4 flex flex-row flex-wrap items-end gap-3"
+                [ngClass]="isPresidentOrAdmin ? 'max-w-2xl' : 'max-w-xs'">
+                <mat-form-field class="meeting-filters__field -mb-5">
+                    <mat-label>Year</mat-label>
+                    <mat-select [value]="listYearFilter" (selectionChange)="yearFilterChanged($event.value)">
+                        <mat-option value="">All years</mat-option>
+                        <mat-option *ngFor="let y of years" [value]="'' + y.year">{{ y.year }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field *ngIf="isPresidentOrAdmin" class="meeting-filters__field -mb-5">
                     <mat-label>Show</mat-label>
                     <mat-select [value]="archivedFilter" (selectionChange)="archivedFilterChanged($event.value)">
                         <mat-option value="">Active</mat-option>
@@ -182,12 +191,17 @@
                 <fuse-card class="flex flex-col items-center p-12">
                     <mat-icon class="text-gray-300 dark:text-gray-600 mb-4"
                               style="font-size: 64px; width: 64px; height: 64px;">groups</mat-icon>
-                    <h2 class="text-xl font-semibold text-gray-500 m-0">No Meetings Yet</h2>
+                    <h2 class="text-xl font-semibold text-gray-500 m-0">
+                        {{ listYearFilter ? 'No meetings for this year' : 'No meetings yet' }}
+                    </h2>
                     <p class="text-gray-400 mt-2 text-center">
-                        <ng-container *ngIf="isPresidentOrAdmin">
+                        <ng-container *ngIf="listYearFilter">
+                            Try another year or clear the year filter to see all meetings.
+                        </ng-container>
+                        <ng-container *ngIf="!listYearFilter && isPresidentOrAdmin">
                             Click "New Meeting" to create the first grant meeting.
                         </ng-container>
-                        <ng-container *ngIf="!isPresidentOrAdmin">
+                        <ng-container *ngIf="!listYearFilter && !isPresidentOrAdmin">
                             No meetings have been created yet. The president or admin will start one when ready.
                         </ng-container>
                     </p>

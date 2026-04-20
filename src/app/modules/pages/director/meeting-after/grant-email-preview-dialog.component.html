@@ -20,7 +20,7 @@
 
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 m-0 mb-2">Outgoing messages</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-2 leading-relaxed">
-            Expand a row to see the full message. Each uses that organization’s name, greeting, and project title when present.
+            Expand a row to see the full message. Each uses that organization’s name, greeting, and proposal title when present.
             <span *ngIf="data.canSend" class="block mt-1">Use <strong>Edit</strong> to change the subject or the message text (plain English — no HTML). Choose <strong>Show preview</strong> to see the formatted email.</span>
         </p>
 
@@ -99,7 +99,7 @@
         <div *ngIf="rows.length === 0" class="rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
             <p class="font-medium m-0 mb-2">No recipients to show</p>
             <p class="m-0 text-gray-600 dark:text-gray-400 leading-relaxed">
-                This list only includes funded organizations from the finalized meeting.
+                This list only includes funded organizations from the completed meeting.
                 If there are no funded allocations yet, there is no one to email.
             </p>
         </div>

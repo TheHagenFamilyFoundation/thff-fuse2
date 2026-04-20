@@ -5,3 +5,10 @@
         background-color: rgba(0, 0, 0, 0.04);
     }
 }
+
+/* Pair Year + Show: equal fixed width, row layout; wrap only if viewport is very narrow */
+.meeting-filters__field {
+    width: 12rem;
+    max-width: 100%;
+    flex: 0 0 auto;
+}

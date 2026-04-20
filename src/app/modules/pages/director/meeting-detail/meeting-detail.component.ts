@@ -6,6 +6,7 @@ import { filter, map } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { meetingStatusLabel } from '../meeting-status.labels';
 
 @Component({
     standalone: false,
@@ -280,7 +281,7 @@ export class MeetingDetailComponent implements OnInit {
                     this.meeting = meeting;
                     this.recalcTotals();
                     this.loadSummary(meeting._id);
-                    this.snackBar.open('Meeting finalized. You can still edit budget and allocations here if needed.', 'Close', { duration: 5000 });
+                    this.snackBar.open('Meeting completed. You can still edit budget and allocations here if needed.', 'Close', { duration: 5000 });
                     this._changeDetectorRef.markForCheck();
                 },
                 error: (err) => {
@@ -371,12 +372,7 @@ export class MeetingDetailComponent implements OnInit {
     }
 
     getStatusLabel(status: string): string {
-        switch (status) {
-            case 'setup': return 'Not Started';
-            case 'in_progress': return 'In Progress';
-            case 'completed': return 'Finalized';
-            default: return status;
-        }
+        return meetingStatusLabel(status);
     }
 
     goToProposal(proposalID: string): void {

@@ -1,6 +1,11 @@
+/* Let the dialog body use most of the viewport (panel class set in MatDialog.open). */
+:host ::ng-deep .grant-email-preview-dialog-panel .mat-mdc-dialog-content {
+    max-height: min(92vh, 1400px) !important;
+}
+
 .grant-preview-dialog-content {
     display: block;
-    min-width: min(100%, 720px);
+    min-width: min(100%, 880px);
     min-height: 5rem;
     padding-top: 0.5rem;
     /* Ensure body text isn’t lost against MDC dialog surface in some themes */
@@ -11,7 +16,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-height: min(72vh, 820px);
+    max-height: min(85vh, 1000px);
     overflow-y: auto;
     padding-right: 0.25rem;
 }
@@ -57,8 +62,11 @@
 }
 
 .grant-email-panel__body .grant-email-sample__frame {
-    /* Taller preview when expanded — less scrolling inside the email */
-    max-height: min(58vh, 620px);
+    /* Large preview area — primary scroll is inside this box */
+    height: min(78vh, 920px);
+    max-height: min(78vh, 920px);
+    min-height: 280px;
+    padding: 0.75rem 1rem;
 }
 
 .grant-email-edit-fields .grant-email-field {
@@ -66,6 +74,6 @@
 }
 
 .grant-email-plain-textarea {
-    min-height: 10rem;
+    min-height: 14rem;
     resize: vertical;
 }
