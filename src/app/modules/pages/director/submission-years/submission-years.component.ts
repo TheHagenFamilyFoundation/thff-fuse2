@@ -72,18 +72,23 @@ export class SubmissionYearsComponent implements AfterViewInit {
 
     private getSubmissionYears(): void {
         this.tableLoaded = false;
-        this.submissionYearsService.getAllSubmissionYears(undefined).subscribe({
+        this.submissionYearsService.getAllSubmissionYears(this.currentYear).subscribe({
             next: (years) => {
-                this.years = years;
-                this.dataSource = new MatTableDataSource(this.years);
-                this.dataSource.sort = this.sort;
+                const list = Array.isArray(years) ? years : [];
+                this.years = list;
+                this.dataSource = new MatTableDataSource(list);
+                if (this.sort) {
+                    this.dataSource.sort = this.sort;
+                }
                 this.checkCurrentYearSubmissionYear();
                 this.tableLoaded = true;
             },
             error: (err) => {
                 console.error('getAllSubmissionYears error', err);
+                this.years = [];
+                this.dataSource = new MatTableDataSource([]);
                 this.tableLoaded = true;
-            }
+            },
         });
     }
 

@@ -33,11 +33,8 @@
                                         matInput
                                         placeholder="Legal Name"
                                         formControlName="legalName"
-                                        value="{{ legalName }}"
+                                        id="grid-legal-name"
                                         required
-                                        (keyup)="
-                                            legalName$.next($event.target.value)
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -71,16 +68,16 @@
                                         maxLength="500"
                                         placeholder="Description"
                                         formControlName="description"
-                                        value="{{ description }}"
-                                        (keyup)="
-                                            description$.next(
-                                                $event.target.value
-                                            )
-                                        "
+                                        id="grid-organization-description"
                                     ></textarea>
                                     <mat-hint align="end"
-                                        >{{ description?.toString().length }} /
-                                        500</mat-hint
+                                        >{{
+                                            (
+                                                groupedForm.get('description')
+                                                    ?.value || ''
+                                            ).length
+                                        }}
+                                        / 500</mat-hint
                                     >
                                 </mat-form-field>
                             </div>
@@ -98,18 +95,19 @@
                                         matInput
                                         placeholder="Year Founded"
                                         formControlName="yearFounded"
+                                        id="grid-year-founded"
                                         maxlength="4"
-                                        value="{{ yearFounded }}"
                                         required
-                                        (keyup)="
-                                            yearFounded$.next(
-                                                $event.target.value
-                                            )
-                                        "
                                     />
                                     <mat-hint align="end"
-                                        >{{ yearFounded?.toString().length }} /
-                                        4</mat-hint
+                                        >{{
+                                            (
+                                                groupedForm
+                                                    .get('yearFounded')
+                                                    ?.value?.toString() || ''
+                                            ).length
+                                        }}
+                                        / 4</mat-hint
                                     >
                                     <mat-error
                                         *ngIf="
@@ -136,15 +134,10 @@
                                     <input
                                         matInput
                                         formControlName="currentOperatingBudget"
+                                        id="grid-current-operating-budget"
                                         placeholder="Current Operating Budget"
                                         currencyMask
                                         required
-                                        value="{{ currentOperatingBudget }}"
-                                        (keyup)="
-                                            currentOperatingBudget$.next(
-                                                $event.target.value
-                                            )
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -182,11 +175,8 @@
                                         matInput
                                         placeholder="Executive Director"
                                         formControlName="director"
-                                        value="{{ director }}"
+                                        id="grid-executive-director"
                                         required
-                                        (keyup)="
-                                            director$.next($event.target.value)
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -203,7 +193,7 @@
                             <div class="w-full md:w-1/2 px-3">
                                 <label
                                     class="block tracking-wide text-sm mb-2"
-                                    for="grid-phone"
+                                    for="org-phone-executive"
                                 >
                                     Phone Number *
                                 </label>
@@ -211,15 +201,10 @@
                                     <input
                                         matInput
                                         formControlName="phone"
-                                        value="{{ phone }}"
                                         type="tel"
                                         appPhoneMask
-                                        formControlName="phone"
-                                        id="phone-number"
+                                        id="org-phone-executive"
                                         placeholder="Phone Number"
-                                        (keyup)="
-                                            phone$.next($event.target.value)
-                                        "
                                         required
                                     />
                                     <mat-error
@@ -253,12 +238,7 @@
                                         matInput
                                         placeholder="Contact Person"
                                         formControlName="contactPerson"
-                                        value="{{ contactPerson }}"
-                                        (keyup)="
-                                            contactPerson$.next(
-                                                $event.target.value
-                                            )
-                                        "
+                                        id="grid-contact-person"
                                         required
                                     />
                                     <mat-error
@@ -285,12 +265,7 @@
                                         matInput
                                         placeholder="Title"
                                         formControlName="contactPersonTitle"
-                                        value="{{ contactPersonTitle }}"
-                                        (keyup)="
-                                            contactPersonTitle$.next(
-                                                $event.target.value
-                                            )
-                                        "
+                                        id="grid-contact-person-title"
                                         required
                                     />
                                     <mat-error
@@ -310,7 +285,7 @@
                             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                 <label
                                     class="block tracking-wide text-sm mb-2"
-                                    for="grid-contact-person-phone-number"
+                                    for="org-phone-contact"
                                 >
                                     Phone Number *
                                 </label>
@@ -318,17 +293,11 @@
                                     <input
                                         matInput
                                         class="form-control"
-                                        value="{{ contactPersonPhoneNumber }}"
                                         type="tel"
                                         appPhoneMask
                                         formControlName="contactPersonPhoneNumber"
-                                        id="phone-number"
+                                        id="org-phone-contact"
                                         placeholder="Phone Number"
-                                        (keyup)="
-                                            contactPersonPhoneNumber$.next(
-                                                $event.target.value
-                                            )
-                                        "
                                         required
                                     />
                                     <mat-error
@@ -354,14 +323,10 @@
                                     <input
                                         matInput
                                         class="form-control"
-                                        value="{{ email }}"
                                         type="text"
                                         formControlName="email"
-                                        id="email"
+                                        id="grid-email"
                                         placeholder="Email"
-                                        (keyup)="
-                                            email$.next($event.target.value)
-                                        "
                                         required
                                     />
                                     <mat-error
@@ -395,11 +360,8 @@
                                         matInput
                                         placeholder="Address"
                                         formControlName="address"
-                                        value="{{ address }}"
+                                        id="grid-address"
                                         required
-                                        (keyup)="
-                                            address$.next($event.target.value)
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -427,11 +389,8 @@
                                         matInput
                                         placeholder="City"
                                         formControlName="city"
-                                        value="{{ city }}"
+                                        id="grid-city"
                                         required
-                                        (keyup)="
-                                            city$.next($event.target.value)
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -457,11 +416,8 @@
                                         matInput
                                         placeholder="State"
                                         formControlName="state"
-                                        value="{{ state }}"
+                                        id="grid-state"
                                         required
-                                        (keyup)="
-                                            state$.next($event.target.value)
-                                        "
                                     />
                                     <mat-error
                                         *ngIf="
@@ -488,13 +444,18 @@
                                         placeholder="Zip"
                                         maxlength="5"
                                         formControlName="zip"
-                                        value="{{ zip }}"
+                                        id="grid-zip"
                                         required
-                                        (keyup)="zip$.next($event.target.value)"
                                     />
                                     <mat-hint align="end"
-                                        >{{ zip?.toString().length }} /
-                                        5</mat-hint
+                                        >{{
+                                            (
+                                                groupedForm
+                                                    .get('zip')
+                                                    ?.value?.toString() || ''
+                                            ).length
+                                        }}
+                                        / 5</mat-hint
                                     >
                                     <mat-error
                                         *ngIf="
@@ -519,14 +480,10 @@
                                 <mat-form-field>
                                     <input
                                         matInput
-                                        value="{{ website }}"
                                         type="text"
                                         formControlName="website"
-                                        id="website"
+                                        id="grid-website"
                                         placeholder="Website"
-                                        (keyup)="
-                                            website$.next($event.target.value)
-                                        "
                                     />
                                 </mat-form-field>
                             </div>

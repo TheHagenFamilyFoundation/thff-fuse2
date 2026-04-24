@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationService } from './organization.service';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { isUserInOrgUsers } from 'app/core/utilities/organization-access.util';
 
 @Component({
     standalone: false,
@@ -49,6 +50,9 @@ export class OrganizationComponent implements OnInit, OnDestroy {
 
         this._authService.checkDirector().subscribe((isADirector) => {
             this.isDirector = isADirector;
+            if (this.org && this.currentUser?._id) {
+                this.checkInOrganization(this.currentUser._id);
+            }
             this._cdr.detectChanges();
         });
 
@@ -89,12 +93,11 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     checkInOrganization(_id: string): void {
-        const object = this.org.users.find((obj) => obj._id === _id);
-        this.inOrg = !!object;
+        this.inOrg = isUserInOrgUsers(this.org?.users, _id);
 
         if (!this.inOrg && !this.isDirector) {
             this._router.navigate(['/welcome']);
-            this.snackBar.open('You are not allowed to view this Organization', 'OK', {
+            this.snackBar.open('You are not allowed to view this Organization', undefined, {
                 duration: 3000,
             });
         }

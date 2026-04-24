@@ -27,81 +27,124 @@
         </p>
     </div>
 
-    <!-- Pending Invites -->
-    <div *ngIf="pendingInvites.length > 0" class="mb-6">
-        <h3 class="text-sm font-semibold text-amber-600 uppercase tracking-wider mb-3">
-            <mat-icon class="icon-size-4 mr-1 align-middle">schedule</mat-icon>
-            Pending Invites ({{ pendingInvites.length }})
-        </h3>
-        <div class="flex flex-col gap-2">
-            <div *ngFor="let invite of pendingInvites"
-                 class="flex items-center justify-between p-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900 dark:bg-opacity-30">
-
-                <div class="flex items-center min-w-0">
-                    <div class="flex items-center justify-center w-9 h-9 rounded-full bg-amber-400 text-white text-sm font-bold mr-3 flex-shrink-0">
-                        <mat-icon class="icon-size-5">mail_outline</mat-icon>
-                    </div>
-                    <div class="min-w-0">
-                        <div class="font-medium text-gray-800 dark:text-gray-200 truncate">{{ invite.email }}</div>
-                        <div class="text-xs text-amber-600">Invited {{ invite.createdAt | date:'MMM d, y' }}</div>
-                    </div>
-                </div>
-
-                <div *ngIf="canManageTeam" class="flex items-center gap-1 flex-shrink-0">
-                    <button mat-icon-button
-                            class="text-gray-400 hover:text-primary"
-                            matTooltip="Resend invite"
-                            [disabled]="resendingInviteId === invite._id"
-                            (click)="resendInvite(invite._id)">
-                        <mat-spinner *ngIf="resendingInviteId === invite._id" [diameter]="18"></mat-spinner>
-                        <mat-icon *ngIf="resendingInviteId !== invite._id" class="icon-size-5">send</mat-icon>
-                    </button>
-                    <button mat-icon-button
-                            class="text-gray-400 hover:text-red-500"
-                            matTooltip="Cancel invite"
-                            (click)="cancelInvite(invite._id)">
-                        <mat-icon class="icon-size-5">close</mat-icon>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Members List -->
+    <!-- Members & pending invites (single table) -->
     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-        Members ({{ org?.users?.length || 0 }})
+        Members &amp; invites ({{ teamRowCount }})
     </h3>
 
-    <div *ngIf="!org?.users?.length" class="text-gray-400 py-4">
-        No members in this organization yet.
+    <div *ngIf="teamRowCount === 0" class="text-gray-400 py-6 text-center border border-dashed border-gray-200 dark:border-neutral-600 rounded-lg">
+        No members or pending invites yet.
     </div>
 
-    <div class="flex flex-col gap-2">
-        <div *ngFor="let user of org?.users"
-             class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-600 dark:bg-opacity-40 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
+    <div *ngIf="teamRowCount > 0"
+         class="flex flex-col w-full overflow-x-auto border border-gray-200 dark:border-neutral-600 rounded-lg">
+        <mat-table [dataSource]="teamDataSource" class="w-full min-w-[680px] org-team-table">
 
-            <div class="flex items-center min-w-0">
-                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-thff-teal text-white text-sm font-bold mr-3 flex-shrink-0">
-                    {{ (user.firstName?.[0] || user.email[0]) | uppercase }}
-                </div>
-                <div class="min-w-0">
-                    <div class="font-medium text-gray-800 dark:text-gray-200 truncate">
-                        {{ user.firstName && user.lastName ? user.firstName + ' ' + user.lastName : user.email }}
+            <ng-container matColumnDef="member">
+                <mat-header-cell *matHeaderCellDef class="font-semibold pl-4 sm:pl-6">Member</mat-header-cell>
+                <mat-cell *matCellDef="let row" class="pl-4 sm:pl-6">
+                    <div class="flex items-center gap-3 min-w-0 py-1">
+                        <div *ngIf="row.kind === 'member'"
+                             class="flex items-center justify-center w-9 h-9 rounded-full bg-thff-teal text-white text-sm font-bold flex-shrink-0">
+                            {{ (row.user?.firstName?.[0] || row.user?.email?.[0] || '?') | uppercase }}
+                        </div>
+                        <div *ngIf="row.kind === 'invite'"
+                             class="flex items-center justify-center w-9 h-9 rounded-full bg-amber-400 text-white flex-shrink-0">
+                            <mat-icon class="icon-size-5">mail_outline</mat-icon>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-medium text-gray-800 dark:text-gray-200 truncate">
+                                {{ row.memberLabel }}
+                            </div>
+                            <div *ngIf="row.kind === 'member' && row.user?.firstName"
+                                 class="text-xs text-gray-500 truncate">
+                                {{ row.user?.email }}
+                            </div>
+                        </div>
                     </div>
-                    <div *ngIf="user.firstName" class="text-sm text-gray-500 truncate">
-                        {{ user.email }}
-                    </div>
-                </div>
-            </div>
+                </mat-cell>
+            </ng-container>
 
-            <button *ngIf="canManageTeam"
-                    mat-icon-button
-                    class="text-gray-400 hover:text-red-500 flex-shrink-0"
-                    matTooltip="Remove from organization"
-                    (click)="removeUser(user)">
-                <mat-icon class="icon-size-5">close</mat-icon>
-            </button>
-        </div>
+            <ng-container matColumnDef="email">
+                <mat-header-cell *matHeaderCellDef class="font-semibold">Email</mat-header-cell>
+                <mat-cell *matCellDef="let row" class="text-gray-700 dark:text-gray-300">
+                    <span class="truncate">{{ row.email }}</span>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="addedAt">
+                <mat-header-cell *matHeaderCellDef class="font-semibold whitespace-nowrap">Date added</mat-header-cell>
+                <mat-cell *matCellDef="let row" class="text-gray-600 dark:text-gray-400 text-sm whitespace-nowrap">
+                    <ng-container *ngIf="row.addedAt; else noDate">
+                        {{ row.addedAt | date: 'MMM d, y' }}
+                    </ng-container>
+                    <ng-template #noDate>—</ng-template>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef class="font-semibold">Status</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="inline-flex items-center self-start px-2 py-0.5 rounded text-xs font-semibold"
+                              [class.bg-emerald-100]="row.status === 'Active'"
+                              [class.text-emerald-800]="row.status === 'Active'"
+                              [class.dark:bg-emerald-900]="row.status === 'Active'"
+                              [class.dark:text-emerald-200]="row.status === 'Active'"
+                              [class.bg-amber-100]="row.status === 'Pending'"
+                              [class.text-amber-900]="row.status === 'Pending'"
+                              [class.dark:bg-amber-900]="row.status === 'Pending'"
+                              [class.dark:text-amber-200]="row.status === 'Pending'">
+                            {{ row.status }}
+                        </span>
+                    </div>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef class="flex justify-end pr-4 sm:pr-6 font-semibold">Actions</mat-header-cell>
+                <mat-cell *matCellDef="let row" class="flex justify-end pr-2 sm:pr-4">
+                    <ng-container *ngIf="row.kind === 'member' && canManageTeam">
+                        <button mat-icon-button
+                                class="text-gray-400 hover:text-red-500"
+                                matTooltip="Remove from organization"
+                                (click)="removeUser(row.user)">
+                            <mat-icon class="icon-size-5">close</mat-icon>
+                        </button>
+                    </ng-container>
+                    <div *ngIf="row.kind === 'invite' && canManageTeam" class="flex items-center">
+                        <button mat-icon-button
+                                class="text-gray-400 hover:text-primary"
+                                matTooltip="Resend invite"
+                                [disabled]="resendingInviteId === row.invite?._id"
+                                (click)="resendInvite(row.invite._id)">
+                            <mat-spinner *ngIf="resendingInviteId === row.invite?._id" [diameter]="18"></mat-spinner>
+                            <mat-icon *ngIf="resendingInviteId !== row.invite?._id" class="icon-size-5">send</mat-icon>
+                        </button>
+                        <button mat-icon-button
+                                class="text-gray-400 hover:text-red-500"
+                                matTooltip="Cancel invite"
+                                (click)="cancelInvite(row.invite._id)">
+                            <mat-icon class="icon-size-5">close</mat-icon>
+                        </button>
+                    </div>
+                    <span *ngIf="!canManageTeam" class="text-gray-400 text-sm">—</span>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns"
+                     [class.bg-amber-50]="row.kind === 'invite'"
+                     [class.dark:bg-amber-900]="row.kind === 'invite'"
+                     [class.dark:bg-opacity-20]="row.kind === 'invite'"></mat-row>
+        </mat-table>
+
+        <mat-paginator *ngIf="teamRowCount > pageSizeOptions[0]"
+                       [pageSizeOptions]="pageSizeOptions"
+                       [pageSize]="10"
+                       showFirstLastButtons
+                       class="border-t border-gray-200 dark:border-neutral-600">
+        </mat-paginator>
     </div>
 
 </div>

@@ -43,9 +43,7 @@
                         </label>
                         <mat-form-field style="width: 100%">
                             <input matInput placeholder="Project Title" formControlName="projectTitle"
-                                value="{{ projectTitle }}" maxlength="100" required (keyup)="
-                                    projectTitle$.next($event.target.value)
-                                " />
+                                id="grid-project-title-field" maxlength="100" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('projectTitle')
@@ -65,9 +63,8 @@
                         <mat-form-field class="purpose">
                             <textarea class="resize-none" matInput placeholder="Purpose" formControlName="purpose"
                                 matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
-                                maxLength="500" value="{{ purpose }}" required
-                                (keyup)="purpose$.next($event.target.value)"></textarea>
-                            <mat-hint align="end">{{ purpose.length }} / 500</mat-hint>
+                                maxLength="500" required></textarea>
+                            <mat-hint align="end">{{ (groupedForm.get('purpose')?.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('purpose')
@@ -88,9 +85,8 @@
                         <mat-form-field class="goals">
                             <textarea class="resize-none" matInput formControlName="goals" placeholder="Goals"
                                 matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
-                                maxLength="500" value="{{ goals }}" required
-                                (keyup)="goals$.next($event.target.value)"></textarea>
-                            <mat-hint align="end">{{ goals.length }} / 500</mat-hint>
+                                maxLength="500" required></textarea>
+                            <mat-hint align="end">{{ (groupedForm.get('goals')?.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('goals')
@@ -112,11 +108,11 @@
                             success? Do you anticipate partnering with any other organizations?
                         </label>
                         <mat-form-field>
-                            <textarea class="resize-none" matInput formControlName="narrative" value="{{ narrative }}"
+                            <textarea class="resize-none" matInput formControlName="narrative"
                                 type="text" id="narrative" matTextareaAutosize rows="5" matAutosizeMinRows="5"
                                 matAutosizeMaxRows="5" maxlength="2000" placeholder="Narrative"
-                                (keyup)="narrative$.next($event.target.value)" required></textarea>
-                            <mat-hint align="end">{{ narrative.length }} /2000</mat-hint>
+                                required></textarea>
+                            <mat-hint align="end">{{ (groupedForm.get('narrative')?.value || '').length }} / 2000</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('narrative')
@@ -136,9 +132,9 @@
                         <mat-form-field>
                             <textarea class="resize-none" matInput placeholder="Time Table" formControlName="timeTable"
                                 matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
-                                maxLength="500" value="{{ timeTable }}" (keyup)="timeTable$.next($event.target.value)"
+                                maxLength="500"
                                 required></textarea>
-                            <mat-hint align="end">{{ timeTable.length }} / 500</mat-hint>
+                            <mat-hint align="end">{{ (groupedForm.get('timeTable')?.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('timeTable')
@@ -157,9 +153,7 @@
                         </label>
                         <mat-form-field>
                             <input matInput placeholder="Amount Requested" formControlName="amountRequested"
-                                maxlength="10" value="{{ amountRequested }}" (keyup)="
-                                    amountRequested$.next($event.target.value)
-                                " required />
+                                maxlength="10" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('amountRequested')
@@ -179,13 +173,11 @@
                             materials, labor).
                         </label>
                         <mat-form-field>
-                            <textarea class="resize-none" matInput value="{{ itemizedBudget }}" type="text"
+                            <textarea class="resize-none" matInput type="text"
                                 matTextareaAutosize rows="5" matAutosizeMinRows="5" matAutosizeMaxRows="5"
                                 maxLength="500" formControlName="itemizedBudget" id="itemized-budget"
-                                placeholder="Itemized Budget" (keyup)="
-                                    itemizedBudget$.next($event.target.value)
-                                " required></textarea>
-                            <mat-hint align="end">{{ itemizedBudget.length }} / 500</mat-hint>
+                                placeholder="Itemized Budget" required></textarea>
+                            <mat-hint align="end">{{ (groupedForm.get('itemizedBudget')?.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('itemizedBudget')
@@ -203,11 +195,9 @@
                             Total Project Cost
                         </label>
                         <mat-form-field>
-                            <input matInput class="form-control" value="{{ totalProjectCost }}" type="text"
+                            <input matInput class="form-control" type="text"
                                 maxlength="10" formControlName="totalProjectCost" id="total-project-cost"
-                                placeholder="Total Project Cost" (keyup)="
-                                    totalProjectCost$.next($event.target.value)
-                                " required />
+                                placeholder="Total Project Cost" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('totalProjectCost')
@@ -259,9 +249,9 @@
                                     'projectTitle',
                                     'projectTitleControl'
                                 )
-                            " (cancel)="
+                            "                             (cancel)="
                                 cancelSingleField(
-                                    'projectTitleName',
+                                    'projectTitle',
                                     'projectTitleControl'
                                 )
                             ">
@@ -326,7 +316,7 @@
                                     </div>
                                 </ng-template>
                             </editable>
-                            <mat-hint align="end">{{ purpose?.toString().length }} / 500</mat-hint>
+                            <mat-hint align="end">{{ (purposeControl.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="invalidInputPurpose">
                                 Purpose is
                                 <strong>required</strong>
@@ -361,7 +351,7 @@
                                     </div>
                                 </ng-template>
                             </editable>
-                            <mat-hint align="end">{{ goals?.toString().length }} / 500</mat-hint>
+                            <mat-hint align="end">{{ (goalsControl.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="invalidInputGoals">
                                 Goals is
                                 <strong>required</strong>
@@ -407,7 +397,7 @@
                                     </div>
                                 </ng-template>
                             </editable>
-                            <mat-hint align="end">{{ narrative?.toString().length }} / 2000</mat-hint>
+                            <mat-hint align="end">{{ (narrativeControl.value || '').length }} / 2000</mat-hint>
                             <mat-error *ngIf="invalidInputNarrative">
                                 Narrative is
                                 <strong>required</strong>
@@ -449,7 +439,7 @@
                                     </div>
                                 </ng-template>
                             </editable>
-                            <mat-hint align="end">{{ timeTable?.toString().length }} / 500</mat-hint>
+                            <mat-hint align="end">{{ (timeTableControl.value || '').length }} / 500</mat-hint>
                             <mat-error *ngIf="invalidInputTimeTable">
                                 Timeline is
                                 <strong>required</strong>
@@ -533,9 +523,9 @@
                                     </div>
                                 </ng-template>
                             </editable>
-                            <mat-hint align="end">{{ itemizedBudget?.toString().length }} /
+                            <mat-hint align="end">{{ (itemizedBudgetControl.value || '').length }} /
                                 500</mat-hint>
-                            <mat-error *ngIf="invalidItemizedBudget">
+                            <mat-error *ngIf="invalidInputItemizedBudget">
                                 Itemized Budget is
                                 <strong>required</strong>
                             </mat-error>
