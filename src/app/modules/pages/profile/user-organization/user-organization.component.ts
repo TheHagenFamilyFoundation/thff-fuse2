@@ -13,11 +13,14 @@ import { Router } from '@angular/router';
 
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { InOrgService } from 'app/core/services/user/in-org.service';
+import {
+    dedupeUserOrganizations,
+    PopulatedUserOrganizationRow,
+} from 'app/core/utilities/organization-access.util';
 
 // import { CreateOrganizationComponent } from '../../organization/create-organization/create-organization.component';
 import { SelectedOrganizationComponent } from './selected-organization/selected-organization.component';
 
-import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 @Component({
     standalone: false,
     selector: 'app-user-organization',
@@ -38,7 +41,7 @@ export class UserOrganizationComponent implements OnInit {
     // displayedColumns = ['id', 'name', 'progress', 'color'];
     displayedColumns = ['name', 'createdOn', 'link'];
 
-    dataSource: MatTableDataSource<OrganizationData>;
+    dataSource: MatTableDataSource<PopulatedUserOrganizationRow>;
 
     inOrganization = false;
 
@@ -80,7 +83,7 @@ export class UserOrganizationComponent implements OnInit {
             this.router.navigate(['/pages/auth/logout']);
         }
 
-        this.dataSource = new MatTableDataSource([]);
+        this.dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>([]);
 
         this.checkOrganizations();
     }
@@ -113,12 +116,14 @@ export class UserOrganizationComponent implements OnInit {
     // checks if user is in any organizations
     checkOrganizations(): void {
         this.getUserService.getUserbyID(this.user._id).subscribe((user) => {
-            const organization = user?.organizations;
+            const organization = dedupeUserOrganizations<PopulatedUserOrganizationRow>(
+                user?.organizations as PopulatedUserOrganizationRow[] | undefined
+            );
 
             if (organization && organization.length > 0) {
                 this.inOrganization = true;
 
-                this.dataSource = new MatTableDataSource(organization);
+                this.dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>(organization);
 
                 this.dataSource.paginator = this.paginator;
                 this.dataSource.sort = this.sort;

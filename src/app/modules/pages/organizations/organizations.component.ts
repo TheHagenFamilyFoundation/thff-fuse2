@@ -3,8 +3,11 @@ import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { OrganizationData } from 'app/common/interfaces/OrganizationData';
 import { GetUserService } from 'app/core/services/user/get-user.service';
+import {
+    dedupeUserOrganizations,
+    PopulatedUserOrganizationRow,
+} from 'app/core/utilities/organization-access.util';
 
 @Component({
     standalone: false,
@@ -36,7 +39,7 @@ export class OrganizationsComponent implements OnInit {
     user: any;
 
     displayedColumns = ['name', 'createdOn', 'action'];
-    dataSource: MatTableDataSource<OrganizationData>;
+    dataSource: MatTableDataSource<PopulatedUserOrganizationRow>;
     hasOrganizations: boolean = false;
     loaded: boolean = false;
 
@@ -85,11 +88,13 @@ export class OrganizationsComponent implements OnInit {
     private checkOrganizations(): void {
         this.getUserService.getUserbyID(this.user._id).subscribe({
             next: (user) => {
-                const organizations = user.organizations;
+                const organizations = dedupeUserOrganizations<PopulatedUserOrganizationRow>(
+                    user.organizations as PopulatedUserOrganizationRow[] | undefined
+                );
 
                 if (organizations && organizations.length > 0) {
                     this.hasOrganizations = true;
-                    this.dataSource = new MatTableDataSource(organizations);
+                    this.dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>(organizations);
                 } else {
                     this.hasOrganizations = false;
                 }

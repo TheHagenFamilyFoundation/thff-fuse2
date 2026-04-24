@@ -5,12 +5,14 @@ import {
     OnInit,
     OnDestroy,
 } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil, finalize } from 'rxjs';
 
 import { AuthService } from 'app/core/auth/auth.service';
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { InOrgService } from 'app/core/services/user/in-org.service';
+import { dedupeUserOrganizations } from 'app/core/utilities/organization-access.util';
 import { SettingsService } from 'app/core/services/user/settings.service';
 import { FuseConfigService } from '@fuse/services/config';
 import { AppConfig, Scheme } from 'app/core/config/app.config';
@@ -67,7 +69,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Account form
     accountForm: FormGroup;
     accountSaving = false;
-    accountAlert: { type: string; message: string } | null = null;
+    accountAlert: { type: 'success' | 'error' | 'info' | 'warning'; message: string } | null = null;
 
     // Security form
     securityForm: FormGroup;
@@ -90,6 +92,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         private _formBuilder: FormBuilder,
         private _fuseConfigService: FuseConfigService,
         private _settingsService: SettingsService,
+        private _snackBar: MatSnackBar,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -176,8 +179,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
             .getUserbyID(this.currentUser._id)
             .subscribe((user) => {
                 if (user) {
-                    if (user.organizations.length > 0) {
-                        this.organizations = user.organizations;
+                    const orgs = dedupeUserOrganizations(user.organizations);
+                    if (orgs.length > 0) {
+                        this.organizations = orgs;
                         this.inOrganization = true;
                         this._inOrgService.changeMessage(true);
                     } else {
@@ -212,6 +216,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // @ Account methods
     // -----------------------------------------------------------------------------------------------------
 
+    onAccountAlertDismissed(dismissed: boolean): void {
+        if (dismissed) {
+            this.accountAlert = null;
+        }
+    }
+
     saveAccount(): void {
         this.accountSaving = true;
         this.accountAlert = null;
@@ -225,20 +235,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
             .pipe(finalize(() => this.accountSaving = false))
             .subscribe({
                 next: (response) => {
-                    this.accountAlert = { type: 'success', message: 'Profile updated successfully' };
+                    const msg =
+                        response?.message === 'Profile updated'
+                            ? 'Profile updated successfully'
+                            : response?.message || 'Profile updated successfully';
+                    this.accountAlert = { type: 'success', message: msg };
 
-                    // Update localStorage with new user data
-                    if (response.user) {
+                    if (response?.user) {
                         this.currentUser = response.user;
+                        this.user = response.user;
                         localStorage.setItem('currentUser', JSON.stringify(response.user));
                     }
+
+                    this._snackBar.open(msg, 'Dismiss', { duration: 6000 });
                 },
                 error: (err) => {
-                    this.accountAlert = {
-                        type: 'error',
-                        message: err?.error?.message || 'Error updating profile'
-                    };
-                }
+                    const errMsg = err?.error?.message || 'Error updating profile';
+                    this.accountAlert = { type: 'error', message: errMsg };
+                    this._snackBar.open(errMsg, 'Dismiss', { duration: 8000 });
+                },
             });
     }
 

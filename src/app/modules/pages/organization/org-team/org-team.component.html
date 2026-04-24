@@ -56,7 +56,7 @@
                             <div class="font-medium text-gray-800 dark:text-gray-200 truncate">
                                 {{ row.memberLabel }}
                             </div>
-                            <div *ngIf="row.kind === 'member' && row.user?.firstName"
+                            <div *ngIf="row.kind === 'member' && row.user?.email && (!row.user?.firstName || !row.user?.lastName)"
                                  class="text-xs text-gray-500 truncate">
                                 {{ row.user?.email }}
                             </div>

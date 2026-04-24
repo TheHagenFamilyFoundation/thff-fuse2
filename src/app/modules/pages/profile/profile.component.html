@@ -103,8 +103,10 @@
                             <div *ngIf="accountAlert" class="mb-6">
                                 <fuse-alert
                                     [type]="accountAlert.type"
-                                    [appearance]="'outline'"
-                                    [showIcon]="true">
+                                    [appearance]="accountAlert.type === 'success' ? 'soft' : 'outline'"
+                                    [showIcon]="true"
+                                    [dismissible]="true"
+                                    (dismissedChanged)="onAccountAlertDismissed($event)">
                                     {{ accountAlert.message }}
                                 </fuse-alert>
                             </div>
