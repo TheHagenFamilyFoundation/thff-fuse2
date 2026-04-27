@@ -7,6 +7,7 @@ import { FuseAlertService } from '@fuse/components/alert/alert.service';
 import { FuseUtilsService } from '@fuse/services/utils/utils.service';
 
 @Component({
+    standalone: false,
     selector       : 'fuse-alert',
     templateUrl    : './alert.component.html',
     styleUrls      : ['./alert.component.scss'],
@@ -204,7 +205,7 @@ export class FuseAlertComponent implements OnChanges, OnInit, OnDestroy
         this.dismissed = dismissed;
 
         // Execute the observable
-        this.dismissedChanged.next(this.dismissed);
+        this.dismissedChanged.emit(this.dismissed);
 
         // Notify the change detector
         this._changeDetectorRef.markForCheck();

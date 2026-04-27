@@ -5,6 +5,7 @@ import { debounceTime, filter, map, Subject, takeUntil } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations/public-api';
 
 @Component({
+    standalone: false,
     selector     : 'search',
     templateUrl  : './search.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -126,7 +127,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy
                         this.resultSets = resultSets;
 
                         // Execute the event
-                        this.search.next(resultSets);
+                        this.search.emit(resultSets);
                     });
             });
     }

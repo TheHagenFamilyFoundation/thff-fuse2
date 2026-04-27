@@ -5,6 +5,7 @@ import { finalize, Subject, takeUntil, takeWhile, tap, timer } from 'rxjs';
 
 import { AuthService } from 'app/core/auth/auth.service';
 @Component({
+    standalone: false,
     selector: 'auth-confirmation',
     templateUrl: './confirmation.component.html',
     encapsulation: ViewEncapsulation.None,

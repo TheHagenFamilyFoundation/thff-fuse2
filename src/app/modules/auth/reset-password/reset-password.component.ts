@@ -8,6 +8,7 @@ import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
+    standalone: false,
     selector: 'auth-reset-password',
     templateUrl: './reset-password.component.html',
     encapsulation: ViewEncapsulation.None,

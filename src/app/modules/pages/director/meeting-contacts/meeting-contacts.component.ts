@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting-contacts',
     templateUrl: './meeting-contacts.component.html',
     styleUrls: ['./meeting-contacts.component.scss']
 })
 export class MeetingContactsComponent implements OnInit {
+    private readonly destroyRef = inject(DestroyRef);
+
     loaded = false;
     meetingId: string = null;
     meeting: any = null;
@@ -15,25 +20,38 @@ export class MeetingContactsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private meetingService: MeetingService
+        private meetingService: MeetingService,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (!id) {
-            this.loaded = true;
-            return;
-        }
-        this.meetingId = id;
+        this.route.paramMap
+            .pipe(
+                map((p) => p.get('id')),
+                filter((id): id is string => !!id),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe((id) => {
+                this.meetingId = id;
+                this.loadContacts(id);
+            });
+    }
 
+    private loadContacts(id: string): void {
+        this.loaded = false;
         this.meetingService.getFundedContacts(id).subscribe({
             next: (data) => {
                 this.meeting = data?.meeting || null;
-                this.contacts = data?.contacts || [];
+                const c = data?.contacts;
+                this.contacts = Array.isArray(c) ? c : [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             },
             error: () => {
+                this.meeting = null;
+                this.contacts = [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }

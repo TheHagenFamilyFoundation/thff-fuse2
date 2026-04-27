@@ -2,6 +2,9 @@ import { Layout } from 'app/layout/layout.types';
 
 // Types
 export type Scheme = 'auto' | 'dark' | 'light';
+
+/** App always uses light mode; config may still list other schemes for typing only. */
+export const FORCED_APP_SCHEME = 'light' as const satisfies Scheme;
 export type Screens = { [key: string]: string };
 export type Theme = 'theme-default' | string;
 export type Themes = { id: string; name: string }[];
@@ -34,7 +37,7 @@ export interface AppConfig
  */
 export const appConfig: AppConfig = {
     layout : 'modern',
-    scheme : 'light',
+    scheme : FORCED_APP_SCHEME,
     screens: {
         sm: '600px',
         md: '960px',

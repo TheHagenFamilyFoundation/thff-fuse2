@@ -1,14 +1,14 @@
 import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { combineLatest, filter, map, Subject, takeUntil } from 'rxjs';
+import { filter, map, Subject, takeUntil } from 'rxjs';
 import { FuseConfigService } from '@fuse/services/config';
-import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { FUSE_VERSION } from '@fuse/version';
 import { Layout } from 'app/layout/layout.types';
-import { AppConfig } from 'app/core/config/app.config';
+import { AppConfig, FORCED_APP_SCHEME } from 'app/core/config/app.config';
 
 @Component({
+    standalone: false,
     selector     : 'layout',
     templateUrl  : './layout.component.html',
     styleUrls    : ['./layout.component.scss'],
@@ -18,7 +18,7 @@ export class LayoutComponent implements OnInit, OnDestroy
 {
     config: AppConfig;
     layout: Layout;
-    scheme: 'dark' | 'light';
+    scheme: 'light';
     theme: string;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -31,7 +31,6 @@ export class LayoutComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _router: Router,
         private _fuseConfigService: FuseConfigService,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
     )
     {
     }
@@ -45,38 +44,21 @@ export class LayoutComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        // Set the theme and scheme based on the configuration
-        combineLatest([
-            this._fuseConfigService.config$,
-            this._fuseMediaWatcherService.onMediaQueryChange$(['(prefers-color-scheme: dark)', '(prefers-color-scheme: light)'])
-        ]).pipe(
-            takeUntil(this._unsubscribeAll),
-            map(([config, mql]) => {
-
-                const options = {
-                    scheme: config.scheme,
-                    theme : config.theme
-                };
-
-                // If the scheme is set to 'auto'...
-                if ( config.scheme === 'auto' )
-                {
-                    // Decide the scheme using the media query
-                    options.scheme = mql.breakpoints['(prefers-color-scheme: dark)'] ? 'dark' : 'light';
-                }
-
-                return options;
-            })
-        ).subscribe((options) => {
-
-            // Store the options
-            this.scheme = options.scheme;
-            this.theme = options.theme;
-
-            // Update the scheme and theme
-            this._updateScheme();
-            this._updateTheme();
-        });
+        // Theme from config; scheme is always light (no dark / auto)
+        this._fuseConfigService.config$
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                map((config: AppConfig) => ({
+                    scheme: FORCED_APP_SCHEME,
+                    theme: config.theme,
+                }))
+            )
+            .subscribe((options) => {
+                this.scheme = options.scheme;
+                this.theme = options.theme;
+                this._updateScheme();
+                this._updateTheme();
+            });
 
         // Subscribe to config changes
         this._fuseConfigService.config$
@@ -185,6 +167,13 @@ export class LayoutComponent implements OnInit, OnDestroy
 
         // Add class name for the currently selected scheme
         this._document.body.classList.add(this.scheme);
+
+        // Keep <html id="fuse"> scheme-* in sync with body. M3 tokens in fuse-theme use
+        // light-dark() + color-scheme; if html stayed scheme-light while body was .dark,
+        // components like mat-paginator kept a white surface.
+        const root = this._document.documentElement.classList;
+        root.remove('scheme-dark', 'scheme-light');
+        root.add('scheme-light');
     }
 
     /**

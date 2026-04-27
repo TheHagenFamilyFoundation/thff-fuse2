@@ -8,31 +8,34 @@
         class="relative flex flex-0 items-center w-full h-16 sm:h-20 px-4 md:px-6 z-49 shadow dark:shadow-none dark:border-b bg-card dark:bg-transparent print:hidden">
         <!-- <ng-container *ngIf="!isScreenSmall"> -->
         <ng-container>
-            <!-- House Icon -->
-            <div class="flex items-center mx-2 lg:mr-8">
-                <!-- <div class="hidden lg:flex">
-                    <img
-                        class="dark:hidden w-24"
-                        src="assets/images/logo/logo-text.svg">
-                    <img
-                        class="hidden dark:flex w-24"
-                        src="assets/images/logo/logo-text-on-dark.svg">
-                </div> -->
-                <!-- <button mat-button routerLink="/home"> -->
-                <button mat-button routerLink="/welcome" fxHide="false">
+            <!-- Primary nav: anchors + routerLinkActive for hover / current-route feedback -->
+            <nav class="modern-layout-top-nav flex flex-wrap items-center gap-0.5 mx-2 lg:mr-8" aria-label="Primary">
+                <a
+                    mat-icon-button
+                    routerLink="/welcome"
+                    routerLinkActive="modern-top-nav-active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="modern-top-nav-link"
+                    aria-label="Home">
                     <mat-icon>home</mat-icon>
-                </button>
-                <div *ngIf="isLoggedIn">
-                    <button mat-button routerLink="/pages/organizations">
-                        Organizations
-                    </button>
-                </div>
-                <div *ngIf="isDirector">
-                    <button mat-button (click)="routeToDirectorsPage()" fxHide="false">
-                        Directors
-                    </button>
-                </div>
-            </div>
+                </a>
+                <a
+                    *ngIf="isLoggedIn"
+                    mat-button
+                    routerLink="/pages/organizations"
+                    routerLinkActive="modern-top-nav-active"
+                    class="modern-top-nav-link">
+                    Organizations
+                </a>
+                <a
+                    *ngIf="isDirector"
+                    mat-button
+                    routerLink="/pages/director"
+                    routerLinkActive="modern-top-nav-active"
+                    class="modern-top-nav-link">
+                    Directors
+                </a>
+            </nav>
             <!-- Horizontal navigation -->
             <!-- <fuse-horizontal-navigation
                 class="mr-2"
@@ -46,7 +49,7 @@
             </button>
         </ng-container> -->
         <!-- Components -->
-        <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
+        <div class="header-user-cluster flex items-center gap-1 pl-2 ml-auto sm:gap-1.5">
             <!-- <languages></languages>
             <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
             <search [appearance]="'bar'"></search>
@@ -63,18 +66,20 @@
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="flex flex-col flex-auto w-full">
+    <!-- Content: min-h-0 lets the routed view scroll and fill height (flex overflow chain) -->
+    <div class="flex flex-col flex-auto min-h-0 w-full">
         <!-- *ngIf="true" hack is required here for router-outlet to work correctly.
              Otherwise, layout changes won't be registered and the view won't be updated! -->
         <router-outlet *ngIf="true"></router-outlet>
     </div>
 
-    <!-- Footer -->
-    <div
-        class="relative flex flex-0 items-center w-full h-14 sm:h-20 px-4 md:px-6 z-49 border-t bg-card dark:bg-transparent print:hidden">
-        <span class="font-medium text-secondary">THFF &copy; {{ currentYear }} - {{ version }}</span>
-    </div>
+    <!-- Footer: compact strip (copyright only) -->
+    <footer
+        class="modern-layout-footer relative flex flex-0 items-center w-full py-2 sm:py-2.5 px-4 md:px-6 z-49 border-t bg-card dark:bg-transparent print:hidden">
+        <span class="modern-layout-footer-text font-medium text-secondary">
+            THFF &copy; {{ currentYear }} - {{ version }}
+        </span>
+    </footer>
 </div>
 
 <!-- Quick chat -->

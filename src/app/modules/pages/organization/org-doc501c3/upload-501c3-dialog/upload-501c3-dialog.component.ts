@@ -8,6 +8,7 @@ export interface Upload501c3DialogData {
 }
 
 @Component({
+    standalone: false,
     selector: 'app-upload-501c3-dialog',
     templateUrl: './upload-501c3-dialog.component.html',
 })
@@ -40,10 +41,10 @@ export class Upload501c3DialogComponent {
 
         this.uploading = true;
         this.upload501c3Service.upload501c3(this.file, this.data.orgID).subscribe({
-            next: () => {
+            next: (res) => {
                 this.snackBar.open('501(c)(3) uploaded successfully', 'OK', { duration: 3000 });
                 this.uploading = false;
-                this.dialogRef.close(true);
+                this.dialogRef.close(res || true);
             },
             error: () => {
                 this.snackBar.open('Failed to upload document. Please try again.', 'OK', { duration: 5000 });

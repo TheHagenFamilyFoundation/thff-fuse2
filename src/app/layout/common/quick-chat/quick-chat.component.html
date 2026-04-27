@@ -62,9 +62,10 @@
                 <div class="flex-auto">
                     <ng-container *ngFor="let chat of chats; trackBy: trackByFn">
                         <div
-                            class="flex items-center py-3 px-4 cursor-pointer"
-                            [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedChat || selectedChat.id !== chat.id,
-                                        'bg-primary-50 dark:bg-hover': selectedChat && selectedChat.id === chat.id}"
+                            class="thff-chat-list-item flex items-center py-3 px-4 cursor-pointer"
+                            [class.thff-chat-list-item--selected]="selectedChat && selectedChat.id === chat.id"
+                            [ngClass]="{'hover:bg-gray-100 dark:hover:bg-white/5': !selectedChat || selectedChat.id !== chat.id,
+                                        'bg-primary-50 dark:bg-primary-800 dark:ring-1 dark:ring-inset dark:ring-primary-300/35': selectedChat && selectedChat.id === chat.id}"
                             (click)="selectChat(chat.id)">
                             <div class="relative flex flex-0 items-center justify-center w-8 h-8">
                                 <ng-container *ngIf="chat.unreadCount > 0">

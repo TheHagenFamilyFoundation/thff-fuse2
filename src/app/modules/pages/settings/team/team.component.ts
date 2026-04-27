@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
+    standalone: false,
     selector       : 'settings-team',
     templateUrl    : './team.component.html',
     encapsulation  : ViewEncapsulation.None,

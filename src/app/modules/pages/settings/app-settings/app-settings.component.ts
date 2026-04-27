@@ -21,6 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService } from 'app/core/services/user/settings.service';
 import { Subject, takeUntil, finalize } from 'rxjs';
 @Component({
+    standalone: false,
     selector: 'settings-app',
     templateUrl: './app-settings.component.html',
     styleUrls: ['./app-settings.component.scss'],
@@ -107,7 +108,7 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     //  * @param scheme
     //  */
     setScheme(scheme: Scheme): void {
-        this._fuseConfigService.config = { scheme };
+        this._fuseConfigService.config = { scheme: 'light' };
         this.showAlert = false;
         this.settingsScheme = scheme;
         this.toggledScheme = true;

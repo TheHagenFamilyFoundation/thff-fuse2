@@ -43,10 +43,18 @@
             </mat-checkbox>
         </div>
 
-        <!-- Table -->
-        <fuse-card class="flex flex-col w-full overflow-hidden">
+        <!-- Table (keep mat-table mounted so MatSort/paginator hooks stay valid) -->
+        <fuse-card class="flex flex-col w-full overflow-hidden relative">
+            <div *ngIf="!loaded"
+                 class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 role="status"
+                 aria-label="Loading organizations">
+                <mat-spinner [diameter]="40"></mat-spinner>
+            </div>
+
             <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
-                       matSortDirection="desc" class="w-full">
+                       matSortDirection="desc" class="w-full min-h-[200px]"
+                       [class.opacity-40]="!loaded" [class.pointer-events-none]="!loaded">
 
                 <!-- Name Column -->
                 <ng-container matColumnDef="name">
@@ -103,12 +111,9 @@
                 </mat-row>
             </mat-table>
 
-            <div *ngIf="!loaded" class="flex items-center justify-center py-12">
-                <mat-spinner [diameter]="40"></mat-spinner>
-            </div>
-
             <mat-paginator (page)="handlePageEvent($event)" [length]="orgCount"
-                           [pageSizeOptions]="[10, 25, 100]"></mat-paginator>
+                           [pageSizeOptions]="[10, 25, 100]"
+                           [disabled]="!loaded"></mat-paginator>
         </fuse-card>
 
     </div>

@@ -1,0 +1,63 @@
+/* -------------------------------------------------------------------------- */
+/* Base styles                                                                */
+/* -------------------------------------------------------------------------- */
+@layer base {
+  /* Enable keyword support for size interpolation */
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  /* Ensure root elements fill the viewport */
+  html,
+  body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  /* Ensure routed component always fills the remaining vertical space */
+  router-outlet + * {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  /* Default border color */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: light-dark(
+      var(--color-neutral-200),
+      var(--color-neutral-800)
+    );
+  }
+
+  /* Disable focus outline by default */
+  *:focus {
+    outline: none;
+  }
+
+  /* Show focus outline only for heuristically determined focus. Ignores
+     programmatic focus determined by the Angular CDK Focus Monitor. This allows
+     to control the focus styles precisely by using the Focus Monitor. */
+  *:focus-visible:not(.cdk-program-focused),
+  .cdk-keyboard-focused {
+    outline: var(--color-primary-600) solid 2px;
+    outline-offset: 0.125rem; /* 2px */
+  }
+
+  /* Base colors */
+  body {
+    background-color: light-dark(
+      var(--color-neutral-100),
+      var(--color-neutral-950)
+    );
+    color: light-dark(var(--color-neutral-950), var(--color-white));
+  }
+}

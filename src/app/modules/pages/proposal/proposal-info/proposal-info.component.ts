@@ -1,72 +1,45 @@
 import {
-    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
+    OnChanges,
     OnDestroy,
     OnInit,
     EventEmitter,
     Output,
     Input,
-    ViewEncapsulation,
+    SimpleChanges,
 } from '@angular/core';
-import {
-    AbstractControl,
-    FormArray,
-    FormBuilder,
-    FormGroup,
-    FormControl,
-    FormGroupDirective,
-    NgForm,
-    Validators,
-} from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
-
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 
 @Component({
+    standalone: false,
     selector: 'app-proposal-info',
     templateUrl: './proposal-info.component.html',
     styleUrls: ['./proposal-info.component.scss'],
 })
-export class ProposalInfoComponent implements OnInit, OnDestroy {
-
+export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
     @Output() refreshProp = new EventEmitter<boolean>();
-    @Input()
-    isDirector: any;
-    @Input()
-    inOrg: any; //used for director
+    @Input() isDirector: any;
+    @Input() inOrg: any;
 
-    proposalID: string; //generated ID
-    propID: string; //mongo id
-    proposal: any; // the Proposal object
+    proposalID: string;
+    propID: string;
+    proposal: any;
     orgID: string;
-    // multiple form
+
     public mode: 'view' | 'edit' = 'view';
 
     apiUrl = environment.apiUrl;
 
-    projectTitle$ = new Subject<string>();
-    purpose$ = new Subject<string>();
-    goals$ = new Subject<string>();
-    narrative$ = new Subject<string>();
-    timeTable$ = new Subject<string>();
-    amountRequested$ = new Subject<number>();
-    totalProjectCost$ = new Subject<number>();
-    itemizedBudget$ = new Subject<string>();
+    public groupedForm: FormGroup;
 
-    projectTitle: string;
-    purpose: string;
-    goals: string;
-    narrative: string;
-    timeTable: string;
-    amountRequested: number;
-    totalProjectCost: number;
-    itemizedBudget: string;
-
-    formProposal: FormGroup;
+    public propObj: any;
 
     loaded = false;
 
@@ -89,174 +62,97 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
     public totalProjectCostControl: FormControl;
     public itemizedBudgetControl: FormControl;
 
-    public groupedForm: FormGroup;
+    public invalidInputProjectTitle = false;
+    public invalidInputPurpose = false;
+    public invalidInputGoals = false;
+    public invalidInputNarrative = false;
+    public invalidInputTimeTable = false;
+    public invalidInputAmountRequested = false;
+    public invalidInputTotalProjectCost = false;
+    public invalidInputItemizedBudget = false;
 
-    public propObj: any;
-
-    public invalidInputProjectTitle: boolean = false;
-    public invalidInputPurpose: boolean = false;
-    public invalidInputGoals: boolean = false;
-    public invalidInputNarrative: boolean = false;
-    public invalidInputTimeTable: boolean = false;
-    public invalidInputAmountRequested: boolean = false;
-    public invalidInputTotalProjectCost: boolean = false;
-    public invalidInputItemizedBudget: boolean = false;
-
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    private readonly _unsubscribeAll = new Subject<void>();
+    private formMessageSub?: Subscription;
 
     constructor(
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
-        fb: FormBuilder
-    ) {
-        this.route.params.subscribe((params) => {
-            this.proposalID = params.id;
-        });
-
-        this.projectTitle$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.projectTitle = term;
-                this.projectTitleChange();
-            });
-
-        this.purpose$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.purpose = term;
-                this.purposeChange();
-            });
-        this.goals$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.goals = term;
-                this.goalsChange();
-            });
-        this.narrative$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.narrative = term;
-                this.narrativeChange();
-            });
-        this.timeTable$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.timeTable = term;
-                this.timeTableChange();
-            });
-        this.amountRequested$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.amountRequested = term;
-                this.amountRequestedChange();
-            });
-        this.totalProjectCost$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.totalProjectCost = term;
-                this.totalProjectCostChange();
-            });
-        this.itemizedBudget$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.itemizedBudget = term;
-                this.itemizedBudgetChange();
-            });
-
-        this.defaultValues();
-    }
-
-    defaultValues(): void {
-        //main
-        this.projectTitle = '';
-        this.purpose = '';
-        this.goals = '';
-        this.narrative = '';
-        this.timeTable = '';
-        this.amountRequested = 0;
-        this.totalProjectCost = 0;
-        this.itemizedBudget = '';
-    }
+        private _cdr: ChangeDetectorRef
+    ) {}
 
     ngOnInit(): void {
-        this.getProposal(this.proposalID);
+        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
+            const id = pm.get('id');
+            if (!id) {
+                return;
+            }
+            this.proposalID = id;
+            this.getProposal(id);
+        });
     }
 
-    /**
-     * On destroy
-     */
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['inOrg'] || changes['isDirector']) {
+            this._cdr.detectChanges();
+        }
+    }
+
     ngOnDestroy(): void {
-        // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next(null);
+        this.formMessageSub?.unsubscribe();
+        this._unsubscribeAll.next(undefined);
         this._unsubscribeAll.complete();
     }
 
-    getProposal(proposalID): void {
-        // query database for that proposal
+    private num(v: unknown, fallback = 0): number {
+        if (v === '' || v === null || v === undefined) {
+            return fallback;
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : fallback;
+    }
 
-        this._proposalService
-            .getProposalByID(proposalID)
-            .subscribe((proposal) => {
+    private wireFormMessageClear(): void {
+        this.formMessageSub?.unsubscribe();
+        this.formMessageSub = this.groupedForm.valueChanges.subscribe(() => {
+            this.showMessage = false;
+        });
+    }
+
+    getProposal(proposalID: string): void {
+        this._proposalService.getProposalByID(proposalID).subscribe(
+            (proposal) => {
                 if (proposal) {
                     this.proposal = proposal;
-                    this.propID = this.proposal._id; //mongo id
+                    this.propID = this.proposal._id;
+                    const org = this.proposal.organization;
+                    this.orgID =
+                        typeof org === 'object' && org
+                            ? org._id
+                            : org;
                     this.setFields();
+                    this.loaded = true;
+                    this._cdr.detectChanges();
+                    Promise.resolve().then(() => this._cdr.detectChanges());
                 } else {
-                    //send user back to welcome
                     this._router.navigate(['/welcome']);
                 }
             },
-                () => {});
+            () => {}
+        );
     }
-
-    // refreshProposal(): void {
-    //     this.getProposal(this.proposalID); //fetch the proposal again
-    // }
 
     setFields(): void {
         if (this.proposal) {
-            if (this.proposal.projectTitle) {
-                this.projectTitle = this.proposal.projectTitle;
-            }
-
-            if (this.proposal.purpose) {
-                this.purpose = this.proposal.purpose;
-            }
-
-            if (this.proposal.goals) {
-                this.goals = this.proposal.goals;
-            }
-
-            if (this.proposal.narrative) {
-                this.narrative = this.proposal.narrative;
-            }
-
-            if (this.proposal.timeTable) {
-                this.timeTable = this.proposal.timeTable;
-            }
-
-            if (this.proposal.amountRequested) {
-                this.amountRequested = this.proposal.amountRequested;
-            }
-
-            if (this.proposal.totalProjectCost) {
-                this.totalProjectCost = this.proposal.totalProjectCost;
-            }
-
-            if (this.proposal.itemizedBudget) {
-                this.itemizedBudget = this.proposal.itemizedBudget;
-            }
-
             this.propObj = {
-                projectTitle: this.projectTitle,
-                purpose: this.purpose,
-                goals: this.goals,
-                narrative: this.narrative,
-                timeTable: this.timeTable,
-                amountRequested: this.amountRequested,
-                totalProjectCost: this.totalProjectCost,
-                itemizedBudget: this.itemizedBudget,
+                projectTitle: this.proposal.projectTitle ?? '',
+                purpose: this.proposal.purpose ?? '',
+                goals: this.proposal.goals ?? '',
+                narrative: this.proposal.narrative ?? '',
+                timeTable: this.proposal.timeTable ?? '',
+                amountRequested: this.proposal.amountRequested ?? 0,
+                totalProjectCost: this.proposal.totalProjectCost ?? 0,
+                itemizedBudget: this.proposal.itemizedBudget ?? '',
             };
         } else {
             this.propObj = {
@@ -272,235 +168,161 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         }
 
         this.initGroupedForm();
+        this._cdr.detectChanges();
     }
 
-    //when toggling the full form
     resetFormValues(): void {
-        // this.formOrganization.setValue({
-        //     legalName: this.legalName,
-        //     yearFounded: this.yearFounded,
-        //     currentOperatingBudget: this.currentOperatingBudget,
-        //     director: this.director,
-        //     phone: this.phone,
-        // });
-
-        // this.formContactPerson.setValue({
-        //     contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-        //     contactPersonTitle: this.contactPersonTitle,
-        //     contactPerson: this.contactPerson,
-        //     email: this.email,
-        // });
-
-        // this.websiteFormControl.setValue(this.website);
-        // this.emailFormControl.setValue(this.email);
-        // this.addressFormControl.setValue(this.address);
-        // this.cityFormControl.setValue(this.city);
-        // this.stateFormControl.setValue(this.state);
-        // this.zipFormControl.setValue(this.zip);
-
-        // this.initFormControls();
         this.initGroupedForm();
     }
 
     initGroupedForm(): void {
+        const req = Validators.required;
+        const p = this.propObj;
+
         this.groupedForm = new FormGroup({
-            projectTitle: new FormControl(this.propObj.projectTitle),
-            purpose: new FormControl(this.propObj.purpose),
-            goals: new FormControl(this.propObj.goals),
-            narrative: new FormControl(this.propObj.narrative),
-            timeTable: new FormControl(this.propObj.timeTable),
-            amountRequested: new FormControl(this.propObj.amountRequested, [
-                Validators.required,
-                Validators.min(1),
-            ]),
-            totalProjectCost: new FormControl(this.propObj.totalProjectCost, [
-                Validators.required,
-                Validators.min(1),
-            ]),
-            itemizedBudget: new FormControl(this.propObj.itemizedBudget),
+            projectTitle: new FormControl(p.projectTitle, req),
+            purpose: new FormControl(p.purpose, req),
+            goals: new FormControl(p.goals, req),
+            narrative: new FormControl(p.narrative, req),
+            timeTable: new FormControl(p.timeTable, req),
+            amountRequested: new FormControl(p.amountRequested, [req, Validators.min(1)]),
+            totalProjectCost: new FormControl(p.totalProjectCost, [req, Validators.min(1)]),
+            itemizedBudget: new FormControl(p.itemizedBudget, req),
         });
 
         this.initFormControls();
+        this.wireFormMessageClear();
     }
 
     initFormControls(): void {
-        this.projectTitleControl = new FormControl(this.projectTitle);
-        this.purposeControl = new FormControl(this.purpose);
-        this.goalsControl = new FormControl(this.goals);
-        this.narrativeControl = new FormControl(this.narrative);
-        this.timeTableControl = new FormControl(this.timeTable);
-        this.amountRequestedControl = new FormControl(this.amountRequested);
-        this.totalProjectCostControl = new FormControl(this.totalProjectCost);
-        this.itemizedBudgetControl = new FormControl(this.itemizedBudget);
+        const p = this.propObj;
+        this.projectTitleControl = new FormControl(p.projectTitle);
+        this.purposeControl = new FormControl(p.purpose);
+        this.goalsControl = new FormControl(p.goals);
+        this.narrativeControl = new FormControl(p.narrative);
+        this.timeTableControl = new FormControl(p.timeTable);
+        this.amountRequestedControl = new FormControl(p.amountRequested);
+        this.totalProjectCostControl = new FormControl(p.totalProjectCost);
+        this.itemizedBudgetControl = new FormControl(p.itemizedBudget);
     }
 
-    //sets the fields to the updated value
-    //then calls the save single field function to call the database
-    updateSingleField(prop: any, control: any): void {
-        if (this[control].value === '') {
-            this[control].value = this.propObj[prop];
-
+    updateSingleField(prop: string, control: string): void {
+        const c = this[control] as FormControl;
+        if (c.value === '' || c.value === null) {
+            c.setValue(this.propObj[prop]);
             this.checkInvalidProp(prop, true);
-
-            // this.invalidInputLegalName = true;
-            setTimeout(() => {
-                // this.invalidInputLegalName = false;
-                this.checkInvalidProp(prop, false);
-            }, 2000);
+            setTimeout(() => this.checkInvalidProp(prop, false), 2000);
         } else {
-            this[prop] = this[control].value;
-            this.propObj[prop] = this[control].value;
-            const change = {
-                [prop]: this[control].value,
-            };
-            this.saveSingleField(change);
+            let val: any = c.value;
+            if (prop === 'amountRequested' || prop === 'totalProjectCost') {
+                val = this.num(val);
+            }
+            this.propObj[prop] = val;
+            this.saveSingleField({ [prop]: val });
         }
     }
 
     checkInvalidProp(prop: string, flag: boolean): void {
         switch (prop) {
-            case 'projectTitle': {
+            case 'projectTitle':
                 this.invalidInputProjectTitle = flag;
                 break;
-            }
-            case 'purpose': {
+            case 'purpose':
                 this.invalidInputPurpose = flag;
                 break;
-            }
-            case 'goals': {
+            case 'goals':
                 this.invalidInputGoals = flag;
                 break;
-            }
-            case 'narrative': {
+            case 'narrative':
                 this.invalidInputNarrative = flag;
                 break;
-            }
-            case 'timeTable': {
+            case 'timeTable':
                 this.invalidInputTimeTable = flag;
                 break;
-            }
-            case 'amountRequested': {
+            case 'amountRequested':
                 this.invalidInputAmountRequested = flag;
                 break;
-            }
-            case 'totalProjectCost': {
+            case 'totalProjectCost':
                 this.invalidInputTotalProjectCost = flag;
                 break;
-            }
-            case 'itemizedBudget': {
+            case 'itemizedBudget':
                 this.invalidInputItemizedBudget = flag;
                 break;
-            }
-            default: {
+            default:
                 console.error('invalid switch prop');
-                break;
-            }
         }
     }
 
-    //takes in the field that changed
-    saveSingleField(change: any): void {
-        const body = change;
-
-        this.updateProposal(body);
+    saveSingleField(change: Record<string, unknown>): void {
+        this.updateProposal(change);
     }
 
-    cancelSingleField(prop: string, control: any): void {
-        (this[control] as AbstractControl).setValue(this[prop]);
+    cancelSingleField(prop: string, control: string): void {
+        (this[control] as AbstractControl).setValue(this.propObj[prop]);
     }
 
-    //calls the updateOrganizationService
-    updateProposal(body: any): void {
+    updateProposal(body: Record<string, unknown>): void {
         this._proposalService.updateProposal(this.propID, body).subscribe(
             (result) => {
-                this.proposal = result.proposal;
-
+                this.proposal = result.proposal ?? result;
+                this.setFields();
                 this.refreshProp.emit(true);
-                this.resetFormValues();
             },
             () => {}
         );
     }
 
     updateGroupedEdition(): void {
-        this.propObj = {
-            projectTitle: this.projectTitle, //changed
-            purpose: this.purpose,
-            goals: this.goals,
-            narrative: this.narrative,
-            timeTable: this.timeTable,
-            amountRequested: this.amountRequested,
-            totalProjectCost: this.totalProjectCost,
-            itemizedBudget: this.itemizedBudget,
+        const v = this.groupedForm.getRawValue();
+        const payload = {
+            projectTitle: v.projectTitle ?? '',
+            purpose: v.purpose ?? '',
+            goals: v.goals ?? '',
+            narrative: v.narrative ?? '',
+            timeTable: v.timeTable ?? '',
+            amountRequested: this.num(v.amountRequested),
+            totalProjectCost: this.num(v.totalProjectCost),
+            itemizedBudget: v.itemizedBudget ?? '',
             organization: this.orgID,
         };
 
-        this._proposalService
-            .updateProposal(this.propID, this.propObj)
-            .subscribe(
-                (result) => {
-                    this.propObj = result.proposal;
-
-                    this.refreshProp.emit(true);
-                    this.resetFormValues();
-                },
-                () => {}
-            );
+        this._proposalService.updateProposal(this.propID, payload).subscribe(
+            (result) => {
+                this.proposal = result.proposal ?? result;
+                this.setFields();
+                this.refreshProp.emit(true);
+            },
+            () => {}
+        );
     }
 
     cancelGroupedEdition(): void {
-        //reset values
         this.setFields();
     }
 
     mainCancel(): void {
         this.editing = false;
-
         this.getProposal(this.proposalID);
     }
 
     handleModeChange(mode: 'view' | 'edit'): void {
         this.mode = mode;
-
         this.resetFormValues();
+        this.editing = mode === 'edit';
+    }
 
-        if (mode === 'view') {
-            this.editing = false;
-        } else {
-            this.editing = true;
+
+    handleInlineEnter(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName === 'TEXTAREA') {
+            return;
         }
-    }
-
-    projectTitleChange(): void {
-        this.showMessage = false;
-    }
-
-    purposeChange(): void {
-        this.showMessage = false;
-    }
-
-    goalsChange(): void {
-        this.showMessage = false;
-    }
-
-    narrativeChange(): void {
-        this.showMessage = false;
-    }
-
-    timeTableChange(): void {
-        this.showMessage = false;
-    }
-
-    amountRequestedChange(): void {
-        this.showMessage = false;
-    }
-
-    totalProjectCostChange(): void {
-        this.showMessage = false;
-    }
-
-    itemizedBudgetChange(): void {
-        this.showMessage = false;
+        if (this.mode !== 'edit' || !this.groupedForm?.valid) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.updateGroupedEdition();
     }
 
     toggleDirectorEdit(): void {
@@ -509,12 +331,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy {
         this.checkEditing(this.mode);
     }
 
-    checkEditing(mode): void {
-        if (mode === 'view') {
-            this.editing = false;
-        } else {
-            this.editing = true;
-        }
+    checkEditing(mode: string): void {
+        this.editing = mode !== 'view';
     }
-
 }

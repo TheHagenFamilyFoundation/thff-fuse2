@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableDataSource } from '@angular/material/table';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { meetingStatusLabel } from '../meeting-status.labels';
 
 @Component({
+    standalone: false,
     selector: 'app-meeting',
     templateUrl: './meeting.component.html',
     styleUrls: ['./meeting.component.scss']
@@ -15,10 +18,11 @@ export class MeetingComponent implements OnInit {
     isPresidentOrAdmin = false;
     loaded = false;
 
-    meetings: any[] = [];
+    /** Table rows — MatTableDataSource so the grid updates reliably after HTTP. */
+    dataSource = new MatTableDataSource<any>([]);
+
     years: any[] = [];
     selectedYearId: string;
-    selectedYear: any;
     currentYear: number = new Date().getFullYear();
 
     // Create form
@@ -29,6 +33,9 @@ export class MeetingComponent implements OnInit {
     // Archive filter: '' = active, 'only' = archived, 'true' = all
     archivedFilter: string = '';
 
+    /** List filter: '' = all calendar years; otherwise numeric string e.g. '2025'. */
+    listYearFilter: string = '';
+
     displayedColumns = ['year', 'created', 'startedBy', 'budget', 'allocated', 'status', 'action'];
 
     constructor(
@@ -36,44 +43,68 @@ export class MeetingComponent implements OnInit {
         private submissionYearsService: SubmissionYearsService,
         private authService: AuthService,
         private snackBar: MatSnackBar,
-        private router: Router
+        private router: Router,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
-        this.authService.checkPresident().subscribe(isP => {
+        this.authService.checkPresident().subscribe((isP) => {
             this.isPresidentOrAdmin = isP;
+            this._changeDetectorRef.markForCheck();
         });
-        this.loadSubmissionYears();
+        // List load must not depend on submission-years (that call can fail or be empty).
+        this.loadMeetings();
+        this.loadSubmissionYearsForForm();
     }
 
-    loadSubmissionYears(): void {
+    /**
+     * Submission years are only needed for the "Create meeting" year dropdown.
+     */
+    private loadSubmissionYearsForForm(): void {
         this.submissionYearsService.getAllSubmissionYears(this.currentYear).subscribe({
             next: (years) => {
-                this.years = years;
-                this.loadAllMeetings();
+                const arr = Array.isArray(years) ? years : [];
+                this.years = arr.slice().sort((a, b) => (b?.year ?? 0) - (a?.year ?? 0));
+                if (this.years.length > 0) {
+                    this.selectedYearId = this.years[0]._id;
+                }
+                this._changeDetectorRef.markForCheck();
             },
             error: () => {
-                this.loaded = true;
+                this.years = [];
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
 
-    loadAllMeetings(): void {
+    loadMeetings(): void {
         this.loaded = false;
-        this.meetingService.getMeetings(undefined, undefined, this.archivedFilter || undefined).subscribe({
+        const parsed =
+            this.listYearFilter === '' ? NaN : Number(this.listYearFilter);
+        const yearNum = Number.isFinite(parsed) ? parsed : undefined;
+        this.meetingService.getMeetings(yearNum, undefined, this.archivedFilter || undefined).subscribe({
             next: (meetings) => {
-                this.meetings = meetings;
+                const rows = Array.isArray(meetings) ? meetings : [];
+                this.dataSource.data = rows;
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             },
             error: () => {
+                this.dataSource.data = [];
                 this.loaded = true;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
 
     archivedFilterChanged(value: string): void {
         this.archivedFilter = value;
-        this.loadAllMeetings();
+        this.loadMeetings();
+    }
+
+    yearFilterChanged(value: string | number | null | undefined): void {
+        this.listYearFilter = value === null || value === undefined ? '' : String(value);
+        this.loadMeetings();
     }
 
     archiveMeeting(event: Event, id: string, archived: boolean): void {
@@ -81,7 +112,7 @@ export class MeetingComponent implements OnInit {
         this.meetingService.archiveMeeting(id, archived).subscribe({
             next: () => {
                 this.snackBar.open(archived ? 'Meeting archived' : 'Meeting restored', 'Close', { duration: 3000 });
-                this.loadAllMeetings();
+                this.loadMeetings();
             },
             error: (err) => {
                 const msg = err.error?.message || 'Error archiving meeting';
@@ -131,12 +162,7 @@ export class MeetingComponent implements OnInit {
     }
 
     getStatusLabel(status: string): string {
-        switch (status) {
-            case 'setup': return 'Not Started';
-            case 'in_progress': return 'In Progress';
-            case 'completed': return 'Finalized';
-            default: return status;
-        }
+        return meetingStatusLabel(status);
     }
 
     getStatusColor(status: string): string {

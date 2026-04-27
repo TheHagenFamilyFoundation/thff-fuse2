@@ -3,6 +3,7 @@ import { Component, OnInit, Output, Input, EventEmitter } from '@angular/core';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 
 @Component({
+    standalone: false,
     selector: 'app-proposal-summary',
     templateUrl: './proposal-summary.component.html',
     styleUrls: ['./proposal-summary.component.scss']

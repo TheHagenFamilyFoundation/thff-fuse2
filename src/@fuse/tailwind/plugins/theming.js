@@ -1,9 +1,9 @@
 const chroma = require('chroma-js');
 const _ = require('lodash');
 const path = require('path');
-const colors = require('tailwindcss/colors');
-const plugin = require('tailwindcss/plugin');
-const flattenColorPalette = require('tailwindcss/lib/util/flattenColorPalette').default;
+const colors = require('tailwind3/colors');
+const plugin = require('tailwind3/plugin');
+const flattenColorPalette = require('tailwind3/lib/util/flattenColorPalette').default;
 const generateContrasts = require(path.resolve(__dirname, ('../utils/generate-contrasts')));
 
 // -----------------------------------------------------------------------------------------------------

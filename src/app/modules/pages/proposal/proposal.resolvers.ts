@@ -4,7 +4,8 @@ import {
     Resolve,
     RouterStateSnapshot,
 } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 import { ProposalService } from './proposal.service';
 
 @Injectable({
@@ -30,6 +31,9 @@ export class ProposalResolver implements Resolve<any> {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<any> {
-        return this._proposalService.getData();
+        return this._proposalService.getData().pipe(
+            timeout(45000),
+            catchError(() => of(null))
+        );
     }
 }

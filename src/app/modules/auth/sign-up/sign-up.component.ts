@@ -7,9 +7,9 @@ import { FuseAlertType } from '@fuse/components/alert';
 import { FuseConfigService } from '@fuse/services/config';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
-import { Scheme } from 'app/core/config/app.config';
 
 @Component({
+    standalone: false,
     selector: 'auth-sign-up',
     templateUrl: './sign-up.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -79,10 +79,7 @@ export class AuthSignUpComponent implements OnInit {
                 // Establish session from the register response
                 this._authService.establishSession(response);
 
-                // Apply user's default scheme
-                if (response.userSettings?.scheme) {
-                    this._fuseConfigService.config = { scheme: response.userSettings.scheme as Scheme };
-                }
+                this._fuseConfigService.config = { scheme: 'light' };
 
                 // Start backend session ping
                 this._backendService.startPing();

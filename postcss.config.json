@@ -1,0 +1,5 @@
+{
+  "plugins": {
+    "tailwind3": "./tailwind.config.js"
+  }
+}

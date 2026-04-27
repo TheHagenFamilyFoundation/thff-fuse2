@@ -6,6 +6,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { ClosePortalDialogComponent } from './close-portal-dialog.component';
 
 @Component({
+    standalone: false,
     selector: 'app-submission-years',
     templateUrl: './submission-years.component.html',
     styleUrls: ['./submission-years.component.scss']
@@ -18,6 +19,7 @@ export class SubmissionYearsComponent implements AfterViewInit {
     dataSource: MatTableDataSource<any>;
     currentYear: number;
     submissionYearMissing: boolean = false;
+    tableLoaded = false;
 
     private years: any;
 
@@ -69,14 +71,24 @@ export class SubmissionYearsComponent implements AfterViewInit {
     }
 
     private getSubmissionYears(): void {
-        this.submissionYearsService.getAllSubmissionYears(undefined).subscribe({
+        this.tableLoaded = false;
+        this.submissionYearsService.getAllSubmissionYears(this.currentYear).subscribe({
             next: (years) => {
-                this.years = years;
-                this.dataSource = new MatTableDataSource(this.years);
-                this.dataSource.sort = this.sort;
+                const list = Array.isArray(years) ? years : [];
+                this.years = list;
+                this.dataSource = new MatTableDataSource(list);
+                if (this.sort) {
+                    this.dataSource.sort = this.sort;
+                }
                 this.checkCurrentYearSubmissionYear();
+                this.tableLoaded = true;
             },
-            error: (err) => { console.error('getAllSubmissionYears error', err); }
+            error: (err) => {
+                console.error('getAllSubmissionYears error', err);
+                this.years = [];
+                this.dataSource = new MatTableDataSource([]);
+                this.tableLoaded = true;
+            },
         });
     }
 

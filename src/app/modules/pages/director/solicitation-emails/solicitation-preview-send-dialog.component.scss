@@ -1,0 +1,28 @@
+.preview-send-content {
+    max-height: min(88vh, 720px);
+    min-height: 200px;
+}
+
+.dialog-step-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+}
+
+.preview-inner img {
+    max-width: 100%;
+    height: auto;
+}
+
+.plain-body-field .plain-textarea {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Rendered email reads like a normal message */
+.email-preview-surface {
+    font-family: inherit;
+}

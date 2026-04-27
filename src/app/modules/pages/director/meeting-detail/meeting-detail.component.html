@@ -18,10 +18,18 @@
                         {{ getStatusLabel(meeting.status) }}
                     </span>
                 </div>
-                <a mat-stroked-button [routerLink]="['/pages/director/meeting', meeting._id, 'contacts']">
-                    <mat-icon class="mr-1">contacts</mat-icon>
-                    Contacts / PDF
-                </a>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a *ngIf="meeting.status === 'completed'"
+                       mat-stroked-button
+                       [routerLink]="['/pages/director/meeting', meeting._id, 'after']">
+                        <mat-icon class="mr-1">mark_email_read</mat-icon>
+                        After meeting
+                    </a>
+                    <a mat-stroked-button [routerLink]="['/pages/director/meeting', meeting._id, 'contacts']">
+                        <mat-icon class="mr-1">contacts</mat-icon>
+                        Contacts / PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -139,7 +147,7 @@
                         </button>
                         <button mat-flat-button color="primary" (click)="completeMeeting()">
                             <mat-icon class="mr-1">check_circle</mat-icon>
-                            Finalize Meeting
+                            Complete meeting
                         </button>
                     </div>
                 </div>
@@ -201,7 +209,7 @@
                 <!-- Table -->
                 <fuse-card *ngIf="meeting.status !== 'completed' || editingCompletedMeeting"
                            class="flex flex-col w-full overflow-hidden">
-                    <mat-table [dataSource]="getTableAllocations()" class="w-full meeting-table">
+                    <mat-table [dataSource]="displayAllocations" class="w-full meeting-table">
 
                         <ng-container matColumnDef="projectTitle">
                             <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">
@@ -431,7 +439,7 @@
                         Started by {{ getUserName(meeting.startedBy) }}
                     </p>
                     <p *ngIf="meeting.completedBy">
-                        Finalized by {{ getUserName(meeting.completedBy) }}
+                        Completed by {{ getUserName(meeting.completedBy) }}
                         on {{ meeting.completedAt | date:'MMM d, yyyy \'at\' h:mm a' }}
                     </p>
                     <p *ngIf="meeting.notes">Notes: {{ meeting.notes }}</p>

@@ -3,7 +3,8 @@
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
             <!-- Back link -->
-            <a [routerLink]="[backLink || organizationLink]"
+            <a *ngIf="backLink || organizationRouterLink"
+               [routerLink]="backLink ? backLink : organizationRouterLink"
                class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mt-6 -mb-2 cursor-pointer">
                 <mat-icon class="icon-size-4">arrow_back</mat-icon>
                 {{ backLabel || 'Back to Organization' }}
@@ -23,8 +24,9 @@
                     </div>
                     <div class="hidden lg:flex h-8 mx-8 border-l-2"></div>
                     <span class="hidden lg:inline text-sm text-gray-500 dark:text-gray-400">Organization:</span>
-                    <a class="hidden lg:inline px-2 text-sm font-medium text-primary hover:underline cursor-pointer"
-                        [routerLink]="[organizationLink]">
+                    <a *ngIf="organizationRouterLink"
+                        class="hidden lg:inline px-2 text-sm font-medium text-primary hover:underline cursor-pointer"
+                        [routerLink]="organizationRouterLink">
                         {{ org?.name }}
                     </a>
                 </div>
@@ -59,15 +61,11 @@
     </div>
     <!-- End of Header -->
 
-    <!-- Non-Director View -->
-    <div *ngIf="!isDirector">
-        <div class="flex-auto border-t -mt-px pt-4 sm:pt-6 my-6">
-            <div class="w-5/6 max-w-screen-xl mx-auto">
-                <fuse-card class="flex flex-col w-full p-6 sm:p-8">
-                    <app-proposal-info [isDirector]="isDirector" [inOrg]="inOrg"></app-proposal-info>
-                </fuse-card>
-            </div>
-        </div>
+    <!-- Non-Director View: full-width content + card so page bg does not read as one gray slab -->
+    <div *ngIf="!isDirector" class="w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+        <fuse-card class="proposal-info-shell flex flex-col w-full p-6 sm:p-8">
+            <app-proposal-info [isDirector]="isDirector" [inOrg]="inOrg"></app-proposal-info>
+        </fuse-card>
     </div>
 
     <!-- Director View -->
@@ -112,7 +110,7 @@
             </fuse-card>
 
             <!-- Proposal Information -->
-            <fuse-card *ngIf="activeTab === 'proposal-info'" class="flex flex-col w-full p-6 sm:p-8">
+            <fuse-card *ngIf="activeTab === 'proposal-info'" class="proposal-info-shell flex flex-col w-full p-6 sm:p-8">
                 <app-proposal-info (refreshProp)="refreshProp()" [isDirector]="isDirector"
                     [inOrg]="inOrg"></app-proposal-info>
             </fuse-card>

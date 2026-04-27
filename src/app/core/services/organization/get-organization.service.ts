@@ -22,8 +22,11 @@ export class GetOrganizationService {
         return this.http.get(urlString);
     }
 
-    getOrgbyID(orgID: string): Observable<any> {
-        const urlString = `${this.apiUrl}/organization/orgID/${orgID}`;
+    getOrgbyID(orgID: string, forceFresh: boolean = false): Observable<any> {
+        let urlString = `${this.apiUrl}/organization/orgID/${orgID}`;
+        if (forceFresh) {
+            urlString += `?_=${Date.now()}`;
+        }
 
         return this.http.get(urlString);
     }
@@ -43,7 +46,16 @@ export class GetOrganizationService {
     }
 
     //TODO: pass in sort
-    getOrgs(skip: number, limit: number, filter: string, sortColumn: string, sortDirection: string, year?: number): Observable<any> {
+    getOrgs(
+        skip: number,
+        limit: number,
+        filter: string,
+        sortColumn: string,
+        sortDirection: string,
+        year?: number,
+        /** When true, API returns `{ items, total }` (one round trip vs separate /count). */
+        includeTotal?: boolean
+    ): Observable<any> {
         let urlString = `${this.apiUrl}/organization?skip=${skip}&limit=${limit}`;
 
         //empty string
@@ -58,6 +70,10 @@ export class GetOrganizationService {
 
         if (year) {
             urlString += `&year=${year}`;
+        }
+
+        if (includeTotal) {
+            urlString += '&includeTotal=1';
         }
 
         return this.http.get(urlString);

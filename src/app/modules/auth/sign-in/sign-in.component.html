@@ -23,7 +23,7 @@
             </fuse-alert>
 
             <!-- Sign in form -->
-            <form class="mt-8" [formGroup]="signInForm" #signInNgForm="ngForm">
+            <form class="mt-8" [formGroup]="signInForm" #signInNgForm="ngForm" (ngSubmit)="signIn()">
                 <!-- Email field -->
                 <mat-form-field class="w-full">
                     <mat-label>Email address</mat-label>
@@ -63,9 +63,14 @@
                     <a class="text-primary-500 hover:underline" [routerLink]="['/support']">Visit the Support page</a>.
                 </div>
 
-                <!-- Submit button -->
-                <button class="fuse-mat-button-large w-full mt-6" mat-flat-button [color]="'primary'"
-                    [disabled]="signInForm.disabled" (click)="signIn()">
+                <!-- Submit: global THFF MDC primary styles (styles.scss) -->
+                <button
+                    class="fuse-mat-button-large w-full mt-6"
+                    mat-flat-button
+                    type="submit"
+                    [color]="'primary'"
+                    [disabled]="signInForm.disabled"
+                >
                     <span *ngIf="!signInForm.disabled">Sign in</span>
                     <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
                         [mode]="'indeterminate'"></mat-progress-spinner>

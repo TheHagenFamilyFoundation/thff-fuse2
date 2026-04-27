@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { meetingStatusLabel } from './meeting-status.labels';
 
 @Component({
+    standalone: false,
     selector: 'app-director',
     templateUrl: './director.component.html',
     styleUrls: ['./director.component.scss']
@@ -13,13 +15,20 @@ export class DirectorComponent implements OnInit {
 
     constructor(
         private _router: Router,
-        private _meetingService: MeetingService
+        private _meetingService: MeetingService,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
         this._meetingService.getMeetings().subscribe({
             next: (meetings) => {
-                this.activeMeeting = meetings.find((m: any) => m.status !== 'completed') || null;
+                const list = Array.isArray(meetings) ? meetings : [];
+                this.activeMeeting = list.find((m: any) => m.status !== 'completed') || null;
+                this._changeDetectorRef.markForCheck();
+            },
+            error: () => {
+                this.activeMeeting = null;
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -44,6 +53,10 @@ export class DirectorComponent implements OnInit {
         this._router.navigate(['/pages/director/referral-links']);
     }
 
+    goToSolicitationEmails(): void {
+        this._router.navigate(['/pages/director/solicitation-emails']);
+    }
+
     goToMeeting(): void {
         this._router.navigate(['/pages/director/meeting']);
     }
@@ -55,12 +68,7 @@ export class DirectorComponent implements OnInit {
     }
 
     getStatusLabel(status: string): string {
-        switch (status) {
-            case 'setup': return 'Not Started';
-            case 'in_progress': return 'In Progress';
-            case 'completed': return 'Finalized';
-            default: return status;
-        }
+        return meetingStatusLabel(status);
     }
 
     getStatusColor(status: string): string {

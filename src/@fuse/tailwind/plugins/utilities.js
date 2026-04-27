@@ -1,4 +1,4 @@
-const plugin = require('tailwindcss/plugin');
+const plugin = require('tailwind3/plugin');
 
 module.exports = plugin(({
     addComponents

@@ -5,6 +5,7 @@ import { AuthUtils } from 'app/core/auth/auth.utils';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 
 @Component({
+    standalone: false,
     selector: 'landing-home',
     templateUrl: './home.component.html',
     encapsulation: ViewEncapsulation.None

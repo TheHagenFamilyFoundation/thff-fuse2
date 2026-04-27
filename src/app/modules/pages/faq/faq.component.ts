@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
+    standalone: false,
     selector: 'faq',
     templateUrl: './faq.component.html',
     encapsulation: ViewEncapsulation.None,

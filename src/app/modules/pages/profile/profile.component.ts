@@ -1,21 +1,22 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ViewEncapsulation,
     OnInit,
     OnDestroy,
 } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil, finalize } from 'rxjs';
 
 import { AuthService } from 'app/core/auth/auth.service';
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { InOrgService } from 'app/core/services/user/in-org.service';
-import { SettingsService } from 'app/core/services/user/settings.service';
-import { FuseConfigService } from '@fuse/services/config';
-import { AppConfig, Scheme } from 'app/core/config/app.config';
+import { dedupeUserOrganizations } from 'app/core/utilities/organization-access.util';
 
 @Component({
+    standalone: false,
     selector: 'profile',
     templateUrl: './profile.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -27,7 +28,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     email: string;
     accessLevel: number;
     isDirector: boolean;
-    organizations: any;
+    organizations: any[] = [];
     inOrganization: boolean;
     isLoggedIn: boolean;
 
@@ -49,12 +50,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
             title: 'Security',
             description: 'Manage your password.',
         },
-        {
-            id: 'app',
-            icon: 'heroicons_outline:cog',
-            title: 'App',
-            description: 'Change App Settings',
-        },
         // {
         //     id: 'notifications',
         //     icon: 'heroicons_outline:bell',
@@ -66,19 +61,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Account form
     accountForm: FormGroup;
     accountSaving = false;
-    accountAlert: { type: string; message: string } | null = null;
+    accountAlert: { type: 'success' | 'error' | 'info' | 'warning'; message: string } | null = null;
 
     // Security form
     securityForm: FormGroup;
     securitySaving = false;
     securityAlert: { type: string; message: string } | null = null;
-
-    // App settings
-    config: AppConfig;
-    themeToggled = false;
-    selectedScheme: string;
-    appSaving = false;
-    appAlert: { type: string; message: string } | null = null;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -87,8 +75,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
         private _getUserService: GetUserService,
         private _inOrgService: InOrgService,
         private _formBuilder: FormBuilder,
-        private _fuseConfigService: FuseConfigService,
-        private _settingsService: SettingsService,
+        private _snackBar: MatSnackBar,
+        private _changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -134,13 +122,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
             confirmPassword: ['', Validators.required],
         });
 
-        // Subscribe to app config for theme
-        this._fuseConfigService.config$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((config: AppConfig) => {
-                this.config = config;
-                this.selectedScheme = config.scheme;
-            });
     }
 
     ngOnDestroy(): void {
@@ -173,17 +154,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
     getOrganizations(): void {
         this._getUserService
             .getUserbyID(this.currentUser._id)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user) => {
-                if (user) {
-                    if (user.organizations.length > 0) {
-                        this.organizations = user.organizations;
+                if (!user) {
+                    return;
+                }
+                const orgs = dedupeUserOrganizations(user.organizations);
+                // Defer so dev-mode "expression changed" does not run in the same CD turn as the HTTP callback
+                setTimeout(() => {
+                    if (orgs.length > 0) {
+                        this.organizations = orgs;
                         this.inOrganization = true;
                         this._inOrgService.changeMessage(true);
                     } else {
+                        this.organizations = [];
                         this.inOrganization = false;
                         this._inOrgService.changeMessage(false);
                     }
-                }
+                    this._changeDetectorRef.detectChanges();
+                });
             });
     }
 
@@ -211,6 +200,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // @ Account methods
     // -----------------------------------------------------------------------------------------------------
 
+    onAccountAlertDismissed(dismissed: boolean): void {
+        if (dismissed) {
+            this.accountAlert = null;
+        }
+    }
+
     saveAccount(): void {
         this.accountSaving = true;
         this.accountAlert = null;
@@ -224,20 +219,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
             .pipe(finalize(() => this.accountSaving = false))
             .subscribe({
                 next: (response) => {
-                    this.accountAlert = { type: 'success', message: 'Profile updated successfully' };
+                    const msg =
+                        response?.message === 'Profile updated'
+                            ? 'Profile updated successfully'
+                            : response?.message || 'Profile updated successfully';
+                    this.accountAlert = { type: 'success', message: msg };
 
-                    // Update localStorage with new user data
-                    if (response.user) {
+                    if (response?.user) {
                         this.currentUser = response.user;
+                        this.user = response.user;
                         localStorage.setItem('currentUser', JSON.stringify(response.user));
                     }
+
+                    this._snackBar.open(msg, 'Dismiss', { duration: 6000 });
                 },
                 error: (err) => {
-                    this.accountAlert = {
-                        type: 'error',
-                        message: err?.error?.message || 'Error updating profile'
-                    };
-                }
+                    const errMsg = err?.error?.message || 'Error updating profile';
+                    this.accountAlert = { type: 'error', message: errMsg };
+                    this._snackBar.open(errMsg, 'Dismiss', { duration: 8000 });
+                },
             });
     }
 
@@ -279,45 +279,4 @@ export class ProfileComponent implements OnInit, OnDestroy {
             });
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ App Settings methods
-    // -----------------------------------------------------------------------------------------------------
-
-    setScheme(scheme: Scheme): void {
-        this._fuseConfigService.config = { scheme };
-        this.selectedScheme = scheme;
-        this.themeToggled = true;
-        this.appAlert = null;
-    }
-
-    saveScheme(): void {
-        if (!this.currentUser) { return; }
-
-        this.appSaving = true;
-        this.appAlert = null;
-
-        const payload = {
-            scheme: this.selectedScheme,
-            userID: this.currentUser._id,
-        };
-
-        this._settingsService.saveSettings(payload)
-            .pipe(finalize(() => {
-                this.appSaving = false;
-                this.themeToggled = false;
-            }))
-            .subscribe({
-                next: (response) => {
-                    // Persist scheme to localStorage so it survives page refresh
-                    localStorage.setItem('userScheme', this.selectedScheme);
-                    this.appAlert = { type: 'success', message: response.message || 'Theme saved' };
-                },
-                error: (err) => {
-                    this.appAlert = {
-                        type: 'error',
-                        message: err?.error?.message || 'Error saving theme'
-                    };
-                }
-            });
-    }
 }

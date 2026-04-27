@@ -9,6 +9,7 @@ import {
     switchMap,
     throwError,
 } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/services/user/user.service';
 import { environment } from '../../../environments/environment';
@@ -71,10 +72,8 @@ export class AuthService {
         this._authenticated = true;
         this._userService.user = response.user;
 
-        // Persist user settings (scheme) so it survives page refresh
-        if (response.userSettings?.scheme) {
-            localStorage.setItem('userScheme', response.userSettings.scheme);
-        }
+        // App is always light mode; keep key for boot script compatibility
+        localStorage.setItem('userScheme', 'light');
     }
 
     /**
@@ -133,12 +132,13 @@ export class AuthService {
      */
     signInUsingToken(): Observable<boolean> {
 
-        // Renew token
+        // Renew token (timeout: unreachable API must not hang guards / 401 retry / session refresh)
         return this._httpClient
             .post(`${this.apiUrl}/auth/refresh-access-token`, {
                 accessToken: this.accessToken
             })
             .pipe(
+                timeout(20000),
                 catchError(() => {
                     // Refresh failed — return false so callers can handle sign-out
                     return of(false);
@@ -161,10 +161,7 @@ export class AuthService {
                     // Store the user on the user service
                     this._userService.user = response.user;
 
-                    // Persist user settings (scheme) so it survives page refresh
-                    if (response.userSettings?.scheme) {
-                        localStorage.setItem('userScheme', response.userSettings.scheme);
-                    }
+                    localStorage.setItem('userScheme', 'light');
 
                     return of(true);
                 })
@@ -232,6 +229,7 @@ export class AuthService {
      * Check the authentication status.
      * If the token exists (even if expired), attempt a refresh.
      * The backend accepts tokens expired within a 24-hour grace window.
+     * (Refresh is time-limited inside {@link signInUsingToken}.)
      */
     check(): Observable<boolean> {
 

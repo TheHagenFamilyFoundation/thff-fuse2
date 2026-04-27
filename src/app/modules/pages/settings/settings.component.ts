@@ -12,6 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
+    standalone: false,
     selector: 'settings',
     templateUrl: './settings.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -75,12 +76,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
             //     description:
             //         'Manage your organization and change roles/permissions',
             // },
-            {
-                id: 'app',
-                icon: 'heroicons_outline:user-group',
-                title: 'App',
-                description: 'Change App Settings',
-            },
         ];
 
         // Subscribe to media changes

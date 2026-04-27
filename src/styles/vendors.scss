@@ -1,9 +1,9 @@
 /* ----------------------------------------------------------------------------------------------------- */
-/*  @ Import third party library styles here.
+/*  Third-party library styles (loaded via Sass @use — avoids deprecated @import).
 /* ----------------------------------------------------------------------------------------------------- */
 
 /* Perfect scrollbar */
-@import '~perfect-scrollbar/css/perfect-scrollbar.css';
+@use 'perfect-scrollbar/css/perfect-scrollbar.css';
 
 /* Quill */
-@import '~quill/dist/quill.snow.css';
+@use 'quill/dist/quill.snow.css';
