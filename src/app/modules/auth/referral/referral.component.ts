@@ -4,6 +4,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 
 @Component({
+    standalone: false,
     selector: 'app-referral',
     templateUrl: './referral.component.html',
 })

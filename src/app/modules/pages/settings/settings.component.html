@@ -42,11 +42,12 @@
             <div class="flex flex-col divide-y border-t border-b">
                 <ng-container *ngFor="let panel of panels; trackBy: trackByFn">
                     <div
-                        class="flex px-8 py-5 cursor-pointer"
+                        class="thff-settings-nav-item flex px-8 py-5 cursor-pointer"
+                        [class.thff-settings-nav-item--selected]="selectedPanel && selectedPanel === panel.id"
                         [ngClass]="{
-                            'hover:bg-gray-100 dark:hover:bg-hover':
+                            'hover:bg-accent-100 dark:hover:bg-accent-500/20':
                                 !selectedPanel || selectedPanel !== panel.id,
-                            'bg-primary-50 dark:bg-hover':
+                            'bg-primary-50 dark:bg-primary-800 dark:ring-1 dark:ring-inset dark:ring-primary-300/35':
                                 selectedPanel && selectedPanel === panel.id
                         }"
                         (click)="goToPanel(panel.id)"
@@ -56,7 +57,7 @@
                                 'text-hint':
                                     !selectedPanel ||
                                     selectedPanel !== panel.id,
-                                'text-primary dark:text-primary-500':
+                                'text-primary dark:text-primary-50':
                                     selectedPanel && selectedPanel === panel.id
                             }"
                             [svgIcon]="panel.icon"
@@ -65,14 +66,20 @@
                             <div
                                 class="font-medium leading-6"
                                 [ngClass]="{
-                                    'text-primary dark:text-primary-500':
+                                    'text-primary dark:text-white':
                                         selectedPanel &&
                                         selectedPanel === panel.id
                                 }"
                             >
                                 {{ panel.title }}
                             </div>
-                            <div class="mt-0.5 text-secondary">
+                            <div
+                                class="mt-0.5 text-secondary"
+                                [ngClass]="{
+                                    'dark:text-primary-50':
+                                        selectedPanel && selectedPanel === panel.id
+                                }"
+                            >
                                 {{ panel.description }}
                             </div>
                         </div>
@@ -133,11 +140,6 @@
                         <!-- Team -->
                         <ng-container *ngSwitchCase="'team'">
                             <!-- <settings-team></settings-team> -->
-                            Coming Soon
-                        </ng-container>
-                        <!-- App -->
-                        <ng-container *ngSwitchCase="'app'">
-                            <!-- <settings-app></settings-app> -->
                             Coming Soon
                         </ng-container>
                     </ng-container>

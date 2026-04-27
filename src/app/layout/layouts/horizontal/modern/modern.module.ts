@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -21,11 +21,8 @@ import { ModernLayoutComponent } from 'app/layout/layouts/horizontal/modern/mode
 import { GetUserService } from '../../../../core/services/user/get-user.service';
 import { InOrgService } from '../../../../core/services/user/in-org.service';
 
-@NgModule({
-    declarations: [ModernLayoutComponent],
-    imports: [
-        HttpClientModule,
-        RouterModule,
+@NgModule({ declarations: [ModernLayoutComponent],
+    exports: [ModernLayoutComponent], imports: [RouterModule,
         MatButtonModule,
         MatDividerModule,
         MatIconModule,
@@ -40,9 +37,5 @@ import { InOrgService } from '../../../../core/services/user/in-org.service';
         SearchModule,
         ShortcutsModule,
         UserModule,
-        SharedModule,
-    ],
-    providers: [GetUserService, InOrgService],
-    exports: [ModernLayoutComponent],
-})
+        SharedModule], providers: [GetUserService, InOrgService, provideHttpClient(withInterceptorsFromDi())] })
 export class ModernLayoutModule {}

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
+    standalone: false,
     selector       : 'settings-account',
     templateUrl    : './account.component.html',
     encapsulation  : ViewEncapsulation.None,

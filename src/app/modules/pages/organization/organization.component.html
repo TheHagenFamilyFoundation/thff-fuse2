@@ -56,7 +56,7 @@
                 <mat-icon class="text-thff-teal icon-size-7 mr-3">description</mat-icon>
                 <h2 class="text-xl font-semibold m-0">501(c)(3) Document</h2>
             </div>
-            <app-org-doc501c3 [org]="org"></app-org-doc501c3>
+            <app-org-doc501c3 [org]="org" (refreshOrg)="refreshOrg()"></app-org-doc501c3>
         </fuse-card>
 
         <!-- Team -->

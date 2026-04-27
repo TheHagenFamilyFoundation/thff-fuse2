@@ -1,0 +1,130 @@
+<h2 mat-dialog-title class="text-lg m-0">Send solicitation</h2>
+
+<p class="text-xs text-gray-500 dark:text-gray-400 mx-6 -mt-1 mb-0">
+    <ng-container [ngSwitch]="step">
+        <span *ngSwitchCase="STEP_CODE">Step 1 of 4 — Referral code</span>
+        <span *ngSwitchCase="STEP_EDIT">Step 2 of 4 — Edit your message</span>
+        <span *ngSwitchCase="STEP_PREVIEW">Step 3 of 4 — Preview</span>
+        <span *ngSwitchCase="STEP_SEND">Step 4 of 4 — Send</span>
+    </ng-container>
+</p>
+
+<mat-dialog-content class="preview-send-content">
+    <!-- Step 1: choose referral code -->
+    <ng-container *ngIf="step === STEP_CODE">
+        <p class="text-sm text-gray-700 dark:text-gray-300 m-0 mb-2">
+            Pick which referral link will appear in this email. Codes are tied to the <strong>submission year</strong> when they were created and are intended for use through <strong>December 31</strong> of that year. For a new year, generate a fresh code on
+            <a routerLink="/pages/director/referral-links" class="text-primary hover:underline">Referral links</a>.
+        </p>
+        <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Referral code</mat-label>
+            <mat-select [(ngModel)]="referralCodeId" required>
+                <mat-option *ngFor="let c of codes" [value]="codeOptionValue(c)">
+                    <span class="font-mono font-semibold">{{ c.code }}</span>
+                    <span *ngIf="c.label" class="text-gray-600 dark:text-gray-400"> — {{ c.label }}</span>
+                    <span *ngIf="codeSubmissionYear(c) as y" class="text-xs text-gray-500"> ({{ y }} cycle)</span>
+                </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="selectedReferralCode() as sel">
+                <ng-container *ngIf="codeSubmissionYear(sel) as y">
+                    This code is for the {{ y }} submission cycle. After Dec 31, {{ y }}, generate a new code on Referral links.
+                </ng-container>
+            </mat-hint>
+        </mat-form-field>
+
+        <div *ngIf="selectedReferralCode() as sel" class="mt-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-4 py-3 text-left">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 m-0 mb-2">Activity for this code</p>
+            <ul class="text-sm text-gray-700 dark:text-gray-300 m-0 pl-4 list-disc space-y-1.5">
+                <li>
+                    <strong>{{ codeUsage(sel).sent }}</strong> solicitation email(s) sent
+                    <span *ngIf="codeUsage(sel).lastAt"> — last {{ codeUsage(sel).lastAt | date: 'medium' }}</span>
+                    <span *ngIf="!codeUsage(sel).lastAt && codeUsage(sel).sent === 0"> (none yet)</span>
+                </li>
+                <li>
+                    <strong>{{ codeUsage(sel).linked }}</strong> applicant account(s) have <strong>linked</strong> this code (signed in and chose this sponsor)
+                </li>
+            </ul>
+            <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-2">
+                “Sent” is logged when you send from this app. “Linked” means the recipient (or anyone) registered that code on their THFF account — not whether a specific email opened the message.
+            </p>
+        </div>
+    </ng-container>
+
+    <div *ngIf="previewError && step === STEP_EDIT" class="text-sm text-red-600 dark:text-red-400 mb-3">{{ previewError }}</div>
+
+    <!-- Step 2: edit -->
+    <ng-container *ngIf="step === STEP_EDIT">
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">
+            This text is the whole email: nothing is added before or after your letter (only a minimal HTML wrapper so mail clients display it). The default uses tokens in double curly braces—referral link, director name/email/contact line, grant year—that are filled in when you send.
+        </p>
+        <mat-form-field class="w-full plain-body-field mb-2" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Template</mat-label>
+            <textarea
+                matInput
+                class="plain-textarea"
+                rows="12"
+                [(ngModel)]="messagePlain"
+                (input)="onPlainInput()"
+                [disabled]="messageSyncing"></textarea>
+            <mat-hint *ngIf="messageSyncing">Loading default text from server…</mat-hint>
+        </mat-form-field>
+        <div class="flex flex-wrap gap-2 items-center">
+            <button mat-stroked-button type="button" (click)="reloadDefaultText()" [disabled]="previewLoading">
+                <mat-icon class="mr-1 icon-size-5">refresh</mat-icon>
+                Reset to default text
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- Step 3: preview -->
+    <ng-container *ngIf="step === STEP_PREVIEW">
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">
+            This is what recipients will see. Use <strong>Back</strong> to edit the letter.
+        </p>
+        <div *ngIf="previewError" class="text-sm text-red-600 dark:text-red-400 mb-3">{{ previewError }}</div>
+        <div *ngIf="previewLoading" class="preview-frame rounded-lg border border-gray-200 dark:border-gray-600 flex justify-center items-center bg-gray-50 dark:bg-gray-900 min-h-[220px]">
+            <mat-spinner [diameter]="40"></mat-spinner>
+        </div>
+        <div *ngIf="!previewLoading && trustedPreview" class="preview-frame rounded-lg border border-gray-200 dark:border-gray-600 overflow-auto bg-white dark:bg-gray-950 max-h-[min(58vh,580px)] shadow-sm">
+            <div class="preview-inner p-4 sm:p-5 text-sm text-gray-900 dark:text-gray-100 email-preview-surface" [innerHTML]="trustedPreview"></div>
+        </div>
+    </ng-container>
+
+    <!-- Step 4: send -->
+    <ng-container *ngIf="step === STEP_SEND">
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">
+            Enter the recipient&rsquo;s address and send.
+        </p>
+        <mat-form-field class="w-full" appearance="outline">
+            <mat-label>Recipient email</mat-label>
+            <input matInput type="email" [(ngModel)]="to" autocomplete="email">
+        </mat-form-field>
+    </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-step-actions">
+    <div class="flex gap-2 items-center">
+        <button mat-button type="button" (click)="cancel()">Cancel</button>
+        <button *ngIf="step > STEP_CODE" mat-button type="button" (click)="back()" [disabled]="previewLoading || sending">
+            Back
+        </button>
+    </div>
+    <div class="flex gap-2 items-center">
+        <button *ngIf="step === STEP_CODE" mat-flat-button color="primary" type="button"
+                (click)="goToEditFromCode()" [disabled]="previewLoading">
+            Next: Edit message
+        </button>
+        <button *ngIf="step === STEP_EDIT" mat-flat-button color="primary" type="button"
+                (click)="goToPreview()" [disabled]="previewLoading">
+            {{ previewLoading ? 'Building preview…' : 'Next: Preview' }}
+        </button>
+        <button *ngIf="step === STEP_PREVIEW" mat-flat-button color="primary" type="button"
+                (click)="goToSend()" [disabled]="previewLoading || !trustedPreview">
+            Next: Send
+        </button>
+        <button *ngIf="step === STEP_SEND" mat-flat-button color="primary" type="button"
+                (click)="send()" [disabled]="sending || previewLoading">
+            {{ sending ? 'Sending…' : 'Send email' }}
+        </button>
+    </div>
+</mat-dialog-actions>

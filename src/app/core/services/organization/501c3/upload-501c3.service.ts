@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-    HttpClient,
-    HttpParams,
-    HttpRequest,
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
@@ -22,15 +18,8 @@ export class Upload501c3Service {
         const formData = new FormData();
         formData.append('doc501c3', file);
 
-        const params = new HttpParams();
-
-        const options = {
-            params,
-            reportProgress: true,
-        };
-
-        const req = new HttpRequest('POST', urlString, formData, options);
-
-        return this.http.request(req);
+        // Return only the completed backend response (not progress events),
+        // so callers do not close UI before upload persistence finishes.
+        return this.http.post(urlString, formData);
     }
 }

@@ -1,5 +1,5 @@
 <section editableGroup (editableModeChange)="handleModeChange($event)" (save)="updateGroupedEdition()"
-    (cancel)="cancelGroupedEdition()">
+    (cancel)="cancelGroupedEdition()" (keydown.enter)="handleInlineEnter($event)">
     <div *ngIf="isDirector && !inOrg" class="py-4">
         Edit As Director?
         <button mat-raised-button *ngIf="!directorEditing" (click)="toggleDirectorEdit()">
@@ -34,15 +34,15 @@
     </div>
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
-            <form *ngIf="orgInfo" [formGroup]="groupedForm" class="w-full max-w-lg">
+            <form *ngIf="groupedForm" [formGroup]="groupedForm" class="w-full max-w-lg">
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
                         <label class="block tracking-wide text-sm mb-2" for="grid-legal-name">
                             Legal Name
                         </label>
                         <mat-form-field style="width: 100%">
-                            <input matInput placeholder="Legal Name" formControlName="legalName" value="{{ legalName }}"
-                                required (keyup)="legalName$.next($event.target.value)" />
+                            <input matInput placeholder="Legal Name" formControlName="legalName" id="grid-legal-name"
+                                required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('legalName')
@@ -59,10 +59,11 @@
                             Year Founded
                         </label>
                         <mat-form-field class="year-founded">
-                            <input matInput placeholder="Year Founded" formControlName="yearFounded" maxlength="4"
-                                value="{{ yearFounded }}" required (keyup)="yearFounded$.next($event.target.value)" />
-                            <mat-hint align="end">{{ yearFounded?.toString().length }} /
-                                4</mat-hint>
+                            <input matInput placeholder="Year Founded" formControlName="yearFounded" id="grid-year-founded"
+                                maxlength="4" required />
+                            <mat-hint align="end">{{
+                                (groupedForm.get('yearFounded')?.value?.toString() || '').length
+                            }} / 4</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('yearFounded')
@@ -78,12 +79,8 @@
                         </label>
                         <mat-form-field class="current-operating-budget">
                             <input matInput formControlName="currentOperatingBudget"
-                                placeholder="Current Operating Budget" currencyMask required
-                                value="{{ currentOperatingBudget }}" (keyup)="
-                                    currentOperatingBudget$.next(
-                                        $event.target.value
-                                    )
-                                " />
+                                id="grid-current-operating-budget"
+                                placeholder="Current Operating Budget" currencyMask required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('currentOperatingBudget')
@@ -110,7 +107,7 @@
                         </label>
                         <mat-form-field>
                             <input matInput placeholder="Executive Director" formControlName="director"
-                                value="{{ director }}" required (keyup)="director$.next($event.target.value)" />
+                                id="grid-executive-director" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('director')
@@ -125,9 +122,8 @@
                             Phone Number
                         </label>
                         <mat-form-field>
-                            <input matInput formControlName="phone" value="{{ phone }}" type="tel" appPhoneMask
-                                formControlName="phone" id="phone-number" placeholder="Phone Number"
-                                (keyup)="phone$.next($event.target.value)" required />
+                            <input matInput formControlName="phone" type="tel" appPhoneMask
+                                id="org-info-phone-main" placeholder="Phone Number" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('phone')
@@ -148,9 +144,7 @@
                         </label>
                         <mat-form-field>
                             <input matInput placeholder="Contact Person" formControlName="contactPerson"
-                                value="{{ contactPerson }}" (keyup)="
-                                    contactPerson$.next($event.target.value)
-                                " required />
+                                id="grid-contact-person" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('contactPerson')
@@ -166,11 +160,7 @@
                         </label>
                         <mat-form-field>
                             <input matInput placeholder="Title" formControlName="contactPersonTitle"
-                                value="{{ contactPersonTitle }}" (keyup)="
-                                    contactPersonTitle$.next(
-                                        $event.target.value
-                                    )
-                                " required />
+                                id="grid-contact-person-title" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('contactPersonTitle')
@@ -188,13 +178,9 @@
                             Phone Number
                         </label>
                         <mat-form-field>
-                            <input matInput class="form-control" value="{{ contactPersonPhoneNumber }}" type="tel"
-                                appPhoneMask formControlName="contactPersonPhoneNumber" id="phone-number"
-                                placeholder="Phone Number" (keyup)="
-                                    contactPersonPhoneNumber$.next(
-                                        $event.target.value
-                                    )
-                                " required />
+                            <input matInput class="form-control" type="tel"
+                                appPhoneMask formControlName="contactPersonPhoneNumber" id="org-info-phone-contact"
+                                placeholder="Phone Number" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('contactPersonPhoneNumber')
@@ -210,8 +196,8 @@
                             Email
                         </label>
                         <mat-form-field>
-                            <input matInput class="form-control" value="{{ email }}" type="text" formControlName="email"
-                                id="email" placeholder="Email" (keyup)="email$.next($event.target.value)" required />
+                            <input matInput class="form-control" type="text" formControlName="email"
+                                id="grid-email" placeholder="Email" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('email')
@@ -233,8 +219,7 @@
                         </label>
                         <mat-form-field class="quarter-width">
                             <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="50"
-                                placeholder="Address" formControlName="address" value="{{ address }}" required
-                                (keyup)="address$.next($event.target.value)"></textarea>
+                                placeholder="Address" formControlName="address" id="grid-address" required></textarea>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('address')
@@ -251,8 +236,7 @@
                             City
                         </label>
                         <mat-form-field>
-                            <input matInput placeholder="City" formControlName="city" value="{{ city }}" required
-                                (keyup)="city$.next($event.target.value)" />
+                            <input matInput placeholder="City" formControlName="city" id="grid-city" required />
                             <mat-error *ngIf="
                                     groupedForm.get('city').hasError('required')
                                 ">
@@ -265,8 +249,7 @@
                             State
                         </label>
                         <mat-form-field>
-                            <input matInput placeholder="State" formControlName="state" value="{{ state }}" required
-                                (keyup)="state$.next($event.target.value)" />
+                            <input matInput placeholder="State" formControlName="state" id="grid-state" required />
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('state')
@@ -281,9 +264,11 @@
                             Zip
                         </label>
                         <mat-form-field>
-                            <input matInput placeholder="Zip" maxlength="5" formControlName="zip" value="{{ zip }}"
-                                required (keyup)="zip$.next($event.target.value)" />
-                            <mat-hint align="end">{{ zip?.toString().length }} / 5</mat-hint>
+                            <input matInput placeholder="Zip" maxlength="5" formControlName="zip" id="grid-zip"
+                                required />
+                            <mat-hint align="end">{{
+                                (groupedForm.get('zip')?.value?.toString() || '').length
+                            }} / 5</mat-hint>
                             <mat-error *ngIf="
                                     groupedForm.get('zip').hasError('required')
                                 ">
@@ -298,8 +283,8 @@
                             Website
                         </label>
                         <mat-form-field>
-                            <input matInput value="{{ website }}" type="text" formControlName="website" id="website"
-                                placeholder="Website" (keyup)="website$.next($event.target.value)" />
+                            <input matInput type="text" formControlName="website" id="grid-website"
+                                placeholder="Website" />
                         </mat-form-field>
                     </div>
                 </div>
@@ -330,7 +315,7 @@
     <section>
         <article>
             <div *ngIf="!editing">
-                <form *ngIf="orgInfo" [formGroup]="groupedForm" class="w-full max-w-lg">
+                <form *ngIf="groupedForm" [formGroup]="groupedForm" class="w-full max-w-lg">
                     <div class="flex flex-wrap -mx-3 mb-6">
                         <div class="w-full px-3">
                             <label class="block tracking-wide text-sm mb-2" for="grid-legal-name">
@@ -823,7 +808,7 @@
     <section>
         <article>
             <div *ngIf="!editing">
-                <form *ngIf="orgInfo" [formGroup]="groupedForm" class="w-full max-w-lg">
+                <form *ngIf="groupedForm" [formGroup]="groupedForm" class="w-full max-w-lg">
                     <div class="flex flex-wrap -mx-3 mb-6">
                         <div class="w-full px-3">
                             <label class="block tracking-wide text-sm mb-2" for="grid-legal-name">

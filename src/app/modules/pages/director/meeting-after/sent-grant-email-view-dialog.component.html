@@ -1,0 +1,36 @@
+<h2 mat-dialog-title class="m-0 text-lg font-semibold text-gray-900 dark:text-gray-100 pr-8">
+    Sent grant notification
+</h2>
+
+<mat-dialog-content class="sent-grant-email-view-dialog">
+    <div *ngIf="loading" class="flex flex-col items-center justify-center gap-3 py-10">
+        <mat-spinner [diameter]="40" color="primary"></mat-spinner>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Loading message…</span>
+    </div>
+
+    <p *ngIf="error" class="text-sm text-red-600 dark:text-red-400 m-0 py-2">{{ error }}</p>
+
+    <ng-container *ngIf="!loading && !error">
+        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 m-0 mb-1">{{ subject || '—' }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-1">
+            <span class="font-medium text-gray-600 dark:text-gray-300">To:</span> {{ to || '—' }}
+        </p>
+        <p *ngIf="sentAt" class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">
+            <span class="font-medium text-gray-600 dark:text-gray-300">Sent:</span>
+            {{ sentAt | date: 'MM/dd/yyyy, h:mm a' }}
+        </p>
+
+        <div *ngIf="!bodyHtml" class="text-sm text-gray-600 dark:text-gray-400 py-4 m-0">
+            The message body was not stored for this send (older records may be missing HTML).
+        </div>
+
+        <div *ngIf="bodyHtml"
+             class="sent-grant-email-view-dialog__frame rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto bg-white dark:bg-gray-950"
+             [innerHTML]="bodyHtml">
+        </div>
+    </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close type="button">Close</button>
+</mat-dialog-actions>

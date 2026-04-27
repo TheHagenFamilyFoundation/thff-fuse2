@@ -1,30 +1,34 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-6">
-    <div class="w-full max-w-md">
-        <fuse-card class="flex flex-col items-center p-8 text-center">
-            <img class="w-24 mb-6" src="assets/images/logo/logo_2020_9.svg" alt="THFF Logo">
+<div class="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-900">
+    <div class="flex flex-1 flex-col justify-center w-full px-6 py-10 sm:px-10 sm:py-12 lg:px-16">
+        <fuse-card class="flex w-full max-w-none flex-col items-center px-8 py-10 sm:px-12 sm:py-14 text-center">
+            <img
+                class="mx-auto mb-8 h-auto max-h-40 w-auto max-w-[min(100%,280px)] object-contain shrink-0"
+                src="assets/images/logo/logo_2020_9.svg"
+                alt="The Hagen Family Foundation"
+            >
 
             <!-- Loading -->
-            <div *ngIf="loading && isLoggedIn">
-                <mat-spinner [diameter]="40" class="mx-auto mb-4"></mat-spinner>
-                <p class="text-lg font-medium m-0">Applying referral code...</p>
+            <div *ngIf="loading && isLoggedIn" class="flex w-full flex-col items-center gap-4">
+                <mat-spinner [diameter]="40"></mat-spinner>
+                <p class="m-0 text-lg font-medium">Applying referral code...</p>
             </div>
 
             <!-- Success -->
-            <div *ngIf="!loading && sponsorName">
-                <mat-icon class="icon-size-12 text-green-500 mb-4">check_circle</mat-icon>
-                <p class="text-lg font-medium m-0 mb-2">Referral linked!</p>
-                <p class="text-secondary m-0">
-                    <strong>{{ sponsorName }}</strong> has been set as your sponsor.
+            <div *ngIf="!loading && sponsorName" class="flex w-full flex-col items-center gap-5">
+                <mat-icon class="icon-size-12 text-green-500">check_circle</mat-icon>
+                <p class="m-0 text-xl font-semibold text-gray-900 dark:text-gray-100">Referral linked!</p>
+                <p class="m-0 max-w-3xl text-base leading-relaxed text-secondary">
+                    <strong class="text-gray-900 dark:text-gray-100">{{ sponsorName }}</strong> has been set as your sponsor.
                 </p>
-                <p class="text-sm text-hint mt-4 m-0">Redirecting to your dashboard...</p>
+                <p class="m-0 pt-2 text-sm text-hint">Redirecting to your dashboard...</p>
             </div>
 
             <!-- Error -->
-            <div *ngIf="!loading && error">
-                <mat-icon class="icon-size-12 text-warn mb-4">error</mat-icon>
-                <p class="text-lg font-medium m-0 mb-2">Something went wrong</p>
-                <p class="text-secondary m-0">{{ error }}</p>
-                <p class="text-sm text-hint mt-4 m-0">Redirecting to your dashboard...</p>
+            <div *ngIf="!loading && error" class="flex w-full flex-col items-center gap-5">
+                <mat-icon class="icon-size-12 text-warn">error</mat-icon>
+                <p class="m-0 text-xl font-semibold">Something went wrong</p>
+                <p class="m-0 max-w-3xl text-base leading-relaxed text-secondary">{{ error }}</p>
+                <p class="m-0 pt-2 text-sm text-hint">Redirecting to your dashboard...</p>
             </div>
         </fuse-card>
     </div>

@@ -11,12 +11,15 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { GetUserService } from '../../../../core/services/user/get-user.service';
 import { InOrgService } from '../../../../core/services/user/in-org.service';
+import { dedupeUserOrganizations } from 'app/core/utilities/organization-access.util';
 
 import packageJson from '../../../../../../package.json';
 
 @Component({
+    standalone: false,
     selector: 'modern-layout',
     templateUrl: './modern.component.html',
+    styleUrls: ['./modern.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class ModernLayoutComponent implements OnInit, OnDestroy {
@@ -166,8 +169,9 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
             .getUserbyID(this.currentUser._id || this.currentUser.id)
             .subscribe((user) => {
                 if (user) {
-                    if (user.organizations.length > 0) {
-                        this.organizations = user.organizations;
+                    const orgs = dedupeUserOrganizations(user.organizations);
+                    if (orgs.length > 0) {
+                        this.organizations = orgs;
 
                         this.inOrganization = true;
 
@@ -188,9 +192,5 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
 
     createOrg(): void {
         this._router.navigate(['/pages/organization/create']);
-    }
-
-    routeToDirectorsPage(): void {
-        this._router.navigate(['/pages/director']);
     }
 }

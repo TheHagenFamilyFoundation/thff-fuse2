@@ -14,6 +14,7 @@ import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/services/user/user.service';
 
 @Component({
+    standalone: false,
     selector: 'user',
     templateUrl: './user.component.html',
     encapsulation: ViewEncapsulation.None,

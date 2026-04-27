@@ -5,6 +5,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
 
 @Component({
+    standalone: false,
     selector: 'auth-sign-out',
     templateUrl: './sign-out.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -40,7 +41,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
         timer(1000, 1000)
             .pipe(
                 finalize(() => {
-                    this._router.navigate(['sign-in']);
+                    this._router.navigate(['/sign-in']);
                 }),
                 takeWhile(() => this.countdown > 0),
                 takeUntil(this._unsubscribeAll),

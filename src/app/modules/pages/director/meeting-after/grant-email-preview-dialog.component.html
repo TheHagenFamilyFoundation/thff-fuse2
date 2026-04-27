@@ -1,0 +1,121 @@
+<h2 mat-dialog-title class="m-0 text-lg font-semibold text-gray-900 dark:text-gray-100">Review grant notification emails</h2>
+
+<mat-dialog-content class="grant-preview-dialog-content">
+    <div *ngIf="loading" class="flex flex-col items-center justify-center gap-3 py-10 text-gray-700 dark:text-gray-300">
+        <mat-spinner [diameter]="40" color="primary"></mat-spinner>
+        <span class="text-sm">Loading recipient list…</span>
+    </div>
+
+    <p *ngIf="error" class="text-sm text-red-600 dark:text-red-400 m-0 py-2">{{ error }}</p>
+
+    <ng-container *ngIf="!loading && !error">
+        <p class="text-sm text-gray-700 dark:text-gray-300 m-0 mb-3" *ngIf="meetingYear">
+            {{ meetingYear }} meeting · One email per funded organization (same addresses as send).
+        </p>
+        <p class="text-sm m-0 mb-3 text-gray-800 dark:text-gray-200">
+            <span class="font-medium text-green-700 dark:text-green-400">{{ counts?.ready ?? 0 }} will send</span>
+            <span class="text-gray-400 mx-1">·</span>
+            <span class="text-gray-600 dark:text-gray-400">{{ counts?.skipped ?? 0 }} skipped (no email)</span>
+        </p>
+
+        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 m-0 mb-2">Outgoing messages</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-2 leading-relaxed">
+            Expand a row to see the full message. Each uses that organization’s name, greeting, and proposal title when present.
+            <span *ngIf="data.canSend" class="block mt-1">Use <strong>Edit</strong> to change the subject or the message text (plain English — no HTML). Choose <strong>Show preview</strong> to see the formatted email.</span>
+        </p>
+
+        <mat-accordion *ngIf="emailPreviews.length > 0"
+                       class="grant-email-accordion"
+                       [multi]="true">
+            <mat-expansion-panel *ngFor="let preview of emailPreviews; trackBy: trackByOrgId"
+                                 class="grant-email-panel">
+                <mat-expansion-panel-header>
+                    <mat-panel-title class="grant-email-panel__title">
+                        {{ preview.organizationName || '—' }}
+                    </mat-panel-title>
+                    <mat-panel-description class="grant-email-panel__desc">
+                        <span class="grant-email-panel__to font-mono">{{ recipientEmail(preview.organizationName) || '—' }}</span>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="grant-email-panel__body pt-1">
+                    <div *ngIf="data.canSend && preview.organizationId" class="flex flex-wrap gap-2 mb-3">
+                        <button mat-stroked-button type="button" color="primary"
+                                (click)="toggleEdit(preview); $event.stopPropagation()">
+                            {{ isEditing(preview) ? 'Show preview' : 'Edit message' }}
+                        </button>
+                    </div>
+
+                    <ng-container *ngIf="!isEditing(preview)">
+                        <p *ngIf="preview.subject" class="text-xs font-mono text-gray-600 dark:text-gray-400 m-0 mb-2 break-all">
+                            <span class="text-gray-500 dark:text-gray-500 font-sans">Subject:</span> {{ preview.subject }}
+                        </p>
+                        <div *ngIf="isRefreshingPreview(preview)"
+                             class="flex flex-col items-center justify-center gap-2 py-10 text-gray-500 text-sm">
+                            <mat-spinner [diameter]="36" color="primary"></mat-spinner>
+                            <span>Updating preview…</span>
+                        </div>
+                        <div *ngIf="preview.renderedHtml && !isRefreshingPreview(preview)"
+                             class="grant-email-sample__frame rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto bg-white dark:bg-gray-950"
+                             [innerHTML]="trustedHtml(preview)">
+                        </div>
+                        <p *ngIf="!preview.renderedHtml && !isRefreshingPreview(preview)" class="text-xs text-gray-500 m-0">Preview unavailable.</p>
+                    </ng-container>
+
+                    <div *ngIf="isEditing(preview)" class="grant-email-edit-fields space-y-3">
+                        <mat-form-field appearance="outline" class="w-full grant-email-field">
+                            <mat-label>Subject</mat-label>
+                            <input matInput [(ngModel)]="preview.subject" name="grantSubj-{{ preview.organizationId }}" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full grant-email-field">
+                            <mat-label>Message</mat-label>
+                            <textarea matInput
+                                      [(ngModel)]="preview.messagePlain"
+                                      name="grantMsg-{{ preview.organizationId }}"
+                                      rows="12"
+                                      class="grant-email-plain-textarea text-sm leading-relaxed"></textarea>
+                            <mat-hint>Plain text only. Line breaks are preserved. URLs become links in the sent email.</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+
+        <div *ngIf="emailPreviews.length === 0 && rows.length > 0"
+             class="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-4 py-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+            No messages will be sent — add organization emails on each profile, or confirm allocations include funded organizations with email addresses.
+        </div>
+
+        <div *ngIf="skippedRows.length > 0" class="mt-4">
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 m-0 mb-2">Skipped (no email on file)</p>
+            <ul class="grant-skipped-list text-sm text-gray-600 dark:text-gray-400 m-0 pl-5 space-y-1 list-disc">
+                <li *ngFor="let r of skippedRows">
+                    <span class="font-medium text-gray-800 dark:text-gray-200">{{ r.organizationName }}</span>
+                    <span *ngIf="r.skipReason" class="text-amber-700 dark:text-amber-400"> — {{ r.skipReason }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div *ngIf="rows.length === 0" class="rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+            <p class="font-medium m-0 mb-2">No recipients to show</p>
+            <p class="m-0 text-gray-600 dark:text-gray-400 leading-relaxed">
+                This list only includes funded organizations from the completed meeting.
+                If there are no funded allocations yet, there is no one to email.
+            </p>
+        </div>
+
+        <p *ngIf="!data.canSend" class="text-xs text-gray-500 mt-3 m-0">
+            Only the president or admin can send these emails. You can review the messages above.
+        </p>
+    </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="grant-preview-actions">
+    <button mat-button type="button" (click)="cancel()" [disabled]="sending">Cancel</button>
+    <button mat-flat-button color="primary" type="button"
+            (click)="confirmSend()"
+            [disabled]="sending || loading || !!error || (counts?.ready ?? 0) === 0 || !data.canSend">
+        <span *ngIf="!sending">Send {{ counts?.ready ?? 0 }} email<span *ngIf="(counts?.ready ?? 0) !== 1">s</span></span>
+        <span *ngIf="sending">Sending…</span>
+    </button>
+</mat-dialog-actions>

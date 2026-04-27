@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
+import { BehaviorSubject, Observable, filter, merge } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -11,13 +11,24 @@ export class FuseLoadingService
     private _mode$: BehaviorSubject<'determinate' | 'indeterminate'> = new BehaviorSubject<'determinate' | 'indeterminate'>('indeterminate');
     private _progress$: BehaviorSubject<number | null> = new BehaviorSubject<number | null>(0);
     private _show$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    private _urlMap: Map<string, boolean> = new Map<string, boolean>();
+    /** Tracks in-flight HTTP requests (Map-per-URL breaks when the same URL overlaps). */
+    private _pendingHttpCount = 0;
 
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient)
+    constructor()
     {
+        const router = inject(Router);
+        // Clear on navigation lifecycle so the bar does not linger across route changes (logout →
+        // sign-in, guard redirects, lazy chunks). NavigationStart runs first and fixes cases where
+        // a tracked non-API request or timing left the bar visible before NavigationEnd.
+        merge(
+            router.events.pipe(filter((e): e is NavigationStart => e instanceof NavigationStart)),
+            router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)),
+            router.events.pipe(filter((e): e is NavigationCancel => e instanceof NavigationCancel)),
+            router.events.pipe(filter((e): e is NavigationError => e instanceof NavigationError))
+        ).subscribe(() => this.clearHttpLoadingBar());
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -73,6 +84,15 @@ export class FuseLoadingService
      */
     hide(): void
     {
+        this.clearHttpLoadingBar();
+    }
+
+    /**
+     * Resets HTTP-driven loading state (pending count + hide). Safe if nothing was showing.
+     */
+    clearHttpLoadingBar(): void
+    {
+        this._pendingHttpCount = 0;
         this._show$.next(false);
     }
 
@@ -113,32 +133,25 @@ export class FuseLoadingService
     }
 
     /**
-     * Sets the loading status on the given url
+     * Sets the loading status for one HTTP request (paired start/finalize per intercept).
      *
      * @param status
-     * @param url
+     * @param _url retained for API compatibility; tracking uses a pending count instead.
      */
-    _setLoadingStatus(status: boolean, url: string): void
+    _setLoadingStatus(status: boolean, _url: string): void
     {
-        // Return if the url was not provided
-        if ( !url )
+        if ( status === true )
         {
-            console.error('The request URL must be provided!');
+            this._pendingHttpCount++;
+            if ( this._pendingHttpCount === 1 )
+            {
+                this._show$.next(true);
+            }
             return;
         }
 
-        if ( status === true )
-        {
-            this._urlMap.set(url, status);
-            this._show$.next(true);
-        }
-        else if ( status === false && this._urlMap.has(url) )
-        {
-            this._urlMap.delete(url);
-        }
-
-        // Only set the status to 'false' if all outgoing requests are completed
-        if ( this._urlMap.size === 0 )
+        this._pendingHttpCount = Math.max(0, this._pendingHttpCount - 1);
+        if ( this._pendingHttpCount === 0 )
         {
             this._show$.next(false);
         }

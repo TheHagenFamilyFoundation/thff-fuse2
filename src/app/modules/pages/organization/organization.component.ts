@@ -1,5 +1,6 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -12,8 +13,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationService } from './organization.service';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { isUserInOrgUsers } from 'app/core/utilities/organization-access.util';
 
 @Component({
+    standalone: false,
     selector: 'organization',
     templateUrl: './organization.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -24,7 +27,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     orgID: any;
     organizationID: any;
     org: any;
-    isDirector: boolean;
+    isDirector: boolean = false;
     inOrg: boolean;
     viewing: string;
 
@@ -37,10 +40,8 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         public getOrgService: GetOrganizationService,
         public _authService: AuthService,
         public snackBar: MatSnackBar,
+        private _cdr: ChangeDetectorRef,
     ) {
-        this.route.params.subscribe((params) => {
-            this.orgID = params.id;
-        });
         this.inOrg = false;
     }
 
@@ -49,9 +50,20 @@ export class OrganizationComponent implements OnInit, OnDestroy {
 
         this._authService.checkDirector().subscribe((isADirector) => {
             this.isDirector = isADirector;
+            if (this.org && this.currentUser?._id) {
+                this.checkInOrganization(this.currentUser._id);
+            }
+            this._cdr.detectChanges();
         });
 
-        this.getOrganization(this.orgID);
+        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
+            const id = pm.get('id');
+            if (!id) {
+                return;
+            }
+            this.orgID = id;
+            this.getOrganization(id);
+        });
     }
 
     ngOnDestroy(): void {
@@ -59,17 +71,19 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 
-    getOrganization(orgID): void {
-        this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
+    getOrganization(orgID: string, forceFresh = false): void {
+        this.getOrgService.getOrgbyID(orgID, forceFresh).subscribe((org) => {
             this.org = org;
             this.organizationID = this.org._id;
             this.checkInOrganization(this.currentUser._id);
             this.checkIsDirectorAndInOrg();
+            this._cdr.detectChanges();
+            Promise.resolve().then(() => this._cdr.detectChanges());
         });
     }
 
     refreshOrg(): void {
-        this.getOrganization(this.orgID);
+        this.getOrganization(this.orgID, true);
     }
 
     checkIsDirectorAndInOrg(): void {
@@ -79,12 +93,11 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     checkInOrganization(_id: string): void {
-        const object = this.org.users.find((obj) => obj._id === _id);
-        this.inOrg = !!object;
+        this.inOrg = isUserInOrgUsers(this.org?.users, _id);
 
         if (!this.inOrg && !this.isDirector) {
-            this._router.navigate(['welcome']);
-            this.snackBar.open('You are not allowed to view this Organization', 'OK', {
+            this._router.navigate(['/welcome']);
+            this.snackBar.open('You are not allowed to view this Organization', undefined, {
                 duration: 3000,
             });
         }

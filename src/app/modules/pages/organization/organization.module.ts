@@ -51,7 +51,6 @@ import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/u
         OrgDoc501c3Component,
         OrgProposalsComponent,
         OrgTeamComponent,
-        ConfirmDialogComponent,
         Upload501c3DialogComponent,
 
     ],
@@ -83,7 +82,8 @@ import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/u
         TranslocoModule,
         FuseCardModule,
         SharedModule,
-        EditableModule
+        EditableModule,
+        ConfirmDialogComponent,
     ],
     exports: [
         PhoneMaskDirective

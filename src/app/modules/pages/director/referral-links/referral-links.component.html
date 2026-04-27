@@ -1,6 +1,5 @@
 <div class="flex flex-col flex-auto min-w-0">
 
-    <!-- Header -->
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
             <a routerLink="/pages/director"
@@ -10,90 +9,92 @@
             </a>
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
-                    Referral Links
+                    Referral links
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">
-                    Generate codes to share with prospective applicants. Proposals created with your code are automatically linked to you as sponsor.
+                    Codes and sign-up links for prospective applicants. Use them when sending
+                    <a routerLink="/pages/director/solicitation-emails" class="text-primary hover:underline">solicitation emails</a>.
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Main -->
-    <div class="w-full max-w-screen-lg mx-auto p-6 sm:p-8">
+    <div class="w-full max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <!-- Create New Code -->
-        <fuse-card class="flex flex-col p-6 mb-6">
-            <h2 class="text-lg font-semibold m-0 mb-4">Generate New Referral Code</h2>
-            <div class="flex flex-col sm:flex-row sm:items-start gap-4">
-                <mat-form-field class="w-full max-w-sm -mb-5">
+        <fuse-card class="flex flex-col p-4 sm:p-5 mb-4 sm:mb-6">
+            <h2 class="text-base font-semibold m-0 mb-3">Generate new referral code</h2>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <mat-form-field class="flex-auto w-full sm:max-w-sm -mb-5">
                     <mat-label>Label (optional)</mat-label>
                     <input matInput [(ngModel)]="newLabel" placeholder="e.g. Community Event 2026">
                 </mat-form-field>
-                <button mat-flat-button color="primary" (click)="createCode()" class="sm:mt-4">
+                <button mat-flat-button color="primary" (click)="createCode()">
                     <mat-icon class="mr-1 icon-size-5">add</mat-icon>
-                    Generate Code
+                    Generate code
                 </button>
             </div>
         </fuse-card>
 
-        <!-- Loading -->
         <div *ngIf="!loaded" class="flex items-center justify-center py-12">
             <mat-spinner [diameter]="40"></mat-spinner>
         </div>
 
-        <!-- Empty State -->
-        <div *ngIf="loaded && codes.length === 0" class="text-center py-12">
-            <mat-icon class="icon-size-12 text-gray-300 dark:text-gray-600">link</mat-icon>
-            <p class="text-gray-500 dark:text-gray-400 mt-4">No referral codes yet. Generate one above to get started.</p>
-        </div>
+        <fuse-card *ngIf="loaded" class="flex flex-col p-4 sm:p-5 referral-codes-card">
+            <h2 class="text-base font-semibold m-0 mb-1">Your referral codes</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">
+                Copy the code or full sign-up link.
+            </p>
 
-        <!-- Codes List -->
-        <div *ngIf="loaded && codes.length > 0" class="space-y-4">
-            <fuse-card *ngFor="let code of codes"
-                       class="flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4"
-                       [ngClass]="{'opacity-50': !code.active}">
+            <div *ngIf="codes.length === 0" class="text-center py-8 px-2">
+                <mat-icon class="icon-size-10 text-gray-300 dark:text-gray-600">link</mat-icon>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-2 m-0">No referral codes yet. Generate one above.</p>
+            </div>
 
-                <div class="flex-auto min-w-0">
-                    <div class="flex items-center gap-3 mb-1">
-                        <span class="text-lg font-mono font-bold tracking-wider">{{ code.code }}</span>
-                        <span *ngIf="code.active"
-                              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:bg-opacity-40 dark:text-green-300">
-                            Active
-                        </span>
-                        <span *ngIf="!code.active"
-                              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-neutral-700 dark:text-gray-400">
-                            Inactive
-                        </span>
-                    </div>
-                    <div *ngIf="code.label" class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ code.label }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500">
-                        Created {{ code.createdAt | date: 'MM/dd/yyyy' }}
-                    </div>
-                    <div *ngIf="code.active" class="mt-2 flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 truncate">
-                        <mat-icon class="icon-size-3.5">link</mat-icon>
-                        <span class="truncate">{{ getLink(code.code) }}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <button *ngIf="code.active" mat-stroked-button (click)="copyCode(code.code)"
-                            matTooltip="Copy code only">
-                        <mat-icon class="icon-size-5 mr-1">content_copy</mat-icon>
-                        Code
-                    </button>
-                    <button *ngIf="code.active" mat-flat-button color="primary" (click)="copyLink(code.code)"
-                            matTooltip="Copy full sign-up link with referral code">
-                        <mat-icon class="icon-size-5 mr-1">share</mat-icon>
-                        Copy Link
-                    </button>
-                    <button mat-stroked-button [color]="code.active ? 'warn' : 'primary'" (click)="toggleCode(code)">
-                        {{ code.active ? 'Deactivate' : 'Activate' }}
-                    </button>
-                </div>
-            </fuse-card>
-        </div>
-
+            <div *ngIf="codes.length > 0" class="codes-table-wrap rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <table class="w-full text-sm codes-table">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900/40 text-left text-gray-500 text-xs">
+                            <th class="py-2 px-3 font-medium">Code</th>
+                            <th class="py-2 px-2 font-medium hidden sm:table-cell">Label</th>
+                            <th class="py-2 px-2 font-medium w-20">Status</th>
+                            <th class="py-2 pl-2 pr-3 font-medium text-right w-[7.5rem]">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let code of codes"
+                            class="border-t border-gray-100 dark:border-gray-800"
+                            [ngClass]="{'opacity-60': !code.active}">
+                            <td class="py-2 px-3 align-top">
+                                <span class="font-mono font-semibold text-sm tracking-wide">{{ code.code }}</span>
+                                <div class="sm:hidden text-xs text-gray-500 mt-0.5" *ngIf="code.label">{{ code.label }}</div>
+                            </td>
+                            <td class="py-2 px-2 align-top text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell max-w-[8rem] truncate" [matTooltip]="code.label">
+                                {{ code.label || '—' }}
+                            </td>
+                            <td class="py-2 px-2 align-top">
+                                <span *ngIf="code.active" class="text-xs text-green-700 dark:text-green-400">On</span>
+                                <span *ngIf="!code.active" class="text-xs text-gray-500">Off</span>
+                            </td>
+                            <td class="py-2 pl-2 pr-3 align-top text-right whitespace-nowrap">
+                                <button mat-icon-button type="button" *ngIf="code.active"
+                                        (click)="copyCode(code.code)" matTooltip="Copy code">
+                                    <mat-icon class="icon-size-5">content_copy</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" *ngIf="code.active"
+                                        (click)="copyLink(code.code)" matTooltip="Copy link">
+                                    <mat-icon class="icon-size-5">share</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button"
+                                        (click)="toggleCode(code)"
+                                        [matTooltip]="code.active ? 'Deactivate' : 'Activate'">
+                                    <mat-icon class="icon-size-5">{{ code.active ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fuse-card>
     </div>
 
 </div>

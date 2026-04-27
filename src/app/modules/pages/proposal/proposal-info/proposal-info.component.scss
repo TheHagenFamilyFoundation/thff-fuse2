@@ -1,7 +1,65 @@
-.mat-form-field {
-    width: 100%
-  }
-
-  input {
+.mat-form-field,
+.mat-mdc-form-field {
     width: 100%;
-  }
+}
+
+input,
+textarea {
+    width: 100%;
+}
+
+/* Grouped edit mode: align with Organization Profile field chrome */
+:host ::ng-deep .proposal-info-grouped-edit {
+    label.block.tracking-wide {
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.35rem;
+    }
+
+    .mat-mdc-form-field {
+        margin-bottom: 0.25rem;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+    }
+
+    .mat-mdc-form-field-focus-overlay {
+        background-color: transparent !important;
+    }
+
+    .mdc-line-ripple {
+        display: none;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+        border-color: transparent !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 0.25rem;
+    }
+
+    .mat-mdc-form-field-hint-wrapper,
+    .mat-mdc-form-field-error-wrapper {
+        padding: 0 0.25rem;
+    }
+}
+
+:host-context(.dark) ::ng-deep .proposal-info-grouped-edit {
+    label.block.tracking-wide {
+        color: #d4d4d4;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        background-color: rgba(82, 82, 82, 0.35) !important;
+        border-color: #525252 !important;
+    }
+}

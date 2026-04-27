@@ -1,0 +1,22 @@
+#fuse {
+  /* ------------------------------------------------------------------------ */
+  /* Styles                                                                   */
+  /* ------------------------------------------------------------------------ */
+  input:not(.restore-autofill-styles) {
+    &:-webkit-autofill {
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: var(--input-text-color);
+      transition: background-color 0s ease-in-out 999999s;
+    }
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* Variables                                                                */
+  /* ------------------------------------------------------------------------ */
+  input:not(.restore-autofill-styles) {
+    --input-text-color: light-dark(
+      var(--color-neutral-950),
+      var(--color-white)
+    );
+  }
+}

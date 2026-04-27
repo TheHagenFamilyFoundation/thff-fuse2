@@ -1,6 +1,9 @@
 import {
     Component,
+    OnDestroy,
     OnInit,
+    OnChanges,
+    SimpleChanges,
     Input,
     Renderer2,
     ViewChild,
@@ -21,7 +24,7 @@ import {
 import { ErrorStateMatcher } from '@angular/material/core';
 
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { environment } from 'environments/environment';
 
@@ -31,14 +34,13 @@ import { UpdateOrganizationInfoService } from 'app/core/services/organization/or
 import { GetOrganizationInfoService } from 'app/core/services/organization/organization-info/get-organization-info.service';
 import { DeleteOrganizationInfoService } from 'app/core/services/organization/organization-info/delete-organization-info.service';
 
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
 @Component({
+    standalone: false,
     selector: 'app-organization-info',
     templateUrl: './organization-info.component.html',
     styleUrls: ['./organization-info.component.scss'],
 })
-export class OrganizationInfoComponent implements OnInit {
+export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     @Input()
     org: any;
     @Output() refreshOrg = new EventEmitter<boolean>();
@@ -58,73 +60,7 @@ export class OrganizationInfoComponent implements OnInit {
 
     orgInfoCreated: boolean = false;
 
-    legalName$ = new Subject<string>();
-
-    yearFounded$ = new Subject<string>();
-
-    currentOperatingBudget$ = new Subject<string>();
-
-    director$ = new Subject<string>();
-
-    phone$ = new Subject<string>();
-
-    contactPerson$ = new Subject<string>();
-
-    contactPersonTitle$ = new Subject<string>();
-
-    contactPersonPhoneNumber$ = new Subject<string>();
-
-    email$ = new Subject<string>();
-
-    address$ = new Subject<string>();
-
-    city$ = new Subject<string>();
-
-    state$ = new Subject<string>();
-
-    zip$ = new Subject<string>();
-
-    website$ = new Subject<string>();
-
     isReadOnly: boolean = true;
-
-    legalName: string;
-
-    //  -Legal Name of Organization Applying:
-    yearFounded: number;
-
-    // -Year Founded
-    currentOperatingBudget: number;
-
-    // -Current Operating Budget
-    director: string;
-
-    // -Executive Director
-    phone: string;
-
-    // -Phone Number
-    contactPerson: string;
-
-    // -Contact person/title/phone number
-    contactPersonTitle: string;
-
-    contactPersonPhoneNumber: string;
-
-    email: string;
-
-    // -Email Address
-    address: string;
-
-    // -Address (principal/administrative office)
-    city: string;
-
-    // -City
-    state: string;
-
-    // -State
-    zip: number;
-
-    website: string;
 
     loaded = false;
 
@@ -138,6 +74,8 @@ export class OrganizationInfoComponent implements OnInit {
     editingLegalName: boolean = false;
 
     directorEditing = false;
+
+    private formMessageSub?: Subscription;
 
     formContactPerson: FormGroup;
 
@@ -256,104 +194,6 @@ export class OrganizationInfoComponent implements OnInit {
             website: [''],
         });
 
-        this.legalName$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.legalName = term;
-                this.legalNameChange();
-            });
-
-        this.yearFounded$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.yearFounded = Number(term);
-                this.yearFoundedChange();
-            });
-
-        this.currentOperatingBudget$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.currentOperatingBudget = Number(term);
-                this.currentOperatingBudgetChange();
-            });
-
-        this.director$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.director = term;
-                this.directorChange();
-            });
-
-        this.phone$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.phone = term;
-                this.phoneChange();
-            });
-
-        this.contactPerson$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.contactPerson = term;
-                this.contactPersonChange();
-            });
-
-        this.contactPersonTitle$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.contactPersonTitle = term;
-                this.contactPersonTitleChange();
-            });
-
-        this.contactPersonPhoneNumber$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.contactPersonPhoneNumber = term;
-                this.contactPersonPhoneNumberChange();
-            });
-
-        this.email$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.email = term;
-                this.emailChange();
-            });
-
-        this.address$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.address = term;
-                this.addressChange();
-            });
-
-        this.city$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.city = term;
-                this.cityChange();
-            });
-
-        this.state$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.state = term;
-                this.stateChange();
-            });
-
-        this.zip$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.zip = Number(term);
-                this.zipChange();
-            });
-
-        this.website$
-            .pipe(debounceTime(400), distinctUntilChanged())
-            .subscribe((term) => {
-                this.website = term;
-                this.websiteChange();
-            });
-
         this.defaultValues();
 
         // const invalidInputMap = new Map<string, boolean>([
@@ -374,56 +214,126 @@ export class OrganizationInfoComponent implements OnInit {
     } // end of constructor
 
     defaultValues(): void {
-        this.legalName = '';
-        this.yearFounded = 0;
-        this.currentOperatingBudget = 0;
-        this.director = '';
-        this.phone = '';
-        this.contactPerson = '';
-        this.contactPersonTitle = '';
-        this.contactPersonPhoneNumber = '';
-        this.email = '';
-        this.address = '';
-        this.city = '';
-        this.state = '';
-        this.zip = 0;
-        this.website = '';
+        this.orgObj = {
+            legalName: '',
+            yearFounded: 0,
+            currentOperatingBudget: 0,
+            director: '',
+            phone: '',
+            contactPerson: '',
+            contactPersonTitle: '',
+            contactPersonPhoneNumber: '',
+            email: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: 0,
+            website: '',
+        };
+    }
 
-        // //edit in place
-        // this.legalNameControl = '';
+    private num(v: unknown, fallback = 0): number {
+        if (v === '' || v === null || v === undefined) {
+            return fallback;
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    private wireFormMessageClear(): void {
+        this.formMessageSub?.unsubscribe();
+        this.formMessageSub = this.groupedForm.valueChanges.subscribe(() => {
+            this.showMessage = false;
+        });
     }
 
     ngOnInit(): void {
         this.orgID = this.org._id;
+        if (!this.orgInfo && !this.hydrateFromParentOrg()) {
+            this.getOrganizationInfo();
+        }
+    }
 
-        this.getOrganizationInfo();
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['org']?.currentValue) {
+            return;
+        }
+        this.orgID = this.org._id;
+        if (this.hydrateFromParentOrg()) {
+            return;
+        }
+        if (!changes['org'].firstChange) {
+            this.getOrganizationInfo();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.formMessageSub?.unsubscribe();
+    }
+
+    /**
+     * Parent GET /organization already uses .populate('info'). Use it when present so the
+     * profile renders even if the follow-up GET /organization-info call fails or is redundant.
+     */
+    private isPopulatedOrganizationInfo(info: unknown): boolean {
+        return (
+            info != null &&
+            typeof info === 'object' &&
+            ('legalName' in info || 'organizationInfoID' in info)
+        );
+    }
+
+    private hydrateFromParentOrg(): boolean {
+        const info = this.org?.info;
+        if (!this.isPopulatedOrganizationInfo(info)) {
+            return false;
+        }
+        this.orgInfo = info;
+        this.setFields();
+        return true;
     }
 
     getOrganizationInfo(): void {
         this.getOrganizationInfoService
             .getOrgInfobyOrgID(this.orgID)
-            .subscribe((orgInfo) => {
-                if (orgInfo) {
-                    this.orgInfo = orgInfo;
-
+            .subscribe({
+                next: (orgInfo) => {
+                    if (orgInfo) {
+                        this.orgInfo = orgInfo;
+                        this.setFields();
+                    } else {
+                        // No row yet: build defaults, attach org, then persist. setFields() must run
+                        // after this.orgInfo is set so the template and validators see a stable record.
+                        this.defaultValues();
+                        this.orgInfo = {
+                            ...this.orgObj,
+                            organization: this.org._id,
+                        };
+                        this.setFields();
+                        this.createOrganizationInfo(this.orgInfo);
+                    }
+                },
+                error: () => {
+                    if (this.hydrateFromParentOrg()) {
+                        return;
+                    }
+                    this.defaultValues();
+                    this.orgInfo = {
+                        ...this.orgObj,
+                        organization: this.org._id,
+                    };
                     this.setFields();
-                } else {
-                    this.setFields();
-                    this.orgInfo = this.orgObj;
-
-                    this.orgInfo.organization = this.org._id;
-                    this.createOrganizationInfo(this.orgInfo);
-                }
+                },
             });
     }
 
     createOrganizationInfo(body): void {
-        // call the service
         this.createOrganizationInfoService
             .createOrganizationInfo(body)
             .subscribe(
                 (result) => {
                     this.orgInfo = result.result;
+                    this.setFields();
                 },
                 () => {}
             );
@@ -439,101 +349,25 @@ export class OrganizationInfoComponent implements OnInit {
 
     setFields(): void {
         if (this.orgInfo) {
-            if (this.orgInfo.legalName) {
-                this.legalName = this.orgInfo.legalName;
-            }
-
-            if (this.orgInfo.yearFounded) {
-                this.yearFounded = this.orgInfo.yearFounded;
-            }
-
-            if (this.orgInfo.yearFounded) {
-                this.yearFounded = this.orgInfo.yearFounded;
-            }
-
-            if (this.orgInfo.currentOperatingBudget) {
-                this.currentOperatingBudget =
-                    this.orgInfo.currentOperatingBudget;
-            }
-
-            if (this.orgInfo.director) {
-                this.director = this.orgInfo.director;
-            }
-
-            if (this.orgInfo.phone) {
-                this.phone = this.orgInfo.phone;
-            }
-
-            if (this.orgInfo.contactPerson) {
-                this.contactPerson = this.orgInfo.contactPerson;
-            }
-
-            if (this.orgInfo.contactPersonTitle) {
-                this.contactPersonTitle = this.orgInfo.contactPersonTitle;
-            }
-
-            if (this.orgInfo.contactPersonPhoneNumber) {
-                this.contactPersonPhoneNumber =
-                    this.orgInfo.contactPersonPhoneNumber;
-            }
-
-            if (this.orgInfo.email) {
-                this.email = this.orgInfo.email;
-            }
-
-            if (this.orgInfo.address) {
-                this.address = this.orgInfo.address;
-            }
-
-            if (this.orgInfo.city) {
-                this.city = this.orgInfo.city;
-            }
-
-            if (this.orgInfo.state) {
-                this.state = this.orgInfo.state;
-            }
-
-            if (this.orgInfo.zip) {
-                this.zip = this.orgInfo.zip;
-            }
-
-            if (this.orgInfo.website) {
-                this.website = this.orgInfo.website;
-            }
-
+            const i = this.orgInfo;
             this.orgObj = {
-                legalName: this.legalName,
-                yearFounded: this.yearFounded,
-                currentOperatingBudget: this.currentOperatingBudget,
-                director: this.director,
-                phone: this.phone,
-                contactPerson: this.contactPerson,
-                contactPersonTitle: this.contactPersonTitle,
-                contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-                email: this.email,
-                address: this.address,
-                city: this.city,
-                state: this.state,
-                zip: this.zip,
-                website: this.website,
+                legalName: i.legalName ?? '',
+                yearFounded: i.yearFounded ?? 0,
+                currentOperatingBudget: i.currentOperatingBudget ?? 0,
+                director: i.director ?? '',
+                phone: i.phone ?? '',
+                contactPerson: i.contactPerson ?? '',
+                contactPersonTitle: i.contactPersonTitle ?? '',
+                contactPersonPhoneNumber: i.contactPersonPhoneNumber ?? '',
+                email: i.email ?? '',
+                address: i.address ?? '',
+                city: i.city ?? '',
+                state: i.state ?? '',
+                zip: i.zip ?? 0,
+                website: i.website ?? '',
             };
         } else {
-            this.orgObj = {
-                legalName: '',
-                yearFounded: 0,
-                currentOperatingBudget: 0,
-                director: '',
-                phone: '',
-                contactPerson: '',
-                contactPersonTitle: '',
-                contactPersonPhoneNumber: '',
-                email: '',
-                address: '',
-                city: '',
-                state: '',
-                zip: 0,
-                website: '',
-            };
+            this.defaultValues();
         }
 
         this.initGroupedForm();
@@ -541,85 +375,85 @@ export class OrganizationInfoComponent implements OnInit {
 
     //when toggling the full form
     resetFormValues(): void {
+        const o = this.orgObj;
         this.formOrganization.setValue({
-            legalName: this.legalName,
-            yearFounded: this.yearFounded,
-            currentOperatingBudget: this.currentOperatingBudget,
-            director: this.director,
-            phone: this.phone,
+            legalName: o.legalName,
+            yearFounded: o.yearFounded,
+            currentOperatingBudget: o.currentOperatingBudget,
+            director: o.director,
+            phone: o.phone,
         });
 
         this.formContactPerson.setValue({
-            contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-            contactPersonTitle: this.contactPersonTitle,
-            contactPerson: this.contactPerson,
-            email: this.email,
+            contactPersonPhoneNumber: o.contactPersonPhoneNumber,
+            contactPersonTitle: o.contactPersonTitle,
+            contactPerson: o.contactPerson,
+            email: o.email,
         });
 
-        this.websiteFormControl.setValue(this.website);
-        this.emailFormControl.setValue(this.email);
-        this.addressFormControl.setValue(this.address);
-        this.cityFormControl.setValue(this.city);
-        this.stateFormControl.setValue(this.state);
-        this.zipFormControl.setValue(this.zip);
+        this.websiteFormControl.setValue(o.website);
+        this.emailFormControl.setValue(o.email);
+        this.addressFormControl.setValue(o.address);
+        this.cityFormControl.setValue(o.city);
+        this.stateFormControl.setValue(o.state);
+        this.zipFormControl.setValue(o.zip != null ? String(o.zip) : '');
 
-        // this.initFormControls();
         this.initGroupedForm();
     }
 
-    //maybe old
     edit(): void {
+        const o = this.orgObj;
         this.formOrganization.setValue({
-            legalName: this.legalName,
-            yearFounded: this.yearFounded,
-            currentOperatingBudget: this.currentOperatingBudget,
-            director: this.director,
-            phone: this.phone,
+            legalName: o.legalName,
+            yearFounded: o.yearFounded,
+            currentOperatingBudget: o.currentOperatingBudget,
+            director: o.director,
+            phone: o.phone,
         });
 
         this.formContactPerson.setValue({
-            contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-            contactPersonTitle: this.contactPersonTitle,
-            contactPerson: this.contactPerson,
-            email: this.email,
+            contactPersonPhoneNumber: o.contactPersonPhoneNumber,
+            contactPersonTitle: o.contactPersonTitle,
+            contactPerson: o.contactPerson,
+            email: o.email,
         });
 
-        this.websiteFormControl.setValue(this.website);
-        this.emailFormControl.setValue(this.email);
-        this.addressFormControl.setValue(this.address);
-        this.cityFormControl.setValue(this.city);
-        this.stateFormControl.setValue(this.state);
-        this.zipFormControl.setValue(this.zip);
+        this.websiteFormControl.setValue(o.website);
+        this.emailFormControl.setValue(o.email);
+        this.addressFormControl.setValue(o.address);
+        this.cityFormControl.setValue(o.city);
+        this.stateFormControl.setValue(o.state);
+        this.zipFormControl.setValue(o.zip != null ? String(o.zip) : '');
 
-        // this.formOrganization.get;
         this.editing = true;
     }
 
     save(): void {
         this.editing = false;
 
+        const v = this.groupedForm.getRawValue();
         const body = {
-            legalName: this.legalName,
-            yearFounded: this.yearFounded,
-            currentOperatingBudget: this.currentOperatingBudget,
-            director: this.director,
-            phone: this.phone,
-            contactPerson: this.contactPerson,
-            contactPersonTitle: this.contactPersonTitle,
-            contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-            email: this.email,
-            address: this.address,
-            city: this.city,
-            state: this.state,
-            zip: this.zip,
-            website: this.website,
+            legalName: v.legalName ?? '',
+            yearFounded: this.num(v.yearFounded),
+            currentOperatingBudget: this.num(v.currentOperatingBudget),
+            director: v.director ?? '',
+            phone: v.phone ?? '',
+            contactPerson: v.contactPerson ?? '',
+            contactPersonTitle: v.contactPersonTitle ?? '',
+            contactPersonPhoneNumber: v.contactPersonPhoneNumber ?? '',
+            email: v.email ?? '',
+            address: v.address ?? '',
+            city: v.city ?? '',
+            state: v.state ?? '',
+            zip: this.num(v.zip),
+            website: v.website ?? '',
             organization: this.orgID,
         };
 
         if (this.orgInfo) {
             this.deleteOrganizationInfoService
                 .deleteOrgInfobyOrgInfoID(this.orgInfo._id)
-                .subscribe((result) => {
+                .subscribe(() => {
                     this.createOrganizationInfo(body);
                 });
         } else {
@@ -632,62 +466,6 @@ export class OrganizationInfoComponent implements OnInit {
         this.editing = false;
 
         this.getOrganizationInfo();
-    }
-
-    legalNameChange(): void {
-        this.showMessage = false;
-    }
-
-    yearFoundedChange(): void {
-        this.showMessage = false;
-    }
-
-    currentOperatingBudgetChange(): void {
-        this.showMessage = false;
-    }
-
-    directorChange(): void {
-        this.showMessage = false;
-    }
-
-    stateChange(): void {
-        this.showMessage = false;
-    }
-
-    cityChange(): void {
-        this.showMessage = false;
-    }
-
-    addressChange(): void {
-        this.showMessage = false;
-    }
-
-    emailChange(): void {
-        this.showMessage = false;
-    }
-
-    contactPersonChange(): void {
-        this.showMessage = false;
-    }
-
-    contactPersonTitleChange(): void {
-        this.showMessage = false;
-    }
-
-    contactPersonPhoneNumberChange(): void {
-        this.showMessage = false;
-    }
-
-    phoneChange(): void {
-        this.showMessage = false;
-    }
-
-    zipChange(): void {
-        this.showMessage = false;
-    }
-
-    websiteChange(): void {
-        this.showMessage = false;
     }
 
     receiveChildData(data): void {
@@ -703,75 +481,80 @@ export class OrganizationInfoComponent implements OnInit {
     //new stuff
 
     initGroupedForm(): void {
+        const o = this.orgObj;
         this.groupedForm = new FormGroup({
-            legalName: new FormControl(this.orgObj.legalName),
-            yearFounded: new FormControl(this.orgObj.yearFounded),
+            legalName: new FormControl(o.legalName),
+            yearFounded: new FormControl(o.yearFounded),
             currentOperatingBudget: new FormControl(
-                this.orgObj.currentOperatingBudget,
+                o.currentOperatingBudget,
                 [Validators.required, Validators.min(1)]
             ),
-            director: new FormControl(this.orgObj.director),
-            phone: new FormControl(this.orgObj.phone),
-            contactPerson: new FormControl(this.orgObj.contactPerson),
-            contactPersonTitle: new FormControl(this.orgObj.contactPersonTitle),
+            director: new FormControl(o.director),
+            phone: new FormControl(o.phone),
+            contactPerson: new FormControl(o.contactPerson),
+            contactPersonTitle: new FormControl(o.contactPersonTitle),
             contactPersonPhoneNumber: new FormControl(
-                this.orgObj.contactPersonPhoneNumber
+                o.contactPersonPhoneNumber
             ),
-            email: new FormControl(this.orgObj.email),
-            address: new FormControl(this.orgObj.address),
-            city: new FormControl(this.orgObj.city),
-            state: new FormControl(this.orgObj.state),
-            zip: new FormControl(this.orgObj.zip),
-            website: new FormControl(this.orgObj.website),
+            email: new FormControl(o.email),
+            address: new FormControl(o.address),
+            city: new FormControl(o.city),
+            state: new FormControl(o.state),
+            zip: new FormControl(o.zip),
+            website: new FormControl(o.website),
         });
 
         this.initFormControls();
+        this.wireFormMessageClear();
     }
 
     initFormControls(): void {
-        // this.nameControl = new FormControl(this.identity.name);
-        this.legalNameControl = new FormControl(this.legalName);
-        this.yearFoundedControl = new FormControl(this.yearFounded);
+        const o = this.orgObj;
+        this.legalNameControl = new FormControl(o.legalName);
+        this.yearFoundedControl = new FormControl(o.yearFounded);
         this.currentOperatingBudgetControl = new FormControl(
-            this.currentOperatingBudget
+            o.currentOperatingBudget
         );
-        this.directorControl = new FormControl(this.director);
-        this.phoneControl = new FormControl(this.phone);
-        this.contactPersonControl = new FormControl(this.contactPerson);
+        this.directorControl = new FormControl(o.director);
+        this.phoneControl = new FormControl(o.phone);
+        this.contactPersonControl = new FormControl(o.contactPerson);
         this.contactPersonTitleControl = new FormControl(
-            this.contactPersonTitle
+            o.contactPersonTitle
         );
         this.contactPersonPhoneNumberControl = new FormControl(
-            this.contactPersonPhoneNumber
+            o.contactPersonPhoneNumber
         );
-        this.emailControl = new FormControl(this.email);
-        this.addressControl = new FormControl(this.address);
-        this.cityControl = new FormControl(this.city);
-        this.stateControl = new FormControl(this.state);
-        this.zipControl = new FormControl(this.zip);
-        this.websiteControl = new FormControl(this.website);
+        this.emailControl = new FormControl(o.email);
+        this.addressControl = new FormControl(o.address);
+        this.cityControl = new FormControl(o.city);
+        this.stateControl = new FormControl(o.state);
+        this.zipControl = new FormControl(o.zip);
+        this.websiteControl = new FormControl(o.website);
     }
 
     //sets the fields to the updated value
     //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
-        if (this[control].value === '') {
-            this[control].value = this.orgObj[prop];
+        const c = this[control] as FormControl;
+        if (c.value === '' || c.value === null) {
+            c.setValue(this.orgObj[prop]);
 
             this.checkInvalidProp(prop, true);
 
-            // this.invalidInputLegalName = true;
             setTimeout(() => {
-                // this.invalidInputLegalName = false;
                 this.checkInvalidProp(prop, false);
             }, 2000);
         } else {
-            this[prop] = this[control].value;
-            this.orgObj[prop] = this[control].value;
-            const change = {
-                [prop]: this[control].value,
-            };
-            this.saveSingleField(change);
+            let val: any = c.value;
+            if (
+                prop === 'yearFounded' ||
+                prop === 'currentOperatingBudget' ||
+                prop === 'zip'
+            ) {
+                val = this.num(val);
+            }
+            this.orgObj[prop] = val;
+            this.saveSingleField({ [prop]: val });
         }
     }
 
@@ -857,32 +640,33 @@ export class OrganizationInfoComponent implements OnInit {
     }
 
     cancelSingleField(prop: string, control: any): void {
-        (this[control] as AbstractControl).setValue(this[prop]);
+        (this[control] as AbstractControl).setValue(this.orgObj[prop]);
     }
 
     updateGroupedEdition(): void {
-        this.orgObj = {
-            legalName: this.legalName, //changed
-            yearFounded: this.yearFounded,
-            currentOperatingBudget: this.currentOperatingBudget,
-            director: this.director,
-            phone: this.phone,
-            contactPerson: this.contactPerson,
-            contactPersonTitle: this.contactPersonTitle,
-            contactPersonPhoneNumber: this.contactPersonPhoneNumber,
-            email: this.email,
-            address: this.address,
-            city: this.city,
-            state: this.state,
-            zip: this.zip,
-            website: this.website,
+        const v = this.groupedForm.getRawValue();
+        const payload = {
+            legalName: v.legalName ?? '',
+            yearFounded: this.num(v.yearFounded),
+            currentOperatingBudget: this.num(v.currentOperatingBudget),
+            director: v.director ?? '',
+            phone: v.phone ?? '',
+            contactPerson: v.contactPerson ?? '',
+            contactPersonTitle: v.contactPersonTitle ?? '',
+            contactPersonPhoneNumber: v.contactPersonPhoneNumber ?? '',
+            email: v.email ?? '',
+            address: v.address ?? '',
+            city: v.city ?? '',
+            state: v.state ?? '',
+            zip: this.num(v.zip),
+            website: v.website ?? '',
             organization: this.orgID,
         };
 
         this.updateOrganizationInfoService
             .updateOrganizationInfo(
                 this.orgInfo.organizationInfoID,
-                this.orgObj
+                payload
             )
             .subscribe(
                 (result) => {
@@ -907,6 +691,20 @@ export class OrganizationInfoComponent implements OnInit {
         this.resetFormValues();
 
         this.checkEditing(mode);
+    }
+
+
+    handleInlineEnter(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName === 'TEXTAREA') {
+            return;
+        }
+        if (this.mode !== 'edit' || !this.groupedForm?.valid || !this.orgInfo?.organizationInfoID) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.updateGroupedEdition();
     }
 
     toggleDirectorEdit(): void {

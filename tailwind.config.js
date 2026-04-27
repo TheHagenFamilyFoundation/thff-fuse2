@@ -1,6 +1,7 @@
 const path = require('path');
-const colors = require('tailwindcss/colors');
-const defaultTheme = require('tailwindcss/defaultTheme');
+/* Use Tailwind v3 package (npm alias `tailwind3`) — top-level `tailwindcss` is v4 for Fuse 21 globals. */
+const colors = require('tailwind3/colors');
+const defaultTheme = require('tailwind3/defaultTheme');
 const generatePalette = require(path.resolve(__dirname, ('src/@fuse/tailwind/utils/generate-palette')));
 
 /**
@@ -298,8 +299,8 @@ const config = {
 
         // Other third party and/or custom plugins
         require('@tailwindcss/typography')({modifiers: ['sm', 'lg']}),
-        require('@tailwindcss/aspect-ratio'),
-        require('@tailwindcss/line-clamp')
+        require('@tailwindcss/aspect-ratio')
+        // line-clamp utilities are built into Tailwind CSS 3.3+; do not add @tailwindcss/line-clamp
     ]
 };
 

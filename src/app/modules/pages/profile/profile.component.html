@@ -53,10 +53,12 @@
             <div class="flex flex-col divide-y border-t border-b">
                 <div
                     *ngFor="let panel of panels; trackBy: trackByFn"
-                    class="flex items-center px-4 py-4 cursor-pointer"
+                    class="thff-settings-nav-item flex items-center px-4 py-4 cursor-pointer"
+                    [class.thff-settings-nav-item--selected]="selectedPanel === panel.id"
                     [ngClass]="{
-                        'hover:bg-gray-100 dark:hover:bg-hover': selectedPanel !== panel.id,
-                        'bg-primary-50 dark:bg-hover': selectedPanel === panel.id
+                        'hover:bg-accent-100 dark:hover:bg-accent-500/20': selectedPanel !== panel.id,
+                        'bg-primary-50 dark:bg-primary-800 dark:ring-1 dark:ring-inset dark:ring-primary-300/35':
+                            selectedPanel === panel.id
                     }"
                     (click)="goToPanel(panel.id)"
                 >
@@ -64,7 +66,7 @@
                         class="mr-3"
                         [ngClass]="{
                             'text-hint': selectedPanel !== panel.id,
-                            'text-primary dark:text-primary-500': selectedPanel === panel.id
+                            'text-primary dark:text-primary-50': selectedPanel === panel.id
                         }"
                         [svgIcon]="panel.icon"
                     ></mat-icon>
@@ -72,12 +74,15 @@
                         <div
                             class="font-medium leading-6"
                             [ngClass]="{
-                                'text-primary dark:text-primary-500': selectedPanel === panel.id
+                                'text-primary dark:text-white': selectedPanel === panel.id
                             }"
                         >
                             {{ panel.title }}
                         </div>
-                        <div class="text-sm text-secondary mt-0.5">
+                        <div
+                            class="text-sm text-secondary mt-0.5"
+                            [class.dark:text-primary-50]="selectedPanel === panel.id"
+                        >
                             {{ panel.description }}
                         </div>
                     </div>
@@ -103,8 +108,10 @@
                             <div *ngIf="accountAlert" class="mb-6">
                                 <fuse-alert
                                     [type]="accountAlert.type"
-                                    [appearance]="'outline'"
-                                    [showIcon]="true">
+                                    [appearance]="accountAlert.type === 'success' ? 'soft' : 'outline'"
+                                    [showIcon]="true"
+                                    [dismissible]="true"
+                                    (dismissedChanged)="onAccountAlertDismissed($event)">
                                     {{ accountAlert.message }}
                                 </fuse-alert>
                             </div>
@@ -268,77 +275,6 @@
                     <!-- <ng-container *ngSwitchCase="'notifications'">
                         <div class="text-secondary">Coming Soon</div>
                     </ng-container> -->
-
-                    <!-- ===== APP SETTINGS PANEL ===== -->
-                    <ng-container *ngSwitchCase="'app'">
-                        <div class="w-full max-w-xl">
-                            <!-- Alert -->
-                            <div *ngIf="appAlert" class="mb-6">
-                                <fuse-alert
-                                    [type]="appAlert.type"
-                                    [appearance]="'outline'"
-                                    [showIcon]="true">
-                                    {{ appAlert.message }}
-                                </fuse-alert>
-                            </div>
-
-                            <div class="text-secondary mb-6">
-                                Choose your preferred color scheme.
-                            </div>
-
-                            <!-- Theme toggle -->
-                            <div class="flex items-center gap-4">
-                                <!-- Light -->
-                                <div
-                                    class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
-                                    [class.ring-2]="config?.scheme === 'light'"
-                                    (click)="setScheme('light')">
-                                    <mat-icon
-                                        class="icon-size-5"
-                                        [svgIcon]="'heroicons_solid:sun'">
-                                    </mat-icon>
-                                    <div
-                                        class="ml-2 font-medium leading-5"
-                                        [class.text-secondary]="config?.scheme !== 'light'">
-                                        Light
-                                    </div>
-                                </div>
-
-                                <!-- Dark -->
-                                <div
-                                    class="flex items-center py-3 pl-5 pr-6 rounded-full cursor-pointer ring-inset ring-primary bg-hover"
-                                    [class.ring-2]="config?.scheme === 'dark'"
-                                    (click)="setScheme('dark')">
-                                    <mat-icon
-                                        class="icon-size-5"
-                                        [svgIcon]="'heroicons_solid:moon'">
-                                    </mat-icon>
-                                    <div
-                                        class="ml-2 font-medium leading-5"
-                                        [class.text-secondary]="config?.scheme !== 'dark'">
-                                        Dark
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="flex items-center justify-end mt-8">
-                                <button
-                                    mat-flat-button
-                                    type="button"
-                                    [color]="'primary'"
-                                    [disabled]="!themeToggled || appSaving"
-                                    (click)="saveScheme()">
-                                    <span *ngIf="!appSaving">Save</span>
-                                    <mat-progress-spinner
-                                        *ngIf="appSaving"
-                                        [diameter]="24"
-                                        [mode]="'indeterminate'">
-                                    </mat-progress-spinner>
-                                </button>
-                            </div>
-                        </div>
-                    </ng-container>
 
                 </ng-container>
             </fuse-card>

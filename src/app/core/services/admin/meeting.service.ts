@@ -32,6 +32,22 @@ export class MeetingService {
         return this.http.get(`${this.apiUrl}/meeting/${id}/funded-contacts`);
     }
 
+    /** Same recipients as grant send (no emails sent) — for confirm dialog. */
+    previewGrantEmails(meetingId: string): Observable<any> {
+        return this.http.get(`${this.apiUrl}/meeting/${meetingId}/preview-grant-emails`);
+    }
+
+    /** Re-render full grant email HTML after plain-text message edits (matches send output). */
+    renderGrantEmailPreview(
+        meetingId: string,
+        body: { organizationId: string; messagePlain: string }
+    ): Observable<{ html: string }> {
+        return this.http.post<{ html: string }>(
+            `${this.apiUrl}/meeting/${meetingId}/grant-notification/preview-render`,
+            body
+        );
+    }
+
     getAddableProposals(id: string): Observable<any> {
         return this.http.get(`${this.apiUrl}/meeting/${id}/addable-proposals`);
     }

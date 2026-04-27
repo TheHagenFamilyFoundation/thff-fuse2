@@ -1,13 +1,14 @@
-import { Component, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { merge, of as observableOf, fromEvent } from 'rxjs';
-import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
+import { catchError, map, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 
 @Component({
+    standalone: false,
     selector: 'app-organizations',
     templateUrl: './organizations.component.html',
     styleUrls: ['./organizations.component.scss']
@@ -19,7 +20,7 @@ export class OrganizationsComponent implements AfterViewInit {
     @ViewChild('filterInput', { static: true }) input: ElementRef;
 
     displayedColumns = ['name', 'createdOn', 'users', 'proposals', 'action'];
-    data: [];
+    data: any[] = [];
     orgCount: number;
     years: any;
     selectedYear: number;
@@ -34,10 +35,14 @@ export class OrganizationsComponent implements AfterViewInit {
     private filterInputString: string = '';
     year: number = (new Date()).getFullYear();
 
+    /** Merge(list) is wired after submission years load to avoid a wasted org request + wrong year. */
+    private mergeConnected = false;
+
     constructor(
         public getOrgService: GetOrganizationService,
         public submissionYearService: SubmissionYearsService,
-        private _router: Router
+        private _router: Router,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     get effectiveYear(): number | undefined {
@@ -46,8 +51,6 @@ export class OrganizationsComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this.sort.start = 'desc';
-        this.getSubmissionYears();
-
         this.sort.sortChange.subscribe(() => {
             this.skip = 0;
             this.sortDirection = this.sort.direction;
@@ -55,24 +58,7 @@ export class OrganizationsComponent implements AfterViewInit {
             this.paginator.pageIndex = 0;
         });
 
-        merge(this.sort.sortChange, this.paginator.page)
-            .pipe(
-                startWith({}),
-                switchMap(() => {
-                    this.loaded = false;
-                    return this.getOrgService.getOrgs(
-                        this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection, this.effectiveYear
-                    ).pipe(catchError(() => observableOf(null)));
-                }),
-                map((data) => {
-                    this.loaded = true;
-                    if (data === null) { return []; }
-                    this.getOrganizationCount(this.filterInputString);
-                    return data;
-                }),
-            )
-            .subscribe(data => (this.data = data));
+        this.getSubmissionYears();
 
         fromEvent(this.input.nativeElement, 'keyup')
             .pipe(
@@ -81,11 +67,36 @@ export class OrganizationsComponent implements AfterViewInit {
                 distinctUntilChanged(),
                 tap((event: KeyboardEvent) => {
                     this.filterInputString = (event.target as HTMLInputElement).value;
-                    this.getOrgService.getOrgs(
-                        this.skip, this.limit, this.filterInputString,
-                        this.sortColumn, this.sortDirection, this.effectiveYear
-                    ).subscribe((data) => { this.data = data; });
-                    this.getOrganizationCount(this.filterInputString);
+                    this.skip = 0;
+                    this.paginator.pageIndex = 0;
+                    this.loaded = false;
+                    this.getOrgService
+                        .getOrgs(
+                            this.skip,
+                            this.limit,
+                            this.filterInputString,
+                            this.sortColumn,
+                            this.sortDirection,
+                            this.effectiveYear,
+                            true
+                        )
+                        .subscribe({
+                            next: (data) => {
+                                const { rows, total } = this.normalizeOrgListResult(data);
+                                this.data = rows.slice();
+                                if (typeof total === 'number') {
+                                    this.orgCount = total;
+                                } else {
+                                    this.getOrganizationCount(this.filterInputString);
+                                }
+                                this.loaded = true;
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            error: () => {
+                                this.loaded = true;
+                                this.data = [];
+                            }
+                        });
                 })
             )
             .subscribe();
@@ -111,7 +122,7 @@ export class OrganizationsComponent implements AfterViewInit {
     }
 
     yearChanged(e: any): void {
-        const selected = this.years.find(y => y._id === e.value);
+        const selected = this.years.find((y) => y._id === e.value);
         this.selectedYear = selected._id;
         this.year = selected.year;
         this.refreshData();
@@ -121,35 +132,137 @@ export class OrganizationsComponent implements AfterViewInit {
         this.refreshData();
     }
 
+    private normalizeOrgListResult(data: any): { rows: any[]; total?: number } {
+        if (data === null || data === undefined) {
+            return { rows: [] };
+        }
+        if (typeof data === 'object' && Array.isArray(data.items)) {
+            const t = data.total;
+            const total =
+                typeof t === 'number' && Number.isFinite(t)
+                    ? t
+                    : typeof t === 'string' && t.trim() !== '' && Number.isFinite(Number(t))
+                      ? Number(t)
+                      : undefined;
+            return { rows: data.items, total };
+        }
+        if (Array.isArray(data)) {
+            return { rows: data };
+        }
+        return { rows: [] };
+    }
+
     private refreshData(): void {
         this.skip = 0;
         this.paginator.pageIndex = 0;
-        this.getOrganizationCount(this.filterInputString);
-        this.getOrgService.getOrgs(
-            this.skip, this.limit, this.filterInputString,
-            this.sortColumn, this.sortDirection, this.effectiveYear
-        ).subscribe({
-            next: (data) => { this.data = data; this.loaded = true; },
-            error: (err) => { console.error('getOrgs error', err); }
-        });
+        this.loaded = false;
+        this.getOrgService
+            .getOrgs(
+                this.skip,
+                this.limit,
+                this.filterInputString,
+                this.sortColumn,
+                this.sortDirection,
+                this.effectiveYear,
+                true
+            )
+            .subscribe({
+                next: (data) => {
+                    const { rows, total } = this.normalizeOrgListResult(data);
+                    this.data = rows.slice();
+                    if (typeof total === 'number') {
+                        this.orgCount = total;
+                    } else {
+                        this.getOrganizationCount(this.filterInputString);
+                    }
+                    this.loaded = true;
+                    this._changeDetectorRef.markForCheck();
+                    if (!this.mergeConnected) {
+                        this.connectOrgListMerge();
+                    }
+                },
+                error: (err) => {
+                    console.error('getOrgs error', err);
+                    this.loaded = true;
+                    this.data = [];
+                    this._changeDetectorRef.markForCheck();
+                }
+            });
+    }
+
+    /**
+     * Subscribes sort + paginator only after the first list response so we never race a duplicate
+     * HTTP against the initial load (paginator often emits on subscribe and could overwrite rows).
+     */
+    private connectOrgListMerge(): void {
+        if (this.mergeConnected) {
+            return;
+        }
+        this.mergeConnected = true;
+        merge(this.sort.sortChange, this.paginator.page)
+            .pipe(
+                switchMap(() => {
+                    this.loaded = false;
+                    return this.getOrgService
+                        .getOrgs(
+                            this.skip,
+                            this.limit,
+                            this.filterInputString,
+                            this.sortColumn,
+                            this.sortDirection,
+                            this.effectiveYear,
+                            true
+                        )
+                        .pipe(catchError(() => observableOf(null)));
+                }),
+                map((data) => {
+                    if (data === null) {
+                        this.loaded = true;
+                        this._changeDetectorRef.markForCheck();
+                        return this.data;
+                    }
+                    const { rows, total } = this.normalizeOrgListResult(data);
+                    this.loaded = true;
+                    if (typeof total === 'number') {
+                        this.orgCount = total;
+                    } else {
+                        this.getOrganizationCount(this.filterInputString);
+                    }
+                    this._changeDetectorRef.markForCheck();
+                    return rows.slice();
+                })
+            )
+            .subscribe((rows) => {
+                this.data = rows;
+            });
     }
 
     private getSubmissionYears(): void {
         this.submissionYearService.getAllSubmissionYears(this.year).subscribe({
             next: (years) => {
+                if (!years?.length) {
+                    console.error('getAllSubmissionYears: no submission years');
+                    return;
+                }
                 this.years = years;
                 this.selectedYear = years[0]._id;
                 this.year = years[0].year;
-                this.getOrganizationCount();
+                this.refreshData();
             },
-            error: (err) => { console.error('getAllSubmissionYears error', err); }
+            error: (err) => {
+                console.error('getAllSubmissionYears error', err);
+            }
         });
     }
 
     private getOrganizationCount(countFilter?: string): void {
         this.getOrgService.getOrganizationCount(countFilter, this.effectiveYear).subscribe({
-            next: (count) => { this.orgCount = count; },
-            error: (err) => { console.error('getOrganizationCount error', err); }
+            next: (count) => {
+                this.orgCount = count;
+            },
+            error: (err) => {
+                console.error('getOrganizationCount error', err);
+            }
         });
     }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
+    standalone: false,
     selector: 'app-selected-organization',
     templateUrl: './selected-organization.component.html',
     styleUrls: ['./selected-organization.component.scss'],

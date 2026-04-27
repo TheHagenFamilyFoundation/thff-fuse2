@@ -12,11 +12,12 @@ import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
-import { AppConfig, Scheme } from 'app/core/config/app.config';
+import { AppConfig, FORCED_APP_SCHEME } from 'app/core/config/app.config';
 import { FuseConfigService } from '@fuse/services/config';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
+    standalone: false,
     selector: 'auth-sign-in',
     templateUrl: './sign-in.component.html',
     encapsulation: ViewEncapsulation.None,
@@ -84,7 +85,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                     this.signInForm.enable();
                     this.signInNgForm.resetForm();
                 } else {
-                    this.setScheme(response.userSettings.scheme);
+                    this.setScheme();
                     this._backendService.startPing();
                     this._applyPendingReferralCode();
                     const redirectURL =
@@ -109,8 +110,8 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
         });
     }
 
-    setScheme(scheme: Scheme): void {
-        this._fuseConfigService.config = { scheme };
+    setScheme(): void {
+        this._fuseConfigService.config = { scheme: FORCED_APP_SCHEME };
     }
 
     private _applyPendingReferralCode(): void {

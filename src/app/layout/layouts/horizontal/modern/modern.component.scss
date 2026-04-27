@@ -1,0 +1,72 @@
+/* THFF brand teal (matches primary theme) */
+$thff-teal: #008083;
+
+/* Top nav: flat text-style links (no bordered boxes); active = color + weight */
+.modern-layout-top-nav {
+    a.modern-top-nav-link {
+        border-radius: 0.5rem;
+        text-transform: none;
+        letter-spacing: normal;
+        font-weight: 500;
+        color: rgba(17, 24, 39, 0.88);
+        background-color: transparent;
+        box-shadow: none;
+        transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--fuse-primary, $thff-teal);
+            outline-offset: 2px;
+        }
+
+        &.modern-top-nav-active {
+            color: var(--fuse-primary, $thff-teal);
+            font-weight: 600;
+            background-color: transparent;
+        }
+
+        /* Center Material icons inside mat-button (avoids top-left optical offset) */
+        .mat-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: 0;
+            line-height: 1;
+            vertical-align: middle;
+        }
+    }
+}
+
+.scheme-dark .modern-layout-top-nav a.modern-top-nav-link {
+    color: rgba(255, 255, 255, 0.88);
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    &.modern-top-nav-active {
+        color: var(--fuse-primary-200, #b2dfdb);
+        font-weight: 600;
+    }
+}
+
+.modern-layout-footer {
+    .modern-layout-footer-text {
+        font-size: 0.8125rem;
+        line-height: 1.35;
+        letter-spacing: 0.01em;
+    }
+}
+
+@media (min-width: 640px) {
+    .modern-layout-footer .modern-layout-footer-text {
+        font-size: 0.875rem;
+    }
+}

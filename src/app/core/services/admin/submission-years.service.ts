@@ -12,10 +12,14 @@ export class SubmissionYearsService {
 
     constructor(private http: HttpClient) {}
 
-    getAllSubmissionYears(year: number): Observable<any> {
-        const urlString = `${this.apiUrl}/submission-year?year=${year}`;
-
-        return this.http.get(urlString);
+    /**
+     * List submission years (newest first). Pass a calendar year for the query hint, or omit / pass null
+     * to call GET /submission-year with no year param (avoids `?year=undefined` breaking loads).
+     */
+    getAllSubmissionYears(year?: number | null): Observable<any> {
+        const y = year == null ? NaN : Number(year);
+        const qs = Number.isFinite(y) ? `?year=${y}` : '';
+        return this.http.get(`${this.apiUrl}/submission-year${qs}`);
     }
 
     //get single submission year

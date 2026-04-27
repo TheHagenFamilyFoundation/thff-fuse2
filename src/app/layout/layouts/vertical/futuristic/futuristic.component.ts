@@ -12,6 +12,7 @@ import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/services/user/user.service';
 
 @Component({
+    standalone: false,
     selector: 'futuristic-layout',
     templateUrl: './futuristic.component.html',
     encapsulation: ViewEncapsulation.None,

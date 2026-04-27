@@ -24,8 +24,16 @@
     <!-- Main -->
     <div class="w-full max-w-screen-lg mx-auto p-6 sm:p-8">
 
-        <fuse-card class="flex flex-col w-full overflow-hidden">
-            <table mat-table [dataSource]="dataSource" matSort class="w-full">
+        <fuse-card class="flex flex-col w-full overflow-hidden relative">
+            <div *ngIf="!tableLoaded"
+                 class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 role="status"
+                 aria-label="Loading submission years">
+                <mat-spinner [diameter]="40"></mat-spinner>
+            </div>
+
+            <table mat-table [dataSource]="dataSource" matSort class="w-full min-h-[200px]"
+                   [class.opacity-40]="!tableLoaded" [class.pointer-events-none]="!tableLoaded">
 
                 <!-- Year Column -->
                 <ng-container matColumnDef="year">

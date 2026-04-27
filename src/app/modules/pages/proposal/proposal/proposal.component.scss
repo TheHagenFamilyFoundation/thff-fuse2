@@ -1,0 +1,12 @@
+/* Lift proposal body off the default page wash (matches org profile cards). */
+.proposal-info-shell {
+    background-color: var(--fuse-bg-card, #fff);
+    border: 1px solid rgb(226 232 240);
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:host-context(.dark) .proposal-info-shell {
+    border-color: rgb(64 64 64);
+    box-shadow: none;
+}

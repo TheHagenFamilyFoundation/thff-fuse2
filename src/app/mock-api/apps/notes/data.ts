@@ -1,5 +1,5 @@
 /* eslint-disable */
-import moment from 'moment';
+import { isoAtHourMinutePlusDays } from '../../lib/mock-dates';
 
 export const labels = [
     {
@@ -38,7 +38,7 @@ export const notes = [
         reminder : null,
         labels   : ['e2f749f5-41ed-49d0-a92a-1c83d879e371'],
         archived : false,
-        createdAt: moment().hour(10).minute(19).subtract(98, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(10, 19, -98),
         updatedAt: null
     },
     {
@@ -53,7 +53,7 @@ export const notes = [
             'b1cde9ee-e54d-4142-ad8b-cf55dafc9528'
         ],
         archived : false,
-        createdAt: moment().hour(15).minute(37).subtract(80, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(15, 37, -80),
         updatedAt: null
     },
     {
@@ -65,8 +65,8 @@ export const notes = [
         reminder : null,
         labels   : ['6c288794-47eb-4605-8bdf-785b61a449d3'],
         archived : false,
-        createdAt: moment().hour(19).minute(27).subtract(74, 'day').toISOString(),
-        updatedAt: moment().hour(15).minute(36).subtract(50, 'day').toISOString()
+        createdAt: isoAtHourMinutePlusDays(19, 27, -74),
+        updatedAt: isoAtHourMinutePlusDays(15, 36, -50)
     },
     {
         id       : '89861bd4-0144-4bb4-8b39-332ca10371d5',
@@ -74,10 +74,10 @@ export const notes = [
         content  : 'Theming support for all apps',
         tasks    : null,
         image    : null,
-        reminder : moment().hour(12).minute(34).add(50, 'day').toISOString(),
+        reminder : isoAtHourMinutePlusDays(12, 34, 50),
         labels   : ['e2f749f5-41ed-49d0-a92a-1c83d879e371'],
         archived : false,
-        createdAt: moment().hour(12).minute(34).subtract(59, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(12, 34, -59),
         updatedAt: null
     },
     {
@@ -110,7 +110,7 @@ export const notes = [
         reminder : null,
         labels   : ['f47c92e5-20b9-44d9-917f-9ff4ad25dfd0'],
         archived : false,
-        createdAt: moment().hour(16).minute(4).subtract(47, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(16, 4, -47),
         updatedAt: null
     },
     {
@@ -145,10 +145,10 @@ export const notes = [
             }
         ],
         image    : null,
-        reminder : moment().hour(10).minute(44).subtract(35, 'day').toISOString(),
+        reminder : isoAtHourMinutePlusDays(10, 44, -35),
         labels   : ['b1cde9ee-e54d-4142-ad8b-cf55dafc9528'],
         archived : false,
-        createdAt: moment().hour(10).minute(44).subtract(35, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(10, 44, -35),
         updatedAt: null
     },
     {
@@ -183,13 +183,13 @@ export const notes = [
             }
         ],
         image    : null,
-        reminder : moment().hour(11).minute(27).subtract(14, 'day').toISOString(),
+        reminder : isoAtHourMinutePlusDays(11, 27, -14),
         labels   : [
             'b1cde9ee-e54d-4142-ad8b-cf55dafc9528',
             'e2f749f5-41ed-49d0-a92a-1c83d879e371'
         ],
         archived : false,
-        createdAt: moment().hour(11).minute(27).subtract(24, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(11, 27, -24),
         updatedAt: null
     },
     {
@@ -198,10 +198,10 @@ export const notes = [
         content  : 'Organize the dad\'s surprise retirement party',
         tasks    : null,
         image    : null,
-        reminder : moment().hour(14).minute(56).subtract(25, 'day').toISOString(),
+        reminder : isoAtHourMinutePlusDays(14, 56, -25),
         labels   : ['f47c92e5-20b9-44d9-917f-9ff4ad25dfd0'],
         archived : false,
-        createdAt: moment().hour(14).minute(56).subtract(20, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(14, 56, -20),
         updatedAt: null
     },
     {
@@ -216,8 +216,8 @@ export const notes = [
             'b1cde9ee-e54d-4142-ad8b-cf55dafc9528'
         ],
         archived : false,
-        createdAt: moment().hour(9).minute(32).subtract(15, 'day').toISOString(),
-        updatedAt: moment().hour(17).minute(6).subtract(12, 'day').toISOString()
+        createdAt: isoAtHourMinutePlusDays(9, 32, -15),
+        updatedAt: isoAtHourMinutePlusDays(17, 6, -12)
     },
     {
         id       : '15188348-78aa-4ed6-b5c2-028a214ba987',
@@ -228,7 +228,7 @@ export const notes = [
         reminder : null,
         labels   : ['e2f749f5-41ed-49d0-a92a-1c83d879e371'],
         archived : false,
-        createdAt: moment().hour(20).minute(5).subtract(12, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(20, 5, -12),
         updatedAt: null
     },
     {
@@ -248,10 +248,10 @@ export const notes = [
             }
         ],
         image    : null,
-        reminder : moment().hour(13).minute(43).subtract(2, 'day').toISOString(),
+        reminder : isoAtHourMinutePlusDays(13, 43, -2),
         labels   : ['bbc73458-940b-421c-8d5f-8dcd23a9b0d6'],
         archived : false,
-        createdAt: moment().hour(13).minute(43).subtract(7, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(13, 43, -7),
         updatedAt: null
     },
     {
@@ -266,7 +266,7 @@ export const notes = [
             '6c288794-47eb-4605-8bdf-785b61a449d3'
         ],
         archived : false,
-        createdAt: moment().hour(7).minute(12).subtract(2, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(7, 12, -2),
         updatedAt: null
     },
     {
@@ -281,7 +281,7 @@ export const notes = [
             '6c288794-47eb-4605-8bdf-785b61a449d3'
         ],
         archived : true,
-        createdAt: moment().hour(17).minute(14).subtract(100, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(17, 14, -100),
         updatedAt: null
     },
     {
@@ -293,7 +293,7 @@ export const notes = [
         reminder : null,
         labels   : ['e2f749f5-41ed-49d0-a92a-1c83d879e371'],
         archived : true,
-        createdAt: moment().hour(10).minute(29).subtract(85, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(10, 29, -85),
         updatedAt: null
     },
     {
@@ -308,7 +308,7 @@ export const notes = [
             'b1cde9ee-e54d-4142-ad8b-cf55dafc9528'
         ],
         archived : true,
-        createdAt: moment().hour(15).minute(30).subtract(69, 'day').toISOString(),
+        createdAt: isoAtHourMinutePlusDays(15, 30, -69),
         updatedAt: null
     }
 ];
