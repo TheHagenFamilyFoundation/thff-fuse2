@@ -22,13 +22,13 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: "18"
+                  # Angular 21 + @tailwindcss/cli require Node >= 20.19; oxide optional
+                  # native deps install reliably on 22.x Linux runners.
+                  node-version: "22"
                   cache: "npm"
 
             - name: Install dependencies
-              run: |
-                  npm config set legacy-peer-deps true
-                  npm ci
+              run: npm ci
 
             - name: Build Angular app
               run: |
