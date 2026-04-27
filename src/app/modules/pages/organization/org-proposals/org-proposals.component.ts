@@ -1,10 +1,28 @@
-import { Component, ViewChild, Input, AfterViewInit, ElementRef } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    Input,
+    OnChanges,
+    OnDestroy,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { merge, Observable, of as observableOf, fromEvent } from 'rxjs';
-import { catchError, map, startWith, switchMap, debounceTime, distinctUntilChanged, tap, filter } from 'rxjs/operators';
+import { from, merge, of as observableOf, fromEvent, Subject } from 'rxjs';
+import {
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    map,
+    switchMap,
+    takeUntil,
+    tap,
+} from 'rxjs/operators';
 
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
@@ -16,7 +34,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
     templateUrl: './org-proposals.component.html',
     styleUrls: ['./org-proposals.component.scss'],
 })
-export class OrgProposalsComponent implements AfterViewInit {
+export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input()
     org: any;
 
@@ -36,11 +54,11 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     propCount: number;
 
-    years: any;
+    years: any[] = [];
 
     year: number;
 
-    selectedYear: number;
+    selectedYear: string | undefined;
 
     currentYear: any;
 
@@ -48,7 +66,7 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     loaded: boolean;
 
-    data: [];
+    data: any[] = [];
 
     dataSource: MatTableDataSource<ProposalData>;
 
@@ -58,11 +76,17 @@ export class OrgProposalsComponent implements AfterViewInit {
 
     portalMessage: string;
 
+    /** Refetch table when org changes or submission years resolve to a calendar year. */
+    private readonly proposalsReload$ = new Subject<void>();
+
+    private readonly destroy$ = new Subject<void>();
+
     constructor(
         public getUserService: GetUserService,
         public proposalService: ProposalService,
         public submissionYearsService: SubmissionYearsService,
-        private _router: Router
+        private _router: Router,
+        private _cdr: ChangeDetectorRef,
     ) {
         this.loaded = false;
         this.filterInputString = '';
@@ -70,86 +94,167 @@ export class OrgProposalsComponent implements AfterViewInit {
         this.skip = 0;
         this.sortDirection = 'desc';
         this.sortColumn = 'createdOn';
-        this.year = (new Date()).getFullYear();
+        this.year = new Date().getFullYear();
+        this.data = [];
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['org']) {
+            return;
+        }
+        const oid = this.getOrgMongoId();
+        if (!oid) {
+            return;
+        }
+        if (changes['org'].firstChange) {
+            return;
+        }
+        const prev = changes['org'].previousValue;
+        const prevId = prev?._id ?? prev?.id;
+        if (prevId === oid) {
+            return;
+        }
+        this.skip = 0;
+        this.filterInputString = '';
+        if (this.input?.nativeElement) {
+            this.input.nativeElement.value = '';
+        }
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
+        this.proposalsReload$.next();
+        this._cdr.markForCheck();
     }
 
     ngAfterViewInit(): void {
-
         this.sort.start = 'desc';
 
-        //TODO: use the store
         if (!localStorage.getItem('currentUser')) {
             this._router.navigate(['/pages/auth/logout']);
+            return;
         }
-        this.getOrgProposalCount(this.year, this.org._id); // no need for parameter
+
+        const orgMongoId = this.getOrgMongoId();
+        if (!orgMongoId) {
+            this.loaded = true;
+            this.data = [];
+            return;
+        }
+
         this.getSubmissionYears();
         this.getCurrentSubmissionYear();
 
-        // If the user changes the sort order, reset back to the first page.
-        this.sort.sortChange.subscribe(() => {
-            this.skip = 0; //reset;
-            this.sortDirection = this.sort.direction;
-            this.sortColumn = this.sort.active;
-            this.paginator.pageIndex = 0;
-        });
-
-        merge(this.sort.sortChange, this.paginator.page)
+        merge(from(this.sort.sortChange), from(this.paginator.page), this.proposalsReload$)
             .pipe(
-                startWith({}),
+                takeUntil(this.destroy$),
+                tap((evt) => {
+                    if (
+                        evt &&
+                        typeof evt === 'object' &&
+                        'active' in evt &&
+                        'direction' in evt
+                    ) {
+                        this.skip = 0;
+                        this.sortDirection = this.sort.direction;
+                        this.sortColumn = this.sort.active;
+                        if (this.paginator) {
+                            this.paginator.pageIndex = 0;
+                        }
+                    }
+                }),
                 switchMap(() => {
+                    const oid = this.getOrgMongoId();
+                    if (!oid) {
+                        this.loaded = true;
+                        return observableOf(null);
+                    }
                     this.loaded = false;
-                    return this.proposalService.getOrgProps(this.year, this.org._id, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                    return this.proposalService
+                        .getOrgProps(
+                            this.year,
+                            oid,
+                            this.skip,
+                            this.limit,
+                            this.filterInputString,
+                            this.sortColumn,
+                            this.sortDirection,
+                        )
                         .pipe(catchError(() => observableOf(null)));
                 }),
                 map((data) => {
-
-                    // Flip flag to show that loading has finished.
                     this.loaded = true;
-                    // this.isRateLimitReached = data === null;
-
                     if (data === null) {
                         return [];
                     }
-
-                    // Only refresh the result length if there is new data. In case of rate
-                    // limit errors, we do not want to reset the paginator to zero, as that
-                    // would prevent users from re-triggering requests.
-                    // this.orgCount = data.length;
                     this.getOrgProposalCount(this.year, this.filterInputString);
                     return data;
                 }),
             )
-            .subscribe(data => (this.data = data));
+            .subscribe((data) => {
+                this.data = data;
+                this._cdr.markForCheck();
+            });
 
-        // server-side filter
-        fromEvent(this.input.nativeElement, 'keyup')
+        fromEvent<Event>(this.input.nativeElement, 'keyup')
             .pipe(
-                filter(Boolean),
+                map((e) => (e.target as HTMLInputElement).value),
                 debounceTime(500),
                 distinctUntilChanged(),
-                tap((event: KeyboardEvent) => {
-                    this.filterInputString = (event.target as HTMLInputElement).value;
+                takeUntil(this.destroy$),
+                tap((value) => {
+                    this.filterInputString = value;
                     this.skip = 0;
-                    this.paginator.pageIndex = 0;
+                    if (this.paginator) {
+                        this.paginator.pageIndex = 0;
+                    }
                     this.loaded = false;
-                    this.proposalService.getOrgProps(this.year, this.org._id, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
+                    const oid = this.getOrgMongoId();
+                    if (!oid) {
+                        this.loaded = true;
+                        this.data = [];
+                        return;
+                    }
+                    this.proposalService
+                        .getOrgProps(
+                            this.year,
+                            oid,
+                            this.skip,
+                            this.limit,
+                            this.filterInputString,
+                            this.sortColumn,
+                            this.sortDirection,
+                        )
                         .subscribe({
-                            next: (data) => {
-                                this.data = data;
+                            next: (rows) => {
+                                this.data = rows;
                                 this.loaded = true;
+                                this._cdr.markForCheck();
                             },
                             error: () => {
                                 this.loaded = true;
                                 this.data = [];
-                            }
+                                this._cdr.markForCheck();
+                            },
                         });
                     this.getOrgProposalCount(this.year, this.filterInputString);
-                })
+                }),
             )
             .subscribe();
-
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private getOrgMongoId(): string | null {
+        const o = this.org;
+        if (!o) {
+            return null;
+        }
+        const id = o._id ?? o.id;
+        return id != null ? String(id) : null;
+    }
 
     handlePageEvent(e: PageEvent): void {
         this.pageEvent = e;
@@ -158,98 +263,134 @@ export class OrgProposalsComponent implements AfterViewInit {
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
             this.paginator.pageIndex = 0;
-        }
-        else {
+        } else {
             if (this.pageEvent.previousPageIndex < this.pageEvent.pageIndex) {
                 this.skip = this.skip + this.limit;
-            }
-            else {
+            } else {
                 this.skip = this.skip - this.limit;
             }
         }
-
     }
 
     getSubmissionYears(): void {
-
-        this.submissionYearsService.getAllSubmissionYears(this.year)
-            .subscribe(
-                (years) => {
-                    this.years = years;
-                    this.selectedYear = years[0]._id; //grab the first one, which should be most recent year
-                },
-                () => {});
+        this.submissionYearsService.getAllSubmissionYears(this.year).subscribe({
+            next: (years) => {
+                this.years = Array.isArray(years) ? years : [];
+                if (this.years.length === 0) {
+                    this.selectedYear = undefined;
+                    this.proposalsReload$.next();
+                    this._cdr.markForCheck();
+                    return;
+                }
+                const first = this.years[0];
+                this.selectedYear = first._id != null ? String(first._id) : undefined;
+                const y = Number(first.year);
+                if (Number.isFinite(y)) {
+                    this.year = y;
+                }
+                this.getOrgProposalCount(this.year, this.filterInputString);
+                this.proposalsReload$.next();
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                this.years = [];
+                this.selectedYear = undefined;
+                this.proposalsReload$.next();
+                this._cdr.markForCheck();
+            },
+        });
     }
 
     getCurrentSubmissionYear(): void {
-
-        this.submissionYearsService.getCurrentSubmissionYear()
-            .subscribe(
-                (year) => {
-                    this.currentYear = year;
-                    this.portalOpen = this.currentYear.active;
-
-                    this.portalMessage = `${this.currentYear.year} Grant Cycle is Closed`;
-                },
-                () => {
-                    this.portalMessage = `${this.year} Grant Cycle Is Opening Soon`;
-                });
-
+        this.submissionYearsService.getCurrentSubmissionYear().subscribe({
+            next: (year) => {
+                this.currentYear = year;
+                this.portalOpen = this.currentYear.active;
+                this.portalMessage = `${this.currentYear.year} Grant Cycle is Closed`;
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                this.portalOpen = false;
+                this.portalMessage = `${this.year} Grant Cycle Is Opening Soon`;
+                this._cdr.markForCheck();
+            },
+        });
     }
 
-    // check if org has proposals, phase this out
-    //TODO: phase out
     checkProposals(): void {
         this.sort.start = 'desc';
-
-        //filter out current year proposals
         const proposals = this.filterByYear(this.org.proposals, this.year);
-
         this.data = proposals;
-
     }
 
     createProposal(): void {
-        this._router.navigate(['/pages/proposal/create'], { queryParams: { org: this.org._id, orgID: this.org.organizationID } });
+        const oid = this.getOrgMongoId();
+        if (!oid) {
+            return;
+        }
+        this._router.navigate(['/pages/proposal/create'], {
+            queryParams: { org: oid, orgID: this.org.organizationID },
+        });
     }
+
     goToProposal(proposalID: string): void {
         this._router.navigate(['/pages/proposal/', proposalID]);
     }
 
     getOrgProposalCount(year: number, countFilter?: string): void {
-        this.proposalService.getOrgProposalCount(year, this.org._id, countFilter)
-            .subscribe(
-                (count) => { this.propCount = count; },
-                () => {});
-
-    }
-
-    yearChanged(e: any): void {
-        this.selectedYear = this.years.find(y => y._id === e.value)._id;
-
-        this.year = this.years.find(y => y._id === e.value).year;
-
-        //fetch count and proposals again
-        this.getOrgProposalCount(this.year, this.filterInputString);
-        this.proposalService.getOrgProps(this.year, this.org._id, this.skip, this.limit, this.filterInputString, this.sortColumn, this.sortDirection)
-            .subscribe((data) => {
-                this.data = data;
+        const oid = this.getOrgMongoId();
+        if (!oid) {
+            return;
+        }
+        this.proposalService.getOrgProposalCount(year, oid, countFilter).subscribe({
+            next: (count) => {
+                this.propCount = count;
+                this._cdr.markForCheck();
             },
-                () => {});
-
+            error: () => {},
+        });
     }
 
-    // Function to filter items by year
+    yearChanged(e: { value: string }): void {
+        const row = this.years?.find((y) => String(y._id) === String(e.value));
+        if (!row) {
+            return;
+        }
+        this.selectedYear = String(row._id);
+        this.year = row.year;
+        this.getOrgProposalCount(this.year, this.filterInputString);
+        const oid = this.getOrgMongoId();
+        if (!oid) {
+            return;
+        }
+        this.proposalService
+            .getOrgProps(
+                this.year,
+                oid,
+                this.skip,
+                this.limit,
+                this.filterInputString,
+                this.sortColumn,
+                this.sortDirection,
+            )
+            .subscribe({
+                next: (data) => {
+                    this.data = data;
+                    this._cdr.markForCheck();
+                },
+                error: () => {},
+            });
+    }
+
     filterByYear(items, year): any {
-        const startDate = new Date(year, 0, 1); // January 1 of the given year
-        const endDate = new Date(year + 1, 0, 1); // January 1 of the next year
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year + 1, 0, 1);
 
         return items.filter((item: any) => {
             const itemDate = new Date(item.createdAt);
             return itemDate >= startDate && itemDate < endDate;
         });
     }
-
 }
 
 export interface ProposalData {

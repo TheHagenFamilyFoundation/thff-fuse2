@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,6 +46,9 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
 
     sending = false;
 
+    /** Step 2 loads default letter from server; keep UX responsive if preview API is slow. */
+    messageSyncing = false;
+
     private previewDebounce: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
@@ -53,11 +56,23 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
         @Inject(MAT_DIALOG_DATA) data: SolicitationPreviewSendDialogData,
         private outboundEmailService: OutboundEmailService,
         private sanitizer: DomSanitizer,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {
         this.codes = data.codes || [];
-        this.referralCodeId = data.referralCodeId || '';
+        this.referralCodeId = this.normalizeReferralCodeId(data.referralCodeId);
         this.to = data.to || '';
+    }
+
+    /** Mat-select / API may expose _id as a string or as `{ $oid: string }`. */
+    private normalizeReferralCodeId(id: unknown): string {
+        if (id == null || id === '') {
+            return '';
+        }
+        if (typeof id === 'object' && id !== null && '$oid' in (id as object)) {
+            return String((id as { $oid: string }).$oid);
+        }
+        return String(id);
     }
 
     ngOnInit(): void {
@@ -67,7 +82,7 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
         } else {
             this.step = STEP_CODE;
             if (this.codes.length > 0) {
-                this.referralCodeId = this.codes[0]._id;
+                this.referralCodeId = this.normalizeReferralCodeId(this.codes[0]._id);
             }
         }
     }
@@ -79,29 +94,76 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
     }
 
     private syncPlainFromServer(onDone?: () => void): void {
+        const refId = this.normalizeReferralCodeId(this.referralCodeId);
+        if (!refId) {
+            onDone?.();
+            return;
+        }
+        this.messageSyncing = true;
         this.outboundEmailService
             .previewSolicitation({
-                referralCodeId: this.referralCodeId
+                referralCodeId: refId
             })
             .subscribe({
                 next: (res) => {
+                    this.messageSyncing = false;
                     const fromApi = res?.plainText;
                     if (typeof fromApi === 'string') {
                         this.messagePlain = fromApi;
                     }
+                    this.referralCodeId = refId;
                     onDone?.();
+                    this._changeDetectorRef.markForCheck();
                 },
                 error: () => {
+                    this.messageSyncing = false;
                     /* keep DEFAULT_SOLICITATION_MESSAGE_PLAIN */
+                    this.referralCodeId = refId;
                     onDone?.();
+                    this._changeDetectorRef.markForCheck();
                 }
             });
+    }
+
+    private static escapeHtml(s: string): string {
+        return s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    private setTrustedPreviewFromResponse(res: { html?: string; plainText?: string }): void {
+        const html = res?.html;
+        if (html != null && String(html).trim() !== '') {
+            this.trustedPreview = this.sanitizer.bypassSecurityTrustHtml(String(html));
+            return;
+        }
+        const plain = res?.plainText;
+        if (typeof plain === 'string' && plain.trim() !== '') {
+            const safe = SolicitationPreviewSendDialogComponent.escapeHtml(plain).replace(/\n/g, '<br>');
+            this.trustedPreview = this.sanitizer.bypassSecurityTrustHtml(
+                `<div class="email-preview-surface">${safe}</div>`
+            );
+            return;
+        }
+        this.trustedPreview = this.sanitizer.bypassSecurityTrustHtml(
+            '<p class="email-preview-surface text-gray-500">(Preview has no content)</p>'
+        );
     }
 
     private runPreview(useServerDefault: boolean, onSuccess?: () => void): void {
         if (this.previewDebounce) {
             clearTimeout(this.previewDebounce);
             this.previewDebounce = null;
+        }
+
+        const refId = this.normalizeReferralCodeId(this.referralCodeId);
+        if (!refId) {
+            this.previewLoading = false;
+            this.previewError = 'Referral code is missing';
+            this._changeDetectorRef.markForCheck();
+            return;
         }
 
         this.previewLoading = true;
@@ -112,7 +174,7 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
             referralCodeId: string;
             messagePlain?: string;
         } = {
-            referralCodeId: this.referralCodeId
+            referralCodeId: refId
         };
         if (!useServerDefault) {
             body.messagePlain = this.messagePlain;
@@ -127,14 +189,14 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
                 } else if (useServerDefault) {
                     this.messagePlain = DEFAULT_SOLICITATION_MESSAGE_PLAIN;
                 }
-                if (res?.html) {
-                    this.trustedPreview = this.sanitizer.bypassSecurityTrustHtml(res.html);
-                }
+                this.setTrustedPreviewFromResponse(res);
                 onSuccess?.();
+                this._changeDetectorRef.markForCheck();
             },
             error: (err) => {
                 this.previewLoading = false;
                 this.previewError = err?.error?.message || 'Could not build preview';
+                this._changeDetectorRef.markForCheck();
             }
         });
     }
@@ -148,8 +210,14 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
         return new Date(raw).getFullYear();
     }
 
+    /** Stable string id for mat-option [value] and comparisons. */
+    codeOptionValue(code: any): string {
+        return this.normalizeReferralCodeId(code?._id);
+    }
+
     selectedReferralCode(): any | null {
-        return this.codes.find((c) => c._id === this.referralCodeId) || null;
+        const id = this.normalizeReferralCodeId(this.referralCodeId);
+        return this.codes.find((c) => this.codeOptionValue(c) === id) || null;
     }
 
     /** From getMyReferralCodes: solicitation sends + applicants who linked this code string on their account. */
@@ -162,22 +230,32 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
     }
 
     goToEditFromCode(): void {
-        if (!this.referralCodeId) {
+        const id = this.normalizeReferralCodeId(this.referralCodeId);
+        if (!id) {
             this.snackBar.open('Choose a referral code', 'OK', { duration: 3000 });
             return;
         }
+        this.referralCodeId = id;
         this.previewError = null;
-        this.syncPlainFromServer(() => {
-            this.step = STEP_EDIT;
-        });
+        /* Advance immediately — previously step changed only after preview HTTP, so a hung/failed request looked like a dead button. */
+        this.step = STEP_EDIT;
+        this._changeDetectorRef.markForCheck();
+        this.syncPlainFromServer();
     }
 
     goToPreview(): void {
+        const refId = this.normalizeReferralCodeId(this.referralCodeId);
+        if (!refId) {
+            this.snackBar.open('Choose a referral code', 'OK', { duration: 3000 });
+            return;
+        }
+        this.referralCodeId = refId;
         this.previewError = null;
-        this.runPreview(false, () => {
-            this.previewError = null;
-            this.step = STEP_PREVIEW;
-        });
+        this.trustedPreview = null;
+        /* Same as edit step: don’t wait on HTTP before showing the next screen (spinner lives on preview). */
+        this.step = STEP_PREVIEW;
+        this._changeDetectorRef.markForCheck();
+        this.runPreview(false);
     }
 
     goToSend(): void {
@@ -212,10 +290,16 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
             return;
         }
 
+        const refId = this.normalizeReferralCodeId(this.referralCodeId);
+        if (!refId) {
+            this.snackBar.open('Choose a referral code', 'OK', { duration: 3000 });
+            return;
+        }
+
         this.sending = true;
         this.outboundEmailService
             .sendSolicitationEmail({
-                referralCodeId: this.referralCodeId,
+                referralCodeId: refId,
                 to: email,
                 messagePlain: this.messagePlain
             })

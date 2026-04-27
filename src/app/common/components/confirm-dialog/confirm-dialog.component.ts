@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 export interface ConfirmDialogData {
     title: string;
@@ -7,11 +9,16 @@ export interface ConfirmDialogData {
     confirmText?: string;
     cancelText?: string;
     warn?: boolean;
+    /** Single-button info/success dialog (no cancel). */
+    alertOnly?: boolean;
+    /** Use success (green) styling for the message body. */
+    messageVariant?: 'default' | 'success';
 }
 
 @Component({
-    standalone: false,
+    standalone: true,
     selector: 'app-confirm-dialog',
+    imports: [CommonModule, MatDialogModule, MatButtonModule],
     templateUrl: './confirm-dialog.component.html',
 })
 export class ConfirmDialogComponent {

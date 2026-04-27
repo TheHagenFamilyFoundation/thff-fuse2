@@ -71,8 +71,8 @@ export class OrganizationComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 
-    getOrganization(orgID): void {
-        this.getOrgService.getOrgbyID(orgID).subscribe((org) => {
+    getOrganization(orgID: string, forceFresh = false): void {
+        this.getOrgService.getOrgbyID(orgID, forceFresh).subscribe((org) => {
             this.org = org;
             this.organizationID = this.org._id;
             this.checkInOrganization(this.currentUser._id);
@@ -83,7 +83,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     refreshOrg(): void {
-        this.getOrganization(this.orgID);
+        this.getOrganization(this.orgID, true);
     }
 
     checkIsDirectorAndInOrg(): void {

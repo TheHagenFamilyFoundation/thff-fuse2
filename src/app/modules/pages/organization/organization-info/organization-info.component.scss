@@ -58,10 +58,12 @@
 }
 
 /* Form inputs fill width */
-input {
+input,
+textarea {
     width: 100%;
 }
 
-.mat-form-field {
+.mat-form-field,
+.mat-mdc-form-field {
     width: 100%;
 }

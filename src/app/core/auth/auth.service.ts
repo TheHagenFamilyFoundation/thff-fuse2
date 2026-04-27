@@ -72,10 +72,8 @@ export class AuthService {
         this._authenticated = true;
         this._userService.user = response.user;
 
-        // Persist user settings (scheme) so it survives page refresh
-        if (response.userSettings?.scheme) {
-            localStorage.setItem('userScheme', response.userSettings.scheme);
-        }
+        // App is always light mode; keep key for boot script compatibility
+        localStorage.setItem('userScheme', 'light');
     }
 
     /**
@@ -163,10 +161,7 @@ export class AuthService {
                     // Store the user on the user service
                     this._userService.user = response.user;
 
-                    // Persist user settings (scheme) so it survives page refresh
-                    if (response.userSettings?.scheme) {
-                        localStorage.setItem('userScheme', response.userSettings.scheme);
-                    }
+                    localStorage.setItem('userScheme', 'light');
 
                     return of(true);
                 })

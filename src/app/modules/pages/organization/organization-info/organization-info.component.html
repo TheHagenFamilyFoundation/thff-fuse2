@@ -1,5 +1,5 @@
 <section editableGroup (editableModeChange)="handleModeChange($event)" (save)="updateGroupedEdition()"
-    (cancel)="cancelGroupedEdition()">
+    (cancel)="cancelGroupedEdition()" (keydown.enter)="handleInlineEnter($event)">
     <div *ngIf="isDirector && !inOrg" class="py-4">
         Edit As Director?
         <button mat-raised-button *ngIf="!directorEditing" (click)="toggleDirectorEdit()">

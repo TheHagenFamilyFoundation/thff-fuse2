@@ -95,12 +95,14 @@
             </div>
 
             <div *ngIf="totalSolicitations > 0" class="relative sent-solicitations-table overflow-x-auto -mx-1">
-                <div *ngIf="!solLoaded"
-                     class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg">
-                    <mat-spinner [diameter]="36"></mat-spinner>
+                <!-- Re-fetching list: show spinner in-flow only — a full z-index overlay + pointer-events-none
+                     on the table stuck interaction after other modals (focus/selection) triggered a silent reload. -->
+                <div *ngIf="!solLoaded" class="flex items-center justify-center gap-2 py-3 text-sm text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                    <mat-spinner [diameter]="28"></mat-spinner>
+                    <span>Updating list…</span>
                 </div>
                 <mat-table [dataSource]="solicitationEmails" class="w-full min-w-[600px] text-sm"
-                           [class.opacity-40]="!solLoaded" [class.pointer-events-none]="!solLoaded">
+                           [class.opacity-60]="!solLoaded">
 
                     <ng-container matColumnDef="sent">
                         <mat-header-cell *matHeaderCellDef class="font-semibold text-xs uppercase tracking-wide text-gray-500">
@@ -137,11 +139,11 @@
                         </mat-header-cell>
                         <mat-cell *matCellDef="let e" class="justify-end whitespace-nowrap">
                             <button mat-stroked-button type="button" class="mr-1" (click)="viewSolicitation(e)"
-                                    [disabled]="solResendId === e._id || viewLoadingId === e._id">
-                                {{ viewLoadingId === e._id ? '…' : 'View' }}
+                                    [disabled]="!solLoaded || solResendId === e._id || isViewRowLoading(e)">
+                                {{ isViewRowLoading(e) ? '…' : 'View' }}
                             </button>
                             <button mat-stroked-button type="button" (click)="resendSolicitation(e)"
-                                    [disabled]="solResendId === e._id || viewLoadingId === e._id">
+                                    [disabled]="!solLoaded || solResendId === e._id || isViewRowLoading(e)">
                                 {{ solResendId === e._id ? '…' : 'Resend' }}
                             </button>
                         </mat-cell>

@@ -36,7 +36,7 @@
                 </mat-optgroup>
                 <ng-container *ngFor="let result of resultSet.results; trackBy: trackByFn">
                     <mat-option
-                        class="group relative mb-1 py-0 px-6 text-md rounded-md hover:bg-gray-100 dark:hover:bg-hover"
+                        class="group relative mb-1 py-0 px-6 text-md rounded-md hover:bg-gray-100 dark:hover:bg-white/5"
                         [routerLink]="result.link">
                         <!-- Contacts -->
                         <ng-container *ngIf="resultSet.id === 'contacts'">
@@ -92,7 +92,7 @@
                 </mat-optgroup>
                 <ng-container *ngFor="let result of resultSet.results; trackBy: trackByFn">
                     <mat-option
-                        class="group relative mb-1 py-0 px-6 text-md rounded-md hover:bg-gray-100 dark:hover:bg-hover"
+                        class="group relative mb-1 py-0 px-6 text-md rounded-md hover:bg-gray-100 dark:hover:bg-white/5"
                         [routerLink]="result.link">
                         <!-- Contacts -->
                         <ng-container *ngIf="resultSet.id === 'contacts'">

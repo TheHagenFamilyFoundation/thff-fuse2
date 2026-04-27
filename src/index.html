@@ -45,9 +45,16 @@
 </head>
 
 <body>
-    <!-- Apply light/dark scheme class before paint (matches Fuse 21) -->
+    <!-- App is always light mode: force scheme-light on <html> before paint. -->
     <script>
-        !function(){try{const e=document.documentElement.classList;e.remove("scheme-dark","scheme-light");const c=localStorage.getItem("scheme"),t=window.matchMedia("(prefers-color-scheme: dark)").matches,s="dark"===c||"system"===c&&t?"scheme-dark":"scheme-light";e.add(s)}catch(e){}}();
+        (function () {
+            try {
+                var root = document.documentElement.classList;
+                root.remove('scheme-dark', 'scheme-light');
+                localStorage.setItem('userScheme', 'light');
+                root.add('scheme-light');
+            } catch (e) {}
+        })();
     </script>
 
     <!-- Splash screen -->

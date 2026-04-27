@@ -108,7 +108,7 @@ export class SettingsAppComponent implements OnInit, OnDestroy {
     //  * @param scheme
     //  */
     setScheme(scheme: Scheme): void {
-        this._fuseConfigService.config = { scheme };
+        this._fuseConfigService.config = { scheme: 'light' };
         this.showAlert = false;
         this.settingsScheme = scheme;
         this.toggledScheme = true;

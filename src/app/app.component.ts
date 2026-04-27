@@ -4,7 +4,7 @@ import { AuthService } from './core/auth/auth.service';
 import { AuthUtils } from './core/auth/auth.utils';
 import { BackendService } from './core/services/backend.service';
 import { FuseConfigService } from '@fuse/services/config';
-import { Scheme } from './core/config/app.config';
+import { FORCED_APP_SCHEME } from './core/config/app.config';
 
 @Component({
     standalone: false,
@@ -29,11 +29,9 @@ export class AppComponent implements OnInit, OnDestroy {
             this._backendService.startPing();
         }
 
-        // Restore the user's saved theme scheme on app init (survives page refresh)
-        const savedScheme = localStorage.getItem('userScheme') as Scheme;
-        if (savedScheme && (savedScheme === 'dark' || savedScheme === 'light')) {
-            this._fuseConfigService.config = { scheme: savedScheme };
-        }
+        // Always light mode; keep localStorage in sync (legacy may still hold "dark")
+        localStorage.setItem('userScheme', FORCED_APP_SCHEME);
+        this._fuseConfigService.config = { scheme: FORCED_APP_SCHEME };
     }
 
     ngOnDestroy(): void {

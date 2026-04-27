@@ -1,4 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 //services
@@ -17,9 +26,15 @@ import { Upload501c3DialogComponent } from './upload-501c3-dialog/upload-501c3-d
     templateUrl: './org-doc501c3.component.html',
     styleUrls: ['./org-doc501c3.component.scss'],
 })
-export class OrgDoc501c3Component implements OnInit {
+export class OrgDoc501c3Component implements OnInit, OnChanges {
+    @Output()
+    refreshOrg = new EventEmitter<boolean>();
+
     @Input()
     org: any;
+
+    /** After upload, GET /organization can briefly omit doc501c3; do not clear UI until this expires. */
+    private _suppress501c3EmptyUntil = 0;
     orgID: any; //string - created
     organizationID: any; // mongo id
     outputStatus: any;
@@ -30,6 +45,7 @@ export class OrgDoc501c3Component implements OnInit {
     constructor(
         public _router: Router,
         private dialog: MatDialog,
+        private _cdr: ChangeDetectorRef,
         public upload501c3Service: Upload501c3Service,
         public getOrganizationService: GetOrganizationService,
         public doc501c3StatusService: Doc501c3StatusService,
@@ -39,20 +55,12 @@ export class OrgDoc501c3Component implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.orgID = this.org.organizationID;
-        this.organizationID = this.org.id;
+        this.applyOrgState(this.org);
+    }
 
-        if (this.org.doc501c3) {
-            this.hasUpload501c3 = true;
-
-            this.doc501c3 = this.org.doc501c3;
-
-            this.status = this.doc501c3.status;
-
-            // set status
-            this.setStatus(this.status);
-        } else {
-            this.hasUpload501c3 = false;
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['org']) {
+            this.applyOrgState(changes['org'].currentValue);
         }
     }
 
@@ -72,7 +80,11 @@ export class OrgDoc501c3Component implements OnInit {
     }
 
     get501c3(): void {
-        this.get501c3Service.view501c3(this.doc501c3._id).subscribe((blob) => {
+        const docId = this.resolveDocId(this.doc501c3);
+        if (!docId) {
+            return;
+        }
+        this.get501c3Service.view501c3(docId).subscribe((blob) => {
             const blobUrl = URL.createObjectURL(blob);
             window.open(blobUrl, '_blank');
         });
@@ -86,8 +98,103 @@ export class OrgDoc501c3Component implements OnInit {
         });
 
         dialogRef.afterClosed().subscribe((uploaded) => {
-            if (uploaded) {
-                this.getOrganization(this.orgID);
+            if (!uploaded) {
+                return;
+            }
+
+            // Avoid parent/ngOnChanges + stale GET wiping "uploaded" UI for a short window.
+            this._suppress501c3EmptyUntil = Date.now() + 12000;
+
+            // Optimistic UI from upload response (shape varies by HttpClient version).
+            const responseOrg = uploaded?.org ?? uploaded?.body?.org;
+            const responseDoc =
+                responseOrg?.doc501c3 ?? uploaded?.doc501c3 ?? uploaded?.body?.doc501c3;
+            this.hasUpload501c3 = true;
+            if (responseDoc) {
+                this.doc501c3 =
+                    typeof responseDoc === 'object'
+                        ? responseDoc
+                        : { _id: responseDoc };
+                const responseStatus =
+                    typeof responseDoc === 'object' && responseDoc
+                        ? responseDoc.status
+                        : null;
+                if (typeof responseStatus === 'number') {
+                    this.setStatus(responseStatus);
+                } else {
+                    this.outputStatus = this.outputStatus || 'Submitted';
+                    this.rejected501c3 = false;
+                }
+            } else {
+                this.outputStatus = this.outputStatus || 'Submitted';
+                this.rejected501c3 = false;
+            }
+
+            // Single source of truth: parent refetches org (cache-busted) so all sections stay in sync.
+            this.refreshOrg.emit(true);
+            this._cdr.detectChanges();
+
+            this.getOrganizationWithRetry(this.orgID);
+        });
+    }
+
+    private applyOrgState(org: any): void {
+        if (!org) {
+            this.hasUpload501c3 = false;
+            this.doc501c3 = null;
+            this.outputStatus = null;
+            this.rejected501c3 = false;
+            return;
+        }
+
+        this.org = org;
+        this.orgID = this.org.organizationID;
+        this.organizationID = this.org.id;
+
+        if (this.org.doc501c3) {
+            this._suppress501c3EmptyUntil = 0;
+            this.hasUpload501c3 = true;
+            this.doc501c3 = this.org.doc501c3;
+            this.status = this.doc501c3.status;
+            this.setStatus(this.status);
+            return;
+        }
+
+        if (Date.now() < this._suppress501c3EmptyUntil) {
+            return;
+        }
+
+        this.hasUpload501c3 = false;
+        this.doc501c3 = null;
+        this.outputStatus = null;
+        this.rejected501c3 = false;
+    }
+
+    private getOrganizationWithRetry(orgID: string, attemptsLeft = 12): void {
+        this.getOrganizationService.getOrgbyID(orgID, true).subscribe({
+            next: (org) => {
+                if (org?.doc501c3) {
+                    this.applyOrgState(org);
+                    return;
+                }
+
+                // Preserve optimistic uploaded state while backend/read model catches up.
+                if (!this.hasUpload501c3) {
+                    this.applyOrgState(org);
+                }
+
+                if (attemptsLeft > 1) {
+                    setTimeout(() => this.getOrganizationWithRetry(orgID, attemptsLeft - 1), 500);
+                    return;
+                }
+
+                // Final attempt with no doc: only reset if we never showed uploaded state.
+                if (!this.hasUpload501c3) {
+                    this.applyOrgState(org);
+                }
+            },
+            error: (err) => {
+                console.error('getOrgByID error:', err);
             }
         });
     }
@@ -95,21 +202,24 @@ export class OrgDoc501c3Component implements OnInit {
     getOrganization(orgID): void {
         this.getOrganizationService.getOrgbyID(orgID).subscribe({
             next: (org) => {
-                this.org = org;
-                this.organizationID = this.org.id;
-
-                if (this.org.doc501c3) {
-                    this.hasUpload501c3 = true;
-                    this.doc501c3 = this.org.doc501c3;
-                    this.status = this.doc501c3.status;
-                    this.setStatus(this.status);
-                } else {
-                    this.hasUpload501c3 = false;
-                }
+                this.applyOrgState(org);
             },
             error: (err) => {
                 console.error('getOrgByID error:', err);
             }
         });
+    }
+
+    private resolveDocId(doc: any): string | null {
+        if (!doc) {
+            return null;
+        }
+        if (typeof doc === 'string') {
+            return doc;
+        }
+        if (typeof doc === 'object' && doc._id) {
+            return String(doc._id);
+        }
+        return null;
     }
 }

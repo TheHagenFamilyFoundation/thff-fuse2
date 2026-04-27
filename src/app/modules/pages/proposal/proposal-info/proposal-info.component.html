@@ -1,5 +1,5 @@
 <section editableGroup (editableModeChange)="handleModeChange($event)" (save)="updateGroupedEdition()"
-    (cancel)="cancelGroupedEdition()">
+    (cancel)="cancelGroupedEdition()" (keydown.enter)="handleInlineEnter($event)">
     <div *ngIf="isDirector && !inOrg" class="py-4">
         Edit As Director?
         <button mat-raised-button *ngIf="!directorEditing" (click)="toggleDirectorEdit()">
@@ -35,7 +35,7 @@
     </div>
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
-            <form *ngIf="proposal" [formGroup]="groupedForm" class="w-full">
+            <form *ngIf="proposal" [formGroup]="groupedForm" class="w-full proposal-info-grouped-edit">
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full px-3">
                         <label class="block tracking-wide text-sm mb-2" for="grid-project-title">

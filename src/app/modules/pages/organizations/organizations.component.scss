@@ -13,3 +13,8 @@
         background-color: rgba(0, 0, 0, 0.04);
     }
 }
+
+/* Dark mode: light hover wash on dark rows */
+:host-context(body.dark) .org-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}

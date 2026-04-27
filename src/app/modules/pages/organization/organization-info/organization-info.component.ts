@@ -693,6 +693,20 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.checkEditing(mode);
     }
 
+
+    handleInlineEnter(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName === 'TEXTAREA') {
+            return;
+        }
+        if (this.mode !== 'edit' || !this.groupedForm?.valid || !this.orgInfo?.organizationInfoID) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.updateGroupedEdition();
+    }
+
     toggleDirectorEdit(): void {
         this.directorEditing = !this.directorEditing;
         this.mode = 'view';

@@ -311,6 +311,20 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.editing = mode === 'edit';
     }
 
+
+    handleInlineEnter(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName === 'TEXTAREA') {
+            return;
+        }
+        if (this.mode !== 'edit' || !this.groupedForm?.valid) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.updateGroupedEdition();
+    }
+
     toggleDirectorEdit(): void {
         this.directorEditing = !this.directorEditing;
         this.mode = 'view';

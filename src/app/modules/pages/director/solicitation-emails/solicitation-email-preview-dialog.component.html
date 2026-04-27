@@ -1,13 +1,13 @@
-<h2 mat-dialog-title class="text-lg m-0 pr-8">{{ data.subject }}</h2>
+<h2 mat-dialog-title class="text-lg m-0 pr-8 shrink-0">{{ data.subject }}</h2>
 
-<mat-dialog-content class="mat-typography">
-    <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3">To: {{ data.to }}</p>
+<mat-dialog-content class="mat-typography solicitation-email-preview-body">
+    <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mb-3 shrink-0">To: {{ data.to }}</p>
 
     <div *ngIf="data.missingPreview || !trustedHtml" class="text-sm text-gray-600 dark:text-gray-400 py-4">
         Preview is not available for this message (sent before stored previews were enabled).
     </div>
 
-    <div *ngIf="trustedHtml" class="email-preview-wrap rounded-lg border border-gray-200 dark:border-gray-600 overflow-auto bg-gray-50 dark:bg-gray-900 max-h-[65vh]">
+    <div *ngIf="trustedHtml" class="email-preview-wrap rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 min-h-0">
         <div class="email-preview-inner p-4" [innerHTML]="trustedHtml"></div>
     </div>
 </mat-dialog-content>

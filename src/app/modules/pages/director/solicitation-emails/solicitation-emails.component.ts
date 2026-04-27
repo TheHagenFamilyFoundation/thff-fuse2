@@ -186,6 +186,14 @@ export class SolicitationEmailsComponent implements OnInit {
         });
     }
 
+    /** Row matches view fetch-in-progress; normalize ids so string/object _id from API compare reliably. */
+    isViewRowLoading(row: { _id?: unknown } | null | undefined): boolean {
+        if (this.viewLoadingId == null) {
+            return false;
+        }
+        return String(row?._id) === this.viewLoadingId;
+    }
+
     viewSolicitation(row: any): void {
         const id = row?._id;
         if (!id) {
@@ -195,19 +203,30 @@ export class SolicitationEmailsComponent implements OnInit {
         this.outboundEmailService.getSolicitationEmailById(String(id)).subscribe({
             next: (doc) => {
                 this.viewLoadingId = null;
-                this.dialog.open(SolicitationEmailPreviewDialogComponent, {
-                    width: '720px',
-                    maxWidth: '95vw',
-                    data: {
-                        subject: doc?.subject,
-                        to: doc?.to,
-                        html: doc?.htmlBody || null,
-                        missingPreview: !doc?.htmlBody
-                    }
-                });
+                this._changeDetectorRef.markForCheck();
+                this.dialog
+                    .open(SolicitationEmailPreviewDialogComponent, {
+                        width: '720px',
+                        maxWidth: '95vw',
+                        maxHeight: '90vh',
+                        autoFocus: false,
+                        panelClass: 'solicitation-email-preview-panel',
+                        data: {
+                            subject: doc?.subject,
+                            to: doc?.to,
+                            html: doc?.htmlBody || null,
+                            missingPreview: !doc?.htmlBody
+                        }
+                    })
+                    .afterClosed()
+                    .subscribe(() => {
+                        this.viewLoadingId = null;
+                        this._changeDetectorRef.markForCheck();
+                    });
             },
             error: () => {
                 this.viewLoadingId = null;
+                this._changeDetectorRef.markForCheck();
                 this.snackBar.open('Could not load email preview', 'OK', { duration: 4000 });
             }
         });

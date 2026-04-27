@@ -1,6 +1,28 @@
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     max-width: min(720px, 92vw);
+    max-height: inherit;
+    min-height: 0;
+}
+
+/* Primary scroll: MDC dialog often clips children; flex + min-height 0 lets this region scroll. */
+:host .solicitation-email-preview-body.mat-mdc-dialog-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.email-preview-wrap {
+    /* Content grows; scrolling is on mat-dialog-content */
+    overflow: visible;
+}
+
+:host mat-dialog-actions {
+    flex-shrink: 0;
 }
 
 .email-preview-inner img {

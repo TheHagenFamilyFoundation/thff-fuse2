@@ -22,8 +22,11 @@ export class GetOrganizationService {
         return this.http.get(urlString);
     }
 
-    getOrgbyID(orgID: string): Observable<any> {
-        const urlString = `${this.apiUrl}/organization/orgID/${orgID}`;
+    getOrgbyID(orgID: string, forceFresh: boolean = false): Observable<any> {
+        let urlString = `${this.apiUrl}/organization/orgID/${orgID}`;
+        if (forceFresh) {
+            urlString += `?_=${Date.now()}`;
+        }
 
         return this.http.get(urlString);
     }

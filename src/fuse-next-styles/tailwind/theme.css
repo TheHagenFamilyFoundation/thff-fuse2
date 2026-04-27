@@ -103,6 +103,20 @@
   --text-5xl--letter-spacing: var(--tracking-normal);
 
   /* Neutral color palette */
+  /* Tailwind’s default oklch grays use hue ~256–265° (reads navy/blue in dark UI). */
+  /* Same lightness steps, chroma 0 — true neutral grays for dark mode surfaces. */
+  --color-gray-50: oklch(98.5% 0 0);
+  --color-gray-100: oklch(96.7% 0 0);
+  --color-gray-200: oklch(92.8% 0 0);
+  --color-gray-300: oklch(87.2% 0 0);
+  --color-gray-400: oklch(70.7% 0 0);
+  --color-gray-500: oklch(55.1% 0 0);
+  --color-gray-600: oklch(44.6% 0 0);
+  --color-gray-700: oklch(37.3% 0 0);
+  --color-gray-800: oklch(27.8% 0 0);
+  --color-gray-900: oklch(21% 0 0);
+  --color-gray-950: oklch(13% 0 0);
+
   /* Edit these values if you wish to customize the surface colors. */
   /* You may want to choose a complementary scale to your primary color. */
   --color-neutral-50: var(--color-gray-50);

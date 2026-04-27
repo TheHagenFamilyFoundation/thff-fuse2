@@ -19,7 +19,7 @@
         <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Referral code</mat-label>
             <mat-select [(ngModel)]="referralCodeId" required>
-                <mat-option *ngFor="let c of codes" [value]="c._id">
+                <mat-option *ngFor="let c of codes" [value]="codeOptionValue(c)">
                     <span class="font-mono font-semibold">{{ c.code }}</span>
                     <span *ngIf="c.label" class="text-gray-600 dark:text-gray-400"> — {{ c.label }}</span>
                     <span *ngIf="codeSubmissionYear(c) as y" class="text-xs text-gray-500"> ({{ y }} cycle)</span>
@@ -59,7 +59,14 @@
         </p>
         <mat-form-field class="w-full plain-body-field mb-2" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Template</mat-label>
-            <textarea matInput class="plain-textarea" rows="12" [(ngModel)]="messagePlain" (input)="onPlainInput()"></textarea>
+            <textarea
+                matInput
+                class="plain-textarea"
+                rows="12"
+                [(ngModel)]="messagePlain"
+                (input)="onPlainInput()"
+                [disabled]="messageSyncing"></textarea>
+            <mat-hint *ngIf="messageSyncing">Loading default text from server…</mat-hint>
         </mat-form-field>
         <div class="flex flex-wrap gap-2 items-center">
             <button mat-stroked-button type="button" (click)="reloadDefaultText()" [disabled]="previewLoading">
