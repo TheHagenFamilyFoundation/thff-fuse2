@@ -54,7 +54,7 @@ export class FuseLoadingInterceptor implements HttpInterceptor
     }
 
     /**
-     * Avoid flicker from background traffic: static assets, i18n, health checks, session ping.
+     * Avoid flicker from background traffic: static assets, i18n, health checks.
      */
     private _shouldSkipLoadingBar(url: string): boolean
     {
@@ -64,8 +64,7 @@ export class FuseLoadingInterceptor implements HttpInterceptor
             u.includes('assets/i18n') ||
             u.includes('/i18n/') ||
             u.includes('/health') ||
-            u.endsWith('/health') ||
-            u.includes('/ping')
+            u.endsWith('/health')
         )
         {
             return true;

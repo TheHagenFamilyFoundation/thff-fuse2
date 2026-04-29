@@ -382,13 +382,37 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
             });
     }
 
+    private getViewerMongoId(): string | null {
+        try {
+            const raw = localStorage.getItem('currentUser');
+            if (!raw) {
+                return null;
+            }
+            const u = JSON.parse(raw);
+            const id = u.id ?? u._id;
+            return id != null ? String(id) : null;
+        } catch {
+            return null;
+        }
+    }
+
     filterByYear(items, year): any {
         const startDate = new Date(year, 0, 1);
         const endDate = new Date(year + 1, 0, 1);
 
+        const viewerId = this.getViewerMongoId();
         return items.filter((item: any) => {
             const itemDate = new Date(item.createdAt);
-            return itemDate >= startDate && itemDate < endDate;
+            const inYear = itemDate >= startDate && itemDate < endDate;
+            if (!inYear) {
+                return false;
+            }
+            if (item?.status === 'submitted') {
+                return true;
+            }
+            const composer = item?.status === 'draft' || item?.status === 'ready_to_submit';
+            const creator = item?.createdBy?._id ?? item?.createdBy;
+            return composer && viewerId != null && String(creator) === viewerId;
         });
     }
 }

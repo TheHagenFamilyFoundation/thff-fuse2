@@ -39,7 +39,7 @@
                     Project Title
                 </mat-header-cell>
                 <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                    {{ row.projectTitle }}
+                    {{ row.projectTitle?.trim() || 'Untitled' }}
                 </mat-cell>
             </ng-container>
 

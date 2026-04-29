@@ -47,6 +47,16 @@
             </div>
 
             <ng-container *ngIf="!loading">
+                <div *ngIf="showWelcomeProposalsActionBar" class="mb-6 flex flex-wrap items-center justify-end gap-2">
+                    <a
+                        mat-stroked-button
+                        color="primary"
+                        [routerLink]="['/pages/proposals']"
+                        [queryParams]="{ year: latestSubmissionYear.year }">
+                        <mat-icon class="icon-size-5">list_alt</mat-icon>
+                        <span class="ml-1">All my proposals ({{ latestSubmissionYear.year }})</span>
+                    </a>
+                </div>
 
                 <!-- Grant cycle missing -->
                 <div
@@ -63,15 +73,15 @@
                     </p>
                 </div>
 
-                <!-- Draft Proposals -->
-                <div *ngIf="drafts.length > 0">
+                <!-- In-progress composer proposals (API status draft or ready_to_submit) -->
+                <div *ngIf="draftProposals.length > 0">
                     <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
                         <mat-icon class="text-amber-500">edit_note</mat-icon>
                         Draft Proposals
                     </h2>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div
-                            *ngFor="let draft of drafts"
+                            *ngFor="let draft of draftProposals"
                             (click)="continueDraft(draft)"
                             class="flex cursor-pointer items-center gap-4 rounded-xl border border-amber-200 bg-card p-4 shadow-sm transition-all hover:border-amber-400 hover:shadow-md dark:border-amber-700 dark:hover:border-amber-500">
                             <div
@@ -79,7 +89,11 @@
                                 <mat-icon class="icon-size-5 text-amber-600 dark:text-amber-400">description</mat-icon>
                             </div>
                             <div class="min-w-0 flex-auto">
-                                <div class="truncate font-medium text-gray-800 dark:text-gray-200">{{ draft.title }}</div>
+                                <div class="truncate font-medium text-gray-800 dark:text-gray-200">{{ draft.projectTitle || 'Untitled draft' }}</div>
+                                <div *ngIf="draftOrganizationLabel(draft)" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                    {{ draftOrganizationLabel(draft) }}
+                                </div>
+                                <div *ngIf="draftSavedHint(draft.updatedAt)" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">{{ draftSavedHint(draft.updatedAt) }}</div>
                                 <div class="mt-0.5 text-xs text-amber-600 dark:text-amber-400">Draft — click to continue editing</div>
                             </div>
                             <mat-icon class="flex-shrink-0 text-gray-400 dark:text-gray-500">arrow_forward</mat-icon>
@@ -89,7 +103,9 @@
 
                 <!-- My Proposals -->
                 <div *ngIf="latestSubmissionYear">
-                    <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
+                    <h2
+                        *ngIf="showWelcomeSubmittedSectionHeading"
+                        class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
                         <mat-icon class="text-thff-teal">assignment</mat-icon>
                         {{ latestSubmissionYear.year }} Proposals
                     </h2>
@@ -99,7 +115,7 @@
                     </div>
 
                     <div
-                        *ngIf="!proposalsLoading && proposals.length === 0"
+                        *ngIf="!proposalsLoading && submittedProposals.length === 0"
                         class="rounded-xl border border-gray-200 bg-card py-12 text-center dark:border-neutral-700">
                         <mat-icon class="icon-size-12 mb-3 text-gray-300 dark:text-gray-600">folder_open</mat-icon>
                         <p class="text-sm text-gray-500 dark:text-gray-400">No proposals submitted yet for {{ latestSubmissionYear.year }}.</p>
@@ -108,9 +124,9 @@
                         </p>
                     </div>
 
-                    <div *ngIf="!proposalsLoading && proposals.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div *ngIf="!proposalsLoading && submittedProposals.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div
-                            *ngFor="let proposal of proposals"
+                            *ngFor="let proposal of submittedProposals"
                             (click)="viewProposal(proposal)"
                             class="flex cursor-pointer flex-col rounded-xl border border-gray-200 bg-card p-5 shadow-sm transition-all hover:border-gray-300 hover:shadow-md dark:border-neutral-700 dark:hover:border-neutral-500">
                             <div class="mb-3 flex items-center gap-1.5">

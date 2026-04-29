@@ -1,0 +1,39 @@
+.my-proposals-year-field {
+    margin-bottom: -0.75rem;
+}
+
+/* Submitted / non-composer rows */
+:host ::ng-deep tr.my-proposals-data-row:not(.my-proposals-draft-row):hover .mat-mdc-cell {
+    background-color: rgb(249 250 251 / 0.8);
+}
+
+:host-context(.dark) ::ng-deep tr.my-proposals-data-row:not(.my-proposals-draft-row):hover .mat-mdc-cell {
+    background-color: rgb(38 38 38 / 0.5);
+}
+
+/* Incomplete / ready-to-submit composer rows — warm highlight (MDC sets bg on cells). */
+:host ::ng-deep tr.my-proposals-draft-row .mat-mdc-cell {
+    background-color: rgb(255 251 235); /* amber-50 */
+    border-bottom-color: rgb(254 243 199); /* amber-100 */
+}
+
+:host ::ng-deep tr.my-proposals-draft-row .mat-mdc-cell:first-of-type {
+    box-shadow: inset 3px 0 0 rgb(245 158 11); /* amber-500 */
+}
+
+:host ::ng-deep tr.my-proposals-draft-row:hover .mat-mdc-cell {
+    background-color: rgb(254 243 199); /* amber-100 */
+}
+
+:host-context(.dark) ::ng-deep tr.my-proposals-draft-row .mat-mdc-cell {
+    background-color: rgba(120 53 15 / 0.22); /* amber-950 tint */
+    border-bottom-color: rgba(146 64 14 / 0.35);
+}
+
+:host-context(.dark) ::ng-deep tr.my-proposals-draft-row .mat-mdc-cell:first-of-type {
+    box-shadow: inset 3px 0 0 rgb(251 191 36); /* amber-400 */
+}
+
+:host-context(.dark) ::ng-deep tr.my-proposals-draft-row:hover .mat-mdc-cell {
+    background-color: rgba(120 53 15 / 0.32);
+}

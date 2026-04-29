@@ -18,6 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslocoModule } from '@ngneat/transloco';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -52,6 +53,7 @@ import { ProposalSummaryComponent } from './proposal-summary/proposal-summary.co
         MatInputModule,
         MatSliderModule,
         MatTooltipModule,
+        MatProgressSpinnerModule,
         EditableModule,
     ],
 })

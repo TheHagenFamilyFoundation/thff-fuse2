@@ -11,6 +11,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { TranslocoModule } from '@ngneat/transloco';
@@ -26,6 +29,7 @@ import { OrganizationsComponent } from './organizations/organizations.component'
 
 import { pagesRoutes } from './page.routing';
 import { ProposalsComponent } from './proposals/proposals.component';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
     imports: [
@@ -50,6 +54,10 @@ import { ProposalsComponent } from './proposals/proposals.component';
         MatPaginatorModule,
         MatSortModule,
         MatProgressSpinnerModule,
+        MatSelectModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        ConfirmDialogComponent,
 
         FuseCardModule,
         SharedModule,

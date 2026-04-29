@@ -1,15 +1,50 @@
 <div class="flex flex-col flex-auto min-w-0">
     <!-- Header -->
-    <div class="bg-card border-b">
+    <div class="bg-card border-b border-gray-200 dark:border-neutral-700">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
-            <a *ngIf="orgID" [routerLink]="['/pages/organization', orgID]"
-               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
-                <mat-icon class="icon-size-4">arrow_back</mat-icon>
-                Back to Organization
-            </a>
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
-                Create Proposal
+            <div *ngIf="showComposerContext()" class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                <a routerLink="/pages/proposals"
+                   class="inline-flex items-center gap-1 font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary">
+                    <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                    My proposals
+                </a>
+                <a *ngIf="!orgID && org" routerLink="/pages/organizations"
+                   class="inline-flex items-center gap-1 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary">
+                    <mat-icon class="icon-size-4">business</mat-icon>
+                    Organizations
+                </a>
+            </div>
+
+            <div *ngIf="showComposerContext()" class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
+                    [ngClass]="{
+                        'bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100': composerProposalStatus === 'draft',
+                        'bg-teal-100 text-teal-900 dark:bg-teal-900/40 dark:text-teal-100': composerProposalStatus === 'ready_to_submit',
+                        'bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-gray-200': composerProposalStatus !== 'draft' && composerProposalStatus !== 'ready_to_submit'
+                    }">
+                    {{ composerStatusLabel() }}
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">for</span>
+                <a *ngIf="orgID"
+                   [routerLink]="['/pages/organization', orgID]"
+                   class="inline-flex max-w-full items-baseline truncate text-sm font-semibold text-gray-900 underline-offset-2 hover:text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:text-primary-300">
+                    {{ organizationName || 'Loading organization…' }}
+                </a>
+                <span *ngIf="!orgID"
+                      class="text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ organizationName || 'Loading organization…' }}
+                </span>
+                <span *ngIf="orgID" class="text-xs text-gray-500 dark:text-gray-400">({{ orgID }})</span>
+            </div>
+
+            <h1 class="m-0 text-xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                {{ showComposerContext() ? 'Proposal draft' : 'Create Proposal' }}
             </h1>
+            <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
+                Your answers are saved as a draft automatically while you work, so you can leave and come back without
+                losing progress.
+            </p>
         </div>
     </div>
 
@@ -164,16 +199,28 @@
                                 <label class="block tracking-wide text-sm mb-2">
                                     Amount Requested <span class="text-warn">*</span>
                                 </label>
-                                <mat-form-field>
-                                    <input matInput formControlName="amountRequested"
-                                        placeholder="Amount Requested" type="number" required />
+                                <mat-form-field class="w-full">
+                                    <span matTextPrefix class="me-1 text-base font-medium text-secondary">$</span>
+                                    <input
+                                        matInput
+                                        type="number"
+                                        formControlName="amountRequested"
+                                        inputmode="decimal"
+                                        min="1"
+                                        step="any"
+                                        placeholder="0"
+                                        required
+                                        aria-describedby="create-proposal-amount-hint"
+                                    />
+                                    <span matTextSuffix class="ms-1 text-xs text-hint">USD</span>
+                                    <mat-hint id="create-proposal-amount-hint">US dollars; decimals are fine (e.g. 2500.50).</mat-hint>
                                     <mat-error
                                         *ngIf="groupedForm.get('amountRequested').hasError('required')">
                                         Amount Requested is <strong>required</strong>
                                     </mat-error>
                                     <mat-error
                                         *ngIf="groupedForm.get('amountRequested').hasError('min')">
-                                        Amount Requested must be <strong>positive</strong>
+                                        Amount Requested must be <strong>at least $1</strong>
                                     </mat-error>
                                 </mat-form-field>
                             </div>
@@ -207,16 +254,28 @@
                                 <label class="block tracking-wide text-sm mb-2">
                                     Total Project Cost <span class="text-warn">*</span>
                                 </label>
-                                <mat-form-field>
-                                    <input matInput formControlName="totalProjectCost"
-                                        placeholder="Total Project Cost" type="number" required />
+                                <mat-form-field class="w-full">
+                                    <span matTextPrefix class="me-1 text-base font-medium text-secondary">$</span>
+                                    <input
+                                        matInput
+                                        type="number"
+                                        formControlName="totalProjectCost"
+                                        inputmode="decimal"
+                                        min="1"
+                                        step="any"
+                                        placeholder="0"
+                                        required
+                                        aria-describedby="create-proposal-total-hint"
+                                    />
+                                    <span matTextSuffix class="ms-1 text-xs text-hint">USD</span>
+                                    <mat-hint id="create-proposal-total-hint">US dollars; decimals are fine (e.g. 2500.50).</mat-hint>
                                     <mat-error
                                         *ngIf="groupedForm.get('totalProjectCost').hasError('required')">
                                         Total Project Cost is <strong>required</strong>
                                     </mat-error>
                                     <mat-error
                                         *ngIf="groupedForm.get('totalProjectCost').hasError('min')">
-                                        Total Project Cost must be <strong>positive</strong>
+                                        Total Project Cost must be <strong>at least $1</strong>
                                     </mat-error>
                                 </mat-form-field>
                             </div>
@@ -230,24 +289,25 @@
                             <span class="text-base font-medium">Referral / Sponsor</span>
                         </div>
 
+                        @if (sponsorInfo(); as sp) {
                         <!-- Sponsor is set -->
-                        <div *ngIf="sponsorName" class="flex items-center justify-between">
+                        <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-on-primary text-sm font-bold">
-                                    {{ sponsorName.charAt(0) }}
+                                    {{ sp.name.charAt(0) }}
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium">{{ sponsorName }}</div>
-                                    <div class="text-xs text-secondary">Sponsor ({{ sponsorCode }})</div>
+                                    <div class="text-sm font-medium">{{ sp.name }}</div>
+                                    <div class="text-xs text-secondary">Sponsor ({{ sp.code }})</div>
                                 </div>
                             </div>
                             <button mat-icon-button (click)="clearSponsor()" matTooltip="Remove sponsor">
                                 <mat-icon class="icon-size-5 text-gray-400">close</mat-icon>
                             </button>
                         </div>
-
+                        } @else {
                         <!-- No sponsor — allow manual entry -->
-                        <div *ngIf="!sponsorName">
+                        <div>
                             <p class="text-sm text-secondary mb-3 m-0">
                                 If a director referred you, enter their referral code below.
                             </p>
@@ -265,24 +325,54 @@
                                 </button>
                             </div>
                         </div>
+                        }
                     </div>
 
                     <!-- Footer -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
-                        <div class="text-sm text-secondary">
-                            Need help creating your proposal?
-                            <a class="text-primary-500 hover:underline" href="mailto:support@hagenfamilyfoundation.org">
-                                Contact support
-                            </a>.
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button mat-stroked-button (click)="cancel()">
-                                Cancel
-                            </button>
-                            <button mat-raised-button [color]="'primary'"
-                                [disabled]="!groupedForm.valid" (click)="createProposal()">
-                                Create Proposal
-                            </button>
+                        <ng-container *ngIf="!redirectingAfterSubmit">
+                            <div class="text-sm text-secondary">
+                                Need help creating your proposal?
+                                <a class="text-primary-500 hover:underline" href="mailto:support@hagenfamilyfoundation.org">
+                                    Contact support
+                                </a>.
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    mat-stroked-button
+                                    type="button"
+                                    [disabled]="submittingProposal"
+                                    (click)="cancel()"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    mat-raised-button
+                                    [color]="'primary'"
+                                    type="button"
+                                    class="create-proposal-submit"
+                                    [disabled]="!groupedForm.valid || submittingProposal"
+                                    [attr.aria-busy]="submittingProposal"
+                                    (click)="createProposal()"
+                                >
+                                    <span class="create-proposal-submit__content">
+                                        <mat-progress-spinner
+                                            *ngIf="submittingProposal"
+                                            class="create-proposal-submit__spinner"
+                                            diameter="20"
+                                            mode="indeterminate"
+                                        />
+                                        <span>{{ submittingProposal ? 'Submitting…' : 'Create Proposal' }}</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </ng-container>
+                        <div
+                            *ngIf="redirectingAfterSubmit"
+                            class="flex items-center justify-center sm:justify-end gap-3 w-full py-1 min-h-[2.5rem]"
+                        >
+                            <mat-spinner [diameter]="28" />
+                            <span class="text-sm text-secondary">Opening proposal…</span>
                         </div>
                     </div>
 

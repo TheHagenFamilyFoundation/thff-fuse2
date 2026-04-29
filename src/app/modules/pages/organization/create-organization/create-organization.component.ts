@@ -6,8 +6,14 @@ import {
 } from '@angular/forms';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs/operators';
 
 import { CreateOrganizationService } from 'app/core/services/organization/create-organization.service';
+import {
+    foundedYearSelectOptions,
+    foundedYearToSelectValue,
+} from 'app/core/utilities/founded-year-options';
+import { normalizeZipForSave, usZipFormValidators, zipFromApiForForm } from 'app/core/utilities/us-zip';
 
 import { environment } from 'environments/environment';
 import { Router } from '@angular/router';
@@ -36,6 +42,12 @@ export class CreateOrganizationComponent implements OnInit {
     userEmail: string;
 
     public groupedForm: FormGroup;
+
+    /** Descending years for “Year founded” (current year → 1800). */
+    readonly foundedYearOptions = foundedYearSelectOptions();
+
+    /** True while create API request is in flight (disables actions + shows progress). */
+    creating = false;
 
     constructor(
         private createOrganizationService: CreateOrganizationService,
@@ -69,7 +81,7 @@ export class CreateOrganizationComponent implements OnInit {
     defaultValues(): void {
         this.orgObj = {
             legalName: '',
-            yearFounded: 0,
+            yearFounded: null,
             currentOperatingBudget: 0,
             director: '',
             phone: '',
@@ -80,7 +92,7 @@ export class CreateOrganizationComponent implements OnInit {
             address: '',
             city: '',
             state: '',
-            zip: 0,
+            zip: '',
             website: '',
         };
 
@@ -93,7 +105,10 @@ export class CreateOrganizationComponent implements OnInit {
         this.groupedForm = new FormGroup({
             description: new FormControl(''),
             legalName: new FormControl(this.orgObj.legalName, req),
-            yearFounded: new FormControl(this.orgObj.yearFounded, req),
+            yearFounded: new FormControl(
+                foundedYearToSelectValue(this.orgObj.yearFounded),
+                req,
+            ),
             currentOperatingBudget: new FormControl(
                 this.orgObj.currentOperatingBudget,
                 [req, Validators.min(1)]
@@ -113,7 +128,7 @@ export class CreateOrganizationComponent implements OnInit {
             address: new FormControl(this.orgObj.address, req),
             city: new FormControl(this.orgObj.city, req),
             state: new FormControl(this.orgObj.state, req),
-            zip: new FormControl(this.orgObj.zip, req),
+            zip: new FormControl(zipFromApiForForm(this.orgObj.zip), usZipFormValidators()),
             website: new FormControl(this.orgObj.website),
         });
     }
@@ -146,7 +161,7 @@ export class CreateOrganizationComponent implements OnInit {
             address: v.address ?? '',
             city: v.city ?? '',
             state: v.state ?? '',
-            zip: this.num(v.zip),
+            zip: normalizeZipForSave(v.zip),
             website: v.website ?? '',
         };
 
@@ -163,19 +178,28 @@ export class CreateOrganizationComponent implements OnInit {
     }
 
     createOrganization(body): void {
-        this.createOrganizationService.createOrganization(body).subscribe(
-            (result) => {
-                this.router.navigate([
-                    `/pages/organization/${result.org.organizationID}`,
-                ]);
-            },
-            (err) => {
-                this.message = err.error.message;
-                this.showMessage = true;
-                setTimeout(() => {
-                    this.showMessage = false;
-                }, 3000);
-            }
-        );
+        this.creating = true;
+        this.createOrganizationService
+            .createOrganization(body)
+            .pipe(
+                takeUntilDestroyed(this.destroyRef),
+                finalize(() => {
+                    this.creating = false;
+                }),
+            )
+            .subscribe({
+                next: (result) => {
+                    this.router.navigate([
+                        `/pages/organization/${result.org.organizationID}`,
+                    ]);
+                },
+                error: (err) => {
+                    this.message = err.error?.message ?? 'Could not create organization.';
+                    this.showMessage = true;
+                    setTimeout(() => {
+                        this.showMessage = false;
+                    }, 3000);
+                },
+            });
     }
 }

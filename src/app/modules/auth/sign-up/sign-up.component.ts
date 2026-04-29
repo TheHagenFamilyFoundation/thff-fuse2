@@ -81,7 +81,7 @@ export class AuthSignUpComponent implements OnInit {
 
                 this._fuseConfigService.config = { scheme: 'light' };
 
-                // Start backend session ping
+                // Proactive JWT refresh while the app is open
                 this._backendService.startPing();
 
                 // Referral code is now on the User record — clean up localStorage

@@ -11,8 +11,9 @@ import { environment } from 'environments/environment';
 })
 export class BackendService {
     apiUrl: string;
-    private pingInterval: any = null;
-    private readonly PING_INTERVAL_MS = 30000; // 30 seconds
+    /** Interval id for periodic JWT lifetime checks and proactive refresh. */
+    private sessionRefreshIntervalId: ReturnType<typeof setInterval> | null = null;
+    private readonly SESSION_REFRESH_INTERVAL_MS = 30000;
     private _isRefreshing = false;
 
     // Refresh when less than 50% of token lifetime remains
@@ -26,23 +27,20 @@ export class BackendService {
         return this.http.get(`${this.apiUrl}/health`);
     }
 
-    ping(): Observable<any> {
-        return this.http.post(`${this.apiUrl}/ping`, {});
-    }
-
     startPing(): void {
-        // Don't start if already running
-        if (this.pingInterval) { return; }
+        if (this.sessionRefreshIntervalId) {
+            return;
+        }
 
-        this.pingInterval = setInterval(() => {
+        this.sessionRefreshIntervalId = setInterval(() => {
             this.checkSession();
-        }, this.PING_INTERVAL_MS);
+        }, this.SESSION_REFRESH_INTERVAL_MS);
     }
 
     stopPing(): void {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
+        if (this.sessionRefreshIntervalId) {
+            clearInterval(this.sessionRefreshIntervalId);
+            this.sessionRefreshIntervalId = null;
         }
     }
 
@@ -71,12 +69,7 @@ export class BackendService {
             return;
         }
 
-        // Token is healthy — ping backend to confirm server-side validity
-        this.ping().subscribe({
-            error: () => {
-                // 401 is handled by the interceptor, other errors are ignored
-            }
-        });
+        // Token still has plenty of lifetime; next interval will re-check (no HTTP call).
     }
 
     private attemptRefresh(): void {

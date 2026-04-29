@@ -28,6 +28,15 @@
                     Organizations
                 </a>
                 <a
+                    *ngIf="showProposalsNavLink"
+                    mat-button
+                    routerLink="/pages/proposals"
+                    routerLinkActive="modern-top-nav-active"
+                    [routerLinkActiveOptions]="{ paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
+                    class="modern-top-nav-link">
+                    Proposals
+                </a>
+                <a
                     *ngIf="isDirector"
                     mat-button
                     routerLink="/pages/director"

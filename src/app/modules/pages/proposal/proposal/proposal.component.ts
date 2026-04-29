@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
@@ -38,6 +38,9 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
     activeTab: 'summary' | 'proposal-info' | 'voting' = 'summary';
     archiveConfirm = false;
+
+    /** True while the header proposal (by public id) is loading — avoids a blank shell before data arrives. */
+    proposalLoading = true;
 
     private readonly _unsubscribeAll = new Subject<void>();
 
@@ -73,14 +76,31 @@ export class ProposalComponent implements OnInit, OnDestroy {
             this.backLabel = 'Back to Meeting';
         }
 
-        this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
-            const id = pm.get('id');
-            if (!id) {
-                return;
-            }
-            this.proposalID = id;
-            this.getProposal(id);
-        });
+        this.route.paramMap
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                map((pm) => pm.get('id')),
+                filter((id): id is string => !!id),
+                tap((id) => {
+                    this.proposalID = id;
+                }),
+                switchMap((id) => {
+                    this.proposalLoading = true;
+                    this.proposal = null;
+                    this.org = null;
+                    this._cdr.detectChanges();
+                    return this._proposalService.getProposalByID(id).pipe(
+                        finalize(() => {
+                            this.proposalLoading = false;
+                            this._cdr.detectChanges();
+                        }),
+                    );
+                }),
+            )
+            .subscribe({
+                next: (proposal) => this.applyLoadedProposal(proposal),
+                error: (err) => this.onProposalLoadError(err),
+            });
     }
 
     get organizationRouterLink(): string[] | null {
@@ -94,41 +114,57 @@ export class ProposalComponent implements OnInit, OnDestroy {
     }
 
     getProposal(proposalID: string): void {
-        this._proposalService.getProposalByID(proposalID).subscribe(
-            (proposal) => {
-                if (proposal) {
-                    this.proposal = proposal;
-                    this.propID = this.proposal._id;
-
-                    this.org = this.proposal.organization;
-                    this.organizationLink = '/pages/organization/' + this.org.organizationID;
-
-                    if (!this.backLabel) {
-                        this.backLabel = 'Back to Organization';
-                    }
-
-                    this.getOrganization(this.org.organizationID);
-
+        this.proposalID = proposalID;
+        this.proposalLoading = true;
+        this._cdr.detectChanges();
+        this._proposalService
+            .getProposalByID(proposalID)
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                finalize(() => {
+                    this.proposalLoading = false;
                     this._cdr.detectChanges();
-                    Promise.resolve().then(() => this._cdr.detectChanges());
-                } else {
-                    this._router.navigate(['/welcome']);
-                }
-            },
-            (err) => {
-                console.error('getProposalByID failed', err);
-                this.snackBar.open(
-                    'Could not load this proposal. Try again or open it from your organization.',
-                    'OK',
-                    { duration: 5000 }
-                );
-                this._router.navigate(['/welcome']);
-            }
-        );
+                }),
+            )
+            .subscribe({
+                next: (proposal) => this.applyLoadedProposal(proposal),
+                error: (err) => this.onProposalLoadError(err),
+            });
     }
 
     refreshProp(): void {
         this.getProposal(this.proposalID);
+    }
+
+    private applyLoadedProposal(proposal: any): void {
+        if (proposal) {
+            this.proposal = proposal;
+            this.propID = this.proposal._id;
+
+            this.org = this.proposal.organization;
+            this.organizationLink = '/pages/organization/' + this.org.organizationID;
+
+            if (!this.backLabel) {
+                this.backLabel = 'Back to Organization';
+            }
+
+            this.getOrganization(this.org.organizationID);
+
+            this._cdr.detectChanges();
+            Promise.resolve().then(() => this._cdr.detectChanges());
+        } else {
+            this._router.navigate(['/welcome']);
+        }
+    }
+
+    private onProposalLoadError(err: unknown): void {
+        console.error('getProposalByID failed', err);
+        this.snackBar.open(
+            'Could not load this proposal. Try again or open it from your organization.',
+            'OK',
+            { duration: 5000 },
+        );
+        this._router.navigate(['/welcome']);
     }
 
     getOrganization(orgID: string): void {
