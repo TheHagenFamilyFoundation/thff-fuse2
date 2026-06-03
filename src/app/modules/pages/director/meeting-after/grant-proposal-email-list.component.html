@@ -1,0 +1,175 @@
+<div class="grant-proposal-emails">
+    <div *ngIf="loading" class="flex flex-col items-center justify-center gap-3 py-16 text-gray-700 dark:text-gray-300">
+        <mat-spinner [diameter]="40" color="primary"></mat-spinner>
+        <span class="text-sm">Loading funded proposals…</span>
+    </div>
+
+    <p *ngIf="error" class="text-sm text-red-600 dark:text-red-400 m-0 py-2">{{ error }}</p>
+    <button *ngIf="error" mat-stroked-button type="button" class="mt-2" (click)="loadProposals()">Try again</button>
+
+    <ng-container *ngIf="!loading && !error">
+        <p class="text-sm text-gray-700 dark:text-gray-300 m-0 mb-1" *ngIf="meetingYear">
+            {{ meetingYear }} meeting · One notification per funded proposal.
+        </p>
+        <p class="text-sm m-0 mb-4 text-gray-800 dark:text-gray-200" *ngIf="emailStatusSummary">
+            {{ emailStatusSummary }}
+        </p>
+
+        <div *ngIf="proposals.length === 0"
+             class="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-4 py-8 text-sm text-gray-600 dark:text-gray-400 text-center">
+            No funded proposals on this meeting yet.
+        </div>
+
+        <ng-container *ngIf="proposals.length > 0">
+            <!-- First round: bundled send for all ready proposals -->
+            <div *ngIf="isFirstRound && unsentReadyProposals.length > 0"
+                 class="grant-proposal-emails__first-round rounded-lg border border-primary/30 bg-primary/5 dark:bg-primary/10 p-4 sm:p-5 mb-4">
+                <h3 class="text-base font-semibold m-0 mb-1 text-gray-900 dark:text-gray-100">
+                    First grant notifications
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 m-0 mb-4 leading-relaxed">
+                    <ng-container *ngIf="unsentReadyProposals.length === 1">
+                        Review the message below (expand to edit if needed), then send it.
+                    </ng-container>
+                    <ng-container *ngIf="unsentReadyProposals.length !== 1">
+                        Review each message below (expand to edit if needed), then send all
+                        {{ unsentReadyProposals.length }} notifications together.
+                    </ng-container>
+                </p>
+                <button *ngIf="canSend"
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="sendAllFirstRound()"
+                        [disabled]="isSendingAny">
+                    <mat-icon class="mr-1 icon-size-5">send</mat-icon>
+                    <span *ngIf="sendingBulk">Sending…</span>
+                    <span *ngIf="!sendingBulk && unsentReadyProposals.length === 1">Send 1 email</span>
+                    <span *ngIf="!sendingBulk && unsentReadyProposals.length !== 1">Send all {{ unsentReadyProposals.length }} emails</span>
+                </button>
+            </div>
+
+            <div *ngIf="!isFirstRound"
+                 class="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                Initial notifications have been sent. Use <strong>Send again</strong> on a proposal when you need a follow-up for that proposal only.
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <p *ngIf="isFirstRound" class="text-sm text-gray-600 dark:text-gray-400 m-0 leading-relaxed">
+                    <ng-container *ngIf="unsentReadyProposals.length === 1">
+                        Expand the proposal to preview or customize its message before you send.
+                    </ng-container>
+                    <ng-container *ngIf="unsentReadyProposals.length !== 1">
+                        Expand a proposal to preview or customize its message before you send all.
+                    </ng-container>
+                </p>
+                <div class="flex flex-wrap gap-2 shrink-0 sm:ml-auto">
+                    <button mat-stroked-button type="button" (click)="expandAll()">Expand all</button>
+                    <button mat-stroked-button type="button" (click)="collapseAll()">Collapse all</button>
+                </div>
+            </div>
+
+            <mat-accordion class="grant-email-accordion" [multi]="true">
+                <mat-expansion-panel *ngFor="let row of proposals; trackBy: trackProposal"
+                                     class="grant-email-panel"
+                                     [expanded]="isPanelExpanded(row)"
+                                     (opened)="onPanelOpened(row)"
+                                     (closed)="onPanelClosed(row)">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="grant-proposal-panel__title">
+                            <span class="font-semibold">{{ row.proposalTitle || 'Untitled proposal' }}</span>
+                        </mat-panel-title>
+                        <mat-panel-description class="grant-proposal-panel__desc">
+                            <span class="grant-proposal-panel__meta hidden sm:inline">{{ row.organizationName }}</span>
+                            <span class="grant-proposal-panel__meta">{{ row.amountGranted | currency:'USD':'symbol':'1.0-0' }}</span>
+                            <span *ngIf="row.sendCount > 0" class="grant-proposal-panel__sent">
+                                Sent {{ row.sendCount }}× · {{ row.lastSentAt | date:'MM/dd/yy' }}
+                            </span>
+                            <span *ngIf="row.sendCount === 0 && row.canSend" class="grant-proposal-panel__not-sent">Not sent</span>
+                            <span *ngIf="!row.canSend" class="text-amber-700 dark:text-amber-400 text-xs">No email</span>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <div class="grant-email-panel__body pt-1">
+                        <div class="flex flex-wrap items-start gap-3 mb-4 text-sm">
+                            <div class="min-w-0 flex-1">
+                                <div class="text-gray-900 dark:text-gray-100 font-medium">{{ row.organizationName }}</div>
+                                <div class="text-xs font-mono text-gray-500 dark:text-gray-400 break-all mt-0.5">
+                                    {{ row.email || row.skipReason || '—' }}
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2 shrink-0">
+                                <button *ngIf="row.lastSentEmailId"
+                                        mat-stroked-button
+                                        type="button"
+                                        (click)="openLastSent(row, $event)">
+                                    <mat-icon class="mr-1 icon-size-5">visibility</mat-icon>
+                                    View last sent
+                                </button>
+                                <button *ngIf="canSend && row.canSend && !isFirstRound"
+                                        mat-flat-button
+                                        color="primary"
+                                        type="button"
+                                        (click)="sendProposal(row, $event)"
+                                        [disabled]="isSendingAny">
+                                    <mat-icon class="mr-1 icon-size-5">send</mat-icon>
+                                    <span *ngIf="!isSending(row)">{{ row.sendCount > 0 ? 'Send again' : 'Send' }}</span>
+                                    <span *ngIf="isSending(row)">Sending…</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div *ngIf="canSend && row.canSend" class="flex flex-wrap gap-2 mb-3">
+                            <button mat-stroked-button type="button" color="primary"
+                                    (click)="toggleEdit(row, $event)">
+                                {{ isEditing(row) ? 'Show preview' : 'Edit message' }}
+                            </button>
+                        </div>
+
+                        <ng-container *ngIf="!isEditing(row)">
+                            <p *ngIf="row.subject" class="text-xs font-mono text-gray-600 dark:text-gray-400 m-0 mb-2 break-all">
+                                <span class="text-gray-500 font-sans">Subject:</span> {{ row.subject }}
+                            </p>
+                            <div *ngIf="isRefreshingPreview(row)"
+                                 class="flex flex-col items-center justify-center gap-2 py-10 text-gray-500 text-sm">
+                                <mat-spinner [diameter]="36" color="primary"></mat-spinner>
+                                <span>Updating preview…</span>
+                            </div>
+                            <div *ngIf="row.html && !isRefreshingPreview(row)"
+                                 class="grant-email-sample__frame rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto bg-white dark:bg-gray-950"
+                                 [innerHTML]="trustedHtml(row)">
+                            </div>
+                            <p *ngIf="!row.html && !isRefreshingPreview(row) && row.canSend" class="text-xs text-gray-500 m-0">Preview unavailable.</p>
+                        </ng-container>
+
+                        <div *ngIf="isEditing(row)" class="grant-email-edit-fields">
+                            <div class="grant-email-edit-field">
+                                <label class="grant-email-edit-label" [attr.for]="'grant-subj-' + row.allocationId">Subject</label>
+                                <input class="grant-email-edit-input"
+                                       [id]="'grant-subj-' + row.allocationId"
+                                       type="text"
+                                       [(ngModel)]="row.subject"
+                                       [name]="'grantSubj-' + row.allocationId" />
+                            </div>
+                            <div class="grant-email-edit-field">
+                                <label class="grant-email-edit-label" [attr.for]="'grant-msg-' + row.allocationId">Message</label>
+                                <textarea class="grant-email-edit-textarea"
+                                          [id]="'grant-msg-' + row.allocationId"
+                                          [(ngModel)]="row.messagePlain"
+                                          [name]="'grantMsg-' + row.allocationId"
+                                          rows="16"></textarea>
+                                <p class="grant-email-edit-hint">
+                                    Plain text only. Line breaks are preserved. URLs become links in the sent email.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </ng-container>
+
+        <p *ngIf="!canSend" class="text-xs text-gray-500 mt-4 m-0">
+            Directors can preview messages; only the president or admin can send.
+        </p>
+    </ng-container>
+</div>

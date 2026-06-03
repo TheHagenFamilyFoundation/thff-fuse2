@@ -2,17 +2,21 @@
     <!-- Header -->
     <div class="bg-card border-b border-gray-200 dark:border-neutral-700">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
-            <div *ngIf="showComposerContext()" class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                <a routerLink="/pages/proposals"
-                   class="inline-flex items-center gap-1 font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary">
-                    <mat-icon class="icon-size-4">arrow_back</mat-icon>
-                    My proposals
-                </a>
-                <a *ngIf="!orgID && org" routerLink="/pages/organizations"
-                   class="inline-flex items-center gap-1 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary">
-                    <mat-icon class="icon-size-4">business</mat-icon>
-                    Organizations
-                </a>
+            <div *ngIf="showComposerContext()" class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                <ng-container *ngFor="let link of composerBackLinks(); let idx = index">
+                    <a [routerLink]="link.path"
+                       [fragment]="link.fragment"
+                       class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-primary"
+                       [ngClass]="isPrimaryBackLink(link.id)
+                           ? 'font-medium text-gray-700 dark:text-gray-200'
+                           : 'text-gray-500 dark:text-gray-400'">
+                        <mat-icon *ngIf="idx === 0" class="icon-size-4">arrow_back</mat-icon>
+                        {{ link.label }}
+                    </a>
+                    <span *ngIf="idx < composerBackLinks().length - 1"
+                          class="text-gray-300 dark:text-gray-600"
+                          aria-hidden="true">·</span>
+                </ng-container>
             </div>
 
             <div *ngIf="showComposerContext()" class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -43,7 +47,8 @@
             </h1>
             <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
                 Your answers are saved as a draft automatically while you work, so you can leave and come back without
-                losing progress.
+                losing progress. When you create the proposal, it is submitted automatically and considered for grant
+                funding for that cycle. You can return and update your proposal anytime until the portal closes.
             </p>
         </div>
     </div>
@@ -58,18 +63,19 @@
                     <!-- Progress indicator -->
                     <div class="flex items-center gap-4 mb-8">
                         <div class="flex-auto">
-                            <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center justify-between mb-2 gap-3">
                                 <span class="text-sm font-medium text-secondary">
                                     {{ completedFields }} of {{ totalFields }} fields completed
                                 </span>
-                                <span *ngIf="draftSaved"
-                                    class="text-sm text-green-600 font-medium transition-opacity duration-300">
-                                    Draft saved
-                                </span>
-                                <span *ngIf="hasDraft && !draftSaved"
-                                    class="text-sm text-secondary">
-                                    Draft available
-                                </span>
+                                <app-autosave-status
+                                    class="shrink-0 text-right"
+                                    size="sm"
+                                    [saving]="draftSaving"
+                                    [savedFlash]="draftSaved"
+                                    savedLabel="Draft saved"
+                                    [idleHint]="
+                                        hasDraft && !draftSaving && !draftSaved ? 'Draft available' : ''
+                                    " />
                             </div>
                             <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                 <div
@@ -331,7 +337,11 @@
                     <!-- Footer -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
                         <ng-container *ngIf="!redirectingAfterSubmit">
-                            <div class="text-sm text-secondary">
+                            <div class="text-sm text-secondary max-w-md">
+                                <p class="m-0 mb-2 text-gray-600 dark:text-gray-300">
+                                    Creating this proposal submits it for grant consideration. There is no separate
+                                    submit step after creation. You may update it until the portal closes.
+                                </p>
                                 Need help creating your proposal?
                                 <a class="text-primary-500 hover:underline" href="mailto:support@hagenfamilyfoundation.org">
                                     Contact support

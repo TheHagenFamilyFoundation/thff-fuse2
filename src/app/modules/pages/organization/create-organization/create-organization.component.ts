@@ -17,6 +17,7 @@ import { normalizeZipForSave, usZipFormValidators, zipFromApiForForm } from 'app
 
 import { environment } from 'environments/environment';
 import { Router } from '@angular/router';
+import { FuseLoadingService } from '@fuse/services/loading';
 
 @Component({
     standalone: false,
@@ -51,7 +52,8 @@ export class CreateOrganizationComponent implements OnInit {
 
     constructor(
         private createOrganizationService: CreateOrganizationService,
-        private router: Router
+        private router: Router,
+        private _fuseLoadingService: FuseLoadingService
     ) {
         this.defaultValues();
     }
@@ -179,6 +181,7 @@ export class CreateOrganizationComponent implements OnInit {
 
     createOrganization(body): void {
         this.creating = true;
+        this._fuseLoadingService.show();
         this.createOrganizationService
             .createOrganization(body)
             .pipe(
@@ -194,6 +197,7 @@ export class CreateOrganizationComponent implements OnInit {
                     ]);
                 },
                 error: (err) => {
+                    this._fuseLoadingService.hide();
                     this.message = err.error?.message ?? 'Could not create organization.';
                     this.showMessage = true;
                     setTimeout(() => {

@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError, finalize, take, timeout } from 'rxjs/operators';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { environment } from 'environments/environment';
 /** Max wait for submission-year and my-proposals calls before showing an error (avoids hanging forever). */
 const API_WAIT_MS = 12000;
@@ -29,6 +31,9 @@ export class WelcomeComponent implements OnInit, OnDestroy
 
     proposals: any[] = [];
     proposalsLoading: boolean = false;
+    submittedProposalsPageIndex = 0;
+    readonly submittedProposalsPageSizeOptions = [12, 25, 50];
+    submittedProposalsPageSize: number;
 
 
     /** Fallback if the HTTP stream never terminates (should not happen with timeout + take). */
@@ -39,8 +44,13 @@ export class WelcomeComponent implements OnInit, OnDestroy
         private _submissionYearsService: SubmissionYearsService,
         private _proposalService: ProposalService,
         private _router: Router,
-        private _cdr: ChangeDetectorRef
-    ) {}
+        private _cdr: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.submittedProposalsPageSize = this._userPreferences.pageSizeForOptions(
+            this.submittedProposalsPageSizeOptions
+        );
+    }
 
     ngOnInit(): void {
         this.getLatestSubmissionYear();
@@ -56,23 +66,29 @@ export class WelcomeComponent implements OnInit, OnDestroy
         return (this.proposals || []).filter((p) => !this._isComposerProposal(p));
     }
 
+    get submittedProposalsDisplayed(): any[] {
+        const rows = this.submittedProposals;
+        if (rows.length <= this.submittedProposalsPageSize) {
+            return rows;
+        }
+        const start = this.submittedProposalsPageIndex * this.submittedProposalsPageSize;
+        return rows.slice(start, start + this.submittedProposalsPageSize);
+    }
+
+    onSubmittedProposalsPage(event: PageEvent): void {
+        this.submittedProposalsPageIndex = event.pageIndex;
+        if (event.pageSize !== this.submittedProposalsPageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+        }
+        this.submittedProposalsPageSize = event.pageSize;
+    }
+
     /** Hide the “All my proposals” toolbar when there is nothing for the active grant year. */
     get showWelcomeProposalsActionBar(): boolean {
         if (!this.latestSubmissionYear || this.proposalsLoading) {
             return false;
         }
         return this.draftProposals.length > 0 || this.submittedProposals.length > 0;
-    }
-
-    /** Hide the “{year} Proposals” section title when there are no submitted rows (empty state stays). */
-    get showWelcomeSubmittedSectionHeading(): boolean {
-        if (!this.latestSubmissionYear) {
-            return false;
-        }
-        if (this.proposalsLoading) {
-            return true;
-        }
-        return this.submittedProposals.length > 0;
     }
 
     private _isComposerProposal(p: any): boolean {
@@ -156,6 +172,7 @@ export class WelcomeComponent implements OnInit, OnDestroy
             )
             .subscribe((proposals) => {
                 this.proposals = proposals || [];
+                this.submittedProposalsPageIndex = 0;
             });
     }
 
@@ -227,6 +244,7 @@ export class WelcomeComponent implements OnInit, OnDestroy
                 org: String(org),
                 ...(orgID ? { orgID: String(orgID) } : {}),
                 ...(proposal?._id ? { draft: String(proposal._id) } : {}),
+                returnTo: 'welcome',
             },
         });
     }

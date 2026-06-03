@@ -1,0 +1,17 @@
+<div
+    class="min-h-[1.25rem] text-gray-500 dark:text-gray-400"
+    [ngClass]="size === 'sm' ? 'text-sm' : 'text-xs'">
+    <span *ngIf="saving" class="inline-flex items-center gap-1.5">
+        <mat-spinner [diameter]="14" class="inline-block"></mat-spinner>
+        {{ savingLabel }}
+    </span>
+    <span
+        *ngIf="!saving && savedFlash"
+        class="inline-flex items-center gap-1 font-medium text-green-700 dark:text-green-400">
+        <mat-icon class="icon-size-4">check_circle</mat-icon>
+        {{ savedLabel }}
+    </span>
+    <span *ngIf="!saving && !savedFlash && idleHint" class="text-gray-400 dark:text-gray-500">
+        {{ idleHint }}
+    </span>
+</div>

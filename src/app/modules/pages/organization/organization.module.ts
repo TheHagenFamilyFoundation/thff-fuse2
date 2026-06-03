@@ -39,6 +39,7 @@ import { PhoneMaskDirective } from 'app/core/directives/phone-mask.directive';
 import { OrgDoc501c3Component } from './org-doc501c3/org-doc501c3.component';
 import { OrgTeamComponent } from './org-team/org-team.component';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
+import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
 import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/upload-501c3-dialog.component';
 
 @NgModule({
@@ -84,6 +85,7 @@ import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/u
         SharedModule,
         EditableModule,
         ConfirmDialogComponent,
+        AutosaveStatusComponent,
     ],
     exports: [
         PhoneMaskDirective

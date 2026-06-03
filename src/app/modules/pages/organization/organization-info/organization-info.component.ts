@@ -1,4 +1,5 @@
 import {
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -25,6 +26,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
 
@@ -87,6 +89,11 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     directorEditing = false;
 
     private formMessageSub?: Subscription;
+
+    private orgInfoSaveInflight = 0;
+    orgInfoSaving = false;
+    orgInfoSavedFlash = false;
+    private orgInfoSavedTimer: ReturnType<typeof setTimeout> | null = null;
 
     formContactPerson: FormGroup;
 
@@ -180,6 +187,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         private updateOrganizationInfoService: UpdateOrganizationInfoService,
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
+        private _cdr: ChangeDetectorRef,
         fb: FormBuilder
     ) {
         //main edit mode
@@ -289,6 +297,37 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     ngOnDestroy(): void {
         this.formMessageSub?.unsubscribe();
+        this.clearOrgInfoSavedTimer();
+    }
+
+    private clearOrgInfoSavedTimer(): void {
+        if (this.orgInfoSavedTimer !== null) {
+            clearTimeout(this.orgInfoSavedTimer);
+            this.orgInfoSavedTimer = null;
+        }
+    }
+
+    private beginOrgInfoSave(): void {
+        this.orgInfoSaveInflight++;
+        this.orgInfoSaving = true;
+        this._cdr.markForCheck();
+    }
+
+    private endOrgInfoSave(): void {
+        this.orgInfoSaveInflight = Math.max(0, this.orgInfoSaveInflight - 1);
+        this.orgInfoSaving = this.orgInfoSaveInflight > 0;
+        this._cdr.markForCheck();
+    }
+
+    private flashOrgInfoSaved(): void {
+        this.clearOrgInfoSavedTimer();
+        this.orgInfoSavedFlash = true;
+        this._cdr.markForCheck();
+        this.orgInfoSavedTimer = setTimeout(() => {
+            this.orgInfoSavedFlash = false;
+            this.orgInfoSavedTimer = null;
+            this._cdr.markForCheck();
+        }, 2000);
     }
 
     /**
@@ -675,16 +714,19 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     //calls the updateOrganizationService
     updateOrganizationInfo(body: any): void {
+        this.beginOrgInfoSave();
         this.updateOrganizationInfoService
             .updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
-            .subscribe(
-                (result) => {
+            .pipe(finalize(() => this.endOrgInfoSave()))
+            .subscribe({
+                next: (result) => {
                     this.orgInfo = result.info;
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
+                    this.flashOrgInfoSaved();
                 },
-                () => {}
-            );
+                error: () => {},
+            });
     }
 
     cancelSingleField(prop: string, control: any): void {
@@ -718,19 +760,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             organization: this.orgID,
         };
 
-        this.updateOrganizationInfoService
-            .updateOrganizationInfo(
-                this.orgInfo.organizationInfoID,
-                payload
-            )
-            .subscribe(
-                (result) => {
-                    this.orgInfo = result.info;
-                    this.refreshOrg.emit(true);
-                    this.resetFormValues();
-                },
-                () => {}
-            );
+        this.updateOrganizationInfo(payload);
     }
 
     cancelGroupedEdition(): void {

@@ -43,6 +43,22 @@
                 </mat-cell>
             </ng-container>
 
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef class="font-semibold">
+                    Status
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <span class="text-sm"
+                          [class.text-amber-700]="isComposerRow(row)"
+                          [class.dark:text-amber-300]="isComposerRow(row)"
+                          [class.text-gray-600]="!isComposerRow(row)"
+                          [class.dark:text-gray-300]="!isComposerRow(row)">
+                        {{ proposalStatusLabel(row) }}
+                    </span>
+                </mat-cell>
+            </ng-container>
+
             <!-- Amount Requested Column -->
             <ng-container matColumnDef="amountRequested">
                 <mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold">
@@ -88,12 +104,14 @@
             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
             <mat-row *matRowDef="let row; columns: displayedColumns"
                      class="org-row cursor-pointer"
-                     (click)="goToProposal(row.proposalID)">
+                     [class.org-draft-row]="isComposerRow(row)"
+                     (click)="onProposalRowClick(row)">
             </mat-row>
         </mat-table>
 
         <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
-                       [pageSizeOptions]="[5, 10, 25]"
+                       [pageSize]="tablePageSize"
+                       [pageSizeOptions]="tablePageSizeOptions"
                        [disabled]="!loaded"></mat-paginator>
     </div>
 
@@ -107,6 +125,9 @@
             <mat-icon class="mr-2 icon-size-5">add</mat-icon>
             <span>Create Proposal</span>
         </button>
+        <p class="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+            Completed proposals are submitted automatically and considered for grant funding for this cycle.
+        </p>
     </div>
 
 </div>

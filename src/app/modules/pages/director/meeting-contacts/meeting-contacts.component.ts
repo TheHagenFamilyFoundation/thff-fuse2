@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 
@@ -20,6 +20,7 @@ export class MeetingContactsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private meetingService: MeetingService,
         private _changeDetectorRef: ChangeDetectorRef
     ) {}
@@ -42,6 +43,10 @@ export class MeetingContactsComponent implements OnInit {
         this.meetingService.getFundedContacts(id).subscribe({
             next: (data) => {
                 this.meeting = data?.meeting || null;
+                if (this.meeting?.status !== 'completed') {
+                    this.router.navigate(['/pages/director/meeting', id]);
+                    return;
+                }
                 const c = data?.contacts;
                 this.contacts = Array.isArray(c) ? c : [];
                 this.loaded = true;

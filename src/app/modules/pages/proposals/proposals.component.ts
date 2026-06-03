@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +19,7 @@ import { of } from 'rxjs';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 
 export interface MyProposalRow {
     _id: string;
@@ -47,6 +49,17 @@ export class ProposalsComponent implements OnInit, OnDestroy {
     displayedColumns: string[] = ['projectTitle', 'organization', 'status', 'updatedAt', 'actions'];
     dataSource = new MatTableDataSource<MyProposalRow>([]);
 
+    readonly tablePageSizeOptions = [5, 10, 25, 50];
+    tablePageSize: number;
+
+    private _paginator: MatPaginator;
+
+    @ViewChild(MatPaginator)
+    set matPaginator(p: MatPaginator | undefined) {
+        this._paginator = p;
+        this._attachPaginator();
+    }
+
     private readonly _destroy$ = new Subject<void>();
     /** After first grant-year + proposals load; avoids duplicate fetch from initial `queryParamMap` emit. */
     private _initialLoadDone = false;
@@ -59,7 +72,10 @@ export class ProposalsComponent implements OnInit, OnDestroy {
         private readonly dialog: MatDialog,
         private readonly snackBar: MatSnackBar,
         private readonly _cdr: ChangeDetectorRef,
-    ) {}
+        private readonly _userPreferences: UserPreferencesService,
+    ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+    }
 
     ngOnInit(): void {
         this.loading = true;
@@ -89,7 +105,7 @@ export class ProposalsComponent implements OnInit, OnDestroy {
                     );
                 }),
                 tap((list: MyProposalRow[]) => {
-                    this.dataSource.data = list;
+                    this.setProposalRows(list);
                 }),
                 finalize(() => {
                     this.loading = false;
@@ -208,8 +224,30 @@ export class ProposalsComponent implements OnInit, OnDestroy {
                 }),
             )
             .subscribe((list: MyProposalRow[]) => {
-                this.dataSource.data = list;
+                this.setProposalRows(list);
             });
+    }
+
+    onPageChange(event: { pageSize: number }): void {
+        if (event.pageSize !== this.tablePageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+            this.tablePageSize = event.pageSize;
+        }
+    }
+
+    private setProposalRows(list: MyProposalRow[]): void {
+        this.dataSource.data = list;
+        if (this._paginator) {
+            this._paginator.firstPage();
+        }
+    }
+
+    private _attachPaginator(): void {
+        if (!this._paginator) {
+            return;
+        }
+        this.dataSource.paginator = this._paginator;
+        this._paginator.pageSize = this.tablePageSize;
     }
 
     orgName(row: MyProposalRow): string {
@@ -256,6 +294,7 @@ export class ProposalsComponent implements OnInit, OnDestroy {
                 org: String(org),
                 ...(orgID ? { orgID: String(orgID) } : {}),
                 ...(row._id ? { draft: String(row._id) } : {}),
+                returnTo: 'proposals',
             },
         });
     }

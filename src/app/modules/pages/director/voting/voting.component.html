@@ -152,7 +152,8 @@
                     </mat-table>
 
                     <mat-paginator (page)="handlePageEvent($event)" [length]="propCount"
-                                   [pageSizeOptions]="[10, 25, 100]"
+                                   [pageSize]="tablePageSize"
+                                   [pageSizeOptions]="tablePageSizeOptions"
                                    [disabled]="!loaded"></mat-paginator>
                 </fuse-card>
 

@@ -7,7 +7,7 @@ import {
     ViewEncapsulation,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { OrganizationService } from './organization.service';
@@ -27,6 +27,7 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     orgID: any;
     organizationID: any;
     org: any;
+    loading = true;
     isDirector: boolean = false;
     inOrg: boolean;
     viewing: string;
@@ -64,6 +65,13 @@ export class OrganizationComponent implements OnInit, OnDestroy {
             this.orgID = id;
             this.getOrganization(id);
         });
+
+        this.route.fragment.pipe(takeUntil(this._unsubscribeAll)).subscribe((fragment) => {
+            if (!fragment) {
+                return;
+            }
+            setTimeout(() => this.scrollTo(fragment), 150);
+        });
     }
 
     ngOnDestroy(): void {
@@ -72,14 +80,39 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     }
 
     getOrganization(orgID: string, forceFresh = false): void {
-        this.getOrgService.getOrgbyID(orgID, forceFresh).subscribe((org) => {
-            this.org = org;
-            this.organizationID = this.org._id;
-            this.checkInOrganization(this.currentUser._id);
-            this.checkIsDirectorAndInOrg();
-            this._cdr.detectChanges();
-            Promise.resolve().then(() => this._cdr.detectChanges());
-        });
+        const showPageLoading = !forceFresh;
+        if (showPageLoading) {
+            this.loading = true;
+            this.org = null;
+            this._cdr.markForCheck();
+        }
+
+        this.getOrgService
+            .getOrgbyID(orgID, forceFresh)
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                finalize(() => {
+                    if (showPageLoading) {
+                        this.loading = false;
+                        this._cdr.markForCheck();
+                    }
+                }),
+            )
+            .subscribe({
+                next: (org) => {
+                    this.org = org;
+                    this.organizationID = this.org._id;
+                    this.checkInOrganization(this.currentUser._id);
+                    this.checkIsDirectorAndInOrg();
+                    this._cdr.markForCheck();
+                },
+                error: () => {
+                    this.snackBar.open('Could not load organization', undefined, {
+                        duration: 4000,
+                    });
+                    this._router.navigate(['/pages/organizations']);
+                },
+            });
     }
 
     refreshOrg(): void {

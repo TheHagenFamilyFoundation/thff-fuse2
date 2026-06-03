@@ -6,6 +6,7 @@ import { catchError, map, switchMap, debounceTime, distinctUntilChanged, tap, fi
 import { Router } from '@angular/router';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 
 @Component({
     standalone: false,
@@ -28,7 +29,10 @@ export class OrganizationsComponent implements AfterViewInit {
     pageEvent: PageEvent;
     hasProposals: boolean = true;
 
-    private limit: number = 10;
+    readonly tablePageSizeOptions = [10, 25, 100];
+    tablePageSize: number;
+
+    private limit: number;
     private skip: number = 0;
     private sortColumn: string = 'createdOn';
     private sortDirection: string = 'desc';
@@ -42,8 +46,12 @@ export class OrganizationsComponent implements AfterViewInit {
         public getOrgService: GetOrganizationService,
         public submissionYearService: SubmissionYearsService,
         private _router: Router,
-        private _changeDetectorRef: ChangeDetectorRef
-    ) {}
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+        this.limit = this.tablePageSize;
+    }
 
     get effectiveYear(): number | undefined {
         return this.hasProposals ? this.year : undefined;
@@ -109,6 +117,8 @@ export class OrganizationsComponent implements AfterViewInit {
     handlePageEvent(e: PageEvent): void {
         this.pageEvent = e;
         if (this.pageEvent.pageSize !== this.limit) {
+            this._userPreferences.setTablePageSize(this.pageEvent.pageSize);
+            this.tablePageSize = this.pageEvent.pageSize;
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
             this.paginator.pageIndex = 0;

@@ -12,6 +12,7 @@ import {
 import { timeout } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/services/user/user.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { environment } from '../../../environments/environment';
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
     constructor(
         private _httpClient: HttpClient,
         private _userService: UserService,
+        private _userPreferencesService: UserPreferencesService,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -71,6 +73,7 @@ export class AuthService {
         this.currentUser = JSON.stringify(response.user);
         this._authenticated = true;
         this._userService.user = response.user;
+        this._userPreferencesService.initFromUserSettings(response.userSettings);
 
         // App is always light mode; keep key for boot script compatibility
         localStorage.setItem('userScheme', 'light');
@@ -160,6 +163,7 @@ export class AuthService {
 
                     // Store the user on the user service
                     this._userService.user = response.user;
+                    this._userPreferencesService.initFromUserSettings(response.userSettings);
 
                     localStorage.setItem('userScheme', 'light');
 
@@ -176,6 +180,7 @@ export class AuthService {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('currentUser');
         localStorage.removeItem('userScheme');
+        this._userPreferencesService.clearCached();
 
         // Set the authenticated flag to false
         this._authenticated = false;

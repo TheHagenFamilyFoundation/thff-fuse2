@@ -1,0 +1,154 @@
+.grant-proposal-emails__first-round {
+    max-width: 100%;
+}
+
+.grant-proposal-emails {
+    display: block;
+    width: 100%;
+}
+
+:host ::ng-deep .grant-email-accordion.mat-accordion .mat-expansion-panel {
+    margin-bottom: 0.75rem !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+:host ::ng-deep .grant-email-accordion.mat-accordion .mat-expansion-panel:last-child {
+    margin-bottom: 0 !important;
+}
+
+:host ::ng-deep .grant-email-accordion.mat-accordion .mat-expansion-panel.mat-expanded,
+:host ::ng-deep .grant-email-accordion.mat-accordion .mat-expansion-panel:hover {
+    box-shadow: none !important;
+}
+
+:host ::ng-deep .grant-email-panel .mat-expansion-panel-body {
+    overflow: visible;
+    padding: 0 1rem 1rem;
+}
+
+.grant-email-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.grant-email-panel {
+    --mat-expansion-header-collapsed-state-height: 64px;
+}
+
+.grant-proposal-panel__title {
+    flex: 1 1 40%;
+    min-width: 0;
+}
+
+.grant-proposal-panel__desc {
+    flex: 1 1 60%;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-right: 0;
+    flex-wrap: wrap;
+}
+
+.grant-proposal-panel__meta {
+    font-size: 0.8125rem;
+    color: rgb(107 114 128);
+    white-space: nowrap;
+}
+
+.grant-proposal-panel__sent {
+    font-size: 0.75rem;
+    color: rgb(22 101 52);
+    white-space: nowrap;
+}
+
+.grant-proposal-panel__not-sent {
+    font-size: 0.75rem;
+    color: rgb(107 114 128);
+    white-space: nowrap;
+}
+
+.grant-email-panel__body {
+    width: 100%;
+    overflow: visible;
+}
+
+.grant-email-sample__frame {
+    min-height: 320px;
+    max-height: min(72vh, 900px);
+    padding: 1rem 1.25rem;
+}
+
+.grant-email-panel__body .grant-email-sample__frame {
+    min-height: 360px;
+    height: min(72vh, 900px);
+    max-height: min(72vh, 900px);
+}
+
+.grant-email-edit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.grant-email-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+}
+
+.grant-email-edit-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgb(55 65 81);
+}
+
+.grant-email-edit-input,
+.grant-email-edit-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    background: #fff;
+    color: rgb(17 24 39);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.grant-email-edit-input:focus,
+.grant-email-edit-textarea:focus {
+    outline: none;
+    border-color: rgb(59 130 246);
+    box-shadow: 0 0 0 1px rgb(59 130 246);
+}
+
+.grant-email-edit-textarea {
+    min-height: 18rem;
+    resize: vertical;
+}
+
+.grant-email-edit-hint {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: rgb(107 114 128);
+}
+
+:host-context(.dark) .grant-email-edit-label {
+    color: rgb(229 231 235);
+}
+
+:host-context(.dark) .grant-email-edit-input,
+:host-context(.dark) .grant-email-edit-textarea {
+    border-color: rgb(75 85 99);
+    background: rgb(17 24 39);
+    color: rgb(243 244 246);
+}
+
+:host-context(.dark) .grant-email-edit-hint {
+    color: rgb(156 163 175);
+}

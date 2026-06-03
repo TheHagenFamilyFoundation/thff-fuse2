@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { FuseConfigService } from '@fuse/services/config';
+import { FuseLoadingService } from '@fuse/services/loading';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
 
@@ -24,6 +25,7 @@ export class AuthSignUpComponent implements OnInit {
     };
     signUpForm: FormGroup;
     showAlert: boolean = false;
+    signingUp = false;
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
@@ -33,7 +35,8 @@ export class AuthSignUpComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _route: ActivatedRoute,
-        private _fuseConfigService: FuseConfigService
+        private _fuseConfigService: FuseConfigService,
+        private _fuseLoadingService: FuseLoadingService
     ) {}
 
     ngOnInit(): void {
@@ -51,12 +54,14 @@ export class AuthSignUpComponent implements OnInit {
     }
 
     signUp(): void {
-        if (this.signUpForm.invalid) {
+        if (this.signUpForm.invalid || this.signingUp) {
             return;
         }
 
+        this.signingUp = true;
         this.signUpForm.disable();
         this.showAlert = false;
+        this._fuseLoadingService.show();
 
         const payload: any = { ...this.signUpForm.value };
 
@@ -91,6 +96,9 @@ export class AuthSignUpComponent implements OnInit {
                 this._router.navigateByUrl('/signed-in-redirect');
             },
             error: (response) => {
+                this._fuseLoadingService.hide();
+                this.signingUp = false;
+
                 const errorMessage = response?.error?.error?.[0]?.msg
                     || response?.error?.message
                     || 'An error occurred while creating your account.';

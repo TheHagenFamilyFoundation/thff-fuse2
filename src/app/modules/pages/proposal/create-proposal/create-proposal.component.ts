@@ -7,6 +7,9 @@ import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { GetOrganizationService } from 'app/core/services/organization/get-organization.service';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { FuseLoadingService } from '@fuse/services/loading';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 import {
     draftFormHasMeaningfulContent,
     parseProposalDraft,
@@ -43,6 +46,8 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     // Draft state
     draftSaved = false;
     hasDraft = false;
+    /** True while server draft PATCH is in flight (debounced autosave). */
+    draftSaving = false;
 
     // Referral/sponsor state (signal avoids NG0100 when HTTP resolves during the same CD turn)
     readonly sponsorInfo = signal<{ name: string; code: string } | null>(null);
@@ -75,6 +80,8 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
 
     /** Server composer status when editing a DB-backed draft (`draft` | `ready_to_submit`). */
     composerProposalStatus: string | null = null;
+    /** Where Cancel / primary back should return (`organization` | `proposals` | `welcome`). */
+    returnTo: 'organization' | 'proposals' | 'welcome' = 'proposals';
     private lastOrgForDraft: string | null = null;
 
     private _destroy$ = new Subject<void>();
@@ -86,6 +93,8 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private _cdr: ChangeDetectorRef,
+        private _fuseLoadingService: FuseLoadingService,
+        private _dialog: MatDialog,
     ) {
         this.initGroupedForm();
     }
@@ -108,6 +117,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
                 const oid = query['orgID'];
                 this.org = o == null ? '' : String(Array.isArray(o) ? o[0] : o);
                 this.orgID = oid == null ? '' : String(Array.isArray(oid) ? oid[0] : oid);
+                this.syncReturnToFromQuery(query);
 
                 if (!this.org) {
                     this.serverDraftId = null;
@@ -443,6 +453,70 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         return !!this.org?.trim();
     }
 
+    /** Primary + alternate destinations for the composer header back row. */
+    composerBackLinks(): { id: string; label: string; path: string[]; fragment?: string }[] {
+        const options = [
+            {
+                id: 'organization' as const,
+                label: this.organizationName?.trim() || 'Organization',
+                path: ['/pages/organization', this.orgID],
+                fragment: 'proposals',
+                show: !!this.orgID?.trim(),
+            },
+            {
+                id: 'proposals' as const,
+                label: 'My proposals',
+                path: ['/pages/proposals'],
+                show: true,
+            },
+            {
+                id: 'welcome' as const,
+                label: 'Home',
+                path: ['/welcome'],
+                show: true,
+            },
+        ].filter((o) => o.show);
+
+        const primary = options.find((o) => o.id === this.returnTo) ?? options[0];
+        const rest = options.filter((o) => o.id !== primary.id);
+        return [primary, ...rest].map(({ id, label, path, fragment }) => ({ id, label, path, fragment }));
+    }
+
+    isPrimaryBackLink(linkId: string): boolean {
+        return linkId === this.returnTo;
+    }
+
+    private syncReturnToFromQuery(query: Record<string, unknown>): void {
+        const raw = query['returnTo'];
+        const explicit =
+            raw == null || raw === ''
+                ? ''
+                : String(Array.isArray(raw) ? raw[0] : raw);
+        if (explicit === 'organization' || explicit === 'proposals' || explicit === 'welcome') {
+            this.returnTo = explicit;
+            return;
+        }
+        this.returnTo = this.orgID?.trim() ? 'organization' : 'proposals';
+    }
+
+    private navigateToReturnTo(): void {
+        switch (this.returnTo) {
+            case 'organization':
+                if (this.orgID?.trim()) {
+                    this.router.navigate(['/pages/organization', this.orgID], { fragment: 'proposals' });
+                } else {
+                    this.router.navigate(['/pages/organizations']);
+                }
+                break;
+            case 'welcome':
+                this.router.navigate(['/welcome']);
+                break;
+            case 'proposals':
+            default:
+                this.router.navigate(['/pages/proposals']);
+        }
+    }
+
     composerStatusLabel(): string {
         const id = this.serverDraftId?.trim();
         const st = this.composerProposalStatus;
@@ -537,25 +611,35 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
             return;
         }
         const body = { ...this.groupedForm.value };
-        this.proposalService.updateProposal(this.serverDraftId, body).subscribe({
-            next: () => {
-                this.hasDraft = draftFormHasMeaningfulContent(this.groupedForm.value);
-                this.draftSaved = true;
-                setTimeout(() => this.draftSaved = false, 2000);
-                this.proposalService
-                    .getProposalById(this.serverDraftId!)
-                    .pipe(take(1), takeUntil(this._destroy$))
-                    .subscribe({
-                        next: (doc: any) => {
-                            const st = doc?.status;
-                            this.composerProposalStatus =
-                                st === 'draft' || st === 'ready_to_submit' ? String(st) : null;
-                        },
-                        error: () => {},
-                    });
-            },
-            error: () => this.saveDraftToLocalStorageFallback(),
-        });
+        this.draftSaving = true;
+        this._cdr.markForCheck();
+        this.proposalService
+            .updateProposal(this.serverDraftId, body)
+            .pipe(
+                finalize(() => {
+                    this.draftSaving = false;
+                    this._cdr.markForCheck();
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.hasDraft = draftFormHasMeaningfulContent(this.groupedForm.value);
+                    this.draftSaved = true;
+                    setTimeout(() => this.draftSaved = false, 2000);
+                    this.proposalService
+                        .getProposalById(this.serverDraftId!)
+                        .pipe(take(1), takeUntil(this._destroy$))
+                        .subscribe({
+                            next: (doc: any) => {
+                                const st = doc?.status;
+                                this.composerProposalStatus =
+                                    st === 'draft' || st === 'ready_to_submit' ? String(st) : null;
+                            },
+                            error: () => {},
+                        });
+                },
+                error: () => this.saveDraftToLocalStorageFallback(),
+            });
     }
 
     private saveDraftToLocalStorageFallback(): void {
@@ -633,7 +717,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     }
 
     cancel(): void {
-        this.router.navigate(['/welcome']);
+        this.navigateToReturnTo();
     }
 
     loadSponsorInfo(): void {
@@ -675,8 +759,28 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     }
 
     clearSponsor(): void {
-        this.referralCodeService.clearMyReferralCode().subscribe();
-        this.sponsorInfo.set(null);
+        const sponsor = this.sponsorInfo();
+        if (!sponsor) {
+            return;
+        }
+
+        const ref = this._dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: 'Remove sponsor?',
+                message: `Remove ${sponsor.name} (${sponsor.code}) as your sponsor? You can re-enter their referral code later if needed.`,
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                warn: true,
+            },
+        });
+
+        ref.afterClosed().pipe(takeUntil(this._destroy$)).subscribe((ok) => {
+            if (!ok) {
+                return;
+            }
+            this.referralCodeService.clearMyReferralCode().subscribe();
+            this.sponsorInfo.set(null);
+        });
     }
 
     private getActiveReferralCode(): string | undefined {
@@ -750,6 +854,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
     ): void {
         this.submittingProposal = true;
         this.redirectingAfterSubmit = false;
+        this._fuseLoadingService.show();
         obs.pipe(
             takeUntil(this._destroy$),
             finalize(() => {
@@ -763,6 +868,7 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
                 onSuccess(res);
             },
             error: (err: { error?: { message?: string } }) => {
+                this._fuseLoadingService.hide();
                 this.message = err.error?.message ?? failureMessage;
                 this.showMessage = true;
                 setTimeout(() => {

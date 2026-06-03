@@ -2,7 +2,7 @@
 <fuse-loading-bar></fuse-loading-bar>
 
 <!-- Wrapper -->
-<div class="flex flex-col flex-auto w-full min-w-0">
+<div class="flex flex-col flex-auto w-full min-w-0 min-h-screen">
     <!-- Header -->
     <div
         class="relative flex flex-0 items-center w-full h-16 sm:h-20 px-4 md:px-6 z-49 shadow dark:shadow-none dark:border-b bg-card dark:bg-transparent print:hidden">
@@ -76,7 +76,7 @@
     </div>
 
     <!-- Content: min-h-0 lets the routed view scroll and fill height (flex overflow chain) -->
-    <div class="flex flex-col flex-auto min-h-0 w-full">
+    <div class="flex flex-col flex-1 w-full">
         <!-- *ngIf="true" hack is required here for router-outlet to work correctly.
              Otherwise, layout changes won't be registered and the view won't be updated! -->
         <router-outlet *ngIf="true"></router-outlet>
