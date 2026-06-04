@@ -71,6 +71,14 @@ export class OutboundEmailService {
         );
     }
 
+    getGrantEmailProposals(meetingId: string): Observable<{
+        meeting?: { _id?: string; year?: number };
+        proposals?: unknown[];
+        counts?: { ready: number; skipped: number };
+    }> {
+        return this.http.get(`${this.apiUrl}/meeting/${meetingId}/grant-email-proposals`);
+    }
+
     /** Single grant notification including htmlBody (must belong to the meeting). */
     getMeetingGrantEmailById(meetingId: string, emailId: string): Observable<{
         subject?: string;
@@ -86,10 +94,14 @@ export class OutboundEmailService {
     sendGrantNotifications(
         meetingId: string,
         body?: {
+            /** When provided, only send to these funded allocation ids (one per proposal). */
+            allocationIds?: string[];
+            /** Legacy: filter by organization id. */
+            organizationIds?: string[];
             customizations?: Array<{
-                organizationId: string;
+                allocationId?: string;
+                organizationId?: string;
                 subject: string;
-                /** Editable plain paragraph (server converts to HTML; same as preview). */
                 messagePlain: string;
             }>;
         }

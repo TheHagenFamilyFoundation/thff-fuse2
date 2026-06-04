@@ -36,7 +36,8 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<boolean> | Promise<boolean> | boolean {
-        const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
+        const redirectUrl =
+            state.url === '/sign-out' ? '/welcome' : state.url;
         return this._check(redirectUrl);
     }
 
@@ -54,7 +55,8 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
         | Promise<boolean | UrlTree>
         | boolean
         | UrlTree {
-        const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
+        const redirectUrl =
+            state.url === '/sign-out' ? '/welcome' : state.url;
         return this._check(redirectUrl);
     }
 
@@ -68,7 +70,9 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
         route: Route,
         segments: UrlSegment[]
     ): Observable<boolean> | Promise<boolean> | boolean {
-        return this._check('/');
+        const target =
+            '/' + segments.map((s) => s.path).join('/');
+        return this._check(target === '/' ? '/welcome' : target);
     }
 
     // -----------------------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { OutboundEmailService } from 'app/core/services/director/outbound-email.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { SolicitationEmailPreviewDialogComponent } from './solicitation-email-preview-dialog.component';
 import { SolicitationPreviewSendDialogComponent } from './solicitation-preview-send-dialog.component';
 
@@ -32,7 +33,8 @@ export class SolicitationEmailsComponent implements OnInit {
     yearFilterOptions: number[] = [];
 
     pageIndex = 0;
-    pageSize = 10;
+    readonly tablePageSizeOptions = [5, 10, 25, 50];
+    pageSize: number;
     totalSolicitations = 0;
 
     /** Suppress duplicate filter reloads when mat-select emits after enable (same year + code). */
@@ -61,8 +63,11 @@ export class SolicitationEmailsComponent implements OnInit {
         private outboundEmailService: OutboundEmailService,
         private snackBar: MatSnackBar,
         private dialog: MatDialog,
-        private _changeDetectorRef: ChangeDetectorRef
-    ) {}
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.pageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+    }
 
     ngOnInit(): void {
         this.rebuildYearFilterOptions();
@@ -146,6 +151,9 @@ export class SolicitationEmailsComponent implements OnInit {
             return;
         }
         this.pageIndex = ev.pageIndex;
+        if (ev.pageSize !== this.pageSize) {
+            this._userPreferences.setTablePageSize(ev.pageSize);
+        }
         this.pageSize = ev.pageSize;
         this.loadSolicitationEmails();
     }

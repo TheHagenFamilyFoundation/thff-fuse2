@@ -1,0 +1,17 @@
+.create-proposal-submit__content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 1.25rem;
+}
+
+.create-proposal-submit__spinner {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.create-proposal-submit__spinner.mat-mdc-progress-spinner,
+.create-proposal-submit__spinner ::ng-deep .mdc-circular-progress {
+    --mdc-circular-progress-active-indicator-color: currentColor;
+}

@@ -6,3 +6,11 @@
         background-color: rgba(0, 0, 0, 0.04);
     }
 }
+
+:host ::ng-deep tr.org-draft-row .mat-mdc-cell {
+    background-color: rgb(255 251 235);
+}
+
+:host-context(.dark) ::ng-deep tr.org-draft-row .mat-mdc-cell {
+    background-color: rgba(120 53 15 / 0.22);
+}

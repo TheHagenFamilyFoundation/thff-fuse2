@@ -1,29 +1,141 @@
-<div class="flex flex-col flex-auto min-w-0">
-    <!-- Header -->
-    <div class="bg-card">
-        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <div
-                class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12"
-            >
-                <!-- Avatar and name -->
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex flex-col min-w-0 ml-4">
-                        <ng-container *transloco="let t">
-                            <div
-                                class="text-xl md:text-xl font-semibold tracking-tight leading-7 md:leading-snug truncate"
-                            >
-                                Proposals
-                            </div>
-                        </ng-container>
-                    </div>
-                </div>
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="bg-card border-b border-gray-200 dark:border-neutral-700">
+        <div class="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <div class="min-w-0">
+                <h1 class="m-0 text-xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                    My proposals
+                </h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Proposals for organizations you belong to. When you complete and create a proposal, it is
+                    automatically submitted and considered for grant funding for that cycle. New proposals can only
+                    be started from an organization’s page. Delete is only available for in-progress drafts.
+                </p>
+            </div>
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+                @if (years.length > 0 && selectedYear != null) {
+                <mat-form-field appearance="outline" class="my-proposals-year-field w-36">
+                    <mat-label>Grant year</mat-label>
+                    <mat-select [value]="selectedYear" (selectionChange)="onYearChange($event.value)">
+                        <mat-option *ngFor="let y of years" [value]="y">{{ y }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                }
             </div>
         </div>
     </div>
-    <!-- End of Header -->
 
-    <!-- Main -->
-    <div class="flex-auto border-t -mt-px pt-4 sm:pt-6">
-        <div class="w-full max-w-screen-xl mx-auto">Main</div>
+    <div class="flex-auto bg-gray-50 px-4 py-6 dark:bg-neutral-900 sm:px-8">
+        <div class="mx-auto w-full max-w-screen-xl">
+            <div
+                *ngIf="!loading"
+                class="mb-4 flex gap-3 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-gray-700 dark:border-primary/30 dark:bg-primary/10 dark:text-gray-200">
+                <mat-icon class="icon-size-5 shrink-0 text-primary">info</mat-icon>
+                <p class="m-0">
+                    In-progress work is saved as a draft. Once you create the proposal, it is submitted automatically
+                    and enters the grant review process for that year.
+                </p>
+            </div>
+
+            <div *ngIf="loading" class="flex flex-col items-center justify-center gap-3 py-16">
+                <mat-spinner [diameter]="40"></mat-spinner>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Loading proposals…</span>
+            </div>
+
+            <div
+                *ngIf="!loading && dataSource.data.length === 0"
+                class="rounded-xl border border-gray-200 bg-card px-6 py-14 text-center dark:border-neutral-700">
+                <mat-icon class="icon-size-12 mb-3 text-gray-300 dark:text-gray-600">folder_open</mat-icon>
+                <p class="m-0 text-sm text-gray-600 dark:text-gray-300">No proposals for {{ displayYearLabel }}.</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Open an organization from <a routerLink="/pages/organizations" class="font-medium text-primary hover:underline">Organizations</a>
+                    and start a proposal there.
+                </p>
+            </div>
+
+            <div
+                *ngIf="!loading && dataSource.data.length > 0"
+                class="overflow-hidden rounded-xl border border-gray-200 bg-card shadow-sm dark:border-neutral-700">
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="dataSource" class="w-full min-w-[640px]">
+                        <ng-container matColumnDef="projectTitle">
+                            <th mat-header-cell *matHeaderCellDef class="pl-4 font-semibold sm:pl-6">Project</th>
+                            <td mat-cell *matCellDef="let row" class="pl-4 sm:pl-6">
+                                <span class="line-clamp-2 font-medium text-gray-900 dark:text-gray-100">
+                                    {{ row.projectTitle?.trim() || 'Untitled' }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="organization">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Organization</th>
+                            <td mat-cell *matCellDef="let row">
+                                <span class="text-gray-800 dark:text-gray-200">{{ orgName(row) }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                            <td mat-cell *matCellDef="let row">
+                                <span class="text-sm text-gray-600 dark:text-gray-300">{{ statusLabel(row) }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="updatedAt">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Updated</th>
+                            <td mat-cell *matCellDef="let row" class="whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {{ row.updatedAt || row.createdAt | date : 'mediumDate' }}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef class="pr-4 text-right font-semibold sm:pr-6">Actions</th>
+                            <td mat-cell *matCellDef="let row" class="pr-4 text-right sm:pr-6">
+                                <button
+                                    *ngIf="!isComposer(row)"
+                                    mat-icon-button
+                                    type="button"
+                                    matTooltip="View"
+                                    (click)="view(row)"
+                                    [disabled]="!row.proposalID">
+                                    <mat-icon class="icon-size-5">visibility</mat-icon>
+                                </button>
+                                <button
+                                    *ngIf="isComposer(row)"
+                                    mat-icon-button
+                                    type="button"
+                                    matTooltip="Continue editing"
+                                    color="primary"
+                                    (click)="continueEditing(row)">
+                                    <mat-icon class="icon-size-5">edit</mat-icon>
+                                </button>
+                                <button
+                                    *ngIf="isComposer(row)"
+                                    mat-icon-button
+                                    type="button"
+                                    matTooltip="Delete draft"
+                                    color="warn"
+                                    (click)="deleteDraft(row)">
+                                    <mat-icon class="icon-size-5">delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr
+                            mat-row
+                            *matRowDef="let row; columns: displayedColumns"
+                            class="my-proposals-data-row"
+                            [class.my-proposals-draft-row]="isComposer(row)"></tr>
+                    </table>
+                </div>
+                <mat-paginator
+                    class="border-t border-gray-200 dark:border-neutral-700"
+                    [pageSize]="tablePageSize"
+                    [pageSizeOptions]="tablePageSizeOptions"
+                    [showFirstLastButtons]="true"
+                    (page)="onPageChange($event)">
+                </mat-paginator>
+            </div>
+        </div>
     </div>
 </div>

@@ -12,7 +12,7 @@ import {
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
@@ -74,6 +74,12 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
     private readonly _unsubscribeAll = new Subject<void>();
     private formMessageSub?: Subscription;
 
+    /** Inline + grouped saves can overlap (e.g. fast field commits). */
+    private proposalInfoSaveInflight = 0;
+    proposalInfoSaving = false;
+    proposalInfoSavedFlash = false;
+    private proposalInfoSavedTimer: ReturnType<typeof setTimeout> | null = null;
+
     constructor(
         private _proposalService: ProposalService,
         private _router: Router,
@@ -100,8 +106,39 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     ngOnDestroy(): void {
         this.formMessageSub?.unsubscribe();
+        this.clearProposalInfoSavedTimer();
         this._unsubscribeAll.next(undefined);
         this._unsubscribeAll.complete();
+    }
+
+    private clearProposalInfoSavedTimer(): void {
+        if (this.proposalInfoSavedTimer !== null) {
+            clearTimeout(this.proposalInfoSavedTimer);
+            this.proposalInfoSavedTimer = null;
+        }
+    }
+
+    private beginProposalInfoSave(): void {
+        this.proposalInfoSaveInflight++;
+        this.proposalInfoSaving = true;
+        this._cdr.markForCheck();
+    }
+
+    private endProposalInfoSave(): void {
+        this.proposalInfoSaveInflight = Math.max(0, this.proposalInfoSaveInflight - 1);
+        this.proposalInfoSaving = this.proposalInfoSaveInflight > 0;
+        this._cdr.markForCheck();
+    }
+
+    private flashProposalInfoSaved(): void {
+        this.clearProposalInfoSavedTimer();
+        this.proposalInfoSavedFlash = true;
+        this._cdr.markForCheck();
+        this.proposalInfoSavedTimer = setTimeout(() => {
+            this.proposalInfoSavedFlash = false;
+            this.proposalInfoSavedTimer = null;
+            this._cdr.markForCheck();
+        }, 2000);
     }
 
     private num(v: unknown, fallback = 0): number {
@@ -262,19 +299,24 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     updateProposal(body: Record<string, unknown>): void {
-        this._proposalService.updateProposal(this.propID, body).subscribe(
-            (result) => {
-                this.proposal = result.proposal ?? result;
-                this.setFields();
-                this.refreshProp.emit(true);
-            },
-            () => {}
-        );
+        this.beginProposalInfoSave();
+        this._proposalService
+            .updateProposal(this.propID, body)
+            .pipe(finalize(() => this.endProposalInfoSave()))
+            .subscribe({
+                next: (result) => {
+                    this.proposal = result.proposal ?? result;
+                    this.setFields();
+                    this.refreshProp.emit(true);
+                    this.flashProposalInfoSaved();
+                },
+                error: () => {},
+            });
     }
 
     updateGroupedEdition(): void {
         const v = this.groupedForm.getRawValue();
-        const payload = {
+        this.updateProposal({
             projectTitle: v.projectTitle ?? '',
             purpose: v.purpose ?? '',
             goals: v.goals ?? '',
@@ -284,16 +326,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
             totalProjectCost: this.num(v.totalProjectCost),
             itemizedBudget: v.itemizedBudget ?? '',
             organization: this.orgID,
-        };
-
-        this._proposalService.updateProposal(this.propID, payload).subscribe(
-            (result) => {
-                this.proposal = result.proposal ?? result;
-                this.setFields();
-                this.refreshProp.emit(true);
-            },
-            () => {}
-        );
+        });
     }
 
     cancelGroupedEdition(): void {

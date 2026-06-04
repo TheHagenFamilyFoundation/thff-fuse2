@@ -32,6 +32,13 @@
             </button>
         </div>
     </div>
+    <app-autosave-status
+        *ngIf="(inOrg || directorEditing) && (orgInfoSaving || orgInfoSavedFlash || editing)"
+        class="mt-1 block"
+        size="sm"
+        [saving]="orgInfoSaving"
+        [savedFlash]="orgInfoSavedFlash"
+        [idleHint]="editing && !orgInfoSaving && !orgInfoSavedFlash ? 'Click Save to apply your changes.' : ''" />
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
             <form *ngIf="groupedForm" [formGroup]="groupedForm" class="w-full max-w-lg">
@@ -58,12 +65,16 @@
                         <label class="block tracking-wide text-sm mb-2" for="grid-year-founded">
                             Year Founded
                         </label>
-                        <mat-form-field class="year-founded">
-                            <input matInput placeholder="Year Founded" formControlName="yearFounded" id="grid-year-founded"
-                                maxlength="4" required />
-                            <mat-hint align="end">{{
-                                (groupedForm.get('yearFounded')?.value?.toString() || '').length
-                            }} / 4</mat-hint>
+                        <mat-form-field class="year-founded-select">
+                            <mat-select
+                                formControlName="yearFounded"
+                                id="grid-year-founded"
+                                placeholder="Select year"
+                                required
+                            >
+                                <mat-option [value]="null" disabled>Select year</mat-option>
+                                <mat-option *ngFor="let y of foundedYearOptions" [value]="y">{{ y }}</mat-option>
+                            </mat-select>
                             <mat-error *ngIf="
                                     groupedForm
                                         .get('yearFounded')
@@ -263,28 +274,35 @@
                         <label class="block tracking-wide text-sm mb-2" for="grid-zip">
                             Zip
                         </label>
-                        <mat-form-field>
-                            <input matInput placeholder="Zip" maxlength="5" formControlName="zip" id="grid-zip"
-                                required />
-                            <mat-hint align="end">{{
-                                (groupedForm.get('zip')?.value?.toString() || '').length
-                            }} / 5</mat-hint>
-                            <mat-error *ngIf="
-                                    groupedForm.get('zip').hasError('required')
-                                ">
+                        <mat-form-field class="zip-field">
+                            <input
+                                matInput
+                                placeholder="12345 or 12345-6789"
+                                maxlength="10"
+                                inputmode="numeric"
+                                autocomplete="postal-code"
+                                formControlName="zip"
+                                id="grid-zip"
+                                required
+                            />
+                            <mat-hint align="end">US ZIP: 5 digits, or ZIP+4</mat-hint>
+                            <mat-error *ngIf="groupedForm.get('zip')?.hasError('required')">
                                 Zip is <strong>required</strong>
+                            </mat-error>
+                            <mat-error *ngIf="groupedForm.get('zip')?.hasError('pattern')">
+                                Enter a valid US ZIP (5 digits or ZIP+4)
                             </mat-error>
                         </mat-form-field>
                     </div>
                 </div>
                 <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <div class="w-full px-3">
                         <label class="block tracking-wide text-sm mb-2" for="grid-website">
                             Website
                         </label>
-                        <mat-form-field>
+                        <mat-form-field class="w-full">
                             <input matInput type="text" formControlName="website" id="grid-website"
-                                placeholder="Website" />
+                                placeholder="https://example.org" autocomplete="url" />
                         </mat-form-field>
                     </div>
                 </div>
@@ -377,15 +395,25 @@
                                             ? 'border-red-600'
                                             : ''
                                     }}">
-                                        {{ orgObj.yearFounded }}
+                                        {{ orgObj.yearFounded > 0 ? orgObj.yearFounded : '—' }}
                                     </div>
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
+                                        editableFocusable
                                         class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
-                                        <input class="form-control" editableFocusable
-                                            data-testid="sample-input-click-edit" placeholder="Year Founded" type="text"
-                                            [formControl]="yearFoundedControl" />
+                                        <mat-form-field class="year-founded-select w-full">
+                                            <mat-select
+                                                data-testid="sample-input-click-edit"
+                                                placeholder="Select year"
+                                                [formControl]="yearFoundedControl"
+                                            >
+                                                <mat-option [value]="null" disabled>Select year</mat-option>
+                                                <mat-option *ngFor="let y of foundedYearOptions" [value]="y">{{
+                                                    y
+                                                }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
                                     </div>
                                 </ng-template>
                             </editable>
@@ -755,25 +783,33 @@
                                     <div class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight hover:border-gray-500 dark:hover:border-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700 {{
                                         invalidInputZip ? 'border-red-600' : ''
                                     }}">
-                                        {{ orgObj.zip }}
+                                        {{ orgObj.zip || '—' }}
                                     </div>
                                 </ng-template>
                                 <ng-template editMode>
                                     <div
                                         class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
-                                        <input class="form-control" editableFocusable
-                                            data-testid="sample-input-click-edit" placeholder="Zip" type="text"
-                                            [formControl]="zipControl" />
+                                        <input
+                                            class="form-control zip-inline-input"
+                                            editableFocusable
+                                            data-testid="sample-input-click-edit"
+                                            placeholder="12345 or 12345-6789"
+                                            type="text"
+                                            maxlength="10"
+                                            inputmode="numeric"
+                                            autocomplete="postal-code"
+                                            [formControl]="zipControl"
+                                        />
                                     </div>
                                 </ng-template>
                             </editable>
                             <mat-error *ngIf="invalidInputZip">
-                                Zip is <strong>required</strong>
+                                Enter a valid US ZIP (5 digits or ZIP+4)
                             </mat-error>
                         </div>
                     </div>
                     <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <div class="w-full px-3">
                             <label class="block tracking-wide text-sm mb-2" for="grid-website">
                                 Website
                             </label>
@@ -791,8 +827,9 @@
                                 <ng-template editMode>
                                     <div
                                         class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-500 rounded py-3 px-4 mb-3 bg-white dark:bg-neutral-600 dark:bg-opacity-40 focus:outline focus:border-gray-500 dark:focus:border-neutral-400">
-                                        <input class="form-control" editableFocusable
-                                            data-testid="sample-input-click-edit" placeholder="Website" type="text"
+                                        <input class="form-control w-full" editableFocusable
+                                            data-testid="sample-input-click-edit" placeholder="https://example.org" type="text"
+                                            autocomplete="url"
                                             [formControl]="websiteControl" />
                                     </div>
                                 </ng-template>
@@ -829,7 +866,7 @@
                             </label>
                             <div
                                 class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
-                                {{ orgObj.yearFounded }}
+                                {{ orgObj.yearFounded > 0 ? orgObj.yearFounded : '—' }}
                             </div>
                         </div>
                         <div class="w-full md:w-1/2 px-3">
@@ -946,12 +983,12 @@
                             </label>
                             <div
                                 class="appearance-none block w-full text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-neutral-600 rounded py-3 px-4 mb-3 leading-tight">
-                                {{ orgObj.zip }}
+                                {{ orgObj.zip || '—' }}
                             </div>
                         </div>
                     </div>
                     <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <div class="w-full px-3">
                             <label class="block tracking-wide text-sm mb-2" for="grid-website">
                                 Website
                             </label>

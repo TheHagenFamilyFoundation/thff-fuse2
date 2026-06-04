@@ -46,10 +46,11 @@
         <!-- Table (keep mat-table mounted so MatSort/paginator hooks stay valid) -->
         <fuse-card class="flex flex-col w-full overflow-hidden relative">
             <div *ngIf="!loaded"
-                 class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-card/90 dark:bg-gray-900/90 rounded-lg"
                  role="status"
                  aria-label="Loading organizations">
                 <mat-spinner [diameter]="40"></mat-spinner>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading organizations…</p>
             </div>
 
             <mat-table [dataSource]="data" matSort matSortActive="createdOn" matSortDisableClear
@@ -112,7 +113,8 @@
             </mat-table>
 
             <mat-paginator (page)="handlePageEvent($event)" [length]="orgCount"
-                           [pageSizeOptions]="[10, 25, 100]"
+                           [pageSize]="tablePageSize"
+                           [pageSizeOptions]="tablePageSizeOptions"
                            [disabled]="!loaded"></mat-paginator>
         </fuse-card>
 

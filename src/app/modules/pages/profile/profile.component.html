@@ -39,7 +39,11 @@
             <fuse-card class="flex flex-col w-full p-6 sm:p-8 pb-6">
                 <div class="text-xl font-semibold">Organizations</div>
                 <div class="flex flex-col w-full mt-8">
-                    <app-user-organization [user]="user" [organizations]="organizations"></app-user-organization>
+                    <app-user-organization
+                        [user]="user"
+                        [organizations]="organizations"
+                        [organizationsLoading]="organizationsLoading">
+                    </app-user-organization>
                 </div>
             </fuse-card>
         </div>
@@ -269,6 +273,59 @@
                                 </button>
                             </div>
                         </form>
+                    </ng-container>
+
+                    <!-- ===== PREFERENCES PANEL ===== -->
+                    <ng-container *ngSwitchCase="'preferences'">
+                        <div class="w-full max-w-xl">
+                            <div *ngIf="preferencesAlert" class="mb-6">
+                                <fuse-alert
+                                    [type]="preferencesAlert.type"
+                                    appearance="outline"
+                                    [showIcon]="true"
+                                    [dismissible]="true"
+                                    (dismissedChanged)="preferencesAlert = null">
+                                    {{ preferencesAlert.message }}
+                                </fuse-alert>
+                            </div>
+
+                            <div class="text-secondary mb-6">
+                                Choose how many rows appear in tables by default. You can still change page size on individual tables.
+                            </div>
+
+                            <mat-form-field class="fuse-mat-no-subscript w-full max-w-xs">
+                                <mat-label>Rows per page</mat-label>
+                                <mat-select [(ngModel)]="preferencesTablePageSize">
+                                    <mat-option *ngFor="let size of tablePageSizeOptions" [value]="size">
+                                        {{ size }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <div *ngIf="showPreferencesActions" class="flex items-center justify-end gap-4 mt-8">
+                                <app-autosave-status
+                                    size="sm"
+                                    [saving]="preferencesSaving"
+                                    [savedFlash]="preferencesSavedFlash"
+                                    savingLabel="Saving…"
+                                    savedLabel="Saved">
+                                </app-autosave-status>
+                                <button
+                                    *ngIf="preferencesChanged"
+                                    mat-flat-button
+                                    type="button"
+                                    [color]="'primary'"
+                                    [disabled]="preferencesSaving"
+                                    (click)="savePreferences()">
+                                    <span *ngIf="!preferencesSaving">Save</span>
+                                    <mat-progress-spinner
+                                        *ngIf="preferencesSaving"
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'">
+                                    </mat-progress-spinner>
+                                </button>
+                            </div>
+                        </div>
                     </ng-container>
 
                     <!-- ===== NOTIFICATIONS PANEL ===== -->

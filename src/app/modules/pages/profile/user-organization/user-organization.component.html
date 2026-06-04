@@ -44,7 +44,10 @@
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
     </mat-table>
-    <mat-paginator [pageSizeOptions]="[5]" [disabled]="!loaded"></mat-paginator>
+    <mat-paginator [pageSize]="tablePageSize"
+                   [pageSizeOptions]="tablePageSizeOptions"
+                   [disabled]="!loaded"
+                   (page)="onOrganizationsPage($event)"></mat-paginator>
 </div>
 <button mat-button color="primary" (click)="createOrganization()" fxHide="false">
     <mat-icon>add</mat-icon> Create Organization

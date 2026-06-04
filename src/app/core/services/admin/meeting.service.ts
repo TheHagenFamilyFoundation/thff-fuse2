@@ -40,7 +40,7 @@ export class MeetingService {
     /** Re-render full grant email HTML after plain-text message edits (matches send output). */
     renderGrantEmailPreview(
         meetingId: string,
-        body: { organizationId: string; messagePlain: string }
+        body: { allocationId?: string; organizationId?: string; messagePlain: string }
     ): Observable<{ html: string }> {
         return this.http.post<{ html: string }>(
             `${this.apiUrl}/meeting/${meetingId}/grant-notification/preview-render`,
@@ -48,8 +48,9 @@ export class MeetingService {
         );
     }
 
-    getAddableProposals(id: string): Observable<any> {
-        return this.http.get(`${this.apiUrl}/meeting/${id}/addable-proposals`);
+    /** Adds allocation rows for any submitted, non-archived proposals in the meeting year not yet on the meeting. */
+    syncEligibleProposals(id: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/meeting/${id}/sync-eligible-proposals`, {});
     }
 
     createMeeting(data: { submissionYear: string; year: number; totalBudget?: number; notes?: string }): Observable<any> {
@@ -64,10 +65,6 @@ export class MeetingService {
         return this.http.put(`${this.apiUrl}/meeting/${id}/allocations`, { allocations });
     }
 
-    addAllocation(id: string, proposalId: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/meeting/${id}/allocations/add`, { proposalId });
-    }
-
     completeMeeting(id: string): Observable<any> {
         return this.http.put(`${this.apiUrl}/meeting/${id}/complete`, {});
     }
@@ -76,7 +73,14 @@ export class MeetingService {
         return this.http.put(`${this.apiUrl}/meeting/${id}/archive`, { archived });
     }
 
+    /** Marks allocation as not in the active deliberation list (proposal stays on the meeting). */
     removeAllocation(meetingId: string, allocationId: string): Observable<any> {
         return this.http.delete(`${this.apiUrl}/meeting/${meetingId}/allocation/${allocationId}`);
+    }
+
+    setAllocationActive(meetingId: string, allocationId: string, active: boolean): Observable<any> {
+        return this.http.put(`${this.apiUrl}/meeting/${meetingId}/allocation/${allocationId}/active`, {
+            active,
+        });
     }
 }

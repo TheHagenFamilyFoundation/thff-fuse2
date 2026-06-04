@@ -26,14 +26,20 @@
 
         <fuse-card class="flex flex-col w-full overflow-hidden relative">
             <div *ngIf="!tableLoaded"
-                 class="absolute inset-0 z-10 flex items-center justify-center bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-card/90 dark:bg-gray-900/90 rounded-lg"
                  role="status"
                  aria-label="Loading submission years">
                 <mat-spinner [diameter]="40"></mat-spinner>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading submission years…</p>
             </div>
 
-            <table mat-table [dataSource]="dataSource" matSort class="w-full min-h-[200px]"
-                   [class.opacity-40]="!tableLoaded" [class.pointer-events-none]="!tableLoaded">
+            <div *ngIf="tableLoaded && loadError"
+                 class="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <mat-icon class="icon-size-12 mb-3 text-amber-500">error_outline</mat-icon>
+                <p class="text-sm text-gray-600 dark:text-gray-300 m-0">{{ loadError }}</p>
+            </div>
+
+            <table *ngIf="tableLoaded && !loadError" mat-table [dataSource]="dataSource" matSort class="w-full min-h-[200px]">
 
                 <!-- Year Column -->
                 <ng-container matColumnDef="year">
@@ -75,7 +81,7 @@
                         <button mat-stroked-button
                                 [color]="row.active ? 'warn' : 'primary'"
                                 [disabled]="!row.active && row.year !== currentYear"
-                                (click)="toggleSubmissionYear(row.subID)">
+                                (click)="toggleSubmissionYear(row)">
                             {{ row.active ? 'Close Portal' : 'Open Portal' }}
                         </button>
                     </td>
@@ -85,6 +91,15 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
             </table>
+
+            <div *ngIf="tableLoaded && !loadError && dataSource.data.length === 0"
+                 class="flex flex-col items-center justify-center py-16 text-center">
+                <mat-icon class="icon-size-12 mb-3 text-gray-300 dark:text-gray-600">calendar_today</mat-icon>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0">No submission years yet.</p>
+                <p *ngIf="submissionYearMissing" class="text-xs text-gray-400 dark:text-gray-500 mt-2 m-0">
+                    Use “Create {{ currentYear }} Year” above to add the current grant cycle.
+                </p>
+            </div>
         </fuse-card>
 
     </div>

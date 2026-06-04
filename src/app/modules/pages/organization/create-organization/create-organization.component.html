@@ -90,30 +90,27 @@
                                 >
                                     Year Founded *
                                 </label>
-                                <mat-form-field class="year-founded">
-                                    <input
-                                        matInput
-                                        placeholder="Year Founded"
+                                <mat-form-field class="year-founded-select">
+                                    <mat-select
                                         formControlName="yearFounded"
                                         id="grid-year-founded"
-                                        maxlength="4"
+                                        placeholder="Select year"
                                         required
-                                    />
-                                    <mat-hint align="end"
-                                        >{{
-                                            (
-                                                groupedForm
-                                                    .get('yearFounded')
-                                                    ?.value?.toString() || ''
-                                            ).length
-                                        }}
-                                        / 4</mat-hint
                                     >
+                                        <mat-option [value]="null" disabled>
+                                            Select year
+                                        </mat-option>
+                                        <mat-option
+                                            *ngFor="let y of foundedYearOptions"
+                                            [value]="y"
+                                            >{{ y }}</mat-option
+                                        >
+                                    </mat-select>
                                     <mat-error
                                         *ngIf="
                                             groupedForm
                                                 .get('yearFounded')
-                                                .hasError('required')
+                                                ?.hasError('required')
                                         "
                                     >
                                         Year Founded is
@@ -438,52 +435,51 @@
                                 >
                                     Zip *
                                 </label>
-                                <mat-form-field>
+                                <mat-form-field class="zip-field">
                                     <input
                                         matInput
-                                        placeholder="Zip"
-                                        maxlength="5"
+                                        placeholder="12345 or 12345-6789"
+                                        maxlength="10"
+                                        inputmode="numeric"
+                                        autocomplete="postal-code"
                                         formControlName="zip"
                                         id="grid-zip"
                                         required
                                     />
-                                    <mat-hint align="end"
-                                        >{{
-                                            (
-                                                groupedForm
-                                                    .get('zip')
-                                                    ?.value?.toString() || ''
-                                            ).length
-                                        }}
-                                        / 5</mat-hint
-                                    >
+                                    <mat-hint align="end">US ZIP: 5 digits, or ZIP+4</mat-hint>
                                     <mat-error
                                         *ngIf="
                                             groupedForm
                                                 .get('zip')
-                                                .hasError('required')
+                                                ?.hasError('required')
                                         "
                                     >
                                         Zip is <strong>required</strong>
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="groupedForm.get('zip')?.hasError('pattern')"
+                                    >
+                                        Enter a valid US ZIP (5 digits or ZIP+4)
                                     </mat-error>
                                 </mat-form-field>
                             </div>
                         </div>
                         <div class="flex flex-wrap -mx-3 mb-6">
-                            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <div class="w-full px-3">
                                 <label
                                     class="block tracking-wide text-sm mb-2"
                                     for="grid-website"
                                 >
                                     Website
                                 </label>
-                                <mat-form-field>
+                                <mat-form-field class="w-full">
                                     <input
                                         matInput
                                         type="text"
                                         formControlName="website"
                                         id="grid-website"
-                                        placeholder="Website"
+                                        placeholder="https://example.org"
+                                        autocomplete="url"
                                     />
                                 </mat-form-field>
                             </div>
@@ -514,18 +510,30 @@
                                     class="fuse-mat-button-large mt-6"
                                     mat-raised-button
                                     [color]="'primary'"
+                                    type="button"
+                                    [disabled]="creating"
                                     (click)="cancel()"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    class="fuse-mat-button-large mt-6"
+                                    class="fuse-mat-button-large mt-6 create-org-submit"
                                     mat-raised-button
                                     [color]="'primary'"
-                                    [disabled]="!groupedForm.valid"
+                                    type="button"
+                                    [disabled]="!groupedForm.valid || creating"
+                                    [attr.aria-busy]="creating"
                                     (click)="createOrg()"
                                 >
-                                    Create
+                                    <span class="create-org-submit__content">
+                                        <mat-progress-spinner
+                                            *ngIf="creating"
+                                            class="create-org-submit__spinner"
+                                            diameter="20"
+                                            mode="indeterminate"
+                                        />
+                                        <span>{{ creating ? 'Creating…' : 'Create' }}</span>
+                                    </span>
                                 </button>
                             </div>
                         </div>

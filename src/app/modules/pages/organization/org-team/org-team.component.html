@@ -141,7 +141,8 @@
 
         <mat-paginator *ngIf="teamRowCount > pageSizeOptions[0]"
                        [pageSizeOptions]="pageSizeOptions"
-                       [pageSize]="10"
+                       [pageSize]="tablePageSize"
+                       (page)="onTeamPage($event)"
                        showFirstLastButtons
                        class="border-t border-gray-200 dark:border-neutral-600">
         </mat-paginator>

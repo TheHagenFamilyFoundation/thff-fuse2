@@ -1,11 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
+import { CreateMeetingDialogComponent } from './create-meeting-dialog.component';
 
 @Component({
     standalone: false,
@@ -13,22 +17,19 @@ import { meetingStatusLabel } from '../meeting-status.labels';
     templateUrl: './meeting.component.html',
     styleUrls: ['./meeting.component.scss']
 })
-export class MeetingComponent implements OnInit {
+export class MeetingComponent implements OnInit, AfterViewInit {
+
+    @ViewChild(MatPaginator) meetingPaginator: MatPaginator;
 
     isPresidentOrAdmin = false;
     loaded = false;
 
-    /** Table rows — MatTableDataSource so the grid updates reliably after HTTP. */
     dataSource = new MatTableDataSource<any>([]);
+    /** Row open in the action menu (single shared mat-menu). */
+    menuRow: any = null;
 
     years: any[] = [];
-    selectedYearId: string;
     currentYear: number = new Date().getFullYear();
-
-    // Create form
-    totalBudget: number = 0;
-    meetingNotes: string = '';
-    showCreateForm = false;
 
     // Archive filter: '' = active, 'only' = archived, 'true' = all
     archivedFilter: string = '';
@@ -38,23 +39,37 @@ export class MeetingComponent implements OnInit {
 
     displayedColumns = ['year', 'created', 'startedBy', 'budget', 'allocated', 'status', 'action'];
 
+    readonly tablePageSizeOptions = [10, 25, 50];
+    tablePageSize: number;
+
     constructor(
         private meetingService: MeetingService,
         private submissionYearsService: SubmissionYearsService,
         private authService: AuthService,
         private snackBar: MatSnackBar,
         private router: Router,
-        private _changeDetectorRef: ChangeDetectorRef
-    ) {}
+        private dialog: MatDialog,
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+    }
 
     ngOnInit(): void {
         this.authService.checkPresident().subscribe((isP) => {
             this.isPresidentOrAdmin = isP;
             this._changeDetectorRef.markForCheck();
         });
-        // List load must not depend on submission-years (that call can fail or be empty).
         this.loadMeetings();
         this.loadSubmissionYearsForForm();
+    }
+
+    ngAfterViewInit(): void {
+        this.connectPaginator();
+    }
+
+    get meetingCount(): number {
+        return this.dataSource.data?.length ?? 0;
     }
 
     /**
@@ -65,9 +80,6 @@ export class MeetingComponent implements OnInit {
             next: (years) => {
                 const arr = Array.isArray(years) ? years : [];
                 this.years = arr.slice().sort((a, b) => (b?.year ?? 0) - (a?.year ?? 0));
-                if (this.years.length > 0) {
-                    this.selectedYearId = this.years[0]._id;
-                }
                 this._changeDetectorRef.markForCheck();
             },
             error: () => {
@@ -85,15 +97,43 @@ export class MeetingComponent implements OnInit {
         this.meetingService.getMeetings(yearNum, undefined, this.archivedFilter || undefined).subscribe({
             next: (meetings) => {
                 const rows = Array.isArray(meetings) ? meetings : [];
-                this.dataSource.data = rows;
+                this.dataSource.data = this.sortMeetings(rows);
                 this.loaded = true;
                 this._changeDetectorRef.markForCheck();
+                setTimeout(() => this.connectPaginator());
             },
             error: () => {
                 this.dataSource.data = [];
                 this.loaded = true;
                 this._changeDetectorRef.markForCheck();
             }
+        });
+    }
+
+    private connectPaginator(): void {
+        if (this.meetingPaginator) {
+            this.dataSource.paginator = this.meetingPaginator;
+            this.meetingPaginator.pageSize = this.tablePageSize;
+            this.meetingPaginator.firstPage();
+        }
+    }
+
+    onMeetingPage(event: { pageSize: number }): void {
+        if (event.pageSize !== this.tablePageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+            this.tablePageSize = event.pageSize;
+        }
+    }
+
+    private sortMeetings(rows: any[]): any[] {
+        return [...rows].sort((a, b) => {
+            const yearDiff = (b.year ?? 0) - (a.year ?? 0);
+            if (yearDiff !== 0) {
+                return yearDiff;
+            }
+            return (
+                new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+            );
         });
     }
 
@@ -105,6 +145,11 @@ export class MeetingComponent implements OnInit {
     yearFilterChanged(value: string | number | null | undefined): void {
         this.listYearFilter = value === null || value === undefined ? '' : String(value);
         this.loadMeetings();
+    }
+
+    openRowMenu(event: Event, row: any): void {
+        event.stopPropagation();
+        this.menuRow = row;
     }
 
     archiveMeeting(event: Event, id: string, archived: boolean): void {
@@ -121,36 +166,29 @@ export class MeetingComponent implements OnInit {
         });
     }
 
-    createMeeting(): void {
-        if (!this.selectedYearId) return;
-
-        const year = this.years.find(y => y._id === this.selectedYearId);
-        if (!year) return;
-
-        const data = {
-            submissionYear: this.selectedYearId,
-            year: year.year,
-            totalBudget: this.totalBudget || 0,
-            notes: this.meetingNotes
-        };
-
-        this.meetingService.createMeeting(data).subscribe({
-            next: (meeting) => {
-                this.snackBar.open('Meeting created', 'Close', { duration: 3000 });
-                this.showCreateForm = false;
-                this.totalBudget = 0;
-                this.meetingNotes = '';
-                this.router.navigate(['/pages/director/meeting', meeting._id]);
-            },
-            error: (err) => {
-                const msg = err.error?.message || 'Error creating meeting';
-                this.snackBar.open(msg, 'Close', { duration: 5000 });
-            }
-        });
+    openCreateMeetingDialog(): void {
+        this.dialog
+            .open(CreateMeetingDialogComponent, {
+                width: '720px',
+                maxWidth: '95vw',
+                data: { years: this.years }
+            })
+            .afterClosed()
+            .subscribe((meeting) => {
+                if (meeting?._id) {
+                    this.snackBar.open('Meeting created', 'Close', { duration: 3000 });
+                    this.loadMeetings();
+                    this.router.navigate(['/pages/director/meeting', meeting._id]);
+                }
+            });
     }
 
     goToMeeting(id: string): void {
         this.router.navigate(['/pages/director/meeting', id]);
+    }
+
+    trackMeeting(_index: number, row: any): string {
+        return String(row?._id ?? _index);
     }
 
     getUserName(user: any): string {
@@ -171,24 +209,6 @@ export class MeetingComponent implements OnInit {
             case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:bg-opacity-40 dark:text-blue-300';
             case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-40 dark:text-green-300';
             default: return '';
-        }
-    }
-
-    getStatusIcon(status: string): string {
-        switch (status) {
-            case 'setup': return 'schedule';
-            case 'in_progress': return 'pending';
-            case 'completed': return 'check_circle';
-            default: return 'help_outline';
-        }
-    }
-
-    getStatusIconColor(status: string): string {
-        switch (status) {
-            case 'setup': return 'text-yellow-500';
-            case 'in_progress': return 'text-blue-500';
-            case 'completed': return 'text-green-500';
-            default: return 'text-gray-400';
         }
     }
 }

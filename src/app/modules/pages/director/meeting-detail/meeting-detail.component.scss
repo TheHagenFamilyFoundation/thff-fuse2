@@ -1,3 +1,7 @@
+:host {
+    display: block;
+}
+
 :host ::ng-deep .mat-row {
     transition: background-color 150ms ease;
 
@@ -10,4 +14,316 @@
 :host ::ng-deep .meeting-table .mat-cell {
     padding-top: 0.7rem;
     padding-bottom: 0.7rem;
+}
+
+.meeting-setup-stepper-card {
+    overflow: hidden;
+}
+
+.meeting-setup-search-field {
+    margin-bottom: 0;
+}
+
+:host ::ng-deep .meeting-setup-search-field .meeting-setup-search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.125rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    vertical-align: middle;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.7);
+        background: transparent;
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(13, 148, 136, 0.65);
+        outline-offset: 1px;
+        border-radius: 2px;
+    }
+
+    .mat-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+        font-size: 1.125rem;
+        line-height: 1.125rem;
+    }
+}
+
+:host-context(.dark) ::ng-deep .meeting-setup-search-field .meeting-setup-search-clear,
+:host-context(body.dark) ::ng-deep .meeting-setup-search-field .meeting-setup-search-clear {
+    color: rgba(255, 255, 255, 0.5);
+
+    &:hover {
+        color: rgba(255, 255, 255, 0.85);
+    }
+}
+
+:host ::ng-deep .meeting-table .mat-column-createdOn {
+    flex: 0 0 6.5rem;
+    min-width: 6.5rem;
+}
+
+:host ::ng-deep .meeting-table--setup {
+    min-width: 64rem;
+}
+
+:host ::ng-deep .meeting-table .mat-column-select {
+    flex: 0 0 3rem;
+    max-width: 3rem;
+    padding-left: 1rem;
+    padding-right: 0;
+}
+
+.meeting-stats-sticky-sentinel {
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
+}
+
+// Fixed flush below app nav — compact stats, actions, and bulk selection
+.meeting-top-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 48;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 160ms ease, visibility 160ms ease, box-shadow 160ms ease;
+
+    :host-context(.dark) &,
+    :host-context(body.dark) & {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    }
+
+    &--visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+.meeting-top-sticky__action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    min-height: 2.5rem;
+    padding: 0.25rem 0;
+}
+
+:host ::ng-deep .meeting-top-sticky__budget-field {
+    width: 7.5rem;
+    margin-bottom: -1.25rem;
+
+    .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+}
+
+:host ::ng-deep .meeting-top-sticky__budget-edit-btn {
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    line-height: 1.5rem;
+
+    .mat-mdc-button-touch-target {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+.meeting-budget-stat-card__edit-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.25rem -0.25rem 0 0;
+    color: rgb(107 114 128);
+}
+
+:host-context(.dark) .meeting-budget-stat-card__edit-btn {
+    color: rgb(156 163 175);
+}
+
+:host ::ng-deep .meeting-budget-stat-card__field {
+    .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+}
+
+.meeting-budget-stat-card__done-btn {
+    min-height: 1.75rem;
+    line-height: 1.75rem;
+    padding: 0 0.625rem;
+    font-size: 0.8125rem;
+}
+
+.meeting-workspace {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.meeting-workspace__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.meeting-workspace__history {
+    flex: 0 0 17rem;
+    width: 17rem;
+    position: sticky;
+    top: 5.5rem;
+    align-self: flex-start;
+}
+
+.meeting-history-panel {
+    max-height: calc(100vh - 7rem);
+}
+
+.meeting-history-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:host-context(.dark) .meeting-history-panel__header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.meeting-history-panel__body {
+    overflow-y: auto;
+    padding: 0.625rem 0.875rem 0.875rem;
+}
+
+.meeting-history-list__item {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+:host-context(.dark) .meeting-history-list__item {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.meeting-history-list__time {
+    display: block;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    color: rgb(107 114 128);
+}
+
+.meeting-history-list__summary {
+    margin: 0.25rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: rgb(31 41 55);
+    word-break: break-word;
+}
+
+:host-context(.dark) .meeting-history-list__summary {
+    color: rgb(229 231 235);
+}
+
+.meeting-history-list__user {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.6875rem;
+    color: rgb(156 163 175);
+}
+
+@media (max-width: 1023px) {
+    .meeting-workspace {
+        flex-direction: column;
+    }
+
+    .meeting-workspace__history {
+        flex: none;
+        width: 100%;
+        position: static;
+    }
+
+    .meeting-history-panel {
+        max-height: 14rem;
+    }
+}
+
+.meeting-complete-footer {
+    padding-top: 0.25rem;
+}
+
+.meeting-top-sticky__selection-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.625rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0;
+
+    &--divider {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+        :host-context(.dark) &,
+        :host-context(body.dark) & {
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+    }
+}
+
+:host ::ng-deep .meeting-top-sticky__btn {
+    min-height: 2rem;
+    line-height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+
+    &.meeting-top-sticky__btn--text {
+        min-height: 2rem;
+        padding: 0 0.5rem;
+    }
+}
+
+.meeting-selection-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(249, 250, 251, 0.85);
+
+    :host-context(.dark) &,
+    :host-context(body.dark) & {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        background: rgba(17, 24, 39, 0.45);
+    }
+}
+
+:host ::ng-deep .meeting-setup-stepper .mat-horizontal-stepper-header-container {
+    flex-wrap: wrap;
+    gap: 0.25rem;
 }

@@ -21,6 +21,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatStepperModule } from '@angular/material/stepper';
 
 //components
 import { DirectorComponent } from './director.component';
@@ -36,14 +37,16 @@ import { SolicitationEmailsComponent } from './solicitation-emails/solicitation-
 import { SolicitationEmailPreviewDialogComponent } from './solicitation-emails/solicitation-email-preview-dialog.component';
 import { SolicitationPreviewSendDialogComponent } from './solicitation-emails/solicitation-preview-send-dialog.component';
 import { MeetingComponent } from './meeting/meeting.component';
+import { CreateMeetingDialogComponent } from './meeting/create-meeting-dialog.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
 import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
 import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
-import { GrantEmailPreviewDialogComponent } from './meeting-after/grant-email-preview-dialog.component';
+import { GrantProposalEmailListComponent } from './meeting-after/grant-proposal-email-list.component';
 import { SentGrantEmailViewDialogComponent } from './meeting-after/sent-grant-email-view-dialog.component';
-
+import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent, GrantEmailPreviewDialogComponent, SentGrantEmailViewDialogComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, CreateMeetingDialogComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent, GrantProposalEmailListComponent, SentGrantEmailViewDialogComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
@@ -67,6 +70,9 @@ import { SentGrantEmailViewDialogComponent } from './meeting-after/sent-grant-em
         MatProgressSpinnerModule,
         MatProgressBarModule,
         MatExpansionModule,
+        MatStepperModule,
+        AutosaveStatusComponent,
+        ConfirmDialogComponent,
     ],
 })
 export class DirectorModule { }

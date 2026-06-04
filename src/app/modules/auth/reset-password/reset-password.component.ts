@@ -6,6 +6,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseValidators } from '@fuse/validators';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { FuseLoadingService } from '@fuse/services/loading';
 
 @Component({
     standalone: false,
@@ -24,6 +25,7 @@ export class AuthResetPasswordComponent implements OnInit, OnDestroy {
     };
     resetPasswordForm: FormGroup;
     showAlert: boolean = false;
+    resettingPassword = false;
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
@@ -34,7 +36,8 @@ export class AuthResetPasswordComponent implements OnInit, OnDestroy {
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
+        private _fuseLoadingService: FuseLoadingService
     ) {}
 
     ngOnInit(): void {
@@ -61,12 +64,14 @@ export class AuthResetPasswordComponent implements OnInit, OnDestroy {
     }
 
     resetPassword(): void {
-        if (this.resetPasswordForm.invalid) {
+        if (this.resetPasswordForm.invalid || this.resettingPassword) {
             return;
         }
 
+        this.resettingPassword = true;
         this.resetPasswordForm.disable();
         this.showAlert = false;
+        this._fuseLoadingService.show();
 
         const passwordPayload = {
             np: this.resetPasswordForm.get('password').value,
@@ -77,6 +82,8 @@ export class AuthResetPasswordComponent implements OnInit, OnDestroy {
             .resetPassword(passwordPayload)
             .pipe(
                 finalize(() => {
+                    this._fuseLoadingService.hide();
+                    this.resettingPassword = false;
                     this.resetPasswordForm.enable();
                     this.resetPasswordNgForm.resetForm();
                     this.showAlert = true;

@@ -18,3 +18,20 @@
 :host-context(body.dark) .org-row:hover {
     background-color: rgba(255, 255, 255, 0.06);
 }
+
+/* Paginator: “Items per page” label + select on one visual line (MDC defaults align-items: flex-end). */
+:host ::ng-deep fuse-card mat-paginator {
+    .mat-mdc-paginator-page-size {
+        align-items: center;
+    }
+
+    .mat-mdc-paginator-page-size-label {
+        margin: 0;
+        align-self: center;
+    }
+
+    .mat-mdc-paginator-page-size .mat-mdc-form-field-infix {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}

@@ -4,6 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { GetUserService } from 'app/core/services/user/get-user.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import {
     dedupeUserOrganizations,
     PopulatedUserOrganizationRow,
@@ -43,11 +44,17 @@ export class OrganizationsComponent implements OnInit {
     hasOrganizations: boolean = false;
     loaded: boolean = false;
 
+    readonly tablePageSizeOptions = [5, 10, 25];
+    tablePageSize: number;
+
     constructor(
         private _router: Router,
         public getUserService: GetUserService,
-        private _cdr: ChangeDetectorRef
-    ) {}
+        private _cdr: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+    }
 
     ngOnInit(): void {
         this.getUser();
@@ -67,6 +74,7 @@ export class OrganizationsComponent implements OnInit {
         }
         if (this._paginator) {
             this.dataSource.paginator = this._paginator;
+            this._paginator.pageSize = this.tablePageSize;
         }
         if (this._sort) {
             this.dataSource.sort = this._sort;
@@ -81,11 +89,19 @@ export class OrganizationsComponent implements OnInit {
         this._router.navigate(['/pages/organization/', orgID]);
     }
 
+    onOrganizationsPage(event: { pageSize: number }): void {
+        if (event.pageSize !== this.tablePageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+            this.tablePageSize = event.pageSize;
+        }
+    }
+
     private getUser(): void {
         this.user = JSON.parse(localStorage.getItem('currentUser'));
     }
 
     private checkOrganizations(): void {
+        this.loaded = false;
         this.getUserService.getUserbyID(this.user._id).subscribe({
             next: (user) => {
                 const organizations = dedupeUserOrganizations<PopulatedUserOrganizationRow>(

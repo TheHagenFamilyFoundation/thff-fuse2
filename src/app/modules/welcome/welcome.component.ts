@@ -1,11 +1,12 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError, finalize, take, timeout } from 'rxjs/operators';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { environment } from 'environments/environment';
-
 /** Max wait for submission-year and my-proposals calls before showing an error (avoids hanging forever). */
 const API_WAIT_MS = 12000;
 
@@ -30,8 +31,10 @@ export class WelcomeComponent implements OnInit, OnDestroy
 
     proposals: any[] = [];
     proposalsLoading: boolean = false;
+    submittedProposalsPageIndex = 0;
+    readonly submittedProposalsPageSizeOptions = [12, 25, 50];
+    submittedProposalsPageSize: number;
 
-    drafts: { orgId: string; orgName: string; title: string; }[] = [];
 
     /** Fallback if the HTTP stream never terminates (should not happen with timeout + take). */
     private _grantCycleSafetyTimer: ReturnType<typeof setTimeout> | null = null;
@@ -41,12 +44,56 @@ export class WelcomeComponent implements OnInit, OnDestroy
         private _submissionYearsService: SubmissionYearsService,
         private _proposalService: ProposalService,
         private _router: Router,
-        private _cdr: ChangeDetectorRef
-    ) {}
+        private _cdr: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.submittedProposalsPageSize = this._userPreferences.pageSizeForOptions(
+            this.submittedProposalsPageSizeOptions
+        );
+    }
 
     ngOnInit(): void {
         this.getLatestSubmissionYear();
-        this.loadDrafts();
+    }
+
+    /** In-progress composer proposals (`draft` incomplete or `ready_to_submit` all fields filled). */
+    get draftProposals(): any[] {
+        return (this.proposals || []).filter((p) => this._isComposerProposal(p));
+    }
+
+    /** Submitted proposals only (composer rows are listed above). */
+    get submittedProposals(): any[] {
+        return (this.proposals || []).filter((p) => !this._isComposerProposal(p));
+    }
+
+    get submittedProposalsDisplayed(): any[] {
+        const rows = this.submittedProposals;
+        if (rows.length <= this.submittedProposalsPageSize) {
+            return rows;
+        }
+        const start = this.submittedProposalsPageIndex * this.submittedProposalsPageSize;
+        return rows.slice(start, start + this.submittedProposalsPageSize);
+    }
+
+    onSubmittedProposalsPage(event: PageEvent): void {
+        this.submittedProposalsPageIndex = event.pageIndex;
+        if (event.pageSize !== this.submittedProposalsPageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+        }
+        this.submittedProposalsPageSize = event.pageSize;
+    }
+
+    /** Hide the “All my proposals” toolbar when there is nothing for the active grant year. */
+    get showWelcomeProposalsActionBar(): boolean {
+        if (!this.latestSubmissionYear || this.proposalsLoading) {
+            return false;
+        }
+        return this.draftProposals.length > 0 || this.submittedProposals.length > 0;
+    }
+
+    private _isComposerProposal(p: any): boolean {
+        const s = p?.status;
+        return s === 'draft' || s === 'ready_to_submit';
     }
 
     ngOnDestroy(): void {
@@ -125,32 +172,52 @@ export class WelcomeComponent implements OnInit, OnDestroy
             )
             .subscribe((proposals) => {
                 this.proposals = proposals || [];
+                this.submittedProposalsPageIndex = 0;
             });
     }
 
-    loadDrafts(): void {
-        this.drafts = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('proposal-draft-')) {
-                try {
-                    const draft = JSON.parse(localStorage.getItem(key));
-                    if (draft && draft.projectTitle) {
-                        const orgId = key.replace('proposal-draft-', '');
-                        this.drafts.push({
-                            orgId,
-                            orgName: '',
-                            title: draft.projectTitle
-                        });
-                    }
-                } catch (e) {
-                    // skip invalid drafts
-                }
+    /** Org label for draft cards (API populates `organization` on my-proposals). */
+    draftOrganizationLabel(draft: any): string {
+        const o = draft?.organization;
+        if (!o || typeof o !== 'object') {
+            return '';
+        }
+        const name = o.name ? String(o.name).trim() : '';
+        const shortId = o.organizationID ? String(o.organizationID).trim() : '';
+        if (name && shortId) {
+            return `${name} · ${shortId}`;
+        }
+        if (name) {
+            return name;
+        }
+        if (shortId) {
+            return `Organization ${shortId}`;
+        }
+        return '';
+    }
+
+    draftSavedHint(iso: string | undefined): string {
+        if (!iso) {
+            return '';
+        }
+        try {
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) {
+                return '';
             }
+            return `Saved ${d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`;
+        } catch {
+            return '';
         }
     }
 
     getProposalStatus(proposal: any): { label: string; color: string; icon: string } {
+        if (proposal.status === 'draft') {
+            return { label: 'Draft', color: 'text-amber-600 dark:text-amber-400', icon: 'edit_note' };
+        }
+        if (proposal.status === 'ready_to_submit') {
+            return { label: 'Ready to submit', color: 'text-teal-600 dark:text-teal-400', icon: 'task_alt' };
+        }
         if (proposal.sponsor) {
             return { label: 'Sponsored', color: 'text-green-600 dark:text-green-400', icon: 'check_circle' };
         }
@@ -169,7 +236,16 @@ export class WelcomeComponent implements OnInit, OnDestroy
         this._router.navigate(['/pages/proposal', id]);
     }
 
-    continueDraft(draft: any): void {
-        this._router.navigate(['/pages/organization', draft.orgId]);
+    continueDraft(proposal: any): void {
+        const org = proposal.organization?._id ?? proposal.organization;
+        const orgID = proposal.organization?.organizationID ?? '';
+        this._router.navigate(['/pages/proposal/create'], {
+            queryParams: {
+                org: String(org),
+                ...(orgID ? { orgID: String(orgID) } : {}),
+                ...(proposal?._id ? { draft: String(proposal._id) } : {}),
+                returnTo: 'welcome',
+            },
+        });
     }
 }

@@ -2,8 +2,9 @@ import {
     Component,
     ViewChild,
     OnInit,
+    OnChanges,
+    SimpleChanges,
     Input,
-    AfterViewInit,
 } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -11,14 +12,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
-import { GetUserService } from 'app/core/services/user/get-user.service';
 import { InOrgService } from 'app/core/services/user/in-org.service';
-import {
-    dedupeUserOrganizations,
-    PopulatedUserOrganizationRow,
-} from 'app/core/utilities/organization-access.util';
-
-// import { CreateOrganizationComponent } from '../../organization/create-organization/create-organization.component';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
+import { PopulatedUserOrganizationRow } from 'app/core/utilities/organization-access.util';
 import { SelectedOrganizationComponent } from './selected-organization/selected-organization.component';
 
 @Component({
@@ -27,49 +23,42 @@ import { SelectedOrganizationComponent } from './selected-organization/selected-
     templateUrl: './user-organization.component.html',
     styleUrls: ['./user-organization.component.scss'],
 })
-export class UserOrganizationComponent implements OnInit {
+export class UserOrganizationComponent implements OnInit, OnChanges {
     @Input()
     user: any;
 
     @Input()
-    organizations: any;
+    organizations: PopulatedUserOrganizationRow[] = [];
+
+    @Input()
+    organizationsLoading = false;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
     @ViewChild(MatSort, { static: false }) sort: MatSort;
 
-    // displayedColumns = ['id', 'name', 'progress', 'color'];
     displayedColumns = ['name', 'createdOn', 'link'];
 
-    dataSource: MatTableDataSource<PopulatedUserOrganizationRow>;
+    dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>([]);
 
     inOrganization = false;
 
-    orgName: any;
-
     email: string;
-
-    // string
-    description: any;
 
     inOrgCheck: boolean;
 
-    loaded: boolean;
+    loaded = false;
+
+    readonly tablePageSizeOptions = [5, 10, 25];
+    tablePageSize: number;
 
     constructor(
-        public getUserService: GetUserService,
         private router: Router,
         public dialog: MatDialog,
-        private inOrg: InOrgService
+        private inOrg: InOrgService,
+        private _userPreferences: UserPreferencesService,
     ) {
-        this.loaded = false;
-
-        // // Create 100 organizations
-        // const organizations: OrganizationData[] = [];
-        // for (let i = 1; i <= 100; i++) { organizations.push(createNewOrganization(i)); }
-
-        // // Assign the data to the data source for the table to render
-        // this.dataSource = new MatTableDataSource(organizations);
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
     }
 
     ngOnInit(): void {
@@ -77,95 +66,68 @@ export class UserOrganizationComponent implements OnInit {
             this.inOrgCheck = message;
         });
 
-        this.email = this.user.email;
-
         if (!this.user) {
             this.router.navigate(['/pages/auth/logout']);
+            return;
         }
 
-        this.dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>([]);
-
-        this.checkOrganizations();
+        this.email = this.user.email;
+        this.syncFromParent();
     }
 
-    /**
-     * Set the paginator and sort after the view init since this component will
-     * be able to query its view for the initialized paginator and sort.
-     */
-    // ngAfterViewInit() {
-
-    //   this.dataSource.paginator = this.paginator;
-    //   this.dataSource.sort = this.sort;
-    // }
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['organizations'] || changes['organizationsLoading']) {
+            this.syncFromParent();
+        }
+    }
 
     applyFilter(filterValue: string): void {
-        let filteredValue = filterValue.trim(); // Remove whitespace
-        filteredValue = filteredValue.toLowerCase(); // Datasource defaults to lowercase matches
+        let filteredValue = filterValue.trim();
+        filteredValue = filteredValue.toLowerCase();
         this.dataSource.filter = filteredValue;
     }
-
-    getUser(): void {
-        this.getUserService.getUserbyID(this.user._id).subscribe(() => {
-            // pass in the user to the check functions
-            this.checkOrganizations();
-        },
-            (err) => {
-            });
-    }
-
-    // checks if user is in any organizations
-    checkOrganizations(): void {
-        this.getUserService.getUserbyID(this.user._id).subscribe((user) => {
-            const organization = dedupeUserOrganizations<PopulatedUserOrganizationRow>(
-                user?.organizations as PopulatedUserOrganizationRow[] | undefined
-            );
-
-            if (organization && organization.length > 0) {
-                this.inOrganization = true;
-
-                this.dataSource = new MatTableDataSource<PopulatedUserOrganizationRow>(organization);
-
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
-
-                this.inOrg.changeMessage(true);
-
-                this.loaded = true;
-            } else {
-                this.inOrganization = false;
-
-                this.loaded = true;
-            }
-        },
-            () => {
-                this.loaded = true;
-            });
-    } // end of checkOrganization
 
     createOrganization(): void {
         this.router.navigate(['/pages/organization/create']);
     }
 
-    // this might be kept
     openSelectedOrgDialog(org): void {
-        const dialogRef = this.dialog.open(SelectedOrganizationComponent, {
+        this.dialog.open(SelectedOrganizationComponent, {
             width: '400px',
             data: { name: org.name, orgID: org.organizationID },
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
         });
     }
 
     onRowClicked(row): void {
-        this.openSelectedOrgDialog(row); // pass in the org from row object
-    }
-
-    newMessage(): void {
-        this.inOrg.changeMessage(false);
+        this.openSelectedOrgDialog(row);
     }
 
     goToOrganization(orgID: string): void {
         this.router.navigate(['/pages/organization/', orgID]);
     }
-} // end of component
+
+    onOrganizationsPage(event: { pageSize: number }): void {
+        if (event.pageSize !== this.tablePageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+            this.tablePageSize = event.pageSize;
+        }
+    }
+
+    private syncFromParent(): void {
+        if (this.organizationsLoading) {
+            this.loaded = false;
+            return;
+        }
+
+        const rows = this.organizations ?? [];
+        this.inOrganization = rows.length > 0;
+        this.dataSource.data = rows;
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        if (this.paginator) {
+            this.paginator.pageSize = this.tablePageSize;
+        }
+        this.inOrg.changeMessage(this.inOrganization);
+        this.loaded = true;
+    }
+}

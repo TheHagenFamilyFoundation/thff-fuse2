@@ -55,10 +55,12 @@
 
                 <!-- Submit button -->
                 <button class="fuse-mat-button-large w-full mt-6" mat-flat-button [color]="'primary'"
-                    [disabled]="signUpForm.disabled" (click)="signUp()">
-                    <span *ngIf="!signUpForm.disabled">Create your account</span>
-                    <mat-progress-spinner *ngIf="signUpForm.disabled" [diameter]="24"
-                        [mode]="'indeterminate'"></mat-progress-spinner>
+                    type="button" [disabled]="signingUp" (click)="signUp()">
+                    <span *ngIf="!signingUp">Create your account</span>
+                    <span *ngIf="signingUp" class="inline-flex items-center justify-center gap-2">
+                        <mat-progress-spinner [diameter]="22" mode="indeterminate"></mat-progress-spinner>
+                        Creating account…
+                    </span>
                 </button>
             </form>
         </div>

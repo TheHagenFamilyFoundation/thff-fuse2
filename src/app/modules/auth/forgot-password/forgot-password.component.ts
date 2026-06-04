@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { FuseLoadingService } from '@fuse/services/loading';
 
 @Component({
     standalone: false,
@@ -21,12 +22,14 @@ export class AuthForgotPasswordComponent implements OnInit {
     };
     forgotPasswordForm: FormGroup;
     showAlert: boolean = false;
+    sendingResetLink = false;
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
     constructor(
         private _authService: AuthService,
-        private _formBuilder: FormBuilder
+        private _formBuilder: FormBuilder,
+        private _fuseLoadingService: FuseLoadingService
     ) {}
 
     ngOnInit(): void {
@@ -36,16 +39,20 @@ export class AuthForgotPasswordComponent implements OnInit {
     }
 
     sendResetLink(): void {
-        if (this.forgotPasswordForm.invalid) {
+        if (this.forgotPasswordForm.invalid || this.sendingResetLink) {
             return;
         }
 
+        this.sendingResetLink = true;
         this.forgotPasswordForm.disable();
         this.showAlert = false;
+        this._fuseLoadingService.show();
 
         this._authService.forgotPassword(this.forgotPasswordForm.get('email').value)
             .pipe(
                 finalize(() => {
+                    this._fuseLoadingService.hide();
+                    this.sendingResetLink = false;
                     this.forgotPasswordForm.enable();
                     this.forgotPasswordNgForm.resetForm();
                     this.showAlert = true;
