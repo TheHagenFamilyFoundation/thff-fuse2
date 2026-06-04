@@ -23,7 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.backendHealthChecker();
 
-        // If user is already authenticated (page refresh), start the session ping
+        // If user is already authenticated (page refresh), start the session refresh timer
         const token = this.authService.accessToken;
         if (token && !AuthUtils.isTokenExpired(token)) {
             this._backendService.startPing();

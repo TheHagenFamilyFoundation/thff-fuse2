@@ -1,0 +1,53 @@
+<h2 mat-dialog-title class="m-0 text-lg font-semibold">Create New Meeting</h2>
+
+<!-- Outside mat-dialog-content so MDC overflow/scroll does not clip the first line -->
+<p class="create-meeting-dialog__hint text-sm text-gray-500 dark:text-gray-400 mx-6 mb-1 max-w-xl leading-normal">
+    The meeting starts with <strong class="font-medium text-gray-700 dark:text-gray-300">submitted</strong> proposals for this year only.
+    Drafts and in-progress applications are not added until applicants submit them; refresh the meeting page to pick up new submissions.
+</p>
+
+<mat-dialog-content class="create-meeting-dialog__content">
+    <div *ngIf="loadingYears" class="flex justify-center py-8">
+        <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="!loadingYears" class="flex flex-col gap-4">
+        <!-- Row 1: year + budget -->
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <mat-form-field class="w-full sm:w-44 shrink-0 -mb-5">
+                <mat-label>Submission Year</mat-label>
+                <mat-select [(value)]="selectedYearId">
+                    <mat-option *ngFor="let y of years" [value]="y._id">{{ y.year }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full sm:w-44 shrink-0 -mb-5">
+                <mat-label>Total Budget</mat-label>
+                <span matPrefix class="pl-2">$&nbsp;</span>
+                <input matInput type="number" [(ngModel)]="totalBudget" placeholder="0" min="0" step="1">
+            </mat-form-field>
+        </div>
+
+        <!-- Row 2: notes + actions -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <mat-form-field class="w-full min-w-0 flex-1 -mb-5">
+                <mat-label>Notes (optional)</mat-label>
+                <input matInput [(ngModel)]="meetingNotes" placeholder="Meeting notes...">
+            </mat-form-field>
+
+            <div class="flex shrink-0 justify-end gap-2">
+                <button mat-stroked-button type="button" (click)="cancel()" [disabled]="creating">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" type="button" (click)="submit()"
+                        [disabled]="!selectedYearId || creating || years.length === 0"
+                        [attr.aria-busy]="creating">
+                    <span class="inline-flex items-center justify-center gap-2">
+                        <mat-spinner *ngIf="creating" diameter="20"></mat-spinner>
+                        <span>{{ creating ? 'Creating…' : 'Create' }}</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>

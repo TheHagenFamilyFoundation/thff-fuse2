@@ -510,3 +510,195 @@ html#fuse .mat-mdc-paginator .mat-mdc-form-field.mat-focused {
         color: #fff !important;
     }
 }
+
+/* ------------------------------------------------------------------------- */
+/* Fuse alerts: `type="info"` uses hard-coded blue — align with THFF primary */
+/* (same treatment as Fuse `type="primary"` outline / soft / fill / border)   */
+/* ------------------------------------------------------------------------- */
+
+fuse-alert.fuse-alert-appearance-outline.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-primary-50 ring-1 ring-primary-400 ring-inset;
+
+    .fuse-alert-icon {
+        @apply text-primary-600;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-dismiss-button {
+        @apply text-primary-900;
+    }
+
+    .fuse-alert-message {
+        @apply text-primary-700;
+    }
+
+    code {
+        @apply text-primary-800 bg-primary-200;
+    }
+
+    .dark & {
+        @apply bg-primary-600;
+
+        .fuse-alert-icon {
+            @apply text-white;
+        }
+
+        .fuse-alert-title,
+        .fuse-alert-dismiss-button {
+            @apply text-white;
+        }
+
+        .fuse-alert-message {
+            @apply text-primary-200;
+        }
+    }
+}
+
+html#fuse.scheme-dark fuse-alert.fuse-alert-appearance-outline.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-primary-600;
+
+    .fuse-alert-icon {
+        @apply text-white;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-dismiss-button {
+        @apply text-white;
+    }
+
+    .fuse-alert-message {
+        @apply text-primary-200;
+    }
+}
+
+fuse-alert.fuse-alert-appearance-soft.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-primary-50;
+
+    .fuse-alert-icon {
+        @apply text-primary-600;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-dismiss-button {
+        @apply text-primary-900;
+    }
+
+    .fuse-alert-message {
+        @apply text-primary-700;
+    }
+
+    code {
+        @apply text-primary-800 bg-primary-200;
+    }
+
+    .dark & {
+        @apply bg-primary-600;
+
+        .fuse-alert-icon {
+            @apply text-white;
+        }
+
+        .fuse-alert-title,
+        .fuse-alert-dismiss-button {
+            @apply text-white;
+        }
+
+        .fuse-alert-message {
+            @apply text-primary-200;
+        }
+    }
+}
+
+html#fuse.scheme-dark fuse-alert.fuse-alert-appearance-soft.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-primary-600;
+
+    .fuse-alert-icon {
+        @apply text-white;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-dismiss-button {
+        @apply text-white;
+    }
+
+    .fuse-alert-message {
+        @apply text-primary-200;
+    }
+}
+
+fuse-alert.fuse-alert-appearance-fill.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-primary-600;
+
+    .fuse-alert-icon {
+        @apply text-white;
+    }
+
+    .fuse-alert-title {
+        @apply text-white;
+    }
+
+    .fuse-alert-message {
+        @apply text-primary-100;
+    }
+
+    code {
+        @apply text-primary-800 bg-primary-200;
+    }
+}
+
+fuse-alert.fuse-alert-appearance-border.fuse-alert-type-info .fuse-alert-container {
+    .fuse-alert-border {
+        @apply bg-primary;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-icon {
+        @apply text-primary;
+    }
+
+    .fuse-alert-message {
+        @apply text-gray-600;
+    }
+
+    .dark & {
+        @apply bg-gray-700;
+
+        .fuse-alert-border {
+            @apply bg-primary-400;
+        }
+
+        .fuse-alert-title,
+        .fuse-alert-icon {
+            @apply text-primary-400;
+        }
+
+        .fuse-alert-message {
+            @apply text-gray-300;
+        }
+
+        code {
+            @apply bg-gray-400 text-gray-800;
+        }
+    }
+}
+
+html#fuse.scheme-dark fuse-alert.fuse-alert-appearance-border.fuse-alert-type-info .fuse-alert-container {
+    @apply bg-gray-700;
+
+    .fuse-alert-border {
+        @apply bg-primary-400;
+    }
+
+    .fuse-alert-title,
+    .fuse-alert-icon {
+        @apply text-primary-400;
+    }
+
+    .fuse-alert-message {
+        @apply text-gray-300;
+    }
+
+    code {
+        @apply bg-gray-400 text-gray-800;
+    }
+}

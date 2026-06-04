@@ -33,6 +33,13 @@
             </button>
         </div>
     </div>
+    <app-autosave-status
+        *ngIf="(inOrg || directorEditing) && (proposalInfoSaving || proposalInfoSavedFlash || editing)"
+        class="mt-1 block"
+        size="sm"
+        [saving]="proposalInfoSaving"
+        [savedFlash]="proposalInfoSavedFlash"
+        [idleHint]="editing && !proposalInfoSaving && !proposalInfoSavedFlash ? 'Click Save to apply your changes.' : ''" />
     <div class="flex flex-col mt-2">
         <div *ngIf="editing">
             <form *ngIf="proposal" [formGroup]="groupedForm" class="w-full proposal-info-grouped-edit">

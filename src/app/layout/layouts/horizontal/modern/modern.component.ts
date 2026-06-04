@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import {
     FuseNavigationService,
@@ -31,10 +32,13 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
     user: any;
     email: string;
     accessLevel: number;
-    isDirector: boolean;
+    isDirector = false;
     organizations: any;
-    inOrganization: boolean;
+    inOrganization = false;
     isLoggedIn: boolean;
+
+    /** Top nav "Proposals": directors always; applicants when they belong to at least one organization (same bar as Organizations). */
+    showProposalsNavLink = false;
 
     version: string = packageJson.version;
 
@@ -52,6 +56,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
         private _authService: AuthService,
         private _getUserService: GetUserService,
         private _inOrgService: InOrgService,
+        private _cdr: ChangeDetectorRef,
     ) { }
 
     // -----------------------------------------------------------------------------------------------------
@@ -88,50 +93,35 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                 this.isScreenSmall = !matchingAliases.includes('md');
             });
 
-        this._authService.check().subscribe((authenticated) => {
-            this.isLoggedIn = authenticated;
-        });
-
-        this._authService.checkDirector().subscribe((isADirector) => {
-            this.isDirector = isADirector;
-        });
-
-        if (this.isLoggedIn) {
-            if (localStorage.getItem('currentUser')) {
-                this.currentUser = JSON.parse(
-                    localStorage.getItem('currentUser')
-                );
-                this.email = this.currentUser.email;
-                this.accessLevel = this.currentUser.accessLevel;
-
-                this.getOrganizations();
-            }
-        }
         this.checkLoggedIn();
     }
 
     checkLoggedIn(): void {
-        this._authService.check().subscribe((authenticated) => {
-            this.isLoggedIn = authenticated;
-        });
+        this._authService.check()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((authenticated) => {
+                this.isLoggedIn = authenticated;
+                if (!authenticated) {
+                    this.showProposalsNavLink = false;
+                    this.inOrganization = false;
+                    this._cdr.markForCheck();
+                    return;
+                }
+                const raw = localStorage.getItem('currentUser');
+                if (raw) {
+                    this.currentUser = JSON.parse(raw);
+                    this.email = this.currentUser.email;
+                    this.accessLevel = this.currentUser.accessLevel;
+                    this.getOrganizations();
+                }
+            });
 
-        this._authService.checkDirector().subscribe((isADirector) => {
-            this.isDirector = isADirector;
-        });
-
-        if (this.isLoggedIn) {
-            if (localStorage.getItem('currentUser')) {
-                this.currentUser = JSON.parse(
-                    localStorage.getItem('currentUser')
-                ); // contains token
-                this.email = this.currentUser.email;
-                this.accessLevel = this.currentUser.accessLevel;
-
-                // TODO
-                this.getOrganizations();
-            }
-
-        }
+        this._authService.checkDirector()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((isADirector) => {
+                this.isDirector = isADirector;
+                this.syncProposalsNavLink();
+            });
     }
 
     /**
@@ -167,6 +157,7 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
     getOrganizations(): void {
         this._getUserService
             .getUserbyID(this.currentUser._id || this.currentUser.id)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user) => {
                 if (user) {
                     const orgs = dedupeUserOrganizations(user.organizations);
@@ -176,15 +167,34 @@ export class ModernLayoutComponent implements OnInit, OnDestroy {
                         this.inOrganization = true;
 
                         this._inOrgService.changeMessage(true);
+                        this.syncProposalsNavLink();
                     } else {
                         this.inOrganization = false;
 
                         this._inOrgService.changeMessage(false);
+                        this.syncProposalsNavLink();
                     }
                 } else {
+                    this.inOrganization = false;
+                    this.syncProposalsNavLink();
                 }
             });
     } // end of getOrganizations
+
+    private syncProposalsNavLink(): void {
+        if (!this.isLoggedIn) {
+            this.showProposalsNavLink = false;
+            this._cdr.markForCheck();
+            return;
+        }
+        if (this.isDirector) {
+            this.showProposalsNavLink = true;
+            this._cdr.markForCheck();
+            return;
+        }
+        this.showProposalsNavLink = this.inOrganization;
+        this._cdr.markForCheck();
+    }
 
     viewOrgs(): void {
         this._router.navigate(['/pages/organizations']);

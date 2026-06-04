@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { AuthService } from 'app/core/auth/auth.service';
+import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/services/user/user.service';
 import { FuseAlertType } from '@fuse/components/alert';
 
@@ -92,10 +93,11 @@ export class AuthUnlockSessionComponent implements OnInit {
                     // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
                     // to the correct page after a successful sign in. This way, that url can be set via
                     // routing file and we don't have to touch here.
-                    const redirectURL =
+                    const redirectURL = AuthUtils.normalizePostLoginRedirect(
                         this._activatedRoute.snapshot.queryParamMap.get(
                             'redirectURL'
-                        ) || '/signed-in-redirect';
+                        )
+                    );
 
                     // Navigate to the redirect url
                     this._router.navigateByUrl(redirectURL);

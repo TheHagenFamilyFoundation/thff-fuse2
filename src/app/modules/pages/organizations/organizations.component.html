@@ -23,8 +23,9 @@
     <div class="w-full max-w-screen-lg mx-auto p-6 sm:p-8">
 
         <!-- Loading State -->
-        <div *ngIf="!loaded" class="flex items-center justify-center py-20">
+        <div *ngIf="!loaded" class="flex flex-col items-center justify-center gap-4 py-20">
             <mat-spinner [diameter]="48"></mat-spinner>
+            <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading organizations…</p>
         </div>
 
         <!-- Empty State -->
@@ -82,7 +83,9 @@
 
             </mat-table>
 
-            <mat-paginator [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
+            <mat-paginator [pageSize]="tablePageSize"
+                           [pageSizeOptions]="tablePageSizeOptions"
+                           (page)="onOrganizationsPage($event)"></mat-paginator>
 
         </fuse-card>
 

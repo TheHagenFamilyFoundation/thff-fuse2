@@ -13,7 +13,7 @@
                     Meetings
                 </h1>
                 <button *ngIf="isPresidentOrAdmin" mat-flat-button color="primary"
-                        (click)="showCreateForm = !showCreateForm">
+                        (click)="openCreateMeetingDialog()">
                     <mat-icon class="mr-1">add</mat-icon>
                     New Meeting
                 </button>
@@ -21,194 +21,171 @@
         </div>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="!loaded" class="flex items-center justify-center py-24">
-        <mat-spinner [diameter]="48"></mat-spinner>
-    </div>
-
     <!-- Main Content -->
-    <div *ngIf="loaded" class="flex-auto">
-        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+    <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
 
-            <!-- Create Meeting Form -->
-            <div *ngIf="showCreateForm && isPresidentOrAdmin" class="mb-8">
-                <fuse-card class="flex flex-col p-6">
-                    <h3 class="text-lg font-semibold m-0 mb-4">Create New Meeting</h3>
-                    <div class="flex flex-col sm:flex-row sm:items-end gap-4">
-                        <mat-form-field class="w-full sm:w-48 -mb-5">
-                            <mat-label>Submission Year</mat-label>
-                            <mat-select [(value)]="selectedYearId">
-                                <mat-option *ngFor="let year of years" [value]="year._id">
-                                    {{ year.year }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-
-                        <mat-form-field class="w-full sm:w-48 -mb-5">
-                            <mat-label>Total Budget</mat-label>
-                            <span matPrefix class="pl-2">$&nbsp;</span>
-                            <input matInput type="number" [(ngModel)]="totalBudget" placeholder="0">
-                        </mat-form-field>
-
-                        <mat-form-field class="w-full sm:flex-1 -mb-5">
-                            <mat-label>Notes (optional)</mat-label>
-                            <input matInput [(ngModel)]="meetingNotes" placeholder="Meeting notes...">
-                        </mat-form-field>
-
-                        <div class="flex gap-2">
-                            <button mat-stroked-button (click)="showCreateForm = false">Cancel</button>
-                            <button mat-flat-button color="primary" (click)="createMeeting()"
-                                    [disabled]="!selectedYearId">
-                                Create
-                            </button>
-                        </div>
-                    </div>
-                </fuse-card>
-            </div>
-
-            <!-- Filters: year + show — horizontal row -->
-            <div
-                class="meeting-filters mb-4 flex flex-row flex-wrap items-end gap-3"
-                [ngClass]="isPresidentOrAdmin ? 'max-w-2xl' : 'max-w-xs'">
-                <mat-form-field class="meeting-filters__field -mb-5">
-                    <mat-label>Year</mat-label>
-                    <mat-select [value]="listYearFilter" (selectionChange)="yearFilterChanged($event.value)">
-                        <mat-option value="">All years</mat-option>
-                        <mat-option *ngFor="let y of years" [value]="'' + y.year">{{ y.year }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field *ngIf="isPresidentOrAdmin" class="meeting-filters__field -mb-5">
-                    <mat-label>Show</mat-label>
-                    <mat-select [value]="archivedFilter" (selectionChange)="archivedFilterChanged($event.value)">
-                        <mat-option value="">Active</mat-option>
-                        <mat-option value="only">Archived</mat-option>
-                        <mat-option value="true">All</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-
-            <!-- Meetings Table -->
-            <div *ngIf="dataSource.data.length > 0">
-                <fuse-card class="flex flex-col w-full overflow-hidden">
-                    <mat-table [dataSource]="dataSource" class="w-full">
-
-                        <!-- Year Column -->
-                        <ng-container matColumnDef="year">
-                            <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Year</mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="pl-6 font-semibold text-lg">
-                                {{ row.year }}
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Created Column -->
-                        <ng-container matColumnDef="created">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">Created</mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
-                                {{ row.createdAt | date:'MMM d, yyyy' }}
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Started By Column -->
-                        <ng-container matColumnDef="startedBy">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">Started By</mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
-                                <span *ngIf="row.startedBy">{{ getUserName(row.startedBy) }}</span>
-                                <span *ngIf="!row.startedBy">&mdash;</span>
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Budget Column -->
-                        <ng-container matColumnDef="budget">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">Budget</mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="font-medium">
-                                <span>{{ row.totalBudget | currency:'USD':'symbol':'1.0-0' }}</span>
-                                <span *ngIf="row.originalBudget && row.originalBudget !== row.totalBudget"
-                                      class="text-xs text-gray-400 ml-1"
-                                      [matTooltip]="'Original budget: ' + (row.originalBudget | currency:'USD':'symbol':'1.0-0')">
-                                    (was {{ row.originalBudget | currency:'USD':'symbol':'1.0-0' }})
-                                </span>
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Allocated Column -->
-                        <ng-container matColumnDef="allocated">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">Given</mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="font-medium">
-                                <span *ngIf="row.status === 'completed'" class="text-green-600">
-                                    {{ row.totalAllocated | currency:'USD':'symbol':'1.0-0' }}
-                                </span>
-                                <span *ngIf="row.status !== 'completed'" class="text-gray-300 dark:text-gray-600">
-                                    &mdash;
-                                </span>
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Status Column -->
-                        <ng-container matColumnDef="status">
-                            <mat-header-cell *matHeaderCellDef class="font-semibold">Status</mat-header-cell>
-                            <mat-cell *matCellDef="let row">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                                      [ngClass]="getStatusColor(row.status)">
-                                    {{ getStatusLabel(row.status) }}
-                                </span>
-                            </mat-cell>
-                        </ng-container>
-
-                        <!-- Action Column -->
-                        <ng-container matColumnDef="action">
-                            <mat-header-cell *matHeaderCellDef class="flex-none w-20"></mat-header-cell>
-                            <mat-cell *matCellDef="let row" class="flex-none w-20">
-                                <button *ngIf="isPresidentOrAdmin" mat-icon-button
-                                        [matMenuTriggerFor]="meetingMenu"
-                                        (click)="$event.stopPropagation()">
-                                    <mat-icon class="text-gray-400 icon-size-5">more_vert</mat-icon>
-                                </button>
-                                <mat-menu #meetingMenu="matMenu">
-                                    <button mat-menu-item (click)="goToMeeting(row._id)">
-                                        <mat-icon>visibility</mat-icon>
-                                        <span>View</span>
-                                    </button>
-                                    <button mat-menu-item (click)="archiveMeeting($event, row._id, !row.archived)">
-                                        <mat-icon>{{ row.archived ? 'unarchive' : 'archive' }}</mat-icon>
-                                        <span>{{ row.archived ? 'Restore' : 'Archive' }}</span>
-                                    </button>
-                                </mat-menu>
-                                <mat-icon *ngIf="!isPresidentOrAdmin" class="text-gray-400 icon-size-5">chevron_right</mat-icon>
-                            </mat-cell>
-                        </ng-container>
-
-                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                        <mat-row *matRowDef="let row; columns: displayedColumns"
-                                 class="meeting-row cursor-pointer"
-                                 (click)="goToMeeting(row._id)">
-                        </mat-row>
-                    </mat-table>
-                </fuse-card>
-            </div>
-
-            <!-- Empty State -->
-            <div *ngIf="loaded && dataSource.data.length === 0">
-                <fuse-card class="flex flex-col items-center p-12">
-                    <mat-icon class="text-gray-300 dark:text-gray-600 mb-4"
-                              style="font-size: 64px; width: 64px; height: 64px;">groups</mat-icon>
-                    <h2 class="text-xl font-semibold text-gray-500 m-0">
-                        {{ listYearFilter ? 'No meetings for this year' : 'No meetings yet' }}
-                    </h2>
-                    <p class="text-gray-400 mt-2 text-center">
-                        <ng-container *ngIf="listYearFilter">
-                            Try another year or clear the year filter to see all meetings.
-                        </ng-container>
-                        <ng-container *ngIf="!listYearFilter && isPresidentOrAdmin">
-                            Click "New Meeting" to create the first grant meeting.
-                        </ng-container>
-                        <ng-container *ngIf="!listYearFilter && !isPresidentOrAdmin">
-                            No meetings have been created yet. The president or admin will start one when ready.
-                        </ng-container>
-                    </p>
-                </fuse-card>
-            </div>
-
+        <!-- Filters: year + show — horizontal row -->
+        <div
+            class="meeting-filters mb-4 flex flex-row flex-wrap items-end gap-3"
+            [ngClass]="isPresidentOrAdmin ? 'max-w-2xl' : 'max-w-xs'">
+            <mat-form-field class="meeting-filters__field -mb-5">
+                <mat-label>Year</mat-label>
+                <mat-select [value]="listYearFilter" (selectionChange)="yearFilterChanged($event.value)">
+                    <mat-option value="">All years</mat-option>
+                    <mat-option *ngFor="let y of years" [value]="'' + y.year">{{ y.year }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field *ngIf="isPresidentOrAdmin" class="meeting-filters__field -mb-5">
+                <mat-label>Show</mat-label>
+                <mat-select [value]="archivedFilter" (selectionChange)="archivedFilterChanged($event.value)">
+                    <mat-option value="">Active</mat-option>
+                    <mat-option value="only">Archived</mat-option>
+                    <mat-option value="true">All</mat-option>
+                </mat-select>
+            </mat-form-field>
         </div>
+
+        <!-- Meetings table (always mounted so paginator wiring stays valid) -->
+        <fuse-card class="flex flex-col w-full overflow-hidden relative min-h-[280px]">
+            <div *ngIf="!loaded"
+                 class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-card/90 dark:bg-gray-900/90 rounded-lg"
+                 role="status"
+                 aria-label="Loading meetings">
+                <mat-spinner [diameter]="40"></mat-spinner>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading meetings…</p>
+            </div>
+
+            <div *ngIf="loaded && meetingCount === 0"
+                 class="flex flex-col items-center justify-center p-12 text-center">
+                <mat-icon class="text-gray-300 dark:text-gray-600 mb-4"
+                          style="font-size: 64px; width: 64px; height: 64px;">groups</mat-icon>
+                <h2 class="text-xl font-semibold text-gray-500 m-0">
+                    {{ listYearFilter ? 'No meetings for this year' : 'No meetings yet' }}
+                </h2>
+                <p class="text-gray-400 mt-2">
+                    <ng-container *ngIf="listYearFilter">
+                        Try another year or clear the year filter to see all meetings.
+                    </ng-container>
+                    <ng-container *ngIf="!listYearFilter && isPresidentOrAdmin">
+                        Click "New Meeting" to create the first grant meeting.
+                    </ng-container>
+                    <ng-container *ngIf="!listYearFilter && !isPresidentOrAdmin">
+                        No meetings have been created yet. The president or admin will start one when ready.
+                    </ng-container>
+                </p>
+            </div>
+
+            <ng-container *ngIf="loaded && meetingCount > 0">
+                <div class="px-4 pt-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 m-0">
+                        {{ meetingCount }} meeting<span *ngIf="meetingCount !== 1">s</span>
+                    </p>
+                </div>
+
+                <mat-table [dataSource]="dataSource"
+                           class="w-full meeting-list-table"
+                           [class.opacity-40]="!loaded"
+                           [class.pointer-events-none]="!loaded">
+
+                    <ng-container matColumnDef="year">
+                        <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Year</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="pl-6 font-semibold">
+                            {{ row.year }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="created">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold">Created</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            {{ row.createdAt | date:'MMM d, yyyy' }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="startedBy">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold">Started By</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="text-gray-500 dark:text-gray-400">
+                            <span *ngIf="row.startedBy">{{ getUserName(row.startedBy) }}</span>
+                            <span *ngIf="!row.startedBy">&mdash;</span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="budget">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold">Budget</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="font-medium whitespace-nowrap">
+                            <span>{{ row.totalBudget | currency:'USD':'symbol':'1.0-0' }}</span>
+                            <span *ngIf="row.originalBudget && row.originalBudget !== row.totalBudget"
+                                  class="text-xs text-gray-400 ml-1"
+                                  [matTooltip]="'Original budget: ' + (row.originalBudget | currency:'USD':'symbol':'1.0-0')">
+                                (was {{ row.originalBudget | currency:'USD':'symbol':'1.0-0' }})
+                            </span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="allocated">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold">Given</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="font-medium whitespace-nowrap">
+                            <span *ngIf="row.status === 'completed'" class="text-green-600">
+                                {{ row.totalAllocated | currency:'USD':'symbol':'1.0-0' }}
+                            </span>
+                            <span *ngIf="row.status !== 'completed'" class="text-gray-300 dark:text-gray-600">
+                                &mdash;
+                            </span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <mat-header-cell *matHeaderCellDef class="font-semibold">Status</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+                                  [ngClass]="getStatusColor(row.status)">
+                                {{ getStatusLabel(row.status) }}
+                            </span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="action">
+                        <mat-header-cell *matHeaderCellDef class="pr-4 w-16"></mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="pr-4 w-16">
+                            <button *ngIf="isPresidentOrAdmin"
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="meetingActionsMenu"
+                                    (click)="openRowMenu($event, row)">
+                                <mat-icon class="text-gray-400 icon-size-5">more_vert</mat-icon>
+                            </button>
+                            <mat-icon *ngIf="!isPresidentOrAdmin" class="text-gray-400 icon-size-5">chevron_right</mat-icon>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackMeeting"
+                             class="meeting-row cursor-pointer"
+                             (click)="goToMeeting(row._id)">
+                    </mat-row>
+                </mat-table>
+
+                <mat-paginator #meetingPaginator
+                               class="border-t border-gray-200 dark:border-gray-700"
+                               [pageSize]="tablePageSize"
+                               [pageSizeOptions]="tablePageSizeOptions"
+                               showFirstLastButtons
+                               (page)="onMeetingPage($event)">
+                </mat-paginator>
+            </ng-container>
+        </fuse-card>
+
+        <mat-menu #meetingActionsMenu="matMenu">
+            <button mat-menu-item (click)="goToMeeting(menuRow?._id)" [disabled]="!menuRow">
+                <mat-icon>visibility</mat-icon>
+                <span>View</span>
+            </button>
+            <button mat-menu-item
+                    (click)="archiveMeeting($event, menuRow._id, !menuRow.archived)"
+                    [disabled]="!menuRow">
+                <mat-icon>{{ menuRow?.archived ? 'unarchive' : 'archive' }}</mat-icon>
+                <span>{{ menuRow?.archived ? 'Restore' : 'Archive' }}</span>
+            </button>
+        </mat-menu>
+
     </div>
 
 </div>

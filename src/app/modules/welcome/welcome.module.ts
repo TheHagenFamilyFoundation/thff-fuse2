@@ -4,6 +4,8 @@ import { SharedModule } from 'app/shared/shared.module';
 import { WelcomeComponent } from 'app/modules/welcome/welcome.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 const welcomeRoutes: Route[] = [
     {
@@ -18,7 +20,9 @@ const welcomeRoutes: Route[] = [
         RouterModule.forChild(welcomeRoutes),
         SharedModule,
         MatIconModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatButtonModule,
+        MatPaginatorModule,
     ],
 })
 export class WelcomeModule {}

@@ -234,4 +234,37 @@ export class AuthUtils {
 
         return date;
     }
+
+    /**
+     * After password login, avoid sending users to public routes that still show a “Sign in” CTA
+     * (e.g. redirectURL `/` from the /sign-out guard special-case, or `/home`).
+     */
+    static normalizePostLoginRedirect(
+        raw: string | null | undefined,
+        fallback = '/signed-in-redirect'
+    ): string {
+        if (raw == null || !String(raw).trim()) {
+            return fallback;
+        }
+        const trimmed = String(raw).trim();
+        if (
+            trimmed.startsWith('http://') ||
+            trimmed.startsWith('https://') ||
+            trimmed.startsWith('//')
+        ) {
+            return fallback;
+        }
+        const pathOnly = (trimmed.match(/^[^?#]*/) ?? [''])[0];
+        const normalizedPath = pathOnly.startsWith('/')
+            ? pathOnly
+            : `/${pathOnly}`;
+        if (
+            normalizedPath === '/' ||
+            normalizedPath === '/home' ||
+            normalizedPath === '/sign-out'
+        ) {
+            return fallback;
+        }
+        return trimmed;
+    }
 }

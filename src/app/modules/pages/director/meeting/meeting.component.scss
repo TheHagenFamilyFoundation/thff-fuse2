@@ -1,9 +1,52 @@
+.meeting-list-table {
+    min-width: 720px;
+
+    .mat-mdc-header-row,
+    .mat-mdc-row {
+        display: flex;
+    }
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    .mat-mdc-header-row {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .mat-mdc-row {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .mat-mdc-row:last-child {
+        border-bottom: none;
+    }
+}
+
+:host-context(.scheme-dark) .meeting-list-table {
+    .mat-mdc-header-row {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .mat-mdc-row {
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+}
+
 .meeting-row {
     transition: background-color 150ms ease;
 
     &:hover {
         background-color: rgba(0, 0, 0, 0.04);
     }
+}
+
+:host-context(.scheme-dark) .meeting-row:hover {
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
 /* Pair Year + Show: equal fixed width, row layout; wrap only if viewport is very narrow */

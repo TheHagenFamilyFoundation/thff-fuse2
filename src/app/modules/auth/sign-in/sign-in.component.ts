@@ -10,10 +10,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { AuthUtils } from 'app/core/auth/auth.utils';
 import { BackendService } from 'app/core/services/backend.service';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { AppConfig, FORCED_APP_SCHEME } from 'app/core/config/app.config';
 import { FuseConfigService } from '@fuse/services/config';
+import { FuseLoadingService } from '@fuse/services/loading';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -32,6 +34,8 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
     };
     signInForm: FormGroup;
     showAlert: boolean = false;
+    /** True while the login request (and post-login redirect) is in progress. */
+    signingIn = false;
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
@@ -45,7 +49,8 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
         private _referralCodeService: ReferralCodeService,
         private _formBuilder: FormBuilder,
         private _router: Router,
-        private _fuseConfigService: FuseConfigService
+        private _fuseConfigService: FuseConfigService,
+        private _fuseLoadingService: FuseLoadingService
     ) {}
 
     ngOnInit(): void {
@@ -67,16 +72,20 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
     }
 
     signIn(): void {
-        if (this.signInForm.invalid) {
+        if (this.signInForm.invalid || this.signingIn) {
             return;
         }
 
-        this.signInForm.disable();
+        this.signingIn = true;
         this.showAlert = false;
+        this.signInForm.disable();
+        this._fuseLoadingService.show();
 
         this._authService.signIn(this.signInForm.value).subscribe({
             next: (response) => {
                 if (response.newPassword === true) {
+                    this._fuseLoadingService.hide();
+                    this.signingIn = false;
                     this.alert = {
                         type: 'success',
                         message: 'A password reset email has been sent. Please create a new password.'
@@ -88,12 +97,19 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                     this.setScheme();
                     this._backendService.startPing();
                     this._applyPendingReferralCode();
-                    const redirectURL =
-                        this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+                    const redirectURL = AuthUtils.normalizePostLoginRedirect(
+                        this._activatedRoute.snapshot.queryParamMap.get(
+                            'redirectURL'
+                        )
+                    );
+                    // Keep loading visible until navigation clears it (empty layout loading bar).
                     this._router.navigateByUrl(redirectURL);
                 }
             },
             error: (response) => {
+                this._fuseLoadingService.hide();
+                this.signingIn = false;
+
                 const errorMessage = response?.error?.error?.[0]?.msg
                     || response?.error?.message
                     || 'An error occurred while signing in.';

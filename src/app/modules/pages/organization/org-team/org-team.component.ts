@@ -16,6 +16,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { OrgTeamService } from 'app/core/services/organization/org-team.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 export type TeamTableRow = {
@@ -66,13 +67,17 @@ export class OrgTeamComponent implements OnInit, OnChanges, AfterViewInit {
     readonly teamDataSource = new MatTableDataSource<TeamTableRow>([]);
 
     readonly pageSizeOptions = [5, 10, 25];
+    tablePageSize: number;
 
     constructor(
         private orgTeamService: OrgTeamService,
         private snackBar: MatSnackBar,
         private dialog: MatDialog,
-        private cdr: ChangeDetectorRef
-    ) {}
+        private cdr: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
+    ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.pageSizeOptions);
+    }
 
     ngOnInit(): void {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -99,6 +104,13 @@ export class OrgTeamComponent implements OnInit, OnChanges, AfterViewInit {
 
     get teamRowCount(): number {
         return this.teamDataSource.data.length;
+    }
+
+    onTeamPage(event: { pageSize: number }): void {
+        if (event.pageSize !== this.tablePageSize) {
+            this._userPreferences.setTablePageSize(event.pageSize);
+            this.tablePageSize = event.pageSize;
+        }
     }
 
     /**

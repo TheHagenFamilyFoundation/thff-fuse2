@@ -1,4 +1,5 @@
 import {
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -25,6 +26,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
 
@@ -33,6 +35,17 @@ import { CreateOrganizationInfoService } from 'app/core/services/organization/or
 import { UpdateOrganizationInfoService } from 'app/core/services/organization/organization-info/update-organization-info.service';
 import { GetOrganizationInfoService } from 'app/core/services/organization/organization-info/get-organization-info.service';
 import { DeleteOrganizationInfoService } from 'app/core/services/organization/organization-info/delete-organization-info.service';
+import {
+    FOUNDED_YEAR_MIN,
+    foundedYearSelectOptions,
+    foundedYearToSelectValue,
+} from 'app/core/utilities/founded-year-options';
+import {
+    normalizeZipForSave,
+    US_ZIP_PATTERN,
+    usZipFormValidators,
+    zipFromApiForForm,
+} from 'app/core/utilities/us-zip';
 
 @Component({
     standalone: false,
@@ -76,6 +89,11 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     directorEditing = false;
 
     private formMessageSub?: Subscription;
+
+    private orgInfoSaveInflight = 0;
+    orgInfoSaving = false;
+    orgInfoSavedFlash = false;
+    private orgInfoSavedTimer: ReturnType<typeof setTimeout> | null = null;
 
     formContactPerson: FormGroup;
 
@@ -169,6 +187,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         private updateOrganizationInfoService: UpdateOrganizationInfoService,
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
+        private _cdr: ChangeDetectorRef,
         fb: FormBuilder
     ) {
         //main edit mode
@@ -181,7 +200,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
         this.formOrganization = fb.group({
             legalName: new FormControl('', Validators.required),
-            yearFounded: new FormControl('', Validators.required),
+            yearFounded: new FormControl<number | null>(null, Validators.required),
             currentOperatingBudget: new FormControl('', [
                 Validators.required,
                 Validators.min(1),
@@ -213,6 +232,15 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         // ]);
     } // end of constructor
 
+    /** Years for year-founded `<mat-select>`s (includes current stored year if outside default range). */
+    get foundedYearOptions(): number[] {
+        return foundedYearSelectOptions(
+            new Date().getFullYear(),
+            FOUNDED_YEAR_MIN,
+            foundedYearToSelectValue(this.orgObj?.yearFounded),
+        );
+    }
+
     defaultValues(): void {
         this.orgObj = {
             legalName: '',
@@ -227,7 +255,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             address: '',
             city: '',
             state: '',
-            zip: 0,
+            zip: '',
             website: '',
         };
     }
@@ -269,6 +297,37 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     ngOnDestroy(): void {
         this.formMessageSub?.unsubscribe();
+        this.clearOrgInfoSavedTimer();
+    }
+
+    private clearOrgInfoSavedTimer(): void {
+        if (this.orgInfoSavedTimer !== null) {
+            clearTimeout(this.orgInfoSavedTimer);
+            this.orgInfoSavedTimer = null;
+        }
+    }
+
+    private beginOrgInfoSave(): void {
+        this.orgInfoSaveInflight++;
+        this.orgInfoSaving = true;
+        this._cdr.markForCheck();
+    }
+
+    private endOrgInfoSave(): void {
+        this.orgInfoSaveInflight = Math.max(0, this.orgInfoSaveInflight - 1);
+        this.orgInfoSaving = this.orgInfoSaveInflight > 0;
+        this._cdr.markForCheck();
+    }
+
+    private flashOrgInfoSaved(): void {
+        this.clearOrgInfoSavedTimer();
+        this.orgInfoSavedFlash = true;
+        this._cdr.markForCheck();
+        this.orgInfoSavedTimer = setTimeout(() => {
+            this.orgInfoSavedFlash = false;
+            this.orgInfoSavedTimer = null;
+            this._cdr.markForCheck();
+        }, 2000);
     }
 
     /**
@@ -352,7 +411,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             const i = this.orgInfo;
             this.orgObj = {
                 legalName: i.legalName ?? '',
-                yearFounded: i.yearFounded ?? 0,
+                yearFounded: foundedYearToSelectValue(i.yearFounded) ?? 0,
                 currentOperatingBudget: i.currentOperatingBudget ?? 0,
                 director: i.director ?? '',
                 phone: i.phone ?? '',
@@ -363,7 +422,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
                 address: i.address ?? '',
                 city: i.city ?? '',
                 state: i.state ?? '',
-                zip: i.zip ?? 0,
+                zip: zipFromApiForForm(i.zip),
                 website: i.website ?? '',
             };
         } else {
@@ -396,7 +455,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.addressFormControl.setValue(o.address);
         this.cityFormControl.setValue(o.city);
         this.stateFormControl.setValue(o.state);
-        this.zipFormControl.setValue(o.zip != null ? String(o.zip) : '');
+        this.zipFormControl.setValue(zipFromApiForForm(o.zip));
 
         this.initGroupedForm();
     }
@@ -423,7 +482,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.addressFormControl.setValue(o.address);
         this.cityFormControl.setValue(o.city);
         this.stateFormControl.setValue(o.state);
-        this.zipFormControl.setValue(o.zip != null ? String(o.zip) : '');
+        this.zipFormControl.setValue(zipFromApiForForm(o.zip));
 
         this.editing = true;
     }
@@ -445,7 +504,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             address: v.address ?? '',
             city: v.city ?? '',
             state: v.state ?? '',
-            zip: this.num(v.zip),
+            zip: normalizeZipForSave(v.zip),
             website: v.website ?? '',
             organization: this.orgID,
         };
@@ -484,7 +543,10 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         const o = this.orgObj;
         this.groupedForm = new FormGroup({
             legalName: new FormControl(o.legalName),
-            yearFounded: new FormControl(o.yearFounded),
+            yearFounded: new FormControl(foundedYearToSelectValue(o.yearFounded), [
+                Validators.required,
+                Validators.min(1),
+            ]),
             currentOperatingBudget: new FormControl(
                 o.currentOperatingBudget,
                 [Validators.required, Validators.min(1)]
@@ -500,7 +562,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             address: new FormControl(o.address),
             city: new FormControl(o.city),
             state: new FormControl(o.state),
-            zip: new FormControl(o.zip),
+            zip: new FormControl(zipFromApiForForm(o.zip), usZipFormValidators()),
             website: new FormControl(o.website),
         });
 
@@ -511,7 +573,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     initFormControls(): void {
         const o = this.orgObj;
         this.legalNameControl = new FormControl(o.legalName);
-        this.yearFoundedControl = new FormControl(o.yearFounded);
+        this.yearFoundedControl = new FormControl(foundedYearToSelectValue(o.yearFounded));
         this.currentOperatingBudgetControl = new FormControl(
             o.currentOperatingBudget
         );
@@ -528,7 +590,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.addressControl = new FormControl(o.address);
         this.cityControl = new FormControl(o.city);
         this.stateControl = new FormControl(o.state);
-        this.zipControl = new FormControl(o.zip);
+        this.zipControl = new FormControl(zipFromApiForForm(o.zip), usZipFormValidators());
         this.websiteControl = new FormControl(o.website);
     }
 
@@ -536,8 +598,27 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     //then calls the save single field function to call the database
     updateSingleField(prop: any, control: any): void {
         const c = this[control] as FormControl;
-        if (c.value === '' || c.value === null) {
-            c.setValue(this.orgObj[prop]);
+        const yearFoundedBlank =
+            prop === 'yearFounded' &&
+            (c.value === '' ||
+                c.value === null ||
+                c.value === undefined ||
+                !Number.isFinite(Number(c.value)) ||
+                Number(c.value) < 1);
+        const zipBlank =
+            prop === 'zip' &&
+            (c.value === '' ||
+                c.value === null ||
+                c.value === undefined ||
+                String(c.value).trim() === '');
+        if (yearFoundedBlank || zipBlank || c.value === '' || c.value === null) {
+            const reset =
+                prop === 'yearFounded'
+                    ? foundedYearToSelectValue(this.orgObj[prop])
+                    : prop === 'zip'
+                      ? zipFromApiForForm(this.orgObj[prop])
+                      : this.orgObj[prop];
+            c.setValue(reset);
 
             this.checkInvalidProp(prop, true);
 
@@ -546,11 +627,17 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             }, 2000);
         } else {
             let val: any = c.value;
-            if (
-                prop === 'yearFounded' ||
-                prop === 'currentOperatingBudget' ||
-                prop === 'zip'
-            ) {
+            if (prop === 'zip') {
+                val = normalizeZipForSave(c.value);
+                if (!US_ZIP_PATTERN.test(val)) {
+                    c.setValue(zipFromApiForForm(this.orgObj[prop]));
+                    this.checkInvalidProp(prop, true);
+                    setTimeout(() => {
+                        this.checkInvalidProp(prop, false);
+                    }, 2000);
+                    return;
+                }
+            } else if (prop === 'yearFounded' || prop === 'currentOperatingBudget') {
                 val = this.num(val);
             }
             this.orgObj[prop] = val;
@@ -627,20 +714,30 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     //calls the updateOrganizationService
     updateOrganizationInfo(body: any): void {
+        this.beginOrgInfoSave();
         this.updateOrganizationInfoService
             .updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
-            .subscribe(
-                (result) => {
+            .pipe(finalize(() => this.endOrgInfoSave()))
+            .subscribe({
+                next: (result) => {
                     this.orgInfo = result.info;
                     this.refreshOrg.emit(true);
                     this.resetFormValues();
+                    this.flashOrgInfoSaved();
                 },
-                () => {}
-            );
+                error: () => {},
+            });
     }
 
     cancelSingleField(prop: string, control: any): void {
-        (this[control] as AbstractControl).setValue(this.orgObj[prop]);
+        const raw = this.orgObj[prop];
+        const v =
+            prop === 'yearFounded'
+                ? foundedYearToSelectValue(raw)
+                : prop === 'zip'
+                  ? zipFromApiForForm(raw)
+                  : raw;
+        (this[control] as AbstractControl).setValue(v);
     }
 
     updateGroupedEdition(): void {
@@ -658,24 +755,12 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             address: v.address ?? '',
             city: v.city ?? '',
             state: v.state ?? '',
-            zip: this.num(v.zip),
+            zip: normalizeZipForSave(v.zip),
             website: v.website ?? '',
             organization: this.orgID,
         };
 
-        this.updateOrganizationInfoService
-            .updateOrganizationInfo(
-                this.orgInfo.organizationInfoID,
-                payload
-            )
-            .subscribe(
-                (result) => {
-                    this.orgInfo = result.info;
-                    this.refreshOrg.emit(true);
-                    this.resetFormValues();
-                },
-                () => {}
-            );
+        this.updateOrganizationInfo(payload);
     }
 
     cancelGroupedEdition(): void {

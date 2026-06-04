@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 
 @Component({
     standalone: false,
@@ -31,7 +32,10 @@ export class ProposalsComponent implements AfterViewInit {
     isPresident: boolean = false;
     archivedFilter: string = ''; // '' = active only, 'only' = archived only, 'true' = all
 
-    private limit: number = 10;
+    readonly tablePageSizeOptions = [10, 25, 100];
+    tablePageSize: number;
+
+    private limit: number;
     private skip: number = 0;
     private sortColumn: string = 'createdOn';
     private sortDirection: string = 'desc';
@@ -45,8 +49,11 @@ export class ProposalsComponent implements AfterViewInit {
         public submissionYearsService: SubmissionYearsService,
         private _router: Router,
         private _authService: AuthService,
-        private _changeDetectorRef: ChangeDetectorRef
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
     ) {
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+        this.limit = this.tablePageSize;
         this._authService.checkPresident().subscribe((isP) => {
             this.isPresident = isP;
         });
@@ -121,6 +128,8 @@ export class ProposalsComponent implements AfterViewInit {
     handlePageEvent(e: PageEvent): void {
         this.pageEvent = e;
         if (this.pageEvent.pageSize !== this.limit) {
+            this._userPreferences.setTablePageSize(this.pageEvent.pageSize);
+            this.tablePageSize = this.pageEvent.pageSize;
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
             this.paginator.pageIndex = 0;

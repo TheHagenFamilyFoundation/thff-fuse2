@@ -27,6 +27,7 @@ import {
 import { GetUserService } from 'app/core/services/user/get-user.service';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 
 @Component({
     standalone: false,
@@ -42,7 +43,10 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild('filterInput', { static: true }) input: ElementRef;
 
-    displayedColumns = ['projectTitle', 'amountRequested', 'sponsor', 'createdOn', 'action'];
+    displayedColumns = ['projectTitle', 'status', 'amountRequested', 'sponsor', 'createdOn', 'action'];
+
+    readonly tablePageSizeOptions = [5, 10, 25];
+    tablePageSize: number;
 
     limit: number;
 
@@ -87,10 +91,12 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
         public submissionYearsService: SubmissionYearsService,
         private _router: Router,
         private _cdr: ChangeDetectorRef,
+        private _userPreferences: UserPreferencesService,
     ) {
         this.loaded = false;
         this.filterInputString = '';
-        this.limit = 10;
+        this.tablePageSize = this._userPreferences.pageSizeForOptions(this.tablePageSizeOptions);
+        this.limit = this.tablePageSize;
         this.skip = 0;
         this.sortDirection = 'desc';
         this.sortColumn = 'createdOn';
@@ -260,6 +266,8 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
         this.pageEvent = e;
 
         if (this.pageEvent.pageSize !== this.limit) {
+            this._userPreferences.setTablePageSize(this.pageEvent.pageSize);
+            this.tablePageSize = this.pageEvent.pageSize;
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;
             this.paginator.pageIndex = 0;
@@ -329,7 +337,50 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
             return;
         }
         this._router.navigate(['/pages/proposal/create'], {
-            queryParams: { org: oid, orgID: this.org.organizationID },
+            queryParams: {
+                org: oid,
+                orgID: this.org.organizationID,
+                returnTo: 'organization',
+            },
+        });
+    }
+
+    onProposalRowClick(row: any): void {
+        if (this.isComposerRow(row)) {
+            this.continueDraft(row);
+            return;
+        }
+        if (row?.proposalID) {
+            this.goToProposal(row.proposalID);
+        }
+    }
+
+    isComposerRow(row: any): boolean {
+        return row?.status === 'draft' || row?.status === 'ready_to_submit';
+    }
+
+    proposalStatusLabel(row: any): string {
+        if (row?.status === 'draft') {
+            return 'Draft';
+        }
+        if (row?.status === 'ready_to_submit') {
+            return 'Ready to submit';
+        }
+        return 'Submitted';
+    }
+
+    continueDraft(row: any): void {
+        const oid = this.getOrgMongoId();
+        if (!oid || !row?._id) {
+            return;
+        }
+        this._router.navigate(['/pages/proposal/create'], {
+            queryParams: {
+                org: oid,
+                orgID: this.org?.organizationID,
+                draft: String(row._id),
+                returnTo: 'organization',
+            },
         });
     }
 
@@ -382,13 +433,37 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
             });
     }
 
+    private getViewerMongoId(): string | null {
+        try {
+            const raw = localStorage.getItem('currentUser');
+            if (!raw) {
+                return null;
+            }
+            const u = JSON.parse(raw);
+            const id = u.id ?? u._id;
+            return id != null ? String(id) : null;
+        } catch {
+            return null;
+        }
+    }
+
     filterByYear(items, year): any {
         const startDate = new Date(year, 0, 1);
         const endDate = new Date(year + 1, 0, 1);
 
+        const viewerId = this.getViewerMongoId();
         return items.filter((item: any) => {
             const itemDate = new Date(item.createdAt);
-            return itemDate >= startDate && itemDate < endDate;
+            const inYear = itemDate >= startDate && itemDate < endDate;
+            if (!inYear) {
+                return false;
+            }
+            if (item?.status === 'submitted') {
+                return true;
+            }
+            const composer = item?.status === 'draft' || item?.status === 'ready_to_submit';
+            const creator = item?.createdBy?._id ?? item?.createdBy;
+            return composer && viewerId != null && String(creator) === viewerId;
         });
     }
 }

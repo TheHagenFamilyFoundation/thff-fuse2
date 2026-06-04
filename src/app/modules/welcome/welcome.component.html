@@ -1,9 +1,8 @@
-<!-- Split: top ~50% logo / grant copy, bottom ~50% proposals (separate scroll) -->
-<div class="welcome-split flex h-full min-h-0 w-full flex-1 flex-col">
+<div class="welcome-split flex w-full flex-col">
 
-    <!-- Upper half: logo scales to fit remaining space; copy is shrink-0 below -->
+    <!-- Logo + grant copy — capped height, does not grow with proposal count -->
     <section
-        class="welcome-hero relative flex min-h-0 flex-[1_1_50%] flex-col overflow-x-hidden border-b border-gray-200 bg-white px-4 pb-4 pt-3 dark:border-neutral-700 dark:bg-neutral-800 sm:px-10 sm:pb-5 sm:pt-4">
+        class="welcome-hero relative flex flex-shrink-0 flex-col overflow-x-hidden border-b border-gray-200 bg-white px-4 pb-4 pt-3 dark:border-neutral-700 dark:bg-neutral-800 sm:px-10 sm:pb-5 sm:pt-4">
 
         <div class="relative flex min-h-0 w-full flex-1 flex-col items-stretch text-center">
             <!-- Flex-1 + min-h-0 gives a hard height budget so the img can use max-h-full and always fit -->
@@ -30,10 +29,8 @@
         </div>
     </section>
 
-    <!-- Lower half: proposals & drafts (scrolls independently) -->
-    <section
-        class="welcome-main flex min-h-0 flex-[1_1_50%] flex-col overflow-y-auto bg-gray-50 dark:bg-neutral-900"
-        cdkScrollable>
+    <!-- Proposals & drafts — grows with content; page scrolls to reach layout footer -->
+    <section class="welcome-main flex flex-col bg-gray-50 dark:bg-neutral-900">
         <div class="mx-auto w-full max-w-screen-lg flex-1 space-y-8 p-4 sm:p-6 lg:p-8">
 
             <!-- While grant-cycle API loads -->
@@ -47,6 +44,16 @@
             </div>
 
             <ng-container *ngIf="!loading">
+                <div *ngIf="showWelcomeProposalsActionBar" class="mb-6 flex flex-wrap items-center justify-end gap-2">
+                    <a
+                        mat-stroked-button
+                        color="primary"
+                        [routerLink]="['/pages/proposals']"
+                        [queryParams]="{ year: latestSubmissionYear.year }">
+                        <mat-icon class="icon-size-5">list_alt</mat-icon>
+                        <span class="ml-1">All my proposals ({{ latestSubmissionYear.year }})</span>
+                    </a>
+                </div>
 
                 <!-- Grant cycle missing -->
                 <div
@@ -63,23 +70,31 @@
                     </p>
                 </div>
 
-                <!-- Draft Proposals -->
-                <div *ngIf="drafts.length > 0">
-                    <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
-                        <mat-icon class="text-amber-500">edit_note</mat-icon>
-                        Draft Proposals
-                    </h2>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- In-progress composer proposals (API status draft or ready_to_submit) -->
+                <div
+                    *ngIf="draftProposals.length > 0"
+                    class="overflow-hidden rounded-xl border border-gray-200 bg-card shadow-sm dark:border-neutral-700">
+                    <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-700">
+                        <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
+                            <mat-icon class="text-amber-500">edit_note</mat-icon>
+                            Draft Proposals
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
                         <div
-                            *ngFor="let draft of drafts"
+                            *ngFor="let draft of draftProposals"
                             (click)="continueDraft(draft)"
-                            class="flex cursor-pointer items-center gap-4 rounded-xl border border-amber-200 bg-card p-4 shadow-sm transition-all hover:border-amber-400 hover:shadow-md dark:border-amber-700 dark:hover:border-amber-500">
+                            class="flex cursor-pointer items-center gap-4 rounded-lg border border-amber-200 bg-gray-50 p-4 transition-all hover:border-amber-400 hover:shadow-sm dark:border-amber-700 dark:bg-neutral-800/50 dark:hover:border-amber-500">
                             <div
                                 class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900 dark:bg-opacity-40">
                                 <mat-icon class="icon-size-5 text-amber-600 dark:text-amber-400">description</mat-icon>
                             </div>
                             <div class="min-w-0 flex-auto">
-                                <div class="truncate font-medium text-gray-800 dark:text-gray-200">{{ draft.title }}</div>
+                                <div class="truncate font-medium text-gray-800 dark:text-gray-200">{{ draft.projectTitle || 'Untitled draft' }}</div>
+                                <div *ngIf="draftOrganizationLabel(draft)" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                    {{ draftOrganizationLabel(draft) }}
+                                </div>
+                                <div *ngIf="draftSavedHint(draft.updatedAt)" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">{{ draftSavedHint(draft.updatedAt) }}</div>
                                 <div class="mt-0.5 text-xs text-amber-600 dark:text-amber-400">Draft — click to continue editing</div>
                             </div>
                             <mat-icon class="flex-shrink-0 text-gray-400 dark:text-gray-500">arrow_forward</mat-icon>
@@ -88,19 +103,23 @@
                 </div>
 
                 <!-- My Proposals -->
-                <div *ngIf="latestSubmissionYear">
-                    <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
-                        <mat-icon class="text-thff-teal">assignment</mat-icon>
-                        {{ latestSubmissionYear.year }} Proposals
-                    </h2>
+                <div
+                    *ngIf="latestSubmissionYear"
+                    class="overflow-hidden rounded-xl border border-gray-200 bg-card shadow-sm dark:border-neutral-700">
+                    <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-700">
+                        <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white">
+                            <mat-icon class="text-thff-teal">assignment</mat-icon>
+                            {{ latestSubmissionYear.year }} Proposals
+                        </h2>
+                    </div>
 
-                    <div *ngIf="proposalsLoading" class="flex items-center justify-center py-12">
+                    <div *ngIf="proposalsLoading" class="flex items-center justify-center px-5 py-12">
                         <mat-spinner [diameter]="32"></mat-spinner>
                     </div>
 
                     <div
-                        *ngIf="!proposalsLoading && proposals.length === 0"
-                        class="rounded-xl border border-gray-200 bg-card py-12 text-center dark:border-neutral-700">
+                        *ngIf="!proposalsLoading && submittedProposals.length === 0"
+                        class="px-5 py-12 text-center">
                         <mat-icon class="icon-size-12 mb-3 text-gray-300 dark:text-gray-600">folder_open</mat-icon>
                         <p class="text-sm text-gray-500 dark:text-gray-400">No proposals submitted yet for {{ latestSubmissionYear.year }}.</p>
                         <p *ngIf="portalOpen" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
@@ -108,38 +127,50 @@
                         </p>
                     </div>
 
-                    <div *ngIf="!proposalsLoading && proposals.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div
-                            *ngFor="let proposal of proposals"
-                            (click)="viewProposal(proposal)"
-                            class="flex cursor-pointer flex-col rounded-xl border border-gray-200 bg-card p-5 shadow-sm transition-all hover:border-gray-300 hover:shadow-md dark:border-neutral-700 dark:hover:border-neutral-500">
-                            <div class="mb-3 flex items-center gap-1.5">
-                                <mat-icon class="{{ getProposalStatus(proposal).color }} icon-size-4">
-                                    {{ getProposalStatus(proposal).icon }}
-                                </mat-icon>
-                                <span
-                                    class="text-xs font-semibold uppercase tracking-wider {{ getProposalStatus(proposal).color }}">
-                                    {{ getProposalStatus(proposal).label }}
-                                </span>
-                            </div>
+                    <div *ngIf="!proposalsLoading && submittedProposals.length > 0">
+                        <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
+                            <div
+                                *ngFor="let proposal of submittedProposalsDisplayed"
+                                (click)="viewProposal(proposal)"
+                                class="flex cursor-pointer flex-col rounded-lg border border-gray-200 bg-gray-50 p-5 transition-all hover:border-gray-300 hover:shadow-sm dark:border-neutral-600 dark:bg-neutral-800/50 dark:hover:border-neutral-500">
+                                <div class="mb-3 flex items-center gap-1.5">
+                                    <mat-icon class="{{ getProposalStatus(proposal).color }} icon-size-4">
+                                        {{ getProposalStatus(proposal).icon }}
+                                    </mat-icon>
+                                    <span
+                                        class="text-xs font-semibold uppercase tracking-wider {{ getProposalStatus(proposal).color }}">
+                                        {{ getProposalStatus(proposal).label }}
+                                    </span>
+                                </div>
 
-                            <h3 class="mb-2 line-clamp-2 font-medium leading-snug text-gray-800 dark:text-gray-200">
-                                {{ proposal.projectTitle }}
-                            </h3>
+                                <h3 class="mb-2 line-clamp-2 font-medium leading-snug text-gray-800 dark:text-gray-200">
+                                    {{ proposal.projectTitle }}
+                                </h3>
 
-                            <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                                {{ proposal.organization?.name }}
-                            </div>
+                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ proposal.organization?.name }}
+                                </div>
 
-                            <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-3 dark:border-neutral-700">
-                                <span class="text-xs text-gray-400 dark:text-gray-500">
-                                    {{ proposal.createdAt | date:'MMM d, y' }}
-                                </span>
-                                <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                    {{ proposal.amountRequested | currency }}
-                                </span>
+                                <div class="mt-auto flex items-center justify-between border-t border-gray-200 pt-3 dark:border-neutral-600">
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                                        {{ proposal.createdAt | date:'MMM d, y' }}
+                                    </span>
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                        {{ proposal.amountRequested | currency }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        <mat-paginator
+                            *ngIf="submittedProposals.length > submittedProposalsPageSize"
+                            class="border-t border-gray-200 dark:border-neutral-700"
+                            [length]="submittedProposals.length"
+                            [pageIndex]="submittedProposalsPageIndex"
+                            [pageSize]="submittedProposalsPageSize"
+                            [pageSizeOptions]="submittedProposalsPageSizeOptions"
+                            showFirstLastButtons
+                            (page)="onSubmittedProposalsPage($event)">
+                        </mat-paginator>
                     </div>
                 </div>
 

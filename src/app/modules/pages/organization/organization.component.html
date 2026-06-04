@@ -11,7 +11,7 @@
     </div>
 
     <!-- Section Nav -->
-    <div class="sticky top-0 z-10 bg-card border-b shadow-sm">
+    <div *ngIf="org && !loading" class="sticky top-0 z-10 bg-card border-b shadow-sm">
         <nav class="flex items-center gap-1 w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-2">
             <a (click)="scrollTo('profile')"
                class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -32,8 +32,20 @@
         </nav>
     </div>
 
-    <!-- Scrollable sections -->
-    <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8 space-y-8" *ngIf="org">
+    <!-- Main -->
+    <div class="flex-auto bg-gray-50 dark:bg-neutral-900">
+        <div class="w-full max-w-screen-xl mx-auto p-6 sm:p-8">
+            <div *ngIf="loading"
+                 class="flex min-h-[280px] flex-col items-center justify-center gap-3"
+                 role="status"
+                 aria-live="polite"
+                 aria-label="Loading organization">
+                <mat-spinner [diameter]="40"></mat-spinner>
+                <p class="m-0 text-sm text-gray-500 dark:text-gray-400">Loading organization…</p>
+            </div>
+
+            <!-- Scrollable sections -->
+            <div class="space-y-8" *ngIf="org && !loading">
 
         <!-- Organization Profile -->
         <fuse-card id="profile" class="flex flex-col w-full p-6 sm:p-8 scroll-mt-20">
@@ -73,6 +85,8 @@
             </app-org-team>
         </fuse-card>
 
+            </div>
+        </div>
     </div>
 
 </div>

@@ -18,6 +18,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 import { TranslocoModule } from '@ngneat/transloco';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -29,6 +31,8 @@ import { proposalRoutes } from './proposal.routing';
 import { ProposalInfoComponent } from './proposal-info/proposal-info.component';
 import { VotingComponent } from './voting/voting.component';
 import { ProposalSummaryComponent } from './proposal-summary/proposal-summary.component';
+import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
     declarations: [ProposalComponent, CreateProposalComponent, ProposalInfoComponent, VotingComponent, ProposalSummaryComponent],
@@ -52,7 +56,11 @@ import { ProposalSummaryComponent } from './proposal-summary/proposal-summary.co
         MatInputModule,
         MatSliderModule,
         MatTooltipModule,
+        MatProgressSpinnerModule,
+        MatDialogModule,
         EditableModule,
+        AutosaveStatusComponent,
+        ConfirmDialogComponent,
     ],
 })
 export class ProposalModule { }

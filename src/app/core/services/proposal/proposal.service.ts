@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -32,16 +33,48 @@ export class ProposalService {
         return this.http.get(urlString);
     }
 
-    //create proposal - submitting
-    createProposal(proposal: any, id: any, referralCode?: string): Observable<any> {
+    /**
+     * Create a proposal. Pass `{ status: 'draft' }` for an in-progress composer row (no submission email);
+     * the API will set `draft` vs `ready_to_submit` from field completeness. Omit status for final submit.
+     */
+    createProposal(
+        proposal: any,
+        orgMongoId: any,
+        referralCode?: string,
+        options?: { status?: 'draft' | 'submitted' },
+    ): Observable<any> {
         const urlString = `${this.apiUrl}/proposal`;
-        const body: any = { proposal, orgID: id };
+        const body: any = { proposal, orgID: orgMongoId };
 
         if (referralCode) {
             body.referralCode = referralCode;
         }
+        if (options?.status) {
+            body.status = options.status;
+        }
 
         return this.http.post(urlString, body);
+    }
+
+    /**
+     * Whether the signed-in user has any proposal tied to their organizations (any year, draft or submitted).
+     * GET /proposal/my-proposals-exists — optional; nav no longer depends on this.
+     */
+    applicantHasAnyMyProposalContent$(): Observable<boolean> {
+        const url = `${this.apiUrl}/proposal/my-proposals-exists`;
+        return this.http.get<{ hasAny?: boolean }>(url).pipe(
+            map((r) => !!r?.hasAny),
+            catchError(() => of(false)),
+        );
+    }
+
+    /** Draft proposals for the signed-in user; optional `organization` = org Mongo `_id` to scope one org. */
+    getMyDrafts(organizationMongoId?: string): Observable<any[]> {
+        let url = `${this.apiUrl}/proposal/my-drafts`;
+        if (organizationMongoId) {
+            url += `?organization=${encodeURIComponent(organizationMongoId)}`;
+        }
+        return this.http.get<any[]>(url);
     }
 
     //update proposal
@@ -142,6 +175,12 @@ export class ProposalService {
     getMyProposals(year: number): Observable<any> {
         const urlString = `${this.apiUrl}/proposal/my-proposals?year=${year}`;
         return this.http.get(urlString);
+    }
+
+    /** Delete an in-progress composer proposal (draft / ready_to_submit). Applicant org members only. */
+    deleteMyProposal(mongoId: string): Observable<void> {
+        const urlString = `${this.apiUrl}/proposal/${mongoId}`;
+        return this.http.delete<void>(urlString);
     }
 
     // Archive or unarchive a proposal (president-only)

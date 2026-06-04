@@ -69,11 +69,13 @@
                     mat-flat-button
                     type="submit"
                     [color]="'primary'"
-                    [disabled]="signInForm.disabled"
+                    [disabled]="signingIn"
                 >
-                    <span *ngIf="!signInForm.disabled">Sign in</span>
-                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
-                        [mode]="'indeterminate'"></mat-progress-spinner>
+                    <span *ngIf="!signingIn">Sign in</span>
+                    <span *ngIf="signingIn" class="inline-flex items-center justify-center gap-2">
+                        <mat-progress-spinner [diameter]="22" mode="indeterminate"></mat-progress-spinner>
+                        Signing in…
+                    </span>
                 </button>
             </form>
 

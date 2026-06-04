@@ -1,5 +1,32 @@
-
-  .mat-form-field,
-  .mat-mdc-form-field {
+.year-founded-select {
+    max-width: 11rem;
     width: 100%;
-  }
+}
+
+.zip-field {
+    max-width: 12rem;
+    width: 100%;
+}
+
+.create-org-submit__content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 1.25rem;
+}
+
+.create-org-submit__spinner {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.create-org-submit__spinner.mat-mdc-progress-spinner,
+.create-org-submit__spinner ::ng-deep .mdc-circular-progress {
+    --mdc-circular-progress-active-indicator-color: currentColor;
+}
+
+.mat-form-field,
+.mat-mdc-form-field {
+    width: 100%;
+}

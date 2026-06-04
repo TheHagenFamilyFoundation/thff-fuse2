@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { FuseCardModule } from '@fuse/components/card';
 import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
@@ -19,6 +20,7 @@ import { profileRoutes } from 'app/modules/pages/profile/profile.routing';
 
 import { UserOrganizationComponent } from './user-organization/user-organization.component';
 import { SelectedOrganizationComponent } from './user-organization/selected-organization/selected-organization.component';
+import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
 
 @NgModule({
     declarations: [ProfileComponent, UserOrganizationComponent, SelectedOrganizationComponent],
@@ -35,9 +37,11 @@ import { SelectedOrganizationComponent } from './user-organization/selected-orga
         MatPaginatorModule,
         MatProgressSpinnerModule,
         MatSnackBarModule,
+        MatSelectModule,
         FuseCardModule,
         FuseAlertModule,
         SharedModule,
+        AutosaveStatusComponent,
     ],
 })
 export class ProfileModule { }
