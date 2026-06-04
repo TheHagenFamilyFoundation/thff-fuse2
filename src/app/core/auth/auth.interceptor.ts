@@ -3,7 +3,6 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
-import { AuthUtils } from 'app/core/auth/auth.utils';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -17,8 +16,8 @@ export class AuthInterceptor implements HttpInterceptor {
         req: HttpRequest<any>,
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
-        // Attach token if available (even if expired — backend refresh endpoint needs it)
-        let newReq = this._addToken(req);
+        // Public endpoints must work without a session (e.g. home page grant-cycle status).
+        const newReq = this._isPublicEndpoint(req.url) ? req : this._addToken(req);
 
         // Response
         return next.handle(newReq).pipe(
@@ -34,13 +33,7 @@ export class AuthInterceptor implements HttpInterceptor {
                         req.url.includes(endpoint)
                     );
 
-                    // Don't intercept public endpoints
-                    const publicEndpoints = ['/submission-year', '/health'];
-                    const isPublicEndpoint = publicEndpoints.some(endpoint =>
-                        req.url.includes(endpoint)
-                    );
-
-                    if (isSkipEndpoint || isPublicEndpoint) {
+                    if (isSkipEndpoint || this._isPublicEndpoint(req.url)) {
                         return throwError(() => error);
                     }
 
@@ -51,6 +44,12 @@ export class AuthInterceptor implements HttpInterceptor {
                 return throwError(() => error);
             })
         );
+    }
+
+    /** Endpoints that must not require auth (landing page grant-cycle status, health checks). */
+    private _isPublicEndpoint(url: string): boolean {
+        const publicEndpoints = ['/submission-year', '/health'];
+        return publicEndpoints.some((endpoint) => url.includes(endpoint));
     }
 
     /**

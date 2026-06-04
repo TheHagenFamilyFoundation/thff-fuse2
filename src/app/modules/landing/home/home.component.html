@@ -12,11 +12,11 @@
             environment, religion, and social services.
         </p>
 
+        <p class="text-sm text-gray-500" *ngIf="loading">Loading grant cycle status…</p>
+
         <p class="text-lg text-gray-700" *ngIf="!loading && latestSubmissionYear">
             The {{ latestSubmissionYear.year }} grant cycle is
-            <span class="font-semibold" [ngClass]="portalOpen ? 'text-green-600' : 'text-red-600'">
-                {{ portalOpen ? 'open' : 'closed' }}
-            </span>.
+            <span class="font-semibold" [ngClass]="portalOpen ? 'text-green-600' : 'text-red-600'">{{ portalOpen ? 'open' : 'closed' }}</span>.
         </p>
     </div>
 

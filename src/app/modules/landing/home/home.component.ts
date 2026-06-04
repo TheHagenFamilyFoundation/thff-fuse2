@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from 'app/core/auth/auth.service';
-import { AuthUtils } from 'app/core/auth/auth.utils';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { of } from 'rxjs';
+import { catchError, finalize, take, timeout } from 'rxjs/operators';
 import { SubmissionYearsService } from 'app/core/services/admin/submission-years.service';
+
+/** Max wait for the public submission-year call on the landing page. */
+const API_WAIT_MS = 12000;
 
 @Component({
     standalone: false,
@@ -10,18 +12,16 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
     templateUrl: './home.component.html',
     encapsulation: ViewEncapsulation.None
 })
-export class LandingHomeComponent implements OnInit {
+export class LandingHomeComponent implements OnInit, OnDestroy {
     latestSubmissionYear: any;
     portalOpen: boolean = false;
     loading: boolean = true;
 
-    /**
-     * Constructor
-     */
+    private _destroyed = false;
+
     constructor(
-        private _router: Router, 
-        private _authService: AuthService,
-        private _submissionYearsService: SubmissionYearsService
+        private _submissionYearsService: SubmissionYearsService,
+        private _cdr: ChangeDetectorRef,
     ) {
     }
 
@@ -29,24 +29,32 @@ export class LandingHomeComponent implements OnInit {
         this.getLatestSubmissionYear();
     }
 
+    ngOnDestroy(): void {
+        this._destroyed = true;
+    }
+
     getLatestSubmissionYear(): void {
         this.loading = true;
-        this._submissionYearsService.getLatestSubmissionYear()
-            .subscribe({
-                next: (year) => {
-                    this.latestSubmissionYear = year;
-                    if (year) {
-                        this.portalOpen = year.active;
+
+        this._submissionYearsService
+            .getLatestSubmissionYear()
+            .pipe(
+                take(1),
+                timeout({ first: API_WAIT_MS }),
+                catchError((err) => {
+                    console.error('Home: getLatestSubmissionYear failed', err);
+                    return of(null);
+                }),
+                finalize(() => {
+                    if (!this._destroyed) {
+                        this.loading = false;
+                        this._cdr.detectChanges();
                     }
-                    this.loading = false;
-                },
-                error: (err) => {
-                    this.loading = false;
-                    // Don't let errors propagate to avoid triggering reload loops
-                    // Set default values if API call fails
-                    this.latestSubmissionYear = null;
-                    this.portalOpen = false;
-                }
+                })
+            )
+            .subscribe((year) => {
+                this.latestSubmissionYear = year;
+                this.portalOpen = !!year?.active;
             });
     }
 }
