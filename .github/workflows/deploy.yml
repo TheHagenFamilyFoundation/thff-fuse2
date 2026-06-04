@@ -3,8 +3,6 @@ name: Deploy to AWS S3 and CloudFront
 on:
     push:
         branches: [master, staging]
-    pull_request:
-        branches: [master, staging]
 
 env:
     AWS_REGION: us-east-1
