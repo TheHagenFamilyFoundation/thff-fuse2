@@ -172,12 +172,12 @@
                             </div>
 
                             <!-- Actions -->
-                            <div class="flex items-center justify-end mt-8">
+                            <div *ngIf="showAccountActions" class="flex items-center justify-end mt-8">
                                 <button
                                     mat-flat-button
                                     type="button"
                                     [color]="'primary'"
-                                    [disabled]="accountSaving"
+                                    [disabled]="accountSaving || !accountChanged"
                                     (click)="saveAccount()">
                                     <span *ngIf="!accountSaving">Save</span>
                                     <mat-progress-spinner
@@ -252,13 +252,6 @@
                             <!-- Actions -->
                             <div class="flex items-center justify-end mt-8">
                                 <button
-                                    mat-stroked-button
-                                    type="button"
-                                    (click)="securityForm.reset(); securityAlert = null">
-                                    Cancel
-                                </button>
-                                <button
-                                    class="ml-4"
                                     mat-flat-button
                                     type="button"
                                     [color]="'primary'"
