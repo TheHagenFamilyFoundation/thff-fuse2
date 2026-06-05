@@ -72,6 +72,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     accountForm: FormGroup;
     accountSaving = false;
     accountAlert: { type: 'success' | 'error' | 'info' | 'warning'; message: string } | null = null;
+    private savedAccountFirstName = '';
+    private savedAccountLastName = '';
 
     // Security form
     securityForm: FormGroup;
@@ -140,6 +142,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
             ]],
             confirmPassword: ['', Validators.required],
         });
+
+        this.syncSavedAccountValues();
     }
 
     ngOnDestroy(): void {
@@ -222,6 +226,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
     }
 
+    get accountChanged(): boolean {
+        if (!this.accountForm) {
+            return false;
+        }
+        const firstName = String(this.accountForm.get('firstName')?.value ?? '').trim();
+        const lastName = String(this.accountForm.get('lastName')?.value ?? '').trim();
+        return firstName !== this.savedAccountFirstName || lastName !== this.savedAccountLastName;
+    }
+
+    get showAccountActions(): boolean {
+        return this.accountChanged || this.accountSaving;
+    }
+
+    private syncSavedAccountValues(): void {
+        if (!this.accountForm) {
+            return;
+        }
+        this.savedAccountFirstName = String(this.accountForm.get('firstName')?.value ?? '').trim();
+        this.savedAccountLastName = String(this.accountForm.get('lastName')?.value ?? '').trim();
+    }
+
     saveAccount(): void {
         this.accountSaving = true;
         this.accountAlert = null;
@@ -245,7 +270,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
                         this.currentUser = response.user;
                         this.user = response.user;
                         localStorage.setItem('currentUser', JSON.stringify(response.user));
+                        this.accountForm.patchValue({
+                            firstName: response.user.firstName ?? '',
+                            lastName: response.user.lastName ?? '',
+                        });
                     }
+
+                    this.syncSavedAccountValues();
+                    this._changeDetectorRef.markForCheck();
 
                     this._snackBar.open(msg, 'Dismiss', { duration: 6000 });
                 },
