@@ -16,8 +16,11 @@
 
             <div
                 class="welcome-hero-copy mt-2 max-w-xl shrink-0 self-center text-xl tracking-tight text-gray-800 dark:text-white sm:mt-3 sm:text-xl">
+                <p class="text-sm text-gray-500 dark:text-gray-400" *ngIf="loading">Loading grant cycle status…</p>
+
                 <p *ngIf="!loading && latestSubmissionYear">
-                    The {{ latestSubmissionYear.year }} grant cycle is {{ portalOpen ? 'open' : 'closed' }}.
+                    The {{ latestSubmissionYear.year }} grant cycle is
+                    <span class="font-semibold" [ngClass]="portalOpen ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ portalOpen ? 'open' : 'closed' }}</span>.
                     <span *ngIf="portalOpen"> Proposals may be submitted through your Organizations page.</span>
                 </p>
                 <p
