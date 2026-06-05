@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         },
         {
             id: 'preferences',
-            icon: 'heroicons_outline:adjustments-horizontal',
+            icon: 'heroicons_outline:adjustments',
             title: 'Preferences',
             description: 'Table and display defaults',
         },
