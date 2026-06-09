@@ -24,6 +24,11 @@
                         referral link.
                     </p>
                     <p
+                        *ngIf="!referralLoading && !referralDirectorName && referralValid"
+                        class="m-0 mt-1 text-sm text-gray-700 dark:text-gray-200">
+                        You were invited to submit a grant proposal through this referral link.
+                    </p>
+                    <p
                         *ngIf="!referralLoading && referralInvalid"
                         class="m-0 mt-1 text-sm text-amber-800 dark:text-amber-200">
                         This referral link may be invalid or expired. You can still sign in or create an account.
