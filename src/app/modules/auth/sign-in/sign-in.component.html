@@ -124,7 +124,10 @@
 
         <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?
-            <a class="thff-link font-medium" routerLink="/sign-up">Create one</a>
+            <a
+                class="thff-link font-medium"
+                routerLink="/sign-up"
+                [queryParams]="referralCode ? { ref: referralCode } : null">Create one</a>
         </p>
 
         <div class="mt-8 flex flex-col items-center gap-3 text-sm">
