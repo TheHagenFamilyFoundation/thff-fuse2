@@ -114,7 +114,9 @@ export class ProposalsComponent implements AfterViewInit {
     }
 
     goToProposal(propID: string): void {
-        this._router.navigate(['/pages/proposal/', propID]);
+        this._router.navigate(['/pages/proposal/', propID], {
+            queryParams: { from: 'director-proposals' },
+        });
     }
 
     clearFilter(): void {

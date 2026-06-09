@@ -453,8 +453,8 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         return !!this.org?.trim();
     }
 
-    /** Primary + alternate destinations for the composer header back row. */
-    composerBackLinks(): { id: string; label: string; path: string[]; fragment?: string }[] {
+    /** Primary back destination for the composer header. */
+    primaryComposerBackLink(): { id: string; label: string; path: string[]; fragment?: string } | null {
         const options = [
             {
                 id: 'organization' as const,
@@ -478,12 +478,30 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         ].filter((o) => o.show);
 
         const primary = options.find((o) => o.id === this.returnTo) ?? options[0];
-        const rest = options.filter((o) => o.id !== primary.id);
-        return [primary, ...rest].map(({ id, label, path, fragment }) => ({ id, label, path, fragment }));
+        if (!primary) {
+            return null;
+        }
+
+        const { id, label, path, fragment } = primary;
+        return { id, label, path, fragment };
     }
 
-    isPrimaryBackLink(linkId: string): boolean {
-        return linkId === this.returnTo;
+    primaryComposerBackLabel(): string {
+        const link = this.primaryComposerBackLink();
+        if (!link) {
+            return '';
+        }
+
+        switch (link.id) {
+            case 'organization':
+                return 'Back to organization';
+            case 'proposals':
+                return 'Back to my proposals';
+            case 'welcome':
+                return 'Back to home';
+            default:
+                return `Back to ${link.label}`;
+        }
     }
 
     private syncReturnToFromQuery(query: Record<string, unknown>): void {

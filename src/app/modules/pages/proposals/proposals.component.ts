@@ -280,7 +280,9 @@ export class ProposalsComponent implements OnInit, OnDestroy {
         if (!pid) {
             return;
         }
-        this.router.navigate(['/pages/proposal', pid]);
+        this.router.navigate(['/pages/proposal', pid], {
+            queryParams: { from: 'user-proposals' },
+        });
     }
 
     continueEditing(row: MyProposalRow): void {

@@ -31,6 +31,8 @@ export class OrganizationComponent implements OnInit, OnDestroy {
     isDirector: boolean = false;
     inOrg: boolean;
     viewing: string;
+    backLink: string;
+    backLabel: string;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -56,6 +58,16 @@ export class OrganizationComponent implements OnInit, OnDestroy {
             }
             this._cdr.detectChanges();
         });
+
+        const qpm = this.route.snapshot.queryParamMap;
+        const from = qpm.get('from');
+        if (from === 'director-organizations') {
+            this.backLink = '/pages/director/organizations';
+            this.backLabel = 'Back to View Organizations';
+        } else if (from === 'meeting' && qpm.get('meetingId')) {
+            this.backLink = '/pages/director/meeting/' + qpm.get('meetingId');
+            this.backLabel = 'Back to Meeting';
+        }
 
         this.route.paramMap.pipe(takeUntil(this._unsubscribeAll)).subscribe((pm) => {
             const id = pm.get('id');

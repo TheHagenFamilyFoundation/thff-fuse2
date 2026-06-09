@@ -2,12 +2,13 @@
     <!-- Header -->
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
-            <!-- Back link -->
-            <a *ngIf="backLink || organizationRouterLink"
-               [routerLink]="backLink ? backLink : organizationRouterLink"
+            <!-- Contextual back (org link lives in subtitle for directors) -->
+            <a *ngIf="primaryBackRouterLink"
+               [routerLink]="primaryBackRouterLink"
+               [fragment]="primaryBackFragment"
                class="thff-link-nav mt-6 -mb-2">
                 <mat-icon class="icon-size-4">arrow_back</mat-icon>
-                {{ backLabel || 'Back to Organization' }}
+                {{ primaryBackLabel }}
             </a>
             <div *ngIf="proposalLoading"
                  class="flex flex-col items-center justify-center gap-3 py-14 sm:py-16"
@@ -18,29 +19,28 @@
                 <mat-spinner [diameter]="44"></mat-spinner>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Loading proposal…</span>
             </div>
-            <div *ngIf="!proposalLoading" class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
-                <div class="flex flex-auto items-center min-w-0">
-                    <div class="flex items-center gap-3">
-                        <div class="text-xl md:text-2xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-                            {{viewing}} {{ proposal?.projectTitle }}
-                        </div>
-                        <!-- Archived Badge -->
+            <div *ngIf="!proposalLoading" class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between min-w-0 my-8 sm:my-12">
+                <div class="flex flex-col min-w-0 flex-1 gap-2">
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 min-w-0">
+                        <h1 class="m-0 text-xl md:text-2xl font-semibold tracking-tight leading-7 md:leading-snug min-w-0">
+                            <span *ngIf="viewing">{{ viewing }}</span>{{ headerProjectTitle }}
+                        </h1>
                         <span *ngIf="proposal?.archived"
-                              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300">
+                              class="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300">
                             <mat-icon class="icon-size-3.5">archive</mat-icon>
                             Archived
                         </span>
                     </div>
-                    <div class="hidden lg:flex h-8 mx-8 border-l-2"></div>
-                    <span class="hidden lg:inline text-sm text-gray-500 dark:text-gray-400">Organization:</span>
-                    <a *ngIf="organizationRouterLink"
-                        class="thff-link hidden lg:inline px-2 cursor-pointer"
-                        [routerLink]="organizationRouterLink">
-                        {{ org?.name }}
-                    </a>
+                    <p *ngIf="showOrganizationMeta && organizationRouterLink"
+                       class="m-0 text-sm text-gray-500 dark:text-gray-400">
+                        Organization:
+                        <a class="thff-link font-medium" [routerLink]="organizationRouterLink">
+                            {{ org?.name }}
+                        </a>
+                    </p>
                 </div>
                 <!-- President Archive Action -->
-                <div *ngIf="isPresident" class="mt-4 sm:mt-0 sm:ml-auto flex-shrink-0">
+                <div *ngIf="isPresident" class="flex shrink-0 flex-col gap-2 sm:items-end">
                     <ng-container *ngIf="!archiveConfirm">
                         <button *ngIf="!proposal?.archived" mat-stroked-button color="warn" (click)="toggleArchive()"
                                 class="flex items-center gap-1">

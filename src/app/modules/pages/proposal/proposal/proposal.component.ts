@@ -35,6 +35,7 @@ export class ProposalComponent implements OnInit, OnDestroy {
     organizationLink: string;
     backLink: string;
     backLabel: string;
+    backFragment: string | undefined;
 
     activeTab: 'summary' | 'proposal-info' | 'voting' = 'summary';
     archiveConfirm = false;
@@ -71,9 +72,24 @@ export class ProposalComponent implements OnInit, OnDestroy {
         });
 
         const qpm = this.route.snapshot.queryParamMap;
-        if (qpm.get('from') === 'meeting' && qpm.get('meetingId')) {
+        const from = qpm.get('from');
+        if (from === 'meeting' && qpm.get('meetingId')) {
             this.backLink = '/pages/director/meeting/' + qpm.get('meetingId');
             this.backLabel = 'Back to Meeting';
+        } else if (from === 'director-proposals') {
+            this.backLink = '/pages/director/proposals';
+            this.backLabel = 'Back to View Proposals';
+        } else if (from === 'director-voting') {
+            this.backLink = '/pages/director/voting';
+            this.backLabel = 'Back to Voting';
+        } else if (from === 'user-proposals') {
+            this.backLink = '/pages/proposals';
+            this.backLabel = 'Back to My Proposals';
+        } else if (from === 'welcome') {
+            this.backLink = '/welcome';
+            this.backLabel = 'Back to Home';
+        } else if (from === 'organization') {
+            this.backFragment = 'proposals';
         }
 
         this.route.paramMap
@@ -106,6 +122,40 @@ export class ProposalComponent implements OnInit, OnDestroy {
     get organizationRouterLink(): string[] | null {
         const oid = this.org?.organizationID;
         return oid ? ['/pages', 'organization', oid] : null;
+    }
+
+    /** Single back target: contextual when `from` is set, otherwise the organization. */
+    get primaryBackRouterLink(): string | string[] | null {
+        if (this.backLink) {
+            return this.backLink;
+        }
+        return this.organizationRouterLink;
+    }
+
+    get primaryBackLabel(): string {
+        return this.backLabel || 'Back to Organization';
+    }
+
+    get primaryBackFragment(): string | undefined {
+        if (this.backLink) {
+            return undefined;
+        }
+        return this.backFragment;
+    }
+
+    /** Director viewing a proposal for an organization they are not a member of. */
+    get showOrganizationMeta(): boolean {
+        return this.isDirector && !this.inOrg && !!this.org?.name;
+    }
+
+    /** Project title without redundant "(via …)" when org is shown separately. */
+    get headerProjectTitle(): string {
+        const title = String(this.proposal?.projectTitle ?? '').trim();
+        if (!this.showOrganizationMeta) {
+            return title;
+        }
+        const stripped = title.replace(/\s*\(via\s+.+\)\s*$/i, '').trim();
+        return stripped || title;
     }
 
     ngOnDestroy(): void {
@@ -143,10 +193,6 @@ export class ProposalComponent implements OnInit, OnDestroy {
 
             this.org = this.proposal.organization;
             this.organizationLink = '/pages/organization/' + this.org.organizationID;
-
-            if (!this.backLabel) {
-                this.backLabel = 'Back to Organization';
-            }
 
             this.getOrganization(this.org.organizationID);
 

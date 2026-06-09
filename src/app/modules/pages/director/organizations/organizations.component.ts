@@ -111,7 +111,9 @@ export class OrganizationsComponent implements AfterViewInit {
     }
 
     goToOrganization(orgID: string): void {
-        this._router.navigate(['/pages/organization/', orgID]);
+        this._router.navigate(['/pages/organization/', orgID], {
+            queryParams: { from: 'director-organizations' },
+        });
     }
 
     handlePageEvent(e: PageEvent): void {

@@ -2,7 +2,13 @@
 
     <!-- Header -->
     <div class="bg-card border-b">
-        <div class="flex items-center w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
+            <a *ngIf="backLink"
+               [routerLink]="backLink"
+               class="thff-link-nav mb-4">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                {{ backLabel }}
+            </a>
             <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
                 <span *ngIf="viewing" class="text-gray-400 font-normal">{{ viewing }}</span>
                 {{ org?.name }}

@@ -116,7 +116,9 @@ export class VotingComponent implements AfterViewInit {
     }
 
     goToProposal(propID: string): void {
-        this._router.navigate(['/pages/proposal/', propID]);
+        this._router.navigate(['/pages/proposal/', propID], {
+            queryParams: { from: 'director-voting' },
+        });
     }
 
     handlePageEvent(e: PageEvent): void {
