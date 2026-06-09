@@ -45,9 +45,9 @@ export class AuthSignUpComponent implements OnInit {
             password: ['', Validators.required],
         });
 
-        // Old referral links point to /sign-up?ref=CODE — redirect to the new /referral route
+        // Legacy email links to /sign-up?ref=CODE — route through /referral once
         this._route.queryParams.subscribe((params) => {
-            if (params.ref) {
+            if (params.ref && !localStorage.getItem('referralCode')) {
                 this._router.navigate(['/referral'], { queryParams: { ref: params.ref } });
             }
         });

@@ -1,82 +1,102 @@
-<div class="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-auto min-w-0">
-    <div
-        class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none sm:bg-card">
-        <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
-            <!-- Logo -->
-            <div class="flex justify-center">
-                <img [src]="fullImagePath" class="w-36 h-36" alt="THFF Logo" />
-            </div>
-
-            <!-- Title -->
-            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">
-                Sign up
-            </div>
-            <div class="flex items-baseline mt-0.5 font-medium">
-                <div>Already have an account?</div>
-                <a class="ml-1 text-primary-500 hover:underline" [routerLink]="['/sign-in']">Sign in</a>
-            </div>
-
-            <!-- Alert -->
-            <fuse-alert class="mt-8 -mb-4" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false"
-                [type]="alert.type" [@shake]="alert.type === 'error'">
-                {{ alert.message }}
-            </fuse-alert>
-
-            <!-- Sign Up form -->
-            <form class="mt-8" [formGroup]="signUpForm" #signUpNgForm="ngForm">
-                <!-- Email field -->
-                <mat-form-field class="w-full">
-                    <mat-label>Email address</mat-label>
-                    <input id="email" matInput [formControlName]="'email'" />
-                    <mat-error *ngIf="signUpForm.get('email').hasError('required')">
-                        Email address is required
-                    </mat-error>
-                    <mat-error *ngIf="signUpForm.get('email').hasError('email')">
-                        Please enter a valid email address
-                    </mat-error>
-                </mat-form-field>
-
-                <!-- Password field -->
-                <mat-form-field class="w-full">
-                    <mat-label>Password</mat-label>
-                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField />
-                    <button mat-icon-button type="button" (click)="
-                            passwordField.type === 'password'
-                                ? (passwordField.type = 'text')
-                                : (passwordField.type = 'password')
-                        " matSuffix>
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
-                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
-                            [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
-                    </button>
-                    <mat-error>Password is required</mat-error>
-                </mat-form-field>
-
-                <!-- Submit button -->
-                <button class="fuse-mat-button-large w-full mt-6" mat-flat-button [color]="'primary'"
-                    type="button" [disabled]="signingUp" (click)="signUp()">
-                    <span *ngIf="!signingUp">Create your account</span>
-                    <span *ngIf="signingUp" class="inline-flex items-center justify-center gap-2">
-                        <mat-progress-spinner [diameter]="22" mode="indeterminate"></mat-progress-spinner>
-                        Creating account…
-                    </span>
-                </button>
-            </form>
+<div class="flex flex-col flex-auto items-center justify-center min-h-full w-full bg-white px-4 py-10 sm:py-12">
+    <div class="w-full max-w-md">
+        <div class="flex justify-center">
+            <img [src]="fullImagePath" class="w-28 h-28 sm:w-32 sm:h-32" alt="The Hagen Family Foundation" />
         </div>
-    </div>
-    <div
-        class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-darkgray dark:border-l">
-        <div class="z-10 relative w-full max-w-2xl">
-            <div class="text-5xl lg:text-7xl font-bold leading-none text-thff-teal">
-                <div>Welcome to</div>
-                <div>The Hagen Family Foundation</div>
-            </div>
-            <div class="mt-6 text-lg tracking-tight leading-6 text-lightgray">
-                The Hagen Family Foundation provides financial grants to
-                not-for-profit organizations in the areas of the arts,
-                education, environment, religion, and social services.
-            </div>
+
+        <div class="mt-8 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-center">
+            Create account
+        </div>
+        <p class="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+            Sign up to apply for a grant.
+        </p>
+
+        <fuse-alert
+            class="mt-6"
+            *ngIf="showAlert"
+            [appearance]="'outline'"
+            [showIcon]="false"
+            [type]="alert.type"
+            [@shake]="alert.type === 'error'">
+            {{ alert.message }}
+        </fuse-alert>
+
+        <form class="mt-6" [formGroup]="signUpForm" #signUpNgForm="ngForm">
+            <mat-form-field class="w-full">
+                <mat-label>Email address</mat-label>
+                <input
+                    id="email"
+                    matInput
+                    type="email"
+                    autocomplete="email"
+                    [formControlName]="'email'" />
+                <mat-error *ngIf="signUpForm.get('email').hasError('required')">
+                    Email address is required
+                </mat-error>
+                <mat-error *ngIf="signUpForm.get('email').hasError('email')">
+                    Please enter a valid email address
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+                <mat-label>Password</mat-label>
+                <input
+                    id="password"
+                    matInput
+                    type="password"
+                    autocomplete="new-password"
+                    [formControlName]="'password'"
+                    #passwordField />
+                <button
+                    mat-icon-button
+                    type="button"
+                    (click)="
+                        passwordField.type === 'password'
+                            ? (passwordField.type = 'text')
+                            : (passwordField.type = 'password')
+                    "
+                    matSuffix>
+                    <mat-icon
+                        class="icon-size-5"
+                        *ngIf="passwordField.type === 'password'"
+                        [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                    <mat-icon
+                        class="icon-size-5"
+                        *ngIf="passwordField.type === 'text'"
+                        [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
+                </button>
+                <mat-error>Password is required</mat-error>
+            </mat-form-field>
+
+            <button
+                class="fuse-mat-button-large w-full mt-6"
+                mat-flat-button
+                [color]="'primary'"
+                type="button"
+                [disabled]="signingUp"
+                (click)="signUp()">
+                <span *ngIf="!signingUp">Create your account</span>
+                <span *ngIf="signingUp" class="inline-flex items-center justify-center gap-2">
+                    <mat-progress-spinner [diameter]="22" mode="indeterminate"></mat-progress-spinner>
+                    Creating account…
+                </span>
+            </button>
+        </form>
+
+        <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?
+            <a class="thff-link font-medium" [routerLink]="['/sign-in']">Sign in</a>
+        </p>
+
+        <div class="mt-8 flex flex-col items-center gap-3 text-sm">
+            <a class="thff-link-nav" [routerLink]="['/home']">
+                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_solid:arrow-left'"></mat-icon>
+                Back to home page
+            </a>
+            <span class="text-secondary">
+                Need help?
+                <a class="thff-link" [routerLink]="['/support']">Visit the Support page</a>
+            </span>
         </div>
     </div>
 </div>

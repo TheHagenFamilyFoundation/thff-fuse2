@@ -46,8 +46,11 @@ export class AuthInterceptor implements HttpInterceptor {
         );
     }
 
-    /** Endpoints that must not require auth (landing page grant-cycle status, health checks). */
+    /** Endpoints that must not require auth (landing page grant-cycle status, health checks, referral validate). */
     private _isPublicEndpoint(url: string): boolean {
+        if (url.includes('/referral-code/validate/')) {
+            return true;
+        }
         const publicEndpoints = ['/submission-year', '/health'];
         return publicEndpoints.some((endpoint) => url.includes(endpoint));
     }
