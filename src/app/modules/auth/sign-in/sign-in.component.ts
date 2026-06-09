@@ -7,6 +7,7 @@ import {
     OnDestroy,
 } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { thffEmailValidator, validateEmailOnBlur } from 'app/core/auth/auth-validators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
@@ -65,7 +66,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.signInForm = this._formBuilder.group({
-            email: ['', [Validators.required, Validators.email]],
+            email: ['', [Validators.required, thffEmailValidator]],
             password: ['', Validators.required],
         });
 
@@ -85,6 +86,7 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
 
     signIn(): void {
         if (this.signInForm.invalid || this.signingIn) {
+            this.signInForm.markAllAsTouched();
             return;
         }
 
@@ -122,12 +124,13 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                 this._fuseLoadingService.hide();
                 this.signingIn = false;
 
-                const errorMessage = response?.error?.error?.[0]?.msg
-                    || response?.error?.message
-                    || 'An error occurred while signing in.';
+                const errorMessage = AuthUtils.getAuthErrorMessage(
+                    response,
+                    'An error occurred while signing in.'
+                );
 
-                this.signInForm.enable();
-                this.signInNgForm.resetForm();
+                this._restoreSignInFormAfterError();
+                AuthUtils.applyFieldValidationErrors(this.signInForm, response);
 
                 this.alert = {
                     type: 'error',
@@ -136,6 +139,19 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
                 this.showAlert = true;
             }
         });
+    }
+
+    /** Keep email on failed sign-in; clear password so the user can retry. */
+    private _restoreSignInFormAfterError(): void {
+        const email = this.signInForm.get('email')?.value ?? '';
+        this.signInForm.enable();
+        this.signInForm.patchValue({ email, password: '' });
+        this.signInForm.get('password')?.markAsTouched();
+    }
+
+    /** Validate email when the user leaves the field (e.g. Tab to password). */
+    onEmailBlur(): void {
+        validateEmailOnBlur(this.signInForm);
     }
 
     setScheme(): void {

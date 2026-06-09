@@ -7,11 +7,13 @@
             <mat-form-field class="flex-auto">
                 <mat-icon matPrefix class="mr-2">email</mat-icon>
                 <input matInput
+                       type="email"
                        placeholder="Enter email address..."
                        [formControl]="emailControl"
+                       (blur)="emailControl.markAsTouched()"
                        (keyup.enter)="addUser()">
-                <mat-error *ngIf="emailControl.hasError('email')">Please enter a valid email</mat-error>
-                <mat-error *ngIf="emailControl.hasError('required')">Email is required</mat-error>
+                <mat-error *ngIf="emailControl.hasError('email') && emailControl.touched">Please enter a valid email</mat-error>
+                <mat-error *ngIf="emailControl.hasError('required') && emailControl.touched">Email is required</mat-error>
             </mat-form-field>
             <button mat-flat-button color="primary"
                     [disabled]="emailControl.invalid || adding"

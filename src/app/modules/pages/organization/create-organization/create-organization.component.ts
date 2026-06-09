@@ -14,6 +14,7 @@ import {
     foundedYearToSelectValue,
 } from 'app/core/utilities/founded-year-options';
 import { normalizeZipForSave, usZipFormValidators, zipFromApiForForm } from 'app/core/utilities/us-zip';
+import { thffEmailValidator, validateEmailOnBlur } from 'app/core/auth/auth-validators';
 
 import { environment } from 'environments/environment';
 import { Router } from '@angular/router';
@@ -126,13 +127,17 @@ export class CreateOrganizationComponent implements OnInit {
                 this.orgObj.contactPersonPhoneNumber,
                 req
             ),
-            email: new FormControl(this.orgObj.email, req),
+            email: new FormControl(this.orgObj.email, [req, thffEmailValidator]),
             address: new FormControl(this.orgObj.address, req),
             city: new FormControl(this.orgObj.city, req),
             state: new FormControl(this.orgObj.state, req),
             zip: new FormControl(zipFromApiForForm(this.orgObj.zip), usZipFormValidators()),
             website: new FormControl(this.orgObj.website),
         });
+    }
+
+    onEmailBlur(): void {
+        validateEmailOnBlur(this.groupedForm);
     }
 
     private num(v: unknown, fallback = 0): number {
@@ -144,6 +149,7 @@ export class CreateOrganizationComponent implements OnInit {
     }
 
     createOrg(): void {
+        this.groupedForm.markAllAsTouched();
         if (!this.groupedForm.valid) {
             return;
         }

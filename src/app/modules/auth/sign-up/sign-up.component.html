@@ -50,14 +50,14 @@
         <fuse-alert
             class="mt-6"
             *ngIf="showAlert"
-            [appearance]="'outline'"
+            [appearance]="alert.type === 'error' ? 'fill' : 'outline'"
             [showIcon]="false"
             [type]="alert.type"
             [@shake]="alert.type === 'error'">
             {{ alert.message }}
         </fuse-alert>
 
-        <form class="mt-6" [formGroup]="signUpForm" #signUpNgForm="ngForm">
+        <form class="mt-6" [formGroup]="signUpForm" #signUpNgForm="ngForm" novalidate>
             <mat-form-field class="w-full">
                 <mat-label>Email address</mat-label>
                 <input
@@ -65,11 +65,12 @@
                     matInput
                     type="email"
                     autocomplete="email"
-                    [formControlName]="'email'" />
-                <mat-error *ngIf="signUpForm.get('email').hasError('required')">
+                    [formControlName]="'email'"
+                    (blur)="onEmailBlur()" />
+                <mat-error *ngIf="signUpForm.get('email').hasError('required') && signUpForm.get('email').touched">
                     Email address is required
                 </mat-error>
-                <mat-error *ngIf="signUpForm.get('email').hasError('email')">
+                <mat-error *ngIf="signUpForm.get('email').hasError('email') && signUpForm.get('email').touched">
                     Please enter a valid email address
                 </mat-error>
             </mat-form-field>
@@ -81,8 +82,11 @@
                     matInput
                     type="password"
                     autocomplete="new-password"
+                    aria-describedby="password-requirements"
                     [formControlName]="'password'"
-                    #passwordField />
+                    #passwordField
+                    (focus)="passwordFocused = true"
+                    (blur)="passwordFocused = false" />
                 <button
                     mat-icon-button
                     type="button"
@@ -101,15 +105,54 @@
                         *ngIf="passwordField.type === 'text'"
                         [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
                 </button>
-                <mat-error>Password is required</mat-error>
+                <mat-error
+                    *ngIf="signUpForm.get('password').hasError('required') && signUpForm.get('password').touched">
+                    Password is required
+                </mat-error>
+                <mat-error
+                    *ngIf="
+                        signUpForm.get('password').hasError('thffPassword') &&
+                        signUpForm.get('password').touched &&
+                        !signUpForm.get('password').hasError('required')
+                    ">
+                    Password does not meet the requirements below
+                </mat-error>
             </mat-form-field>
+
+            <div
+                id="password-requirements"
+                class="-mt-3 mb-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-900/40"
+                *ngIf="passwordFocused || signUpForm.get('password').value">
+                <p class="m-0 text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Your password must include:
+                </p>
+                <ul class="m-0 mt-2 list-none space-y-1.5 p-0" role="list">
+                    <li
+                        *ngFor="let rule of passwordRuleStates"
+                        class="flex items-center gap-2 text-xs leading-snug"
+                        [class.text-green-700]="rule.met"
+                        [class.dark:text-green-400]="rule.met"
+                        [class.text-gray-600]="!rule.met"
+                        [class.dark:text-gray-400]="!rule.met">
+                        <mat-icon
+                            class="icon-size-4 shrink-0"
+                            [class.text-green-600]="rule.met"
+                            [class.dark:text-green-400]="rule.met"
+                            [class.text-gray-400]="!rule.met"
+                            [svgIcon]="
+                                rule.met ? 'heroicons_solid:check-circle' : 'heroicons_outline:minus-circle'
+                            "></mat-icon>
+                        <span>{{ rule.label }}</span>
+                    </li>
+                </ul>
+            </div>
 
             <button
                 class="fuse-mat-button-large w-full mt-6"
                 mat-flat-button
                 [color]="'primary'"
                 type="button"
-                [disabled]="signingUp"
+                [disabled]="signUpForm.invalid || signingUp"
                 (click)="signUp()">
                 <span *ngIf="!signingUp">Create your account</span>
                 <span *ngIf="signingUp" class="inline-flex items-center justify-center gap-2">

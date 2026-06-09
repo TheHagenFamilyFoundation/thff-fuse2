@@ -5,6 +5,8 @@
 // https://github.com/auth0/angular2-jwt
 // -----------------------------------------------------------------------------------------------------
 
+import { FormGroup } from '@angular/forms';
+
 export class AuthUtils {
     /**
      * Constructor
@@ -266,5 +268,54 @@ export class AuthUtils {
             return fallback;
         }
         return trimmed;
+    }
+
+    /** Validation errors from auth API 422 responses (`{ error: [{ param, msg }] }`). */
+    static getValidationErrors(response: any): Array<{ param?: string; msg?: string }> {
+        const raw = response?.error?.error;
+        return Array.isArray(raw) ? raw : [];
+    }
+
+    /** User-facing message for auth form failures (maps generic validator text). */
+    static getAuthErrorMessage(response: any, fallback: string): string {
+        const errors = this.getValidationErrors(response);
+        if (errors.length > 0) {
+            const first = errors[0];
+            if (first.param === 'email') {
+                return 'Please enter a valid email address.';
+            }
+            if (first.msg && first.msg !== 'Invalid value') {
+                return first.msg;
+            }
+        }
+
+        const message = response?.error?.message;
+        if (message && message !== 'Invalid value') {
+            return message;
+        }
+
+        return fallback;
+    }
+
+    /** Highlight invalid fields after a server-side validation error. */
+    static applyFieldValidationErrors(form: FormGroup, response: any): void {
+        for (const err of this.getValidationErrors(response)) {
+            const param = err.param;
+            if (!param) {
+                continue;
+            }
+
+            const control = form.get(param);
+            if (!control) {
+                continue;
+            }
+
+            if (param === 'email') {
+                control.setErrors({ email: true });
+            } else {
+                control.setErrors({ server: true });
+            }
+            control.markAsTouched();
+        }
     }
 }

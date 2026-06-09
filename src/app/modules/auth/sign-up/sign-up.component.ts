@@ -7,6 +7,12 @@ import {
     ViewEncapsulation,
 } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { thffEmailValidator, validateEmailOnBlur } from 'app/core/auth/auth-validators';
+import {
+    getThffPasswordRuleStates,
+    thffPasswordValidator,
+    ThffPasswordRuleState,
+} from 'app/core/auth/password-validators';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { fuseAnimations } from '@fuse/animations';
@@ -14,6 +20,7 @@ import { FuseAlertType } from '@fuse/components/alert';
 import { FuseConfigService } from '@fuse/services/config';
 import { FuseLoadingService } from '@fuse/services/loading';
 import { AuthService } from 'app/core/auth/auth.service';
+import { AuthUtils } from 'app/core/auth/auth.utils';
 import { BackendService } from 'app/core/services/backend.service';
 import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -45,6 +52,9 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
     referralInvalid = false;
     referralValid = false;
 
+    passwordFocused = false;
+    passwordRuleStates: ThffPasswordRuleState[] = getThffPasswordRuleStates('');
+
     private _unsubscribeAll: Subject<void> = new Subject<void>();
 
     constructor(
@@ -61,9 +71,16 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.signUpForm = this._formBuilder.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', Validators.required],
+            email: ['', [Validators.required, thffEmailValidator]],
+            password: ['', [Validators.required, thffPasswordValidator]],
         });
+
+        this.signUpForm
+            .get('password')
+            ?.valueChanges.pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((value) => {
+                this.passwordRuleStates = getThffPasswordRuleStates(value);
+            });
 
         this._loadReferralContext();
     }
@@ -75,6 +92,7 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
 
     signUp(): void {
         if (this.signUpForm.invalid || this.signingUp) {
+            this.signUpForm.markAllAsTouched();
             return;
         }
 
@@ -121,12 +139,13 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
                 this._fuseLoadingService.hide();
                 this.signingUp = false;
 
-                const errorMessage = response?.error?.error?.[0]?.msg
-                    || response?.error?.message
-                    || 'An error occurred while creating your account.';
+                const errorMessage = AuthUtils.getAuthErrorMessage(
+                    response,
+                    'An error occurred while creating your account.'
+                );
 
-                this.signUpForm.enable();
-                this.signUpNgForm.resetForm();
+                this._restoreSignUpFormAfterError();
+                AuthUtils.applyFieldValidationErrors(this.signUpForm, response);
 
                 this.alert = {
                     type: 'error',
@@ -135,6 +154,19 @@ export class AuthSignUpComponent implements OnInit, OnDestroy {
                 this.showAlert = true;
             }
         });
+    }
+
+    /** Validate email when the user leaves the field (e.g. Tab to password). */
+    onEmailBlur(): void {
+        validateEmailOnBlur(this.signUpForm);
+    }
+
+    /** Keep email on failed registration; clear password so the user can retry. */
+    private _restoreSignUpFormAfterError(): void {
+        const email = this.signUpForm.get('email')?.value ?? '';
+        this.signUpForm.enable();
+        this.signUpForm.patchValue({ email, password: '' });
+        this.signUpForm.get('password')?.markAsTouched();
     }
 
     private _loadReferralContext(): void {
