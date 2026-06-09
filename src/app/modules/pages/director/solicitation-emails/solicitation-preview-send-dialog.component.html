@@ -97,7 +97,18 @@
         </p>
         <mat-form-field class="w-full" appearance="outline">
             <mat-label>Recipient email</mat-label>
-            <input matInput type="email" [(ngModel)]="to" autocomplete="email">
+            <input
+                matInput
+                type="email"
+                [formControl]="recipientEmailControl"
+                autocomplete="email"
+                (blur)="onRecipientEmailBlur()" />
+            <mat-error *ngIf="recipientEmailControl.hasError('required') && recipientEmailControl.touched">
+                Recipient email is required
+            </mat-error>
+            <mat-error *ngIf="recipientEmailControl.hasError('email') && recipientEmailControl.touched">
+                Please enter a valid email address
+            </mat-error>
         </mat-form-field>
     </ng-container>
 </mat-dialog-content>
@@ -123,7 +134,7 @@
             Next: Send
         </button>
         <button *ngIf="step === STEP_SEND" mat-flat-button color="primary" type="button"
-                (click)="send()" [disabled]="sending || previewLoading">
+                (click)="send()" [disabled]="sending || previewLoading || recipientEmailControl.invalid">
             {{ sending ? 'Sending…' : 'Send email' }}
         </button>
     </div>

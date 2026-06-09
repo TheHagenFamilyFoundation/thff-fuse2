@@ -50,14 +50,14 @@
         <fuse-alert
             class="mt-6"
             *ngIf="showAlert"
-            [appearance]="'outline'"
+            [appearance]="alert.type === 'error' ? 'fill' : 'outline'"
             [showIcon]="false"
             [type]="alert.type"
             [@shake]="alert.type === 'error'">
             {{ alert.message }}
         </fuse-alert>
 
-        <form class="mt-6" [formGroup]="signInForm" #signInNgForm="ngForm" (ngSubmit)="signIn()">
+        <form class="mt-6" [formGroup]="signInForm" #signInNgForm="ngForm" novalidate (ngSubmit)="signIn()">
             <mat-form-field class="w-full">
                 <mat-label>Email address</mat-label>
                 <input
@@ -65,11 +65,12 @@
                     matInput
                     type="email"
                     autocomplete="email"
-                    [formControlName]="'email'" />
-                <mat-error *ngIf="signInForm.get('email').hasError('required')">
+                    [formControlName]="'email'"
+                    (blur)="onEmailBlur()" />
+                <mat-error *ngIf="signInForm.get('email').hasError('required') && signInForm.get('email').touched">
                     Email address is required
                 </mat-error>
-                <mat-error *ngIf="signInForm.get('email').hasError('email')">
+                <mat-error *ngIf="signInForm.get('email').hasError('email') && signInForm.get('email').touched">
                     Please enter a valid email address
                 </mat-error>
             </mat-form-field>
@@ -113,7 +114,7 @@
                 mat-flat-button
                 type="submit"
                 [color]="'primary'"
-                [disabled]="signingIn">
+                [disabled]="signInForm.invalid || signingIn">
                 <span *ngIf="!signingIn">Sign in</span>
                 <span *ngIf="signingIn" class="inline-flex items-center justify-center gap-2">
                     <mat-progress-spinner [diameter]="22" mode="indeterminate"></mat-progress-spinner>

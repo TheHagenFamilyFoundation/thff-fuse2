@@ -46,6 +46,12 @@ import {
     usZipFormValidators,
     zipFromApiForForm,
 } from 'app/core/utilities/us-zip';
+import {
+    isValidThffEmail,
+    thffEmailValidator,
+    validateEmailControlOnBlur,
+    validateEmailOnBlur,
+} from 'app/core/auth/auth-validators';
 
 @Component({
     standalone: false,
@@ -103,7 +109,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     emailFormControl = new FormControl('', [
         Validators.required,
-        Validators.email,
+        thffEmailValidator,
     ]);
 
     addressFormControl = new FormControl('', [Validators.required]);
@@ -175,6 +181,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     public invalidInputContactPersonTitle: boolean = false;
     public invalidInputContactPersonPhoneNumber: boolean = false;
     public invalidInputEmail: boolean = false;
+    public invalidInputEmailFormat: boolean = false;
     public invalidInputAddress: boolean = false;
     public invalidInputCity: boolean = false;
     public invalidInputState: boolean = false;
@@ -195,7 +202,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             contactPersonPhoneNumber: new FormControl('', Validators.required),
             contactPersonTitle: new FormControl('', Validators.required),
             contactPerson: new FormControl('', Validators.required),
-            email: new FormControl('', [Validators.required, Validators.email]),
+            email: new FormControl('', [Validators.required, thffEmailValidator]),
         });
 
         this.formOrganization = fb.group({
@@ -558,7 +565,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             contactPersonPhoneNumber: new FormControl(
                 o.contactPersonPhoneNumber
             ),
-            email: new FormControl(o.email),
+            email: new FormControl(o.email, [Validators.required, thffEmailValidator]),
             address: new FormControl(o.address),
             city: new FormControl(o.city),
             state: new FormControl(o.state),
@@ -586,7 +593,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.contactPersonPhoneNumberControl = new FormControl(
             o.contactPersonPhoneNumber
         );
-        this.emailControl = new FormControl(o.email);
+        this.emailControl = new FormControl(o.email, [Validators.required, thffEmailValidator]);
         this.addressControl = new FormControl(o.address);
         this.cityControl = new FormControl(o.city);
         this.stateControl = new FormControl(o.state);
@@ -621,9 +628,19 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
             c.setValue(reset);
 
             this.checkInvalidProp(prop, true);
+            if (prop === 'email') {
+                this.invalidInputEmailFormat = false;
+            }
 
             setTimeout(() => {
                 this.checkInvalidProp(prop, false);
+            }, 2000);
+        } else if (prop === 'email' && !isValidThffEmail(c.value)) {
+            c.setValue(this.orgObj[prop]);
+            this.invalidInputEmail = false;
+            this.invalidInputEmailFormat = true;
+            setTimeout(() => {
+                this.invalidInputEmailFormat = false;
             }, 2000);
         } else {
             let val: any = c.value;
@@ -741,6 +758,11 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     updateGroupedEdition(): void {
+        this.groupedForm.markAllAsTouched();
+        if (!this.groupedForm.valid) {
+            return;
+        }
+
         const v = this.groupedForm.getRawValue();
         const payload = {
             legalName: v.legalName ?? '',
@@ -761,6 +783,14 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         };
 
         this.updateOrganizationInfo(payload);
+    }
+
+    onGroupedEmailBlur(): void {
+        validateEmailOnBlur(this.groupedForm);
+    }
+
+    onEmailControlBlur(): void {
+        validateEmailControlOnBlur(this.emailControl);
     }
 
     cancelGroupedEdition(): void {

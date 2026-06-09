@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { thffEmailValidator, validateEmailControlOnBlur } from 'app/core/auth/auth-validators';
 import { OutboundEmailService } from 'app/core/services/director/outbound-email.service';
 import { DEFAULT_SOLICITATION_MESSAGE_PLAIN } from './solicitation-default-message';
 
@@ -34,7 +36,8 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
     codes: any[] = [];
 
     referralCodeId = '';
-    to = '';
+
+    recipientEmailControl = new FormControl('', [Validators.required, thffEmailValidator]);
 
     messagePlain = DEFAULT_SOLICITATION_MESSAGE_PLAIN;
 
@@ -61,7 +64,7 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
     ) {
         this.codes = data.codes || [];
         this.referralCodeId = this.normalizeReferralCodeId(data.referralCodeId);
-        this.to = data.to || '';
+        this.recipientEmailControl.setValue(data.to || '');
     }
 
     /** Mat-select / API may expose _id as a string or as `{ $oid: string }`. */
@@ -280,12 +283,20 @@ export class SolicitationPreviewSendDialogComponent implements OnInit, OnDestroy
         this.runPreview(true);
     }
 
+    onRecipientEmailBlur(): void {
+        validateEmailControlOnBlur(this.recipientEmailControl);
+        this._changeDetectorRef.markForCheck();
+    }
+
     send(): void {
-        const email = (this.to || '').trim();
-        if (!email) {
-            this.snackBar.open('Recipient email is required', 'OK', { duration: 3000 });
+        this.recipientEmailControl.markAsTouched();
+        this.recipientEmailControl.updateValueAndValidity();
+        if (this.recipientEmailControl.invalid) {
+            this._changeDetectorRef.markForCheck();
             return;
         }
+
+        const email = String(this.recipientEmailControl.value ?? '').trim();
         if (this.previewLoading) {
             return;
         }

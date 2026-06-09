@@ -11,6 +11,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { thffEmailValidator, validateEmailControlOnBlur } from 'app/core/auth/auth-validators';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -50,7 +51,7 @@ export class OrgTeamComponent implements OnInit, OnChanges, AfterViewInit {
         this.teamDataSource.paginator = p ?? null;
     }
 
-    emailControl = new FormControl('', [Validators.required, Validators.email]);
+    emailControl = new FormControl('', [Validators.required, thffEmailValidator]);
     adding: boolean = false;
     resendingInviteId: string | null = null;
     currentUserId: string;
@@ -214,6 +215,7 @@ export class OrgTeamComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     addUser(): void {
+        validateEmailControlOnBlur(this.emailControl);
         if (this.emailControl.invalid) {
             return;
         }

@@ -320,21 +320,32 @@
                                     <input
                                         matInput
                                         class="form-control"
-                                        type="text"
+                                        type="email"
                                         formControlName="email"
                                         id="grid-email"
                                         placeholder="Email"
                                         required
-                                    />
+                                        (blur)="onEmailBlur()" />
                                     <mat-error
                                         *ngIf="
                                             groupedForm
                                                 .get('email')
-                                                .hasError('required')
+                                                .hasError('required') &&
+                                            groupedForm.get('email').touched
                                         "
                                     >
                                         Contact Person Email is
                                         <strong>required</strong>
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="
+                                            groupedForm
+                                                .get('email')
+                                                .hasError('email') &&
+                                            groupedForm.get('email').touched
+                                        "
+                                    >
+                                        Please enter a valid email address
                                     </mat-error>
                                 </mat-form-field>
                             </div>
