@@ -32,10 +32,12 @@ export class UserPreferencesService {
         this.setTablePageSize(normalizeTablePageSize(settings?.tablePageSize), false);
     }
 
+    /** Default page size from settings; use when a table first loads. Paginator changes stay page-scoped. */
     pageSizeForOptions(options: readonly number[]): number {
         return tablePageSizeForOptions(this.tablePageSize, options);
     }
 
+    /** Update in-memory + cached default. Prefer {@link saveTablePageSize} from profile settings. */
     setTablePageSize(size: number, persist = true): void {
         const normalized = normalizeTablePageSize(size);
         if (normalized === this.tablePageSize) {

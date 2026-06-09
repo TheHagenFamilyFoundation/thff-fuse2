@@ -124,7 +124,6 @@ export class VotingComponent implements AfterViewInit {
     handlePageEvent(e: PageEvent): void {
         this.pageEvent = e;
         if (this.pageEvent.pageSize !== this.limit) {
-            this._userPreferences.setTablePageSize(this.pageEvent.pageSize);
             this.tablePageSize = this.pageEvent.pageSize;
             this.limit = this.pageEvent.pageSize;
             this.skip = 0;

@@ -151,9 +151,6 @@ export class SolicitationEmailsComponent implements OnInit {
             return;
         }
         this.pageIndex = ev.pageIndex;
-        if (ev.pageSize !== this.pageSize) {
-            this._userPreferences.setTablePageSize(ev.pageSize);
-        }
         this.pageSize = ev.pageSize;
         this.loadSolicitationEmails();
     }
