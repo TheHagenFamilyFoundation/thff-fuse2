@@ -66,6 +66,6 @@ export class ReferralComponent implements OnInit {
         };
         localStorage.setItem('referralCode', JSON.stringify(refData));
 
-        this.router.navigate(['/sign-in']);
+        this.router.navigate(['/sign-in'], { queryParams: { ref: code } });
     }
 }

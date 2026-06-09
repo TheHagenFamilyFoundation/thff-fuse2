@@ -39,6 +39,12 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
+    /** Set when user arrives via /referral?ref=… (query param + localStorage). */
+    referralCode: string | null = null;
+    referralDirectorName: string | null = null;
+    referralLoading = false;
+    referralInvalid = false;
+
     private config: AppConfig;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -64,6 +70,8 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
             .subscribe((config: AppConfig) => {
                 this.config = config;
             });
+
+        this._loadReferralContext();
     }
 
     ngOnDestroy(): void {
@@ -128,6 +136,62 @@ export class AuthSignInComponent implements OnInit, OnDestroy {
 
     setScheme(): void {
         this._fuseConfigService.config = { scheme: FORCED_APP_SCHEME };
+    }
+
+    private _loadReferralContext(): void {
+        const fromUrl = this._activatedRoute.snapshot.queryParamMap.get('ref');
+        const fromStorage = this._readStoredReferralCode();
+        const code = (fromUrl || fromStorage || '').trim();
+
+        if (!code) {
+            return;
+        }
+
+        this.referralCode = code;
+        this._persistReferralCode(code);
+
+        if (!fromUrl) {
+            this._router.navigate([], {
+                relativeTo: this._activatedRoute,
+                queryParams: { ref: code },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
+
+        this.referralLoading = true;
+        this._referralCodeService.validateReferralCode(code).subscribe({
+            next: (result) => {
+                this.referralDirectorName = result?.directorName || null;
+                this.referralInvalid = false;
+                this.referralLoading = false;
+            },
+            error: () => {
+                this.referralDirectorName = null;
+                this.referralInvalid = true;
+                this.referralLoading = false;
+            },
+        });
+    }
+
+    private _readStoredReferralCode(): string | null {
+        const stored = localStorage.getItem('referralCode');
+        if (!stored) {
+            return null;
+        }
+        try {
+            const refData = JSON.parse(stored);
+            return refData?.code ? String(refData.code) : null;
+        } catch {
+            return stored;
+        }
+    }
+
+    private _persistReferralCode(code: string): void {
+        localStorage.setItem(
+            'referralCode',
+            JSON.stringify({ code, year: new Date().getFullYear() })
+        );
     }
 
     private _applyPendingReferralCode(): void {

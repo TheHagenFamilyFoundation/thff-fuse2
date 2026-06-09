@@ -123,6 +123,98 @@
     background-color: #262626;
 }
 
+/* ------------------------------------------------------------------------- */
+/* THFF text links — always underlined teal; readable in body copy & forms   */
+/* ------------------------------------------------------------------------- */
+
+.thff-link {
+    color: #006d6f;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+
+    &:hover {
+        color: #004f51;
+        text-decoration-color: #004f51;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #008083;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+.dark .thff-link {
+    color: #5eead4;
+
+    &:hover {
+        color: #99f6e4;
+        text-decoration-color: #99f6e4;
+    }
+}
+
+/** Back links and inline nav with optional leading icon */
+.thff-link-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: #006d6f;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &:hover {
+        color: #004f51;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #008083;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+.dark .thff-link-nav {
+    color: #5eead4;
+
+    &:hover {
+        color: #99f6e4;
+    }
+}
+
+/** Fallback: body-copy links without an explicit class still read as links */
+.text-secondary a:not(.thff-link):not(.thff-link-nav):not(.thff-btn-primary):not(.thff-btn-secondary):not([mat-flat-button]):not([mat-button]):not([mat-stroked-button]),
+p.text-sm a:not(.thff-link):not(.thff-link-nav):not(.thff-btn-primary):not(.thff-btn-secondary):not([mat-flat-button]):not([mat-button]):not([mat-stroked-button]) {
+    color: #006d6f;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    cursor: pointer;
+
+    &:hover {
+        color: #004f51;
+    }
+}
+
+.dark .text-secondary a:not(.thff-link):not(.thff-link-nav):not(.thff-btn-primary):not(.thff-btn-secondary):not([mat-flat-button]):not([mat-button]):not([mat-stroked-button]),
+.dark p.text-sm a:not(.thff-link):not(.thff-link-nav):not(.thff-btn-primary):not(.thff-btn-secondary):not([mat-flat-button]):not([mat-button]):not([mat-stroked-button]) {
+    color: #5eead4;
+
+    &:hover {
+        color: #99f6e4;
+    }
+}
+
 /* Angular Material MDC: filled & raised primary/accent/warn = obvious CTAs */
 $thff-btn-cta-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.1),

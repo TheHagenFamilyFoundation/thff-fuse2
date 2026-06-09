@@ -6,10 +6,7 @@
                 <ng-container *ngFor="let link of composerBackLinks(); let idx = index">
                     <a [routerLink]="link.path"
                        [fragment]="link.fragment"
-                       class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-primary"
-                       [ngClass]="isPrimaryBackLink(link.id)
-                           ? 'font-medium text-gray-700 dark:text-gray-200'
-                           : 'text-gray-500 dark:text-gray-400'">
+                       class="thff-link-nav inline-flex items-center gap-1">
                         <mat-icon *ngIf="idx === 0" class="icon-size-4">arrow_back</mat-icon>
                         {{ link.label }}
                     </a>
@@ -32,7 +29,7 @@
                 <span class="text-sm text-gray-500 dark:text-gray-400">for</span>
                 <a *ngIf="orgID"
                    [routerLink]="['/pages/organization', orgID]"
-                   class="inline-flex max-w-full items-baseline truncate text-sm font-semibold text-gray-900 underline-offset-2 hover:text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:text-primary-300">
+                   class="thff-link inline-flex max-w-full items-baseline truncate text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                     {{ organizationName || 'Loading organization…' }}
                 </a>
                 <span *ngIf="!orgID"
@@ -343,7 +340,7 @@
                                     submit step after creation. You may update it until the portal closes.
                                 </p>
                                 Need help creating your proposal?
-                                <a class="text-primary-500 hover:underline" href="mailto:support@hagenfamilyfoundation.org">
+                                <a class="thff-link" href="mailto:support@hagenfamilyfoundation.org">
                                     Contact support
                                 </a>.
                             </div>

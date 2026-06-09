@@ -3,7 +3,7 @@
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
             <a routerLink="/pages/director"
-               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+               class="thff-link-nav mb-4">
                 <mat-icon class="icon-size-4">arrow_back</mat-icon>
                 Back to Director's Page
             </a>
@@ -14,7 +14,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">
                     Start a new email to walk through choosing a referral code, editing the letter, previewing, and entering the recipient last.
                     Referral codes are for a submission year and roll over after December 31—generate new codes on
-                    <a routerLink="/pages/director/referral-links" class="text-primary hover:underline">Referral links</a>.
+                    <a routerLink="/pages/director/referral-links" class="thff-link">Referral links</a>.
                 </p>
             </div>
         </div>
@@ -45,7 +45,7 @@
 
             <div *ngIf="codesLoaded && codes.length === 0" class="text-sm text-gray-500 py-2">
                 Create a referral code on
-                <a routerLink="/pages/director/referral-links" class="text-primary hover:underline">Referral links</a>
+                <a routerLink="/pages/director/referral-links" class="thff-link">Referral links</a>
                 first.
             </div>
 

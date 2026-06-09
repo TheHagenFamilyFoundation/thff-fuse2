@@ -4,7 +4,7 @@
     <div class="bg-card border-b">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
             <a routerLink="/pages/director/meeting"
-               class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 cursor-pointer">
+               class="thff-link-nav mb-4">
                 <mat-icon class="icon-size-4">arrow_back</mat-icon>
                 Back to Meetings
             </a>
@@ -375,7 +375,7 @@
                         <ng-container matColumnDef="projectTitle">
                             <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project Title</mat-header-cell>
                             <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                                <a class="text-primary hover:underline cursor-pointer"
+                                <a class="thff-link cursor-pointer"
                                    (click)="goToProposal(row.proposal?.proposalID)">
                                     {{ row.proposal?.projectTitle }}
                                 </a>
@@ -384,7 +384,7 @@
                         <ng-container matColumnDef="organization">
                             <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
                             <mat-cell *matCellDef="let row">
-                                <a class="text-primary hover:underline cursor-pointer"
+                                <a class="thff-link cursor-pointer"
                                    (click)="goToOrganization(row.organization?.organizationID)">
                                     {{ row.organization?.name }}
                                 </a>
@@ -573,7 +573,7 @@
                                                 Project Title
                                             </mat-header-cell>
                                             <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                                                <a class="text-primary hover:underline cursor-pointer"
+                                                <a class="thff-link cursor-pointer"
                                                    (click)="goToProposal(row.proposal?.proposalID)">
                                                     {{ row.proposal?.projectTitle }}
                                                 </a>
@@ -585,7 +585,7 @@
                                                 Organization
                                             </mat-header-cell>
                                             <mat-cell *matCellDef="let row">
-                                                <a class="text-primary hover:underline cursor-pointer"
+                                                <a class="thff-link cursor-pointer"
                                                    (click)="goToOrganization(row.organization?.organizationID)">
                                                     {{ row.organization?.name }}
                                                 </a>
@@ -802,7 +802,7 @@
                                 Project Title
                             </mat-header-cell>
                             <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                                <a class="text-primary hover:underline cursor-pointer"
+                                <a class="thff-link cursor-pointer"
                                    (click)="goToProposal(row.proposal?.proposalID)">
                                     {{ row.proposal?.projectTitle }}
                                 </a>
@@ -814,7 +814,7 @@
                                 Organization
                             </mat-header-cell>
                             <mat-cell *matCellDef="let row">
-                                <a class="text-primary hover:underline cursor-pointer"
+                                <a class="thff-link cursor-pointer"
                                    (click)="goToOrganization(row.organization?.organizationID)">
                                     {{ row.organization?.name }}
                                 </a>
@@ -956,7 +956,7 @@
                             <ng-container matColumnDef="projectTitle">
                                 <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="pl-6 font-medium opacity-80">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToProposal(row.proposal?.proposalID)">
                                         {{ row.proposal?.projectTitle }}
                                     </a>
@@ -965,7 +965,7 @@
                             <ng-container matColumnDef="organization">
                                 <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="opacity-80">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToOrganization(row.organization?.organizationID)">
                                         {{ row.organization?.name }}
                                     </a>
@@ -1000,7 +1000,7 @@
                             <ng-container matColumnDef="projectTitle">
                                 <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToProposal(row.proposal?.proposalID)">
                                         {{ row.proposal?.projectTitle }}
                                     </a>
@@ -1009,7 +1009,7 @@
                             <ng-container matColumnDef="organization">
                                 <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
                                 <mat-cell *matCellDef="let row">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToOrganization(row.organization?.organizationID)">
                                         {{ row.organization?.name }}
                                     </a>
@@ -1050,7 +1050,7 @@
                             <ng-container matColumnDef="projectTitle">
                                 <mat-header-cell *matHeaderCellDef class="pl-6 font-semibold">Project</mat-header-cell>
                                 <mat-cell *matCellDef="let row" class="pl-6 font-medium">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToProposal(row.proposal?.proposalID)">
                                         {{ row.proposal?.projectTitle }}
                                     </a>
@@ -1059,7 +1059,7 @@
                             <ng-container matColumnDef="organization">
                                 <mat-header-cell *matHeaderCellDef class="font-semibold">Organization</mat-header-cell>
                                 <mat-cell *matCellDef="let row">
-                                    <a class="text-primary hover:underline cursor-pointer"
+                                    <a class="thff-link cursor-pointer"
                                        (click)="goToOrganization(row.organization?.organizationID)">
                                         {{ row.organization?.name }}
                                     </a>
