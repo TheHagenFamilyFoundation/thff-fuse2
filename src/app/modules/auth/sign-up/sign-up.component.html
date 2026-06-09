@@ -4,6 +4,42 @@
             <img [src]="fullImagePath" class="w-28 h-28 sm:w-32 sm:h-32" alt="The Hagen Family Foundation" />
         </div>
 
+        <!-- Referral invite -->
+        <div
+            *ngIf="referralCode"
+            class="mt-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-left dark:bg-primary/10">
+            <div class="flex items-start gap-3">
+                <mat-icon class="icon-size-5 shrink-0 text-primary mt-0.5">mail</mat-icon>
+                <div class="min-w-0">
+                    <p class="m-0 text-sm font-semibold text-gray-900 dark:text-white">
+                        You've been invited to apply
+                    </p>
+                    <p *ngIf="referralLoading" class="m-0 mt-1 text-sm text-gray-600 dark:text-gray-300">
+                        Checking your referral…
+                    </p>
+                    <p
+                        *ngIf="!referralLoading && referralDirectorName"
+                        class="m-0 mt-1 text-sm text-gray-700 dark:text-gray-200">
+                        <strong>{{ referralDirectorName }}</strong> invited you to submit a grant proposal through this
+                        referral link.
+                    </p>
+                    <p
+                        *ngIf="!referralLoading && !referralDirectorName && referralValid"
+                        class="m-0 mt-1 text-sm text-gray-700 dark:text-gray-200">
+                        You were invited to submit a grant proposal through this referral link.
+                    </p>
+                    <p
+                        *ngIf="!referralLoading && referralInvalid"
+                        class="m-0 mt-1 text-sm text-amber-800 dark:text-amber-200">
+                        This referral link may be invalid or expired. You can still create an account.
+                    </p>
+                    <p class="m-0 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Referral code: <span class="font-mono font-medium">{{ referralCode }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-8 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-center">
             Create account
         </div>
@@ -85,7 +121,10 @@
 
         <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?
-            <a class="thff-link font-medium" [routerLink]="['/sign-in']">Sign in</a>
+            <a
+                class="thff-link font-medium"
+                [routerLink]="['/sign-in']"
+                [queryParams]="referralCode ? { ref: referralCode } : null">Sign in</a>
         </p>
 
         <div class="mt-8 flex flex-col items-center gap-3 text-sm">

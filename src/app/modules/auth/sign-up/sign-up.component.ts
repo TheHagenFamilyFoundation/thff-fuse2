@@ -1,4 +1,11 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    ViewEncapsulation,
+} from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -8,6 +15,9 @@ import { FuseConfigService } from '@fuse/services/config';
 import { FuseLoadingService } from '@fuse/services/loading';
 import { AuthService } from 'app/core/auth/auth.service';
 import { BackendService } from 'app/core/services/backend.service';
+import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
+import { Subject, takeUntil } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 @Component({
     standalone: false,
@@ -16,7 +26,7 @@ import { BackendService } from 'app/core/services/backend.service';
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
 })
-export class AuthSignUpComponent implements OnInit {
+export class AuthSignUpComponent implements OnInit, OnDestroy {
     @ViewChild('signUpNgForm') signUpNgForm: NgForm;
 
     alert: { type: FuseAlertType; message: string } = {
@@ -29,14 +39,24 @@ export class AuthSignUpComponent implements OnInit {
 
     fullImagePath = '../assets/images/logo/logo_2020_9.svg';
 
+    referralCode: string | null = null;
+    referralDirectorName: string | null = null;
+    referralLoading = false;
+    referralInvalid = false;
+    referralValid = false;
+
+    private _unsubscribeAll: Subject<void> = new Subject<void>();
+
     constructor(
         private _authService: AuthService,
         private _backendService: BackendService,
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _route: ActivatedRoute,
+        private _referralCodeService: ReferralCodeService,
         private _fuseConfigService: FuseConfigService,
-        private _fuseLoadingService: FuseLoadingService
+        private _fuseLoadingService: FuseLoadingService,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -45,12 +65,12 @@ export class AuthSignUpComponent implements OnInit {
             password: ['', Validators.required],
         });
 
-        // Legacy email links to /sign-up?ref=CODE — route through /referral once
-        this._route.queryParams.subscribe((params) => {
-            if (params.ref && !localStorage.getItem('referralCode')) {
-                this._router.navigate(['/referral'], { queryParams: { ref: params.ref } });
-            }
-        });
+        this._loadReferralContext();
+    }
+
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next();
+        this._unsubscribeAll.complete();
     }
 
     signUp(): void {
@@ -77,6 +97,8 @@ export class AuthSignUpComponent implements OnInit {
                 // Legacy plain-string format
                 payload.referralCode = stored;
             }
+        } else if (this.referralCode) {
+            payload.referralCode = this.referralCode;
         }
 
         this._authService.signUp(payload).subscribe({
@@ -113,5 +135,101 @@ export class AuthSignUpComponent implements OnInit {
                 this.showAlert = true;
             }
         });
+    }
+
+    private _loadReferralContext(): void {
+        const fromUrl = this._route.snapshot.queryParamMap.get('ref');
+        const fromStorage = this._readStoredReferralCode();
+        const code = (fromUrl || fromStorage || '').trim();
+
+        if (!code) {
+            return;
+        }
+
+        this.referralCode = code;
+        this._persistReferralCode(code);
+
+        this.referralLoading = true;
+        this.referralInvalid = false;
+        this.referralValid = false;
+        this.referralDirectorName = null;
+
+        this._referralCodeService
+            .validateReferralCode(code)
+            .pipe(
+                finalize(() => {
+                    this.referralLoading = false;
+                    this._changeDetectorRef.markForCheck();
+                }),
+                takeUntil(this._unsubscribeAll)
+            )
+            .subscribe({
+                next: (result) => {
+                    this.referralDirectorName = this._extractDirectorName(result);
+                    this.referralValid =
+                        result?.valid === true ||
+                        (!!this.referralDirectorName && result?.valid !== false);
+                    this.referralInvalid = !this.referralValid && !this.referralDirectorName;
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: () => {
+                    this.referralDirectorName = null;
+                    this.referralValid = false;
+                    this.referralInvalid = true;
+                    this._changeDetectorRef.markForCheck();
+                },
+            });
+    }
+
+    private _extractDirectorName(result: Record<string, unknown> | null | undefined): string | null {
+        if (!result) {
+            return null;
+        }
+
+        const direct =
+            result['directorName'] ??
+            result['director_name'] ??
+            result['name'];
+
+        if (typeof direct === 'string' && direct.trim()) {
+            return direct.trim();
+        }
+
+        const director = result['director'];
+        if (director && typeof director === 'object') {
+            const d = director as Record<string, unknown>;
+            const first = String(d['firstName'] ?? d['first_name'] ?? '').trim();
+            const last = String(d['lastName'] ?? d['last_name'] ?? '').trim();
+            const full = `${first} ${last}`.trim();
+            if (full) {
+                return full;
+            }
+            const email = d['email'];
+            if (typeof email === 'string' && email.trim()) {
+                return email.trim();
+            }
+        }
+
+        return null;
+    }
+
+    private _readStoredReferralCode(): string | null {
+        const stored = localStorage.getItem('referralCode');
+        if (!stored) {
+            return null;
+        }
+        try {
+            const refData = JSON.parse(stored);
+            return refData?.code ? String(refData.code) : null;
+        } catch {
+            return stored;
+        }
+    }
+
+    private _persistReferralCode(code: string): void {
+        localStorage.setItem(
+            'referralCode',
+            JSON.stringify({ code, year: new Date().getFullYear() })
+        );
     }
 }
