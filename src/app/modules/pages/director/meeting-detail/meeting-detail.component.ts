@@ -1507,7 +1507,9 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     }
 
     goToOrganization(orgID: string): void {
-        this.router.navigate(['/pages/organization/', orgID]);
+        this.router.navigate(['/pages/organization/', orgID], {
+            queryParams: { from: 'meeting', meetingId: this.meeting._id },
+        });
     }
 
     isAllocationActiveTogglePending(row: any): boolean {

@@ -385,7 +385,9 @@ export class OrgProposalsComponent implements AfterViewInit, OnChanges, OnDestro
     }
 
     goToProposal(proposalID: string): void {
-        this._router.navigate(['/pages/proposal/', proposalID]);
+        this._router.navigate(['/pages/proposal/', proposalID], {
+            queryParams: { from: 'organization' },
+        });
     }
 
     getOrgProposalCount(year: number, countFilter?: string): void {

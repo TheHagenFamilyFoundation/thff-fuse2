@@ -2,19 +2,13 @@
     <!-- Header -->
     <div class="bg-card border-b border-gray-200 dark:border-neutral-700">
         <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
-            <div *ngIf="showComposerContext()" class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                <ng-container *ngFor="let link of composerBackLinks(); let idx = index">
-                    <a [routerLink]="link.path"
-                       [fragment]="link.fragment"
-                       class="thff-link-nav inline-flex items-center gap-1">
-                        <mat-icon *ngIf="idx === 0" class="icon-size-4">arrow_back</mat-icon>
-                        {{ link.label }}
-                    </a>
-                    <span *ngIf="idx < composerBackLinks().length - 1"
-                          class="text-gray-300 dark:text-gray-600"
-                          aria-hidden="true">·</span>
-                </ng-container>
-            </div>
+            <a *ngIf="showComposerContext() && primaryComposerBackLink() as link"
+               [routerLink]="link.path"
+               [fragment]="link.fragment"
+               class="thff-link-nav mb-4 inline-flex items-center gap-1">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                {{ primaryComposerBackLabel() }}
+            </a>
 
             <div *ngIf="showComposerContext()" class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span

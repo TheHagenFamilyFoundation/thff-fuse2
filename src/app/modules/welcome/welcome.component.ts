@@ -233,7 +233,9 @@ export class WelcomeComponent implements OnInit, OnDestroy
             console.warn('Proposal is missing proposalID; cannot navigate', proposal);
             return;
         }
-        this._router.navigate(['/pages/proposal', id]);
+        this._router.navigate(['/pages/proposal', id], {
+            queryParams: { from: 'welcome' },
+        });
     }
 
     continueDraft(proposal: any): void {
