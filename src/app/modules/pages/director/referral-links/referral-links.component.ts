@@ -47,9 +47,10 @@ export class ReferralLinksComponent implements OnInit {
     createCode(): void {
         this.referralCodeService.createReferralCode(this.newLabel).subscribe({
             next: (code) => {
-                this.codes.unshift(code);
+                this.codes = [code, ...this.codes];
                 this.newLabel = '';
                 this.snackBar.open('Referral code created', 'OK', { duration: 3000 });
+                this._changeDetectorRef.markForCheck();
             },
             error: (err) => {
                 console.error('Error creating referral code', err);
@@ -64,6 +65,7 @@ export class ReferralLinksComponent implements OnInit {
                 code.active = updated.active;
                 const msg = updated.active ? 'Code activated' : 'Code deactivated';
                 this.snackBar.open(msg, 'OK', { duration: 3000 });
+                this._changeDetectorRef.markForCheck();
             },
             error: (err) => {
                 console.error('Error toggling code', err);

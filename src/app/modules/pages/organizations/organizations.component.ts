@@ -91,7 +91,6 @@ export class OrganizationsComponent implements OnInit {
 
     onOrganizationsPage(event: { pageSize: number }): void {
         if (event.pageSize !== this.tablePageSize) {
-            this._userPreferences.setTablePageSize(event.pageSize);
             this.tablePageSize = event.pageSize;
         }
     }

@@ -922,9 +922,6 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
     onActiveTablePage(event: PageEvent): void {
         this.activeTablePageIndex = event.pageIndex;
-        if (event.pageSize !== this.activeTablePageSize) {
-            this._userPreferences.setTablePageSize(event.pageSize);
-        }
         this.activeTablePageSize = event.pageSize;
     }
 
@@ -1028,9 +1025,6 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
     onSetupTablePage(event: PageEvent): void {
         this.setupTablePageIndex = event.pageIndex;
-        if (event.pageSize !== this.setupTablePageSize) {
-            this._userPreferences.setTablePageSize(event.pageSize);
-        }
         this.setupTablePageSize = event.pageSize;
     }
 

@@ -60,6 +60,11 @@ export class ProposalsComponent implements AfterViewInit {
     }
 
     ngAfterViewInit(): void {
+        if (this.paginator) {
+            this.paginator.pageSize = this.tablePageSize;
+            this.paginator.pageIndex = 0;
+        }
+
         this.sort.start = 'desc';
         this.sort.sortChange.subscribe(() => {
             this.skip = 0;

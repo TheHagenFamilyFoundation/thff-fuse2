@@ -109,7 +109,6 @@ export class OrgTeamComponent implements OnInit, OnChanges, AfterViewInit {
 
     onTeamPage(event: { pageSize: number }): void {
         if (event.pageSize !== this.tablePageSize) {
-            this._userPreferences.setTablePageSize(event.pageSize);
             this.tablePageSize = event.pageSize;
         }
     }

@@ -77,9 +77,6 @@ export class WelcomeComponent implements OnInit, OnDestroy
 
     onSubmittedProposalsPage(event: PageEvent): void {
         this.submittedProposalsPageIndex = event.pageIndex;
-        if (event.pageSize !== this.submittedProposalsPageSize) {
-            this._userPreferences.setTablePageSize(event.pageSize);
-        }
         this.submittedProposalsPageSize = event.pageSize;
     }
 
