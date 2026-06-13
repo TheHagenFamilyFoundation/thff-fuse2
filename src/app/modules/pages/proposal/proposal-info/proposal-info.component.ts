@@ -15,10 +15,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, Subscription } from 'rxjs';
-import { finalize, takeUntil } from 'rxjs/operators';
+import { finalize, switchMap, takeUntil } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { ReferralCodeService } from 'app/core/services/director/referral-code.service';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -92,6 +93,7 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     constructor(
         private _proposalService: ProposalService,
+        private _referralCodeService: ReferralCodeService,
         private _router: Router,
         private route: ActivatedRoute,
         private _cdr: ChangeDetectorRef,
@@ -417,13 +419,15 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
         this.referralError = '';
         this.referralSuccess = '';
 
-        this._proposalService
-            .updateProposal(proposalId, { referralCode: code })
+        this._referralCodeService
+            .validateReferralCode(code)
             .pipe(
+                switchMap(() => this._proposalService.updateProposal(proposalId, { referralCode: code })),
                 finalize(() => {
                     this.referralValidating = false;
                     this._cdr.detectChanges();
                 }),
+                takeUntil(this._unsubscribeAll),
             )
             .subscribe({
                 next: (result) => {

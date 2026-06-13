@@ -312,15 +312,18 @@
                                 <mat-form-field class="flex-auto -mb-5">
                                     <input matInput [(ngModel)]="manualReferralCode"
                                         placeholder="Enter referral code"
+                                        (ngModelChange)="referralError = ''"
                                         (keyup.enter)="applyReferralCode()" />
-                                    <mat-error *ngIf="referralError">{{ referralError }}</mat-error>
                                 </mat-form-field>
-                                <button mat-stroked-button (click)="applyReferralCode()"
+                                <button mat-stroked-button type="button" (click)="applyReferralCode()"
                                     [disabled]="referralValidating || !manualReferralCode?.trim()"
                                     class="mt-1">
                                     {{ referralValidating ? 'Checking...' : 'Apply' }}
                                 </button>
                             </div>
+                            <p *ngIf="referralError" class="text-sm text-red-600 dark:text-red-400 mt-2 mb-0" role="alert">
+                                {{ referralError }}
+                            </p>
                         </div>
                         }
                     </div>
