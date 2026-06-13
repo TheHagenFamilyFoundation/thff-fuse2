@@ -171,6 +171,12 @@ export class ProposalService {
 
     }
 
+    /** Apply a director referral code to an existing proposal without a sponsor. */
+    applyProposalReferralCode(id: string, code: string): Observable<any> {
+        const urlString = `${this.apiUrl}/proposal/${id}/referral-code`;
+        return this.http.put(urlString, { code });
+    }
+
     // Get proposals for the current user's organizations for the given year
     getMyProposals(year: number): Observable<any> {
         const urlString = `${this.apiUrl}/proposal/my-proposals?year=${year}`;

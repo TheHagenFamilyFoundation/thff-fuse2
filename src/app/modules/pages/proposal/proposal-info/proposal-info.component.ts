@@ -11,11 +11,15 @@ import {
 } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { Subject, Subscription } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 
 import { environment } from 'environments/environment';
 import { ProposalService } from 'app/core/services/proposal/proposal.service';
+import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
     standalone: false,
@@ -53,6 +57,12 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     directorEditing = false;
 
+    /** Referral / sponsor code entry (org members editing an existing proposal). */
+    manualReferralCode = '';
+    referralValidating = false;
+    referralError = '';
+    referralSuccess = '';
+
     public projectTitleControl: FormControl;
     public purposeControl: FormControl;
     public goalsControl: FormControl;
@@ -84,7 +94,9 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
         private _proposalService: ProposalService,
         private _router: Router,
         private route: ActivatedRoute,
-        private _cdr: ChangeDetectorRef
+        private _cdr: ChangeDetectorRef,
+        private _snackBar: MatSnackBar,
+        private _dialog: MatDialog,
     ) {}
 
     ngOnInit(): void {
@@ -366,5 +378,160 @@ export class ProposalInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     checkEditing(mode: string): void {
         this.editing = mode !== 'view';
+    }
+
+    get hasProposalSponsor(): boolean {
+        return !!this.proposal?.sponsor;
+    }
+
+    get sponsorDisplayName(): string {
+        const sponsor = this.proposal?.sponsor;
+        if (!sponsor || typeof sponsor !== 'object') {
+            return '';
+        }
+        const full = `${sponsor.firstName || ''} ${sponsor.lastName || ''}`.trim();
+        return full || sponsor.email || '';
+    }
+
+    onReferralCodeInput(): void {
+        this.referralError = '';
+        this.referralSuccess = '';
+    }
+
+    applyReferralCode(): void {
+        const code = this.manualReferralCode.trim();
+        const proposalId = this.resolveProposalMongoId();
+
+        if (!code) {
+            return;
+        }
+
+        if (!proposalId) {
+            this.referralError = 'Proposal is still loading. Please try again in a moment.';
+            this._snackBar.open(this.referralError, 'OK', { duration: 4000 });
+            this._cdr.detectChanges();
+            return;
+        }
+
+        this.referralValidating = true;
+        this.referralError = '';
+        this.referralSuccess = '';
+
+        this._proposalService
+            .updateProposal(proposalId, { referralCode: code })
+            .pipe(
+                finalize(() => {
+                    this.referralValidating = false;
+                    this._cdr.detectChanges();
+                }),
+            )
+            .subscribe({
+                next: (result) => {
+                    this.proposal = result.proposal ?? result;
+                    this.propID = this.resolveProposalMongoId() ?? proposalId;
+                    this.manualReferralCode = '';
+                    const sponsorName = this.sponsorDisplayName || 'Director assigned';
+                    this.referralSuccess = `Sponsor added: ${sponsorName}`;
+                    this._snackBar.open(this.referralSuccess, 'OK', { duration: 5000 });
+                    this.refreshProp.emit(true);
+                    this._cdr.detectChanges();
+                },
+                error: (err) => {
+                    this.referralError = this.formatReferralError(err);
+                    this._snackBar.open(this.referralError, 'OK', { duration: 5000 });
+                    this._cdr.detectChanges();
+                },
+            });
+    }
+
+    clearSponsor(): void {
+        if (!this.hasProposalSponsor) {
+            return;
+        }
+
+        const sponsorName = this.sponsorDisplayName || 'this sponsor';
+        const ref = this._dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: 'Remove sponsor?',
+                message: `Remove ${sponsorName} as the sponsor for this proposal? You can enter a referral code again later if needed.`,
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                warn: true,
+            },
+        });
+
+        ref.afterClosed().pipe(takeUntil(this._unsubscribeAll)).subscribe((ok) => {
+            if (!ok) {
+                return;
+            }
+
+            const proposalId = this.resolveProposalMongoId();
+            if (!proposalId) {
+                this.referralError = 'Proposal is still loading. Please try again in a moment.';
+                this._snackBar.open(this.referralError, 'OK', { duration: 4000 });
+                this._cdr.detectChanges();
+                return;
+            }
+
+            this.referralValidating = true;
+            this.referralError = '';
+            this.referralSuccess = '';
+
+            this._proposalService
+                .updateProposal(proposalId, { clearSponsor: true })
+                .pipe(
+                    finalize(() => {
+                        this.referralValidating = false;
+                        this._cdr.detectChanges();
+                    }),
+                )
+                .subscribe({
+                    next: (result) => {
+                        this.proposal = result.proposal ?? result;
+                        this.propID = this.resolveProposalMongoId() ?? proposalId;
+                        this.referralSuccess = 'Sponsor removed.';
+                        this._snackBar.open(this.referralSuccess, 'OK', { duration: 4000 });
+                        this.refreshProp.emit(true);
+                        this._cdr.detectChanges();
+                    },
+                    error: (err) => {
+                        this.referralError = this.formatReferralError(err);
+                        this._snackBar.open(this.referralError, 'OK', { duration: 5000 });
+                        this._cdr.detectChanges();
+                    },
+                });
+        });
+    }
+
+    private resolveProposalMongoId(): string | null {
+        const raw = this.propID ?? this.proposal?._id ?? this.proposal?.id;
+        if (raw == null) {
+            return null;
+        }
+        const id = String(raw);
+        return /^[a-f0-9]{24}$/i.test(id) ? id : null;
+    }
+
+    private formatReferralError(err: unknown): string {
+        const e = err as HttpErrorResponse;
+        if (e?.error?.message) {
+            return e.error.message;
+        }
+        if (e?.status === 404) {
+            return 'Invalid or expired referral code.';
+        }
+        if (e?.status === 409) {
+            return 'This proposal already has a sponsor.';
+        }
+        if (e?.status === 400) {
+            return e.error?.message || 'Unable to update sponsor.';
+        }
+        if (e?.status === 403) {
+            return 'You do not have permission to add a sponsor to this proposal.';
+        }
+        if (e?.status === 0) {
+            return 'Could not reach the server. Check your connection and try again.';
+        }
+        return 'Unable to apply referral code. Please try again.';
     }
 }
