@@ -760,19 +760,26 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
         this.referralValidating = true;
         this.referralError = '';
 
-        this.referralCodeService.setMyReferralCode(code).subscribe({
-            next: (result) => {
+        this.referralCodeService.validateReferralCode(code).pipe(
+            switchMap(() => this.referralCodeService.setMyReferralCode(code)),
+            finalize(() => {
                 this.referralValidating = false;
+                this.pingComposerView();
+            }),
+            takeUntil(this._destroy$),
+        ).subscribe({
+            next: (result) => {
                 this.manualReferralCode = '';
                 this.sponsorInfo.set({
                     name: result.sponsor?.name ?? '',
                     code: result.code ?? '',
                 });
+                this.pingComposerView();
             },
             error: (err) => {
-                this.referralValidating = false;
-                this.referralError = err.error?.message || 'Invalid referral code';
-            }
+                this.referralError = err.error?.message || 'Invalid or expired referral code';
+                this.pingComposerView();
+            },
         });
     }
 

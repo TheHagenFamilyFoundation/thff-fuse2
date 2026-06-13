@@ -582,6 +582,67 @@
             </div>
         </article>
     </section>
+
+    <!-- Referral / Sponsor (org members) -->
+    <section *ngIf="inOrg && loaded" class="mt-8">
+        <div class="p-5 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-2 mb-3">
+                <mat-icon class="icon-size-5 text-secondary">person_add</mat-icon>
+                <span class="text-base font-medium">Referral / Sponsor</span>
+            </div>
+
+            @if (hasProposalSponsor) {
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-on-primary text-sm font-bold shrink-0">
+                        {{ sponsorDisplayName.charAt(0) }}
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium">{{ sponsorDisplayName }}</div>
+                        <div class="text-xs text-secondary">Sponsor assigned to this proposal</div>
+                    </div>
+                </div>
+                <button mat-icon-button type="button" (click)="clearSponsor()"
+                    [disabled]="referralValidating"
+                    matTooltip="Remove sponsor">
+                    <mat-icon class="icon-size-5 text-gray-400">close</mat-icon>
+                </button>
+            </div>
+            <p *ngIf="referralSuccess" class="text-sm text-green-700 dark:text-green-400 mt-2 mb-0" role="status">
+                {{ referralSuccess }}
+            </p>
+            <p *ngIf="referralError" class="text-sm text-red-600 dark:text-red-400 mt-2 mb-0" role="alert">
+                {{ referralError }}
+            </p>
+            } @else {
+            <div>
+                <p class="text-sm text-secondary mb-3 m-0">
+                    If a director referred you, enter their referral code below.
+                </p>
+                <div class="flex items-start gap-3">
+                    <mat-form-field class="flex-auto -mb-5">
+                        <input matInput [(ngModel)]="manualReferralCode"
+                            placeholder="Enter referral code"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="onReferralCodeInput()"
+                            (keyup.enter)="applyReferralCode()" />
+                    </mat-form-field>
+                    <button mat-stroked-button type="button" (click)="applyReferralCode()"
+                        [disabled]="referralValidating || !manualReferralCode?.trim()"
+                        class="mt-1">
+                        {{ referralValidating ? 'Checking...' : 'Apply' }}
+                    </button>
+                </div>
+                <p *ngIf="referralError" class="text-sm text-red-600 dark:text-red-400 mt-2 mb-0" role="alert">
+                    {{ referralError }}
+                </p>
+                <p *ngIf="referralSuccess" class="text-sm text-green-700 dark:text-green-400 mt-2 mb-0" role="status">
+                    {{ referralSuccess }}
+                </p>
+            </div>
+            }
+        </div>
+    </section>
 </div>
 <div *ngIf="!directorEditing && (!inOrg && isDirector)">
     <section>

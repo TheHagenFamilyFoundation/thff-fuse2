@@ -20,6 +20,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslocoModule } from '@ngneat/transloco';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -58,6 +59,7 @@ import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/con
         MatTooltipModule,
         MatProgressSpinnerModule,
         MatDialogModule,
+        MatSnackBarModule,
         EditableModule,
         AutosaveStatusComponent,
         ConfirmDialogComponent,
