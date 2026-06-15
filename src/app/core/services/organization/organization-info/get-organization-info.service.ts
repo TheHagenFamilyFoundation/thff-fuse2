@@ -18,7 +18,7 @@ export class GetOrganizationInfoService {
     }
 
     getOrgInfobyID(orgInfoID: string): Observable<any> {
-        const urlString = `${this.apiUrl}/organizationInfo?organizationID=${orgInfoID}`;
+        const urlString = `${this.apiUrl}/organization-info?organization=${orgInfoID}`;
 
         return this.http.get(urlString);
     }

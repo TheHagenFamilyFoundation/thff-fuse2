@@ -12,7 +12,7 @@ export class CreateOrganizationInfoService {
   constructor(private http: HttpClient) {}
 
   createOrganizationInfo(body): Observable<any> {
-    const urlString = `${this.apiUrl}/organizationInfo`;
+    const urlString = `${this.apiUrl}/organization-info`;
 
     // send to api
     return this.http.post(urlString, body);

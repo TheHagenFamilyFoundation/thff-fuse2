@@ -27,6 +27,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 // import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { environment } from 'environments/environment';
 
@@ -195,6 +196,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         private getOrganizationInfoService: GetOrganizationInfoService,
         private deleteOrganizationInfoService: DeleteOrganizationInfoService,
         private _cdr: ChangeDetectorRef,
+        private _snackBar: MatSnackBar,
         fb: FormBuilder
     ) {
         //main edit mode
@@ -394,15 +396,16 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     createOrganizationInfo(body): void {
+        this.beginOrgInfoSave();
         this.createOrganizationInfoService
             .createOrganizationInfo(body)
-            .subscribe(
-                (result) => {
-                    this.orgInfo = result.result;
-                    this.setFields();
+            .pipe(finalize(() => this.endOrgInfoSave()))
+            .subscribe({
+                next: (result) => {
+                    this.applyOrgInfoSaveResult(result);
                 },
-                () => {}
-            );
+                error: (err) => this.handleOrgInfoSaveError(err),
+            });
     }
 
     deleteOrganizationInfo(): void {
@@ -731,19 +734,52 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
 
     //calls the updateOrganizationService
     updateOrganizationInfo(body: any): void {
+        if (!this.orgInfo?.organizationInfoID) {
+            this.createOrganizationInfo({
+                ...this.orgObj,
+                ...body,
+                organization: this.orgID,
+            });
+            return;
+        }
+
         this.beginOrgInfoSave();
         this.updateOrganizationInfoService
             .updateOrganizationInfo(this.orgInfo.organizationInfoID, body)
             .pipe(finalize(() => this.endOrgInfoSave()))
             .subscribe({
                 next: (result) => {
-                    this.orgInfo = result.info;
-                    this.refreshOrg.emit(true);
-                    this.resetFormValues();
-                    this.flashOrgInfoSaved();
+                    this.applyOrgInfoSaveResult(result);
                 },
-                error: () => {},
+                error: (err) => this.handleOrgInfoSaveError(err),
             });
+    }
+
+    private applyOrgInfoSaveResult(result: any): void {
+        const saved = result?.info ?? result?.result;
+        if (
+            saved &&
+            typeof saved === 'object' &&
+            ('organizationInfoID' in saved || 'legalName' in saved)
+        ) {
+            this.orgInfo = saved;
+        }
+        this.setFields();
+        this.refreshOrg.emit(true);
+        this.flashOrgInfoSaved();
+    }
+
+    private handleOrgInfoSaveError(err: any): void {
+        const msg =
+            err?.error?.message ||
+            (err?.error?.code === 'ORG001'
+                ? 'An organization with this legal name already exists.'
+                : null) ||
+            'Could not save organization profile. Please try again.';
+        this.showMessage = true;
+        this.message = msg;
+        this._snackBar.open(msg, 'Dismiss', { duration: 8000 });
+        this._cdr.markForCheck();
     }
 
     cancelSingleField(prop: string, control: any): void {
@@ -814,7 +850,7 @@ export class OrganizationInfoComponent implements OnInit, OnDestroy, OnChanges {
         if (target?.tagName === 'TEXTAREA') {
             return;
         }
-        if (this.mode !== 'edit' || !this.groupedForm?.valid || !this.orgInfo?.organizationInfoID) {
+        if (this.mode !== 'edit' || !this.groupedForm?.valid || !this.orgID) {
             return;
         }
         event.preventDefault();
