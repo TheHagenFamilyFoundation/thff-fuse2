@@ -11,6 +11,11 @@ export interface Upload501c3DialogData {
     standalone: false,
     selector: 'app-upload-501c3-dialog',
     templateUrl: './upload-501c3-dialog.component.html',
+    styles: [`
+        :host ::ng-deep .thff-btn-spinner circle {
+            stroke: currentColor;
+        }
+    `],
 })
 export class Upload501c3DialogComponent {
     file: File = null;
@@ -37,7 +42,7 @@ export class Upload501c3DialogComponent {
     }
 
     onUpload(): void {
-        if (!this.file) { return; }
+        if (!this.file || this.uploading) { return; }
 
         this.uploading = true;
         this.upload501c3Service.upload501c3(this.file, this.data.orgID).subscribe({
