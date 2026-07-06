@@ -11,11 +11,6 @@ export interface Upload501c3DialogData {
     standalone: false,
     selector: 'app-upload-501c3-dialog',
     templateUrl: './upload-501c3-dialog.component.html',
-    styles: [`
-        :host ::ng-deep .thff-btn-spinner circle {
-            stroke: currentColor;
-        }
-    `],
 })
 export class Upload501c3DialogComponent {
     file: File = null;
