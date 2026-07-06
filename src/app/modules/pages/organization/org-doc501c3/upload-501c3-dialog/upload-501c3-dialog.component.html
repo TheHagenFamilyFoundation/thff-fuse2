@@ -25,14 +25,17 @@
         </label>
     </mat-dialog-content>
 
-    <mat-dialog-actions class="flex justify-end gap-2 pt-2">
+    <mat-dialog-actions class="flex items-center justify-end gap-2 pt-2">
         <button mat-button (click)="onCancel()" [disabled]="uploading">Cancel</button>
         <button mat-flat-button color="primary"
-                [disabled]="!file || uploading"
+                class="min-w-[140px]"
+                [disabled]="!file"
                 (click)="onUpload()">
-            <mat-spinner *ngIf="uploading" [diameter]="20" class="mr-2"></mat-spinner>
-            <mat-icon *ngIf="!uploading" class="mr-2 icon-size-5">upload</mat-icon>
-            <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
+            <span class="flex items-center justify-center leading-none">
+                <mat-spinner *ngIf="uploading" [diameter]="18" class="thff-btn-spinner mr-2"></mat-spinner>
+                <mat-icon *ngIf="!uploading" class="mr-2 icon-size-5">upload</mat-icon>
+                <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
+            </span>
         </button>
     </mat-dialog-actions>
 </div>
