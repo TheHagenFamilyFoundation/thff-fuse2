@@ -31,10 +31,10 @@
                 class="min-w-[140px]"
                 [disabled]="!file"
                 (click)="onUpload()">
-            <span class="flex items-center justify-center leading-none">
-                <mat-spinner *ngIf="uploading" [diameter]="18" class="thff-btn-spinner mr-2"></mat-spinner>
+            <span class="inline-flex items-center justify-center">
+                <mat-spinner *ngIf="uploading" [diameter]="18" class="thff-btn-spinner mr-2 flex-shrink-0"></mat-spinner>
                 <mat-icon *ngIf="!uploading" class="mr-2 icon-size-5">upload</mat-icon>
-                <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
+                <span class="leading-none">{{ uploading ? 'Uploading...' : 'Upload' }}</span>
             </span>
         </button>
     </mat-dialog-actions>
