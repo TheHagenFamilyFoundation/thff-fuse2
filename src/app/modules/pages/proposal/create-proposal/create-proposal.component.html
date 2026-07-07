@@ -38,9 +38,9 @@
             </h1>
             <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
                 Your answers are saved as a draft automatically while you work, so you can leave and come back without
-                losing progress. When you're finished, click <span class="font-semibold">Submit Application</span> at
-                the bottom to send it in for grant consideration for that cycle. You can return and update your
-                application anytime until the portal closes.
+                losing progress. When you're finished, click <span class="font-semibold">Create Proposal</span> at the
+                bottom — this submits it for grant consideration for that cycle (there is no separate submit step). You
+                can return and update your proposal anytime until the portal closes.
             </p>
         </div>
     </div>
@@ -333,12 +333,15 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
                         <ng-container *ngIf="!redirectingAfterSubmit">
                             <div class="text-sm text-secondary max-w-md">
-                                <p class="m-0 mb-2 text-gray-600 dark:text-gray-300">
-                                    Clicking <span class="font-semibold">Submit Application</span> sends your
-                                    application in for grant consideration. There is no separate submit step — you may
-                                    keep updating it until the portal closes.
-                                </p>
-                                Need help with your application?
+                                <div class="mb-2 flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-blue-800 dark:text-blue-200">
+                                    <mat-icon class="icon-size-5 mt-0.5 flex-shrink-0">info</mat-icon>
+                                    <p class="m-0">
+                                        Clicking <span class="font-semibold">Create Proposal</span> submits your
+                                        proposal for grant consideration — there is no separate submit step. You can
+                                        keep updating it until the portal closes.
+                                    </p>
+                                </div>
+                                Need help with your proposal?
                                 <a class="thff-link" href="mailto:support@hagenfamilyfoundation.org">
                                     Contact support
                                 </a>.
@@ -369,7 +372,7 @@
                                                 diameter="20"
                                                 mode="indeterminate"
                                             />
-                                            <span>{{ submittingProposal ? 'Submitting…' : 'Submit Application' }}</span>
+                                            <span>{{ submittingProposal ? 'Submitting…' : 'Create Proposal' }}</span>
                                         </span>
                                     </button>
                                 </div>
@@ -378,7 +381,7 @@
                                     class="m-0 text-xs text-amber-700 dark:text-amber-500 sm:text-right"
                                     role="status"
                                 >
-                                    Complete these fields to submit: {{ missingFieldLabels.join(', ') }}
+                                    Complete these fields to create your proposal: {{ missingFieldLabels.join(', ') }}
                                 </p>
                             </div>
                         </ng-container>
