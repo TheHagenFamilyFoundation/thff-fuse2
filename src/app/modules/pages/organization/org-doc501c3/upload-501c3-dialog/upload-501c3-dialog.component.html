@@ -25,14 +25,24 @@
         </label>
     </mat-dialog-content>
 
-    <mat-dialog-actions class="flex justify-end gap-2 pt-2">
-        <button mat-button (click)="onCancel()" [disabled]="uploading">Cancel</button>
-        <button mat-flat-button color="primary"
-                [disabled]="!file || uploading"
-                (click)="onUpload()">
-            <mat-spinner *ngIf="uploading" [diameter]="20" class="mr-2"></mat-spinner>
-            <mat-icon *ngIf="!uploading" class="mr-2 icon-size-5">upload</mat-icon>
-            <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
-        </button>
+    <mat-dialog-actions class="flex items-center justify-end gap-2 pt-2">
+        <!-- Uploading: plain progress indicator, not a button -->
+        <div *ngIf="uploading" class="inline-flex items-center px-2 text-sm font-medium text-gray-500">
+            <mat-spinner [diameter]="18" class="mr-2 flex-shrink-0"></mat-spinner>
+            <span>Uploading...</span>
+        </div>
+
+        <!-- Idle: actions -->
+        <ng-container *ngIf="!uploading">
+            <button mat-button (click)="onCancel()">Cancel</button>
+            <button mat-flat-button color="primary"
+                    [disabled]="!file"
+                    (click)="onUpload()">
+                <span class="inline-flex items-center justify-center">
+                    <mat-icon class="mr-2 icon-size-5">upload</mat-icon>
+                    <span>Upload</span>
+                </span>
+            </button>
+        </ng-container>
     </mat-dialog-actions>
 </div>

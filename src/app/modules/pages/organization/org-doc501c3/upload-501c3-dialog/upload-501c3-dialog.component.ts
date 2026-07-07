@@ -37,7 +37,7 @@ export class Upload501c3DialogComponent {
     }
 
     onUpload(): void {
-        if (!this.file) { return; }
+        if (!this.file || this.uploading) { return; }
 
         this.uploading = true;
         this.upload501c3Service.upload501c3(this.file, this.data.orgID).subscribe({
