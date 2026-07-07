@@ -38,8 +38,9 @@
             </h1>
             <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
                 Your answers are saved as a draft automatically while you work, so you can leave and come back without
-                losing progress. When you create the proposal, it is submitted automatically and considered for grant
-                funding for that cycle. You can return and update your proposal anytime until the portal closes.
+                losing progress. When you're finished, click <span class="font-semibold">Create Proposal</span> at the
+                bottom — this submits it for grant consideration for that cycle (there is no separate submit step). You
+                can return and update your proposal anytime until the portal closes.
             </p>
         </div>
     </div>
@@ -332,43 +333,56 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
                         <ng-container *ngIf="!redirectingAfterSubmit">
                             <div class="text-sm text-secondary max-w-md">
-                                <p class="m-0 mb-2 text-gray-600 dark:text-gray-300">
-                                    Creating this proposal submits it for grant consideration. There is no separate
-                                    submit step after creation. You may update it until the portal closes.
-                                </p>
-                                Need help creating your proposal?
+                                <div class="mb-2 flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-blue-800 dark:text-blue-200">
+                                    <mat-icon class="icon-size-5 mt-0.5 flex-shrink-0">info</mat-icon>
+                                    <p class="m-0">
+                                        Clicking <span class="font-semibold">Create Proposal</span> submits your
+                                        proposal for grant consideration — there is no separate submit step. You can
+                                        keep updating it until the portal closes.
+                                    </p>
+                                </div>
+                                Need help with your proposal?
                                 <a class="thff-link" href="mailto:support@hagenfamilyfoundation.org">
                                     Contact support
                                 </a>.
                             </div>
-                            <div class="flex items-center gap-3">
-                                <button
-                                    mat-stroked-button
-                                    type="button"
-                                    [disabled]="submittingProposal"
-                                    (click)="cancel()"
+                            <div class="flex flex-col items-stretch sm:items-end gap-2">
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        mat-stroked-button
+                                        type="button"
+                                        [disabled]="submittingProposal"
+                                        (click)="cancel()"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        mat-raised-button
+                                        [color]="'primary'"
+                                        type="button"
+                                        class="create-proposal-submit"
+                                        [disabled]="!groupedForm.valid || submittingProposal"
+                                        [attr.aria-busy]="submittingProposal"
+                                        (click)="createProposal()"
+                                    >
+                                        <span class="create-proposal-submit__content">
+                                            <mat-progress-spinner
+                                                *ngIf="submittingProposal"
+                                                class="create-proposal-submit__spinner"
+                                                diameter="20"
+                                                mode="indeterminate"
+                                            />
+                                            <span>{{ submittingProposal ? 'Submitting…' : 'Create Proposal' }}</span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <p
+                                    *ngIf="!groupedForm.valid && !submittingProposal"
+                                    class="m-0 text-xs text-amber-700 dark:text-amber-500 sm:text-right"
+                                    role="status"
                                 >
-                                    Cancel
-                                </button>
-                                <button
-                                    mat-raised-button
-                                    [color]="'primary'"
-                                    type="button"
-                                    class="create-proposal-submit"
-                                    [disabled]="!groupedForm.valid || submittingProposal"
-                                    [attr.aria-busy]="submittingProposal"
-                                    (click)="createProposal()"
-                                >
-                                    <span class="create-proposal-submit__content">
-                                        <mat-progress-spinner
-                                            *ngIf="submittingProposal"
-                                            class="create-proposal-submit__spinner"
-                                            diameter="20"
-                                            mode="indeterminate"
-                                        />
-                                        <span>{{ submittingProposal ? 'Submitting…' : 'Create Proposal' }}</span>
-                                    </span>
-                                </button>
+                                    Complete these fields to create your proposal: {{ missingFieldLabels.join(', ') }}
+                                </p>
                             </div>
                         </ng-container>
                         <div
