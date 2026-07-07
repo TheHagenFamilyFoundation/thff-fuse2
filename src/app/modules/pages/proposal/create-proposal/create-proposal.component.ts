@@ -285,6 +285,25 @@ export class CreateProposalComponent implements OnInit, OnDestroy {
             .filter(key => this.groupedForm.get(key).valid).length;
     }
 
+    readonly fieldLabels: Record<string, string> = {
+        projectTitle: 'Project Title',
+        purpose: 'Purpose',
+        goals: 'Goals',
+        narrative: 'Narrative',
+        timeTable: 'Time Table',
+        amountRequested: 'Amount Requested',
+        itemizedBudget: 'Itemized Budget',
+        totalProjectCost: 'Total Project Cost',
+    };
+
+    /** Labels of the fields still keeping the form from being submittable. */
+    get missingFieldLabels(): string[] {
+        if (!this.groupedForm) { return []; }
+        return Object.keys(this.groupedForm.controls)
+            .filter(key => this.groupedForm.get(key)?.invalid)
+            .map(key => this.fieldLabels[key] ?? key);
+    }
+
     private get draftKey(): string {
         return proposalDraftStorageKey(this.org);
     }
