@@ -10,6 +10,11 @@ export const environment = {
      * Avoids calling `http://localhost:1337` from the browser (CORS / localhost quirks).
      */
     apiUrl: '/api',
+    /**
+     * Socket.IO base URL. Empty string = same origin, so the Angular dev server
+     * proxies `/socket.io` to the Node server (see `proxy.conf.json`).
+     */
+    socketUrl: '',
     /** For dev-only messages — actual HTTP base is `apiUrl` above */
     backendOriginLabel: 'http://127.0.0.1:1337',
 };

@@ -16,9 +16,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Sort } from '@angular/material/sort';
 import { PageEvent } from '@angular/material/paginator';
-import { Subject, EMPTY, forkJoin, of, from } from 'rxjs';
+import { Subject, EMPTY, forkJoin, of, from, interval } from 'rxjs';
 import { catchError, debounceTime, filter, finalize, last, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { MeetingRealtimeService } from 'app/core/services/admin/meeting-realtime.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
@@ -129,6 +130,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
     private static readonly BULK_ALLOCATION_CONCURRENCY = 8;
 
+    /** How often to poll the server for live updates while a meeting is setup / in progress. */
+    private static readonly LIVE_POLL_INTERVAL_MS = 10000;
+
+    /** Timestamp of the last successful live refresh (drives the "Live" indicator). */
+    liveUpdatedAt: Date | null = null;
+
+    /** True while the realtime socket is connected (polling falls back when false). */
+    realtimeConnected = false;
+
     // Summary collapse state
     fundedCollapsed = false;
     inConsiderationSummaryCollapsed = true;
@@ -148,6 +158,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         private route: ActivatedRoute,
         private router: Router,
         private meetingService: MeetingService,
+        private realtime: MeetingRealtimeService,
         private authService: AuthService,
         private dialog: MatDialog,
         private snackBar: MatSnackBar,
@@ -224,12 +235,30 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             )
             .subscribe((id) => {
                 this.meetingId = id;
+                this.realtime.joinMeeting(id);
                 this.loadMeetingDetails(id);
+            });
+
+        // Live updates pushed by the server after any meeting mutation.
+        this.realtime
+            .meetingUpdates()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((meeting) => this.applyLiveMeetingUpdate(meeting));
+
+        this.realtime
+            .connected()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((connected) => {
+                this.realtimeConnected = connected;
+                this._changeDetectorRef.markForCheck();
             });
 
         this.destroyRef.onDestroy(() => {
             this.clearSetupBudgetNotesSavedTimer();
             this.clearAllocationsSavedTimer();
+            if (this.meetingId) {
+                this.realtime.leaveMeeting(this.meetingId);
+            }
         });
 
         this.setupSearchSubject
@@ -309,6 +338,24 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     const msg = err.error?.message || 'Error saving allocations';
                     this.snackBar.open(msg, 'Close', { duration: 5000 });
                 },
+            });
+
+        // Live sync: while a meeting is being set up or run, poll for the latest
+        // state so directors watching see the president's edits without refreshing.
+        interval(MeetingDetailComponent.LIVE_POLL_INTERVAL_MS)
+            .pipe(
+                filter(() => this.canLivePoll()),
+                switchMap(() =>
+                    this.meetingService.getMeeting(this.meetingId).pipe(
+                        catchError(() => of(null))
+                    )
+                ),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe((meeting) => {
+                if (meeting) {
+                    this.applyLiveMeetingUpdate(meeting);
+                }
             });
     }
 
@@ -518,6 +565,82 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.pendingAllocations.clear();
         this.allocationAmountDrafts.clear();
         this.hasUnsavedChanges = false;
+    }
+
+    /**
+     * True when it's safe to poll the server for a live refresh: the meeting is
+     * loaded, still in a live state (setup / in progress), the tab is visible, and
+     * the current user is not in the middle of editing (so we never clobber edits).
+     */
+    private canLivePoll(): boolean {
+        if (!this.loaded || !this.meetingId || !this.meeting) {
+            return false;
+        }
+        // Realtime socket is authoritative; only poll as a fallback when it's down.
+        if (this.realtimeConnected) {
+            return false;
+        }
+        if (typeof document !== 'undefined' && document.hidden) {
+            return false;
+        }
+        const status = this.meeting.status;
+        if (status !== 'setup' && status !== 'in_progress') {
+            return false;
+        }
+        return !this.isLocallyEditing();
+    }
+
+    /** Any local editing/in-flight state that a live refresh must not overwrite. */
+    private isLocallyEditing(): boolean {
+        return (
+            this.hasUnsavedChanges ||
+            this.pendingAllocations.size > 0 ||
+            this.editingInProgressBudget ||
+            this.editingCompletedMeeting ||
+            this.setupBudgetNotesSaving ||
+            this.allocationsSaving ||
+            this.bulkAllocationActionInFlight ||
+            this.allocationActiveToggleInFlight.size > 0 ||
+            this.syncAllocationsInFlight ||
+            this.focusedAllocationInputId !== null
+        );
+    }
+
+    /**
+     * Apply a polled meeting payload without disturbing local edits, search, or sort.
+     * Editable drafts (budget/notes) are only overwritten for read-only viewers.
+     */
+    private applyLiveMeetingUpdate(meeting: any): void {
+        if (!meeting || !this.meeting) {
+            return;
+        }
+        // Re-check: the user may have started editing while the request was in flight.
+        if (this.isLocallyEditing()) {
+            return;
+        }
+        // Ignore stale/mismatched responses (e.g. after navigating to another meeting).
+        if (this.meetingId && String(meeting._id) !== String(this.meetingId)) {
+            return;
+        }
+
+        this.meeting = meeting;
+        if (!this.canEditBudget()) {
+            this.totalBudget = meeting.totalBudget;
+            this.meetingNotes = meeting.notes || '';
+        }
+        this.recalcTotals();
+        this.liveUpdatedAt = new Date();
+        this.refreshSummaryIfCompleted();
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /** Show the "Live" indicator while a meeting is actively being set up or run. */
+    get showLiveIndicator(): boolean {
+        return (
+            this.loaded &&
+            !!this.meeting &&
+            (this.meeting.status === 'setup' || this.meeting.status === 'in_progress')
+        );
     }
 
     /** Whether to run sync-eligible-proposals for the current meeting + role. */
