@@ -17,6 +17,13 @@
                           [ngClass]="getStatusColor(meeting.status)">
                         {{ getStatusLabel(meeting.status) }}
                     </span>
+                    <span *ngIf="showLiveIndicator"
+                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300"
+                          [matTooltip]="liveUpdatedAt ? ('Updated ' + (liveUpdatedAt | date:'h:mm:ss a')) : 'Updates automatically'"
+                          aria-label="Live meeting — updates automatically">
+                        <span class="meeting-live-dot"></span>
+                        Live
+                    </span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <a *ngIf="meeting.status === 'completed' && hasFundedProposals()"

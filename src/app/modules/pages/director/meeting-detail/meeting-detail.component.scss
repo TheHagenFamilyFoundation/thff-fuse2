@@ -2,6 +2,32 @@
     display: block;
 }
 
+.meeting-live-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: currentColor;
+    animation: meeting-live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes meeting-live-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.35;
+        transform: scale(0.7);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .meeting-live-dot {
+        animation: none;
+    }
+}
+
 :host ::ng-deep .mat-row {
     transition: background-color 150ms ease;
 
