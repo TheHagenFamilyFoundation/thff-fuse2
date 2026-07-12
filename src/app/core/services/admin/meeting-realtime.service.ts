@@ -30,8 +30,9 @@ export class MeetingRealtimeService {
 
         this.socket = io(url as string, {
             auth: { token },
-            // WebSocket-only to match the server (no sticky sessions needed).
-            transports: ['websocket'],
+            // HTTP long-polling first (App Runner has no WebSocket support), then
+            // auto-upgrade to WebSocket where available. Matches the server config.
+            transports: ['polling', 'websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 8000,
