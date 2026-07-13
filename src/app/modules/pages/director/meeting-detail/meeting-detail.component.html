@@ -18,11 +18,20 @@
                         {{ getStatusLabel(meeting.status) }}
                     </span>
                     <span *ngIf="showLiveIndicator"
-                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:bg-opacity-40 dark:text-red-300"
-                          [matTooltip]="liveUpdatedAt ? ('Updated ' + (liveUpdatedAt | date:'h:mm:ss a')) : 'Updates automatically'"
-                          aria-label="Live meeting — updates automatically">
-                        <span class="meeting-live-dot"></span>
-                        Live
+                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          [ngClass]="realtimeConnected
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:bg-opacity-40 dark:text-green-300'
+                              : 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:bg-opacity-40 dark:text-amber-300'"
+                          [matTooltip]="realtimeConnected
+                              ? 'Connected — grant and budget changes appear instantly'
+                              : 'Connection dropped — refreshing every few seconds until it reconnects'"
+                          [attr.aria-label]="realtimeConnected ? 'Live — updates automatically' : 'Reconnecting — updates every few seconds'">
+                        <span class="meeting-live-dot" [class.meeting-live-dot--idle]="!realtimeConnected"></span>
+                        {{ liveStatusLabel }}
+                    </span>
+                    <span *ngIf="showLiveIndicator && liveAgoLabel"
+                          class="text-xs text-gray-400 dark:text-gray-500">
+                        {{ liveAgoLabel }}
                     </span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -288,7 +297,8 @@
                         </div>
                     </ng-container>
                     <ng-template #budgetStatDisplay>
-                        <span class="text-2xl font-bold mt-1">{{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }}</span>
+                        <span class="text-2xl font-bold mt-1 meeting-stat-value"
+                              [class.meeting-stat-value--flash]="budgetJustChanged">{{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }}</span>
                     </ng-template>
                     <span *ngIf="previousBudgetAmount() != null"
                           class="text-xs text-gray-400 mt-0.5">
@@ -298,15 +308,19 @@
 
                 <fuse-card class="flex flex-col p-5">
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Allocated</span>
-                    <span class="text-2xl font-bold mt-1" [ngClass]="{ 'text-red-600': totalAllocated > budgetForDisplay() }">
+                    <span class="text-2xl font-bold mt-1 meeting-stat-value"
+                          [class.text-red-600]="totalAllocated > budgetForDisplay()"
+                          [class.meeting-stat-value--flash]="allocatedJustChanged">
                         {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }}
                     </span>
                 </fuse-card>
 
                 <fuse-card class="flex flex-col p-5">
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining</span>
-                    <span class="text-2xl font-bold mt-1"
-                          [ngClass]="{ 'text-red-600': remainingBudget < 0, 'text-green-600': remainingBudget > 0 }">
+                    <span class="text-2xl font-bold mt-1 meeting-stat-value"
+                          [class.text-red-600]="remainingBudget < 0"
+                          [class.text-green-600]="remainingBudget > 0"
+                          [class.meeting-stat-value--flash]="remainingJustChanged">
                         {{ remainingBudget | currency:'USD':'symbol':'1.0-0' }}
                     </span>
                 </fuse-card>
@@ -881,8 +895,9 @@
                                            (input)="onAllocationAmountInput(row._id, $event)">
                                 </div>
                                 <span *ngIf="!isPresidentOrAdmin || (meeting.status !== 'in_progress' && !(meeting.status === 'completed' && editingCompletedMeeting))"
-                                      class="font-semibold"
-                                      [ngClass]="{ 'text-green-600': row.amountGranted > 0 }">
+                                      class="font-semibold meeting-amount"
+                                      [class.text-green-600]="row.amountGranted > 0"
+                                      [class.meeting-amount--flash]="isAllocationRecentlyChanged(row)">
                                     {{ (row.amountGranted || 0) | currency:'USD':'symbol':'1.0-0' }}
                                 </span>
                             </mat-cell>
@@ -904,7 +919,8 @@
                         </ng-container>
 
                         <mat-header-row *matHeaderRowDef="getActiveColumns()"></mat-header-row>
-                        <mat-row *matRowDef="let row; columns: getActiveColumns(); trackBy: trackAllocationRow"></mat-row>
+                        <mat-row *matRowDef="let row; columns: getActiveColumns(); trackBy: trackAllocationRow"
+                                 [class.meeting-row--flash]="isAllocationRecentlyChanged(row)"></mat-row>
                     </mat-table>
 
                     <mat-paginator
