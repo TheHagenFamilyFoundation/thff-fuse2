@@ -16,9 +16,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Sort } from '@angular/material/sort';
 import { PageEvent } from '@angular/material/paginator';
-import { Subject, EMPTY, forkJoin, of, from } from 'rxjs';
+import { Subject, EMPTY, forkJoin, of, from, interval } from 'rxjs';
 import { catchError, debounceTime, filter, finalize, last, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { MeetingRealtimeService } from 'app/core/services/admin/meeting-realtime.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
@@ -129,6 +130,26 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
     private static readonly BULK_ALLOCATION_CONCURRENCY = 8;
 
+    /** How often to poll the server for live updates while a meeting is setup / in progress. */
+    private static readonly LIVE_POLL_INTERVAL_MS = 10000;
+
+    /** Timestamp of the last successful live refresh (drives the "Live" indicator). */
+    liveUpdatedAt: Date | null = null;
+
+    /** True while the realtime socket is connected (polling falls back when false). */
+    realtimeConnected = false;
+
+    /** True once the socket has connected at least once (so we say "Connecting…" vs "Reconnecting…"). */
+    private hasEverConnected = false;
+
+    /** Allocation ids whose grant/status just changed on a live update (drives the row flash). */
+    readonly recentlyChangedAllocationIds = new Set<string>();
+    /** Transient highlight flags for the stat cards after a live update. */
+    budgetJustChanged = false;
+    allocatedJustChanged = false;
+    remainingJustChanged = false;
+    private liveChangeFlashTimer: ReturnType<typeof setTimeout> | null = null;
+
     // Summary collapse state
     fundedCollapsed = false;
     inConsiderationSummaryCollapsed = true;
@@ -140,7 +161,13 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** Measured bottom edge of the app layout header (px); 0 when header has scrolled off. */
     layoutHeaderBottomPx = 0;
 
+    /** Sticky top offset + max height (px) for the History panel so its header always
+     *  clears the fixed stats/actions bar instead of being hidden behind it. */
+    historyTopPx = 88;
+    historyMaxHeightPx: number | null = null;
+
     @ViewChild('statsStickySentinel') statsStickySentinel?: ElementRef<HTMLElement>;
+    @ViewChild('topStickyBar') topStickyBar?: ElementRef<HTMLElement>;
 
     displayedColumns = ['projectTitle', 'organization', 'sponsor', 'createdOn', 'amountRequested', 'amountGranted'];
 
@@ -148,6 +175,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         private route: ActivatedRoute,
         private router: Router,
         private meetingService: MeetingService,
+        private realtime: MeetingRealtimeService,
         private authService: AuthService,
         private dialog: MatDialog,
         private snackBar: MatSnackBar,
@@ -161,6 +189,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {
         this.measureLayoutHeader();
         this.updateStatsStickyVisible();
+        this.updateHistoryLayout();
     }
 
     @HostListener('window:scroll')
@@ -168,6 +197,39 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     onWindowScrollOrResize(): void {
         this.measureLayoutHeader();
         this.updateStatsStickyVisible();
+        this.updateHistoryLayout();
+    }
+
+    /**
+     * Pin the History panel just below the fixed stats/actions bar so its header
+     * stays visible while the list scrolls, and cap its height to the space left
+     * in the viewport. Recomputed on scroll/resize since the bar height varies.
+     */
+    private updateHistoryLayout(): void {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        // Below the lg breakpoint the panel stacks (static) and CSS caps its height.
+        if (window.innerWidth < 1024) {
+            if (this.historyMaxHeightPx !== null || this.historyTopPx !== 88) {
+                this.historyMaxHeightPx = null;
+                this.historyTopPx = 88;
+                this._changeDetectorRef.markForCheck();
+            }
+            return;
+        }
+        const gap = 12;
+        const barHeight =
+            this.topStickyBarVisible && this.topStickyBar?.nativeElement
+                ? Math.round(this.topStickyBar.nativeElement.getBoundingClientRect().height)
+                : 0;
+        const top = this.layoutHeaderBottomPx + barHeight + gap;
+        const maxHeight = Math.max(180, Math.round(window.innerHeight - top - gap));
+        if (top !== this.historyTopPx || maxHeight !== this.historyMaxHeightPx) {
+            this.historyTopPx = top;
+            this.historyMaxHeightPx = maxHeight;
+            this._changeDetectorRef.markForCheck();
+        }
     }
 
     private measureLayoutHeader(): void {
@@ -224,12 +286,42 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             )
             .subscribe((id) => {
                 this.meetingId = id;
+                this.realtime.joinMeeting(id);
                 this.loadMeetingDetails(id);
             });
+
+        // Live updates pushed by the server after any meeting mutation.
+        this.realtime
+            .meetingUpdates()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((meeting) => this.applyLiveMeetingUpdate(meeting));
+
+        this.realtime
+            .connected()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((connected) => {
+                this.realtimeConnected = connected;
+                if (connected) {
+                    this.hasEverConnected = true;
+                }
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Keep the "updated N ago" label current while a meeting is live.
+        interval(1000)
+            .pipe(
+                filter(() => this.showLiveIndicator && !!this.liveUpdatedAt),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe(() => this._changeDetectorRef.markForCheck());
 
         this.destroyRef.onDestroy(() => {
             this.clearSetupBudgetNotesSavedTimer();
             this.clearAllocationsSavedTimer();
+            this.clearLiveChangeFlashTimer();
+            if (this.meetingId) {
+                this.realtime.leaveMeeting(this.meetingId);
+            }
         });
 
         this.setupSearchSubject
@@ -309,6 +401,24 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     const msg = err.error?.message || 'Error saving allocations';
                     this.snackBar.open(msg, 'Close', { duration: 5000 });
                 },
+            });
+
+        // Live sync: while a meeting is being set up or run, poll for the latest
+        // state so directors watching see the president's edits without refreshing.
+        interval(MeetingDetailComponent.LIVE_POLL_INTERVAL_MS)
+            .pipe(
+                filter(() => this.canLivePoll()),
+                switchMap(() =>
+                    this.meetingService.getMeeting(this.meetingId).pipe(
+                        catchError(() => of(null))
+                    )
+                ),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe((meeting) => {
+                if (meeting) {
+                    this.applyLiveMeetingUpdate(meeting);
+                }
             });
     }
 
@@ -487,6 +597,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     setTimeout(() => {
                         this.measureLayoutHeader();
                         this.updateStatsStickyVisible();
+                        this.updateHistoryLayout();
                         this.tryRestoreSetupStepIndex();
                     });
                 })
@@ -518,6 +629,208 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.pendingAllocations.clear();
         this.allocationAmountDrafts.clear();
         this.hasUnsavedChanges = false;
+    }
+
+    /**
+     * True when it's safe to poll the server for a live refresh: the meeting is
+     * loaded, still in a live state (setup / in progress), the tab is visible, and
+     * the current user is not in the middle of editing (so we never clobber edits).
+     */
+    private canLivePoll(): boolean {
+        if (!this.loaded || !this.meetingId || !this.meeting) {
+            return false;
+        }
+        // Realtime socket is authoritative; only poll as a fallback when it's down.
+        if (this.realtimeConnected) {
+            return false;
+        }
+        if (typeof document !== 'undefined' && document.hidden) {
+            return false;
+        }
+        const status = this.meeting.status;
+        if (status !== 'setup' && status !== 'in_progress') {
+            return false;
+        }
+        return !this.isLocallyEditing();
+    }
+
+    /** Any local editing/in-flight state that a live refresh must not overwrite. */
+    private isLocallyEditing(): boolean {
+        return (
+            this.hasUnsavedChanges ||
+            this.pendingAllocations.size > 0 ||
+            this.editingInProgressBudget ||
+            this.editingCompletedMeeting ||
+            this.setupBudgetNotesSaving ||
+            this.allocationsSaving ||
+            this.bulkAllocationActionInFlight ||
+            this.allocationActiveToggleInFlight.size > 0 ||
+            this.syncAllocationsInFlight ||
+            this.focusedAllocationInputId !== null
+        );
+    }
+
+    /**
+     * Apply a polled meeting payload without disturbing local edits, search, or sort.
+     * Editable drafts (budget/notes) are only overwritten for read-only viewers.
+     */
+    private applyLiveMeetingUpdate(meeting: any): void {
+        if (!meeting || !this.meeting) {
+            return;
+        }
+        // Re-check: the user may have started editing while the request was in flight.
+        if (this.isLocallyEditing()) {
+            return;
+        }
+        // Ignore stale/mismatched responses (e.g. after navigating to another meeting).
+        if (this.meetingId && String(meeting._id) !== String(this.meetingId)) {
+            return;
+        }
+
+        // Snapshot the current values so we can highlight exactly what changed.
+        const prevGranted = new Map<string, number>();
+        const prevActive = new Map<string, boolean>();
+        for (const a of this.meeting.allocations || []) {
+            prevGranted.set(String(a._id), Number(a.amountGranted || 0));
+            prevActive.set(String(a._id), a.activeInMeeting !== false);
+        }
+        const prevBudget = Number(this.meeting.totalBudget || 0);
+        const prevAllocated = this.totalAllocated;
+
+        this.meeting = meeting;
+        if (!this.canEditBudget()) {
+            this.totalBudget = meeting.totalBudget;
+            this.meetingNotes = meeting.notes || '';
+        }
+        this.recalcTotals();
+        this.liveUpdatedAt = new Date();
+        this.flagLiveChanges(prevGranted, prevActive, prevBudget, prevAllocated);
+        this.refreshSummaryIfCompleted();
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /** Relative "updated N ago" label for watchers; empty until the first live update. */
+    get liveAgoLabel(): string {
+        if (!this.liveUpdatedAt) {
+            return '';
+        }
+        const secs = Math.max(0, Math.floor((Date.now() - this.liveUpdatedAt.getTime()) / 1000));
+        if (secs < 5) {
+            return 'Updated just now';
+        }
+        if (secs < 60) {
+            return `Updated ${secs}s ago`;
+        }
+        const mins = Math.floor(secs / 60);
+        return mins === 1 ? 'Updated 1 min ago' : `Updated ${mins} min ago`;
+    }
+
+    /** Badge label reflecting the real connection state (not just "live during setup"). */
+    get liveStatusLabel(): string {
+        if (this.realtimeConnected) {
+            return 'Live';
+        }
+        return this.hasEverConnected ? 'Reconnecting…' : 'Connecting…';
+    }
+
+    isAllocationRecentlyChanged(row: any): boolean {
+        return !!row && this.recentlyChangedAllocationIds.has(String(row._id));
+    }
+
+    private liveChangeProposalTitle(allocation: any): string {
+        const title = allocation?.proposal?.projectTitle;
+        return title && String(title).trim() ? String(title).trim() : 'A proposal';
+    }
+
+    /**
+     * Toast for watchers when the president moves proposals to / from the set aside
+     * list. The person who performed the action is guarded out upstream (their own
+     * edit is in flight), so this only fires for people watching.
+     */
+    private notifyAllocationListChanges(setAside: string[], restored: string[]): void {
+        const parts: string[] = [];
+        if (setAside.length === 1) {
+            parts.push(`“${setAside[0]}” was set aside`);
+        } else if (setAside.length > 1) {
+            parts.push(`${setAside.length} proposals were set aside`);
+        }
+        if (restored.length === 1) {
+            parts.push(`“${restored[0]}” moved back to consideration`);
+        } else if (restored.length > 1) {
+            parts.push(`${restored.length} proposals moved back to consideration`);
+        }
+        if (parts.length > 0) {
+            this.snackBar.open(parts.join(' · '), 'Close', { duration: 4000 });
+        }
+    }
+
+    private clearLiveChangeFlashTimer(): void {
+        if (this.liveChangeFlashTimer !== null) {
+            clearTimeout(this.liveChangeFlashTimer);
+            this.liveChangeFlashTimer = null;
+        }
+    }
+
+    /** Diff the applied update against the prior state and trigger the transient highlights. */
+    private flagLiveChanges(
+        prevGranted: Map<string, number>,
+        prevActive: Map<string, boolean>,
+        prevBudget: number,
+        prevAllocated: number
+    ): void {
+        const changedIds = new Set<string>();
+        const setAsideTitles: string[] = [];
+        const restoredTitles: string[] = [];
+        for (const a of this.meeting?.allocations || []) {
+            const id = String(a._id);
+            const grantedChanged = Number(a.amountGranted || 0) !== (prevGranted.get(id) ?? 0);
+            const wasActive = prevActive.get(id) ?? true;
+            const nowActive = a.activeInMeeting !== false;
+            const activeChanged = prevActive.has(id) && nowActive !== wasActive;
+            const isNew = !prevGranted.has(id);
+            if (grantedChanged || activeChanged || isNew) {
+                changedIds.add(id);
+            }
+            if (activeChanged && !nowActive) {
+                setAsideTitles.push(this.liveChangeProposalTitle(a));
+            } else if (activeChanged && nowActive) {
+                restoredTitles.push(this.liveChangeProposalTitle(a));
+            }
+        }
+
+        this.notifyAllocationListChanges(setAsideTitles, restoredTitles);
+
+        const budgetChanged = Number(this.meeting?.totalBudget || 0) !== prevBudget;
+        const allocatedChanged = this.totalAllocated !== prevAllocated;
+
+        if (changedIds.size === 0 && !budgetChanged && !allocatedChanged) {
+            return;
+        }
+
+        this.recentlyChangedAllocationIds.clear();
+        changedIds.forEach((id) => this.recentlyChangedAllocationIds.add(id));
+        this.budgetJustChanged = budgetChanged;
+        this.allocatedJustChanged = allocatedChanged;
+        this.remainingJustChanged = budgetChanged || allocatedChanged;
+
+        this.clearLiveChangeFlashTimer();
+        this.liveChangeFlashTimer = setTimeout(() => {
+            this.recentlyChangedAllocationIds.clear();
+            this.budgetJustChanged = false;
+            this.allocatedJustChanged = false;
+            this.remainingJustChanged = false;
+            this.liveChangeFlashTimer = null;
+            this._changeDetectorRef.markForCheck();
+        }, 1800);
+    }
+
+    /** Show the "Live" indicator while a meeting is actively being set up or run. */
+    get showLiveIndicator(): boolean {
+        return (
+            this.loaded &&
+            !!this.meeting &&
+            (this.meeting.status === 'setup' || this.meeting.status === 'in_progress')
+        );
     }
 
     /** Whether to run sync-eligible-proposals for the current meeting + role. */

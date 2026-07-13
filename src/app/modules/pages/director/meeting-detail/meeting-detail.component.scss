@@ -2,6 +2,108 @@
     display: block;
 }
 
+.meeting-live-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: currentColor;
+    animation: meeting-live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes meeting-live-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.35;
+        transform: scale(0.7);
+    }
+}
+
+/* Steady (non-pulsing) dot while reconnecting / on the polling fallback. */
+.meeting-live-dot--idle {
+    animation: none;
+    opacity: 0.65;
+}
+
+/* Transient highlight on a stat value when it updates live (draws the watcher's eye). */
+.meeting-stat-value {
+    display: inline-block;
+    padding: 0 0.35rem;
+    margin: 0 -0.35rem;
+    border-radius: 0.375rem;
+}
+
+.meeting-stat-value--flash {
+    animation: meeting-value-flash 1.8s ease-out;
+}
+
+@keyframes meeting-value-flash {
+    0% {
+        background-color: rgba(16, 185, 129, 0.30);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Transient highlight on a grant row that just changed. */
+:host ::ng-deep .mat-row.meeting-row--flash {
+    animation: meeting-row-flash 2s ease-out;
+}
+
+@keyframes meeting-row-flash {
+    0%,
+    25% {
+        background-color: rgba(16, 185, 129, 0.28);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Strong, obvious pop on the grant amount itself when it changes live. */
+.meeting-amount {
+    display: inline-block;
+    border-radius: 0.375rem;
+    padding: 0.05rem 0.4rem;
+    margin: -0.05rem -0.4rem;
+}
+
+.meeting-amount--flash {
+    animation: meeting-amount-flash 2s ease-out;
+}
+
+@keyframes meeting-amount-flash {
+    0% {
+        background-color: rgba(16, 185, 129, 0.55);
+        color: rgb(6, 95, 70);
+        transform: scale(1.18);
+    }
+    30% {
+        background-color: rgba(16, 185, 129, 0.45);
+        transform: scale(1.18);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .meeting-live-dot {
+        animation: none;
+    }
+
+    .meeting-stat-value--flash,
+    .meeting-amount--flash,
+    :host ::ng-deep .mat-row.meeting-row--flash {
+        animation: none;
+    }
+}
+
 :host ::ng-deep .mat-row {
     transition: background-color 150ms ease;
 
