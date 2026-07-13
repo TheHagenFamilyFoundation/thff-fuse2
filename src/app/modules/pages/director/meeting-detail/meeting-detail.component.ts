@@ -161,7 +161,13 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** Measured bottom edge of the app layout header (px); 0 when header has scrolled off. */
     layoutHeaderBottomPx = 0;
 
+    /** Sticky top offset + max height (px) for the History panel so its header always
+     *  clears the fixed stats/actions bar instead of being hidden behind it. */
+    historyTopPx = 88;
+    historyMaxHeightPx: number | null = null;
+
     @ViewChild('statsStickySentinel') statsStickySentinel?: ElementRef<HTMLElement>;
+    @ViewChild('topStickyBar') topStickyBar?: ElementRef<HTMLElement>;
 
     displayedColumns = ['projectTitle', 'organization', 'sponsor', 'createdOn', 'amountRequested', 'amountGranted'];
 
@@ -183,6 +189,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {
         this.measureLayoutHeader();
         this.updateStatsStickyVisible();
+        this.updateHistoryLayout();
     }
 
     @HostListener('window:scroll')
@@ -190,6 +197,39 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     onWindowScrollOrResize(): void {
         this.measureLayoutHeader();
         this.updateStatsStickyVisible();
+        this.updateHistoryLayout();
+    }
+
+    /**
+     * Pin the History panel just below the fixed stats/actions bar so its header
+     * stays visible while the list scrolls, and cap its height to the space left
+     * in the viewport. Recomputed on scroll/resize since the bar height varies.
+     */
+    private updateHistoryLayout(): void {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        // Below the lg breakpoint the panel stacks (static) and CSS caps its height.
+        if (window.innerWidth < 1024) {
+            if (this.historyMaxHeightPx !== null || this.historyTopPx !== 88) {
+                this.historyMaxHeightPx = null;
+                this.historyTopPx = 88;
+                this._changeDetectorRef.markForCheck();
+            }
+            return;
+        }
+        const gap = 12;
+        const barHeight =
+            this.topStickyBarVisible && this.topStickyBar?.nativeElement
+                ? Math.round(this.topStickyBar.nativeElement.getBoundingClientRect().height)
+                : 0;
+        const top = this.layoutHeaderBottomPx + barHeight + gap;
+        const maxHeight = Math.max(180, Math.round(window.innerHeight - top - gap));
+        if (top !== this.historyTopPx || maxHeight !== this.historyMaxHeightPx) {
+            this.historyTopPx = top;
+            this.historyMaxHeightPx = maxHeight;
+            this._changeDetectorRef.markForCheck();
+        }
     }
 
     private measureLayoutHeader(): void {
@@ -557,6 +597,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     setTimeout(() => {
                         this.measureLayoutHeader();
                         this.updateStatsStickyVisible();
+                        this.updateHistoryLayout();
                         this.tryRestoreSetupStepIndex();
                     });
                 })
