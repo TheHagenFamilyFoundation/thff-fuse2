@@ -139,6 +139,17 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** True while the realtime socket is connected (polling falls back when false). */
     realtimeConnected = false;
 
+    /** True once the socket has connected at least once (so we say "Connecting…" vs "Reconnecting…"). */
+    private hasEverConnected = false;
+
+    /** Allocation ids whose grant/status just changed on a live update (drives the row flash). */
+    readonly recentlyChangedAllocationIds = new Set<string>();
+    /** Transient highlight flags for the stat cards after a live update. */
+    budgetJustChanged = false;
+    allocatedJustChanged = false;
+    remainingJustChanged = false;
+    private liveChangeFlashTimer: ReturnType<typeof setTimeout> | null = null;
+
     // Summary collapse state
     fundedCollapsed = false;
     inConsiderationSummaryCollapsed = true;
@@ -250,12 +261,24 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((connected) => {
                 this.realtimeConnected = connected;
+                if (connected) {
+                    this.hasEverConnected = true;
+                }
                 this._changeDetectorRef.markForCheck();
             });
+
+        // Keep the "updated N ago" label current while a meeting is live.
+        interval(1000)
+            .pipe(
+                filter(() => this.showLiveIndicator && !!this.liveUpdatedAt),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe(() => this._changeDetectorRef.markForCheck());
 
         this.destroyRef.onDestroy(() => {
             this.clearSetupBudgetNotesSavedTimer();
             this.clearAllocationsSavedTimer();
+            this.clearLiveChangeFlashTimer();
             if (this.meetingId) {
                 this.realtime.leaveMeeting(this.meetingId);
             }
@@ -623,6 +646,16 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
+        // Snapshot the current values so we can highlight exactly what changed.
+        const prevGranted = new Map<string, number>();
+        const prevActive = new Map<string, boolean>();
+        for (const a of this.meeting.allocations || []) {
+            prevGranted.set(String(a._id), Number(a.amountGranted || 0));
+            prevActive.set(String(a._id), a.activeInMeeting !== false);
+        }
+        const prevBudget = Number(this.meeting.totalBudget || 0);
+        const prevAllocated = this.totalAllocated;
+
         this.meeting = meeting;
         if (!this.canEditBudget()) {
             this.totalBudget = meeting.totalBudget;
@@ -630,8 +663,124 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         }
         this.recalcTotals();
         this.liveUpdatedAt = new Date();
+        this.flagLiveChanges(prevGranted, prevActive, prevBudget, prevAllocated);
         this.refreshSummaryIfCompleted();
         this._changeDetectorRef.markForCheck();
+    }
+
+    /** Relative "updated N ago" label for watchers; empty until the first live update. */
+    get liveAgoLabel(): string {
+        if (!this.liveUpdatedAt) {
+            return '';
+        }
+        const secs = Math.max(0, Math.floor((Date.now() - this.liveUpdatedAt.getTime()) / 1000));
+        if (secs < 5) {
+            return 'Updated just now';
+        }
+        if (secs < 60) {
+            return `Updated ${secs}s ago`;
+        }
+        const mins = Math.floor(secs / 60);
+        return mins === 1 ? 'Updated 1 min ago' : `Updated ${mins} min ago`;
+    }
+
+    /** Badge label reflecting the real connection state (not just "live during setup"). */
+    get liveStatusLabel(): string {
+        if (this.realtimeConnected) {
+            return 'Live';
+        }
+        return this.hasEverConnected ? 'Reconnecting…' : 'Connecting…';
+    }
+
+    isAllocationRecentlyChanged(row: any): boolean {
+        return !!row && this.recentlyChangedAllocationIds.has(String(row._id));
+    }
+
+    private liveChangeProposalTitle(allocation: any): string {
+        const title = allocation?.proposal?.projectTitle;
+        return title && String(title).trim() ? String(title).trim() : 'A proposal';
+    }
+
+    /**
+     * Toast for watchers when the president moves proposals to / from the set aside
+     * list. The person who performed the action is guarded out upstream (their own
+     * edit is in flight), so this only fires for people watching.
+     */
+    private notifyAllocationListChanges(setAside: string[], restored: string[]): void {
+        const parts: string[] = [];
+        if (setAside.length === 1) {
+            parts.push(`“${setAside[0]}” was set aside`);
+        } else if (setAside.length > 1) {
+            parts.push(`${setAside.length} proposals were set aside`);
+        }
+        if (restored.length === 1) {
+            parts.push(`“${restored[0]}” moved back to consideration`);
+        } else if (restored.length > 1) {
+            parts.push(`${restored.length} proposals moved back to consideration`);
+        }
+        if (parts.length > 0) {
+            this.snackBar.open(parts.join(' · '), 'Close', { duration: 4000 });
+        }
+    }
+
+    private clearLiveChangeFlashTimer(): void {
+        if (this.liveChangeFlashTimer !== null) {
+            clearTimeout(this.liveChangeFlashTimer);
+            this.liveChangeFlashTimer = null;
+        }
+    }
+
+    /** Diff the applied update against the prior state and trigger the transient highlights. */
+    private flagLiveChanges(
+        prevGranted: Map<string, number>,
+        prevActive: Map<string, boolean>,
+        prevBudget: number,
+        prevAllocated: number
+    ): void {
+        const changedIds = new Set<string>();
+        const setAsideTitles: string[] = [];
+        const restoredTitles: string[] = [];
+        for (const a of this.meeting?.allocations || []) {
+            const id = String(a._id);
+            const grantedChanged = Number(a.amountGranted || 0) !== (prevGranted.get(id) ?? 0);
+            const wasActive = prevActive.get(id) ?? true;
+            const nowActive = a.activeInMeeting !== false;
+            const activeChanged = prevActive.has(id) && nowActive !== wasActive;
+            const isNew = !prevGranted.has(id);
+            if (grantedChanged || activeChanged || isNew) {
+                changedIds.add(id);
+            }
+            if (activeChanged && !nowActive) {
+                setAsideTitles.push(this.liveChangeProposalTitle(a));
+            } else if (activeChanged && nowActive) {
+                restoredTitles.push(this.liveChangeProposalTitle(a));
+            }
+        }
+
+        this.notifyAllocationListChanges(setAsideTitles, restoredTitles);
+
+        const budgetChanged = Number(this.meeting?.totalBudget || 0) !== prevBudget;
+        const allocatedChanged = this.totalAllocated !== prevAllocated;
+
+        if (changedIds.size === 0 && !budgetChanged && !allocatedChanged) {
+            return;
+        }
+
+        this.recentlyChangedAllocationIds.clear();
+        changedIds.forEach((id) => this.recentlyChangedAllocationIds.add(id));
+        this.budgetJustChanged = budgetChanged;
+        this.allocatedJustChanged = allocatedChanged;
+        this.remainingJustChanged = budgetChanged || allocatedChanged;
+
+        this.clearLiveChangeFlashTimer();
+        this.liveChangeFlashTimer = setTimeout(() => {
+            this.recentlyChangedAllocationIds.clear();
+            this.budgetJustChanged = false;
+            this.allocatedJustChanged = false;
+            this.remainingJustChanged = false;
+            this.liveChangeFlashTimer = null;
+            this._changeDetectorRef.markForCheck();
+        }, 1800);
     }
 
     /** Show the "Live" indicator while a meeting is actively being set up or run. */
