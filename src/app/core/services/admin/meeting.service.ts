@@ -83,4 +83,15 @@ export class MeetingService {
             active,
         });
     }
+
+    /**
+     * Set aside (active=false) or restore (active=true) many allocations in one request.
+     * Returns the fully-updated meeting. Preferred over calling setAllocationActive N times.
+     */
+    bulkSetAllocationsActive(meetingId: string, ids: string[], active: boolean): Observable<any> {
+        return this.http.put(`${this.apiUrl}/meeting/${meetingId}/allocations/active`, {
+            ids,
+            active,
+        });
+    }
 }
