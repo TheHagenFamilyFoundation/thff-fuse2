@@ -1763,7 +1763,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         return this.sortAllocationsBySubmittedAt(this.meeting.allocations, true);
     }
 
-    /** Funded allocations exceed the budget. Allowed while running, but blocks completion. */
+    /** Funded allocations exceed the budget. Allowed; completion just asks for confirmation. */
     get isOverBudget(): boolean {
         return this.remainingBudget < 0;
     }
@@ -1771,13 +1771,23 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     completeMeeting(): void {
         if (!this.meeting) return;
 
-        // A meeting can run over budget, but can't be completed until it's back within budget.
+        // Over budget: allowed, but confirm since allocations exceed the budget.
         if (this.isOverBudget) {
-            this.snackBar.open(
-                `You're ${this.formatMeetingMoney(-this.remainingBudget)} over budget. Set aside proposals or lower amounts before completing.`,
-                'Close',
-                { duration: 6000 }
-            );
+            const ref = this.dialog.open(ConfirmDialogComponent, {
+                width: '460px',
+                data: {
+                    title: 'Complete while over budget?',
+                    message: `Allocations are ${this.formatMeetingMoney(-this.remainingBudget)} over the ${this.formatMeetingMoney(this.budgetForDisplay())} budget. Complete the meeting anyway?`,
+                    confirmText: 'Complete meeting',
+                    cancelText: 'Keep editing',
+                    warn: true,
+                },
+            });
+            ref.afterClosed().subscribe((confirmed) => {
+                if (confirmed) {
+                    this.executeCompleteMeeting();
+                }
+            });
             return;
         }
 

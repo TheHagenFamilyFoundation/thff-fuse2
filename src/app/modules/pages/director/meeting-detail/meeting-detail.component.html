@@ -162,8 +162,6 @@
                             color="primary"
                             type="button"
                             class="meeting-top-sticky__btn"
-                            [disabled]="isOverBudget"
-                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
                             (click)="completeMeeting()">
                         <mat-icon class="mr-1 icon-size-5">check_circle</mat-icon>
                         Complete
@@ -184,8 +182,6 @@
                             color="primary"
                             type="button"
                             class="meeting-top-sticky__btn"
-                            [disabled]="isOverBudget"
-                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
                             (click)="completeMeeting()">
                         <mat-icon class="mr-1 icon-size-5">check_circle</mat-icon>
                         Complete
@@ -807,7 +803,7 @@
                                          class="flex items-start gap-2 rounded-md bg-red-50 dark:bg-red-900 dark:bg-opacity-30 border border-red-200 dark:border-red-800 px-3 py-2">
                                         <mat-icon class="icon-size-5 text-red-600 dark:text-red-300 mt-0.5">warning</mat-icon>
                                         <span class="text-sm text-red-700 dark:text-red-200">
-                                            You're {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over the {{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }} budget. You can still start the meeting — but you'll need to get back under budget before you can complete it.
+                                            You're {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over the {{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }} budget. You can still start the meeting and adjust amounts as you go.
                                         </span>
                                     </div>
 
@@ -1067,8 +1063,8 @@
 
                 <div *ngIf="meeting.status === 'in_progress' && isPresidentOrAdmin"
                      class="meeting-complete-footer flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mt-4">
-                    <span *ngIf="isOverBudget" class="text-sm text-red-600 dark:text-red-300">
-                        {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over budget — set aside proposals or lower amounts to complete.
+                    <span *ngIf="isOverBudget" class="text-sm text-amber-600 dark:text-amber-300">
+                        {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over budget — you can still complete.
                     </span>
                     <app-autosave-status
                         size="sm"
@@ -1076,8 +1072,6 @@
                         [savedFlash]="allocationsSavedFlash"
                         idleHint="Allocations save automatically." />
                     <button mat-flat-button color="primary" type="button"
-                            [disabled]="isOverBudget"
-                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
                             (click)="completeMeeting()">
                         <mat-icon class="mr-1">check_circle</mat-icon>
                         Complete meeting
