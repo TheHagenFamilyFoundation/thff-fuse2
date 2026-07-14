@@ -35,6 +35,17 @@
                     </span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
+                    <span *ngIf="meeting.status === 'completed' && hasFundedProposals() && grantEmailsSentCount !== null"
+                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          [ngClass]="hasSentGrantEmails
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:bg-opacity-40 dark:text-green-300'
+                              : 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:bg-opacity-40 dark:text-amber-300'"
+                          [matTooltip]="hasSentGrantEmails
+                              ? grantEmailsSentCount + ' of ' + fundedProposalCount + ' funded proposals notified'
+                              : 'No grant notification emails have been sent yet'">
+                        <mat-icon class="icon-size-4">{{ hasSentGrantEmails ? 'mark_email_read' : 'mail_outline' }}</mat-icon>
+                        {{ grantEmailStatusLabel }}
+                    </span>
                     <a *ngIf="meeting.status === 'completed' && hasFundedProposals()"
                        mat-stroked-button
                        [routerLink]="['/pages/director/meeting', meeting._id, 'after']">
@@ -151,6 +162,8 @@
                             color="primary"
                             type="button"
                             class="meeting-top-sticky__btn"
+                            [disabled]="isOverBudget"
+                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
                             (click)="completeMeeting()">
                         <mat-icon class="mr-1 icon-size-5">check_circle</mat-icon>
                         Complete
@@ -171,6 +184,8 @@
                             color="primary"
                             type="button"
                             class="meeting-top-sticky__btn"
+                            [disabled]="isOverBudget"
+                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
                             (click)="completeMeeting()">
                         <mat-icon class="mr-1 icon-size-5">check_circle</mat-icon>
                         Complete
@@ -197,7 +212,7 @@
                         size="sm"
                         [saving]="allocationsSaving"
                         [savedFlash]="allocationsSavedFlash"
-                        idleHint="Allocations save automatically." />
+                        idleHint="Allocation edits save when you click Done." />
                 </div>
             </div>
 
@@ -207,12 +222,21 @@
                 <span class="text-xs sm:text-sm text-gray-700 dark:text-gray-200 shrink-0">
                     {{ activeSelectionOverlayMessage }}
                 </span>
+                <button mat-flat-button
+                        color="primary"
+                        type="button"
+                        class="meeting-top-sticky__btn"
+                        [disabled]="bulkAllocationActionInFlight || keepSelectedSetAsideCount === 0"
+                        [matTooltip]="keepSelectedSetAsideCount === 0 ? 'Everything is already selected' : null"
+                        (click)="keepSelectedActiveAllocations()">
+                    Keep selected, set aside rest<span *ngIf="keepSelectedSetAsideCount > 0">&nbsp;({{ keepSelectedSetAsideCount }})</span>
+                </button>
                 <button mat-stroked-button
                         type="button"
                         class="meeting-top-sticky__btn"
                         [disabled]="bulkAllocationActionInFlight"
                         (click)="setAsideSelectedActiveAllocations()">
-                    Set aside
+                    Set aside selected
                 </button>
                 <button mat-button
                         type="button"
@@ -373,7 +397,6 @@
 
             <ng-template #setAsideAllocationsTable>
                 <fuse-card class="flex flex-col w-full overflow-hidden">
-                    <ng-container *ngTemplateOutlet="setAsideBulkSelectionBar"></ng-container>
                     <mat-table *ngIf="displayAllocationsSetAside.length > 0"
                                [dataSource]="displayAllocationsSetAside"
                                class="w-full meeting-table">
@@ -532,6 +555,27 @@
                                         [saving]="setupBudgetNotesSaving"
                                         [savedFlash]="setupBudgetNotesSavedFlash"
                                         idleHint="Budget and notes save automatically shortly after you pause typing." />
+
+                                    <div class="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 m-0">
+                                            Optional: set an amount to give each proposal in consideration. It's applied to every proposal when the meeting starts. You can adjust individual amounts once the meeting is in progress.
+                                        </p>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <mat-form-field appearance="outline" class="w-40 meeting-setup-search-field">
+                                                <mat-label>Amount each</mat-label>
+                                                <span matPrefix class="pl-2">$&nbsp;</span>
+                                                <input matInput
+                                                       type="number"
+                                                       min="0"
+                                                       [(ngModel)]="bulkAllocateAmount"
+                                                       (ngModelChange)="onAmountEachChange()"
+                                                       placeholder="e.g. 5000">
+                                            </mat-form-field>
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">
+                                                Applied to each proposal when you start the meeting
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div *ngIf="!isPresidentOrAdmin"
@@ -555,6 +599,23 @@
                                 <div class="pt-2 flex flex-col gap-1">
                                     <ng-container *ngIf="proposalStepIndex === 0">
                                         <ng-container *ngTemplateOutlet="setupProposalsSearchBar"></ng-container>
+
+                                        <div *ngIf="isPresidentOrAdmin && totalAllocated > 0"
+                                             class="flex items-start gap-2 rounded-md bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 px-3 py-2 mb-4">
+                                            <mat-icon class="icon-size-5 text-blue-600 dark:text-blue-300 mt-0.5">info</mat-icon>
+                                            <span class="text-sm text-blue-700 dark:text-blue-200">
+                                                Once the meeting starts, each proposal will be allocated the proposed amount shown below — {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }} across {{ displayAllocations.length }} proposal{{ displayAllocations.length === 1 ? '' : 's' }} in consideration. You can still adjust every amount during the meeting.
+                                            </span>
+                                        </div>
+
+                                        <div *ngIf="isPresidentOrAdmin && remainingBudget < 0"
+                                             class="flex items-start gap-2 rounded-md bg-red-50 dark:bg-red-900 dark:bg-opacity-30 border border-red-200 dark:border-red-800 px-3 py-2 mb-4">
+                                            <mat-icon class="icon-size-5 text-red-600 dark:text-red-300 mt-0.5">warning</mat-icon>
+                                            <span class="text-sm text-red-700 dark:text-red-200">
+                                                You're {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over the {{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }} budget. Set aside proposals you don't plan to fund to get back under budget.
+                                            </span>
+                                        </div>
+
                                     </ng-container>
                     <fuse-card class="flex flex-col w-full overflow-hidden">
                                     <div *ngIf="proposalsTableLoading" class="flex flex-col items-center justify-center gap-3 py-16">
@@ -562,7 +623,6 @@
                                         <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading proposals…</p>
                                     </div>
                                     <ng-container *ngIf="!proposalsTableLoading">
-                                    <ng-container *ngTemplateOutlet="activeBulkSelectionBar"></ng-container>
                                     <div class="overflow-x-auto">
                                     <mat-table
                                         [dataSource]="setupTableRows.length > setupTablePageSize ? setupTableDisplayedRows : setupTableRows"
@@ -650,6 +710,19 @@
                                             </mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="amountGranted">
+                                            <mat-header-cell *matHeaderCellDef class="font-semibold">
+                                                Proposed
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                <span class="font-semibold"
+                                                      [class.text-green-600]="setupRowAmount(row) > 0"
+                                                      [class.text-gray-400]="setupRowAmount(row) === 0">
+                                                    {{ setupRowAmount(row) | currency:'USD':'symbol':'1.0-0' }}
+                                                </span>
+                                            </mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="actions">
                                             <mat-header-cell *matHeaderCellDef class="font-semibold pr-6 flex justify-end">
                                             </mat-header-cell>
@@ -702,13 +775,49 @@
                         <mat-step label="Review & start">
                             <ng-template matStepContent>
                                 <div class="pt-2 space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div class="flex flex-col rounded-md border border-gray-200 dark:border-gray-700 px-4 py-3">
+                                            <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</span>
+                                            <span class="text-xl font-bold mt-1">{{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }}</span>
+                                        </div>
+                                        <div class="flex flex-col rounded-md border border-gray-200 dark:border-gray-700 px-4 py-3">
+                                            <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Proposals</span>
+                                            <span class="text-xl font-bold mt-1">{{ displayAllocations.length }} in consideration</span>
+                                            <span *ngIf="displayAllocationsSetAside.length > 0" class="text-xs text-gray-400 mt-0.5">
+                                                {{ displayAllocationsSetAside.length }} set aside
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-col rounded-md border border-gray-200 dark:border-gray-700 px-4 py-3">
+                                            <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount each</span>
+                                            <span class="text-xl font-bold mt-1">
+                                                {{ amountEachValue != null ? (amountEachValue | currency:'USD':'symbol':'1.0-0') : 'Not set' }}
+                                            </span>
+                                            <span *ngIf="amountEachValue != null" class="text-xs text-gray-400 mt-0.5">
+                                                Applied to each proposal at start
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <p class="text-sm text-gray-600 dark:text-gray-300 m-0">
-                                        {{ displayAllocations.length }} in consideration<span *ngIf="displayAllocationsSetAside.length > 0">, {{ displayAllocationsSetAside.length }} set aside</span>.
+                                        When you start the meeting, {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }} will be allocated across
+                                        {{ proposalsReceivingAmountCount }} of {{ displayAllocations.length }} proposal{{ displayAllocations.length === 1 ? '' : 's' }} in consideration.
                                     </p>
+
+                                    <div *ngIf="isPresidentOrAdmin && remainingBudget < 0"
+                                         class="flex items-start gap-2 rounded-md bg-red-50 dark:bg-red-900 dark:bg-opacity-30 border border-red-200 dark:border-red-800 px-3 py-2">
+                                        <mat-icon class="icon-size-5 text-red-600 dark:text-red-300 mt-0.5">warning</mat-icon>
+                                        <span class="text-sm text-red-700 dark:text-red-200">
+                                            You're {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over the {{ budgetForDisplay() | currency:'USD':'symbol':'1.0-0' }} budget. You can still start the meeting — but you'll need to get back under budget before you can complete it.
+                                        </span>
+                                    </div>
+
                                     <div *ngIf="isPresidentOrAdmin" class="flex flex-wrap gap-2">
-                                        <button mat-flat-button color="primary" type="button" (click)="startMeeting()">
-                                            <mat-icon class="mr-1">play_arrow</mat-icon>
-                                            Start meeting
+                                        <button mat-flat-button color="primary" type="button"
+                                                (click)="startMeeting()"
+                                                [disabled]="startingMeeting">
+                                            <mat-spinner *ngIf="startingMeeting" [diameter]="20" class="mr-2 thff-btn-spinner"></mat-spinner>
+                                            <mat-icon *ngIf="!startingMeeting" class="mr-1">play_arrow</mat-icon>
+                                            {{ startingMeeting ? 'Starting meeting…' : 'Start meeting' }}
                                         </button>
                                     </div>
                                 </div>
@@ -758,24 +867,35 @@
                             size="sm"
                             [saving]="allocationsSaving"
                             [savedFlash]="allocationsSavedFlash"
-                            idleHint="Allocations save automatically." />
+                            idleHint="Allocation edits save when you click Done." />
                         <button *ngIf="editingCompletedMeeting"
-                                mat-stroked-button
+                                mat-flat-button color="primary"
                                 (click)="finishCompletedEdit()">
+                            <mat-icon class="mr-1">check</mat-icon>
                             Done
                         </button>
                     </div>
                 </div>
 
-                <!-- Set aside during completed-meeting edit (always visible here) -->
+                <!-- Set aside during completed-meeting edit (collapsible) -->
                 <div *ngIf="showCompletedEditSetAsideSection()" class="mb-6">
-                    <h3 class="text-md font-semibold m-0 mb-1">
-                        Set aside ({{ displayAllocationsSetAside.length }})
-                    </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mb-3">
-                        Choose which proposals to move back into consideration. After restoring, set grant amounts in the list below.
-                    </p>
-                    <ng-container *ngTemplateOutlet="setAsideAllocationsTable"></ng-container>
+                    <div class="flex items-center gap-2 mb-1 cursor-pointer select-none"
+                         (click)="setAsideCollapsed = !setAsideCollapsed">
+                        <mat-icon class="icon-size-5 text-gray-400 transition-transform duration-200"
+                                  [ngClass]="{ '-rotate-90': setAsideCollapsed }">
+                            expand_more
+                        </mat-icon>
+                        <h3 class="text-md font-semibold m-0">
+                            Set aside ({{ displayAllocationsSetAside.length }})
+                        </h3>
+                        <span class="text-xs text-gray-500">Not counted toward budget usage</span>
+                    </div>
+                    <ng-container *ngIf="!setAsideCollapsed">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mb-3 pl-7">
+                            Choose which proposals to move back into consideration. After restoring, set grant amounts in the list below.
+                        </p>
+                        <ng-container *ngTemplateOutlet="setAsideAllocationsTable"></ng-container>
+                    </ng-container>
                 </div>
 
                 <div *ngIf="meeting.status === 'completed' && editingCompletedMeeting && displayAllocations.length > 0"
@@ -796,7 +916,6 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Loading proposals…</p>
                     </div>
                     <ng-container *ngIf="!proposalsTableLoading">
-                    <ng-container *ngTemplateOutlet="activeBulkSelectionBar"></ng-container>
                     <mat-table
                         [dataSource]="activeTableRows.length > activeTablePageSize ? activeTableDisplayedRows : activeTableRows"
                         class="w-full meeting-table">
@@ -948,12 +1067,18 @@
 
                 <div *ngIf="meeting.status === 'in_progress' && isPresidentOrAdmin"
                      class="meeting-complete-footer flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mt-4">
+                    <span *ngIf="isOverBudget" class="text-sm text-red-600 dark:text-red-300">
+                        {{ (-remainingBudget) | currency:'USD':'symbol':'1.0-0' }} over budget — set aside proposals or lower amounts to complete.
+                    </span>
                     <app-autosave-status
                         size="sm"
                         [saving]="allocationsSaving"
                         [savedFlash]="allocationsSavedFlash"
                         idleHint="Allocations save automatically." />
-                    <button mat-flat-button color="primary" type="button" (click)="completeMeeting()">
+                    <button mat-flat-button color="primary" type="button"
+                            [disabled]="isOverBudget"
+                            [matTooltip]="isOverBudget ? 'Get back under budget before completing' : null"
+                            (click)="completeMeeting()">
                         <mat-icon class="mr-1">check_circle</mat-icon>
                         Complete meeting
                     </button>
@@ -1143,7 +1268,8 @@
 
                 </div>
 
-                <aside class="meeting-workspace__history" aria-label="Meeting history"
+                <aside *ngIf="meeting.status !== 'setup'"
+                       class="meeting-workspace__history" aria-label="Meeting history"
                        [style.top.px]="historyTopPx">
                     <fuse-card class="meeting-history-panel flex flex-col overflow-hidden"
                                [style.maxHeight.px]="historyMaxHeightPx">
@@ -1170,50 +1296,5 @@
 
         </div>
     </div>
-
-    <ng-template #activeBulkSelectionBar>
-        <div *ngIf="canMultiselectAllocations() && activeSelectionCount > 0"
-             class="meeting-selection-bar">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                {{ activeSelectionCount }} selected
-            </span>
-            <button mat-stroked-button
-                    type="button"
-                    [disabled]="bulkAllocationActionInFlight"
-                    (click)="setAsideSelectedActiveAllocations()">
-                <mat-icon class="mr-1 icon-size-5">playlist_remove</mat-icon>
-                Set aside
-            </button>
-            <button mat-button
-                    type="button"
-                    [disabled]="bulkAllocationActionInFlight"
-                    (click)="clearActiveAllocationSelection()">
-                Clear
-            </button>
-        </div>
-    </ng-template>
-
-    <ng-template #setAsideBulkSelectionBar>
-        <div *ngIf="canMultiselectAllocations() && setAsideSelectionCount > 0"
-             class="meeting-selection-bar">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                {{ setAsideSelectionCount }} selected
-            </span>
-            <button mat-flat-button
-                    color="primary"
-                    type="button"
-                    [disabled]="bulkAllocationActionInFlight"
-                    (click)="restoreSelectedSetAsideAllocations()">
-                <mat-icon class="mr-1 icon-size-5">undo</mat-icon>
-                Back to consideration
-            </button>
-            <button mat-button
-                    type="button"
-                    [disabled]="bulkAllocationActionInFlight"
-                    (click)="clearSetAsideAllocationSelection()">
-                Clear
-            </button>
-        </div>
-    </ng-template>
 
 </div>

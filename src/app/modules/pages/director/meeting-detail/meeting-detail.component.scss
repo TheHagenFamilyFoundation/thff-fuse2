@@ -2,6 +2,15 @@
     display: block;
 }
 
+.thff-btn-spinner {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+:host ::ng-deep .thff-btn-spinner circle {
+    stroke: currentColor;
+}
+
 .meeting-live-dot {
     width: 0.5rem;
     height: 0.5rem;
@@ -174,6 +183,18 @@
 :host ::ng-deep .meeting-table .mat-column-createdOn {
     flex: 0 0 6.5rem;
     min-width: 6.5rem;
+}
+
+// Keep the grant amount field from being squeezed into the row action button.
+:host ::ng-deep .meeting-table .mat-column-amountGranted {
+    flex: 0 0 10rem;
+    min-width: 10rem;
+}
+
+:host ::ng-deep .meeting-table .mat-column-actions {
+    flex: 0 0 auto;
+    min-width: 8.5rem;
+    justify-content: flex-end;
 }
 
 :host ::ng-deep .meeting-table--setup {
