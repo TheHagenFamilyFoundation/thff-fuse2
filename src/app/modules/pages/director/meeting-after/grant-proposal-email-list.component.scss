@@ -57,6 +57,27 @@
     white-space: nowrap;
 }
 
+.grant-proposal-panel__email {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    color: rgb(55 65 81);
+    word-break: break-all;
+    min-width: 0;
+}
+
+.grant-proposal-panel__email--missing {
+    font-family: inherit;
+    color: rgb(180 83 9);
+}
+
+:host-context(.dark) .grant-proposal-panel__email {
+    color: rgb(209 213 219);
+}
+
+:host-context(.dark) .grant-proposal-panel__email--missing {
+    color: rgb(251 191 36);
+}
+
 .grant-proposal-panel__sent {
     font-size: 0.75rem;
     color: rgb(22 101 52);

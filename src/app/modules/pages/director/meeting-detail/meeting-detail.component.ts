@@ -16,10 +16,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Sort } from '@angular/material/sort';
 import { PageEvent } from '@angular/material/paginator';
-import { Subject, EMPTY, forkJoin, of, from, interval } from 'rxjs';
-import { catchError, debounceTime, filter, finalize, last, map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
+import { Subject, EMPTY, forkJoin, of, interval } from 'rxjs';
+import { catchError, debounceTime, filter, finalize, map, switchMap, take, tap } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
 import { MeetingRealtimeService } from 'app/core/services/admin/meeting-realtime.service';
+import { OutboundEmailService } from 'app/core/services/director/outbound-email.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
@@ -109,15 +110,28 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** President/admin must opt in before changing total budget during an in-progress meeting. */
     editingInProgressBudget = false;
 
-    /** Columns for setup: proposal selection only (no grant amounts until in progress). */
-    setupViewColumns = ['projectTitle', 'organization', 'sponsor', 'createdOn', 'amountRequested'];
+    /** Columns for setup: proposal details plus an optional pre-meeting proposed amount. */
+    setupViewColumns = ['projectTitle', 'organization', 'sponsor', 'createdOn', 'amountRequested', 'amountGranted'];
     /** Stable column list for setup mat-table (avoid getter in *matHeaderRowDef). */
     setupTableColumns: string[] = [...this.setupViewColumns];
+
+    /** Pre-meeting "amount each" default, applied to every proposal when the meeting starts. */
+    bulkAllocateAmount: number | null = null;
 
     private syncAllocationsInFlight = false;
 
     /** Prevents double-clicks while set-aside / restore requests are in flight. */
     private readonly allocationActiveToggleInFlight = new Set<string>();
+
+    /**
+     * Allocation changes this client just made (set aside / restored), mapped to the
+     * intended active state and an expiry timestamp. Serves two purposes:
+     *  1. Suppress the "watcher" toast for the actor's own changes.
+     *  2. Reconcile against a stale live-update payload that can arrive just after the
+     *     action completes and would otherwise flood set-aside proposals back into the table.
+     */
+    private readonly recentSelfAllocationChanges = new Map<string, { active: boolean; expiry: number }>();
+    private static readonly SELF_CHANGE_SUPPRESS_MS = 8000;
 
     /** Multiselect for bulk set aside (main consideration list). */
     readonly selectedActiveAllocationIds = new Set<string>();
@@ -125,10 +139,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** Multiselect for bulk restore (set aside list). */
     readonly selectedSetAsideAllocationIds = new Set<string>();
 
+    /**
+     * Set-aside decisions made during the setup phase are kept as a local draft (never saved
+     * to the server) and applied all at once when the meeting starts. Persisted to
+     * sessionStorage so a refresh keeps the planning work.
+     */
+    private readonly setupSetAsideDraftIds = new Set<string>();
+
     /** True while a bulk set-aside / restore batch is running. */
     bulkAllocationActionInFlight = false;
-
-    private static readonly BULK_ALLOCATION_CONCURRENCY = 8;
 
     /** How often to poll the server for live updates while a meeting is setup / in progress. */
     private static readonly LIVE_POLL_INTERVAL_MS = 10000;
@@ -176,6 +195,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         private router: Router,
         private meetingService: MeetingService,
         private realtime: MeetingRealtimeService,
+        private outboundEmailService: OutboundEmailService,
         private authService: AuthService,
         private dialog: MatDialog,
         private snackBar: MatSnackBar,
@@ -463,10 +483,9 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         if (!this.meeting?._id || !this.isPresidentOrAdmin) {
             return false;
         }
-        if (this.meeting.status === 'in_progress') {
-            return true;
-        }
-        return this.meeting.status === 'completed' && this.editingCompletedMeeting;
+        // While editing a completed meeting we hold edits locally and only persist
+        // when the user clicks "Done" — no per-keystroke autosave (or its toasts).
+        return this.meeting.status === 'in_progress';
     }
 
     private scheduleAllocationAutosave(): void {
@@ -475,9 +494,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         }
     }
 
-    /** Emits saved meeting or `null` when there is nothing to persist (never completes silently). */
-    private persistPendingAllocationsIfAny() {
-        if (!this.canAutosaveAllocations() || this.pendingAllocations.size === 0) {
+    /**
+     * Emits saved meeting or `null` when there is nothing to persist (never completes silently).
+     * Pass `force` to persist even when autosave is off (e.g. applying setup drafts at start).
+     */
+    private persistPendingAllocationsIfAny(force = false) {
+        const allowed = force
+            ? !!this.meeting?._id && this.isPresidentOrAdmin
+            : this.canAutosaveAllocations();
+        if (!allowed || this.pendingAllocations.size === 0) {
             return of(null);
         }
 
@@ -500,8 +525,40 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         return this.meetingService.updateAllocations(this.meeting._id, allocations);
     }
 
+    /**
+     * Make the server's active/inactive allocation state match the local setup plan when the
+     * meeting starts. Set-aside decisions are local drafts during setup, and a proposal moved
+     * back to consideration must be restored on the server too (it may have been set aside in a
+     * prior session). Runs sequentially (never in parallel) to avoid version conflicts.
+     */
+    private reconcileSetupActiveState() {
+        if (!this.meeting?._id || !this.isPresidentOrAdmin) {
+            return of(null);
+        }
+        const meetingId = this.meeting._id;
+        const allocations = this.meeting.allocations || [];
+        const inactiveIds = allocations
+            .filter((a: any) => !this.allocationIsActive(a))
+            .map((a: any) => String(a._id));
+        const activeIds = allocations
+            .filter((a: any) => this.allocationIsActive(a))
+            .map((a: any) => String(a._id));
+
+        const setAside$ = inactiveIds.length
+            ? this.meetingService.bulkSetAllocationsActive(meetingId, inactiveIds, false)
+            : of(null);
+        const restore$ = activeIds.length
+            ? this.meetingService.bulkSetAllocationsActive(meetingId, activeIds, true)
+            : of(null);
+
+        return setAside$.pipe(switchMap(() => restore$));
+    }
+
     /** Merge a save response without dropping in-flight edits that did not persist. */
-    private applyAllocationSaveResponse(meeting: any, options?: { showSavedFlash?: boolean }): void {
+    private applyAllocationSaveResponse(
+        meeting: any,
+        options?: { showSavedFlash?: boolean; suppressToast?: boolean }
+    ): void {
         const sent = new Map(this.pendingAllocations);
         this.meeting = meeting;
 
@@ -539,7 +596,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
         if (allMatched && options?.showSavedFlash !== false) {
             this.flashAllocationsSaved();
-        } else if (!allMatched) {
+        } else if (!allMatched && !options?.suppressToast) {
             this.snackBar.open(
                 'Could not save that grant amount. Your edit is still on screen — try again.',
                 'Close',
@@ -599,6 +656,8 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                         this.updateStatsStickyVisible();
                         this.updateHistoryLayout();
                         this.tryRestoreSetupStepIndex();
+                        this.restoreAmountEachDraft();
+                        this.restoreSetAsideDraft();
                     });
                 })
             )
@@ -608,6 +667,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 }
                 if (this.meeting?.status === 'completed') {
                     this.loadSummary(id);
+                    this.loadGrantEmailStatus(id);
                 }
             }, () => {
                 this.meeting = null;
@@ -666,6 +726,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             this.bulkAllocationActionInFlight ||
             this.allocationActiveToggleInFlight.size > 0 ||
             this.syncAllocationsInFlight ||
+            this.setupSetAsideDraftIds.size > 0 ||
             this.focusedAllocationInputId !== null
         );
     }
@@ -696,8 +757,11 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         }
         const prevBudget = Number(this.meeting.totalBudget || 0);
         const prevAllocated = this.totalAllocated;
+        const prevStatus = this.meeting.status;
 
         this.meeting = meeting;
+        // Our own recent set-aside/restore decisions win over a possibly-stale broadcast.
+        this.reconcileRecentSelfChanges();
         if (!this.canEditBudget()) {
             this.totalBudget = meeting.totalBudget;
             this.meetingNotes = meeting.notes || '';
@@ -706,7 +770,24 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.liveUpdatedAt = new Date();
         this.flagLiveChanges(prevGranted, prevActive, prevBudget, prevAllocated);
         this.refreshSummaryIfCompleted();
+        this.notifyStatusTransition(prevStatus, meeting.status);
         this._changeDetectorRef.markForCheck();
+    }
+
+    /** Toast watchers when the president moves the meeting to a new lifecycle stage. */
+    private notifyStatusTransition(prev: string, next: string): void {
+        if (!prev || prev === next) {
+            return;
+        }
+        if (next === 'completed') {
+            this.snackBar.open(
+                'This meeting has been completed — final awards are shown below.',
+                'Close',
+                { duration: 6000 }
+            );
+        } else if (prev === 'setup' && next === 'in_progress') {
+            this.snackBar.open('The meeting has started.', 'Close', { duration: 5000 });
+        }
     }
 
     /** Relative "updated N ago" label for watchers; empty until the first live update. */
@@ -740,6 +821,58 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     private liveChangeProposalTitle(allocation: any): string {
         const title = allocation?.proposal?.projectTitle;
         return title && String(title).trim() ? String(title).trim() : 'A proposal';
+    }
+
+    /** Remember that this client just set aside (active=false) / restored (active=true) these proposals. */
+    private markSelfAllocationChanges(ids: string[], active: boolean): void {
+        const expiry = Date.now() + MeetingDetailComponent.SELF_CHANGE_SUPPRESS_MS;
+        for (const id of ids) {
+            this.recentSelfAllocationChanges.set(String(id), { active, expiry });
+        }
+    }
+
+    /** Forget a self-change (e.g. the request failed and we reverted the optimistic state). */
+    private clearSelfAllocationChange(id: string): void {
+        this.recentSelfAllocationChanges.delete(String(id));
+    }
+
+    /** True if this client made a set-aside/restore change to this allocation very recently. */
+    private isRecentSelfAllocationChange(id: string): boolean {
+        const entry = this.recentSelfAllocationChanges.get(String(id));
+        if (!entry) {
+            return false;
+        }
+        if (Date.now() > entry.expiry) {
+            this.recentSelfAllocationChanges.delete(String(id));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * A live-update payload can lag just behind this client's own set-aside/restore action.
+     * Re-apply our recent local decisions on top of the incoming meeting so proposals we
+     * just set aside don't flicker back into the active table.
+     */
+    private reconcileRecentSelfChanges(): void {
+        if (this.recentSelfAllocationChanges.size === 0) {
+            return;
+        }
+        const now = Date.now();
+        for (const a of this.meeting?.allocations || []) {
+            const entry = this.recentSelfAllocationChanges.get(String(a._id));
+            if (!entry) {
+                continue;
+            }
+            if (now > entry.expiry) {
+                this.recentSelfAllocationChanges.delete(String(a._id));
+                continue;
+            }
+            a.activeInMeeting = entry.active;
+            if (!entry.active) {
+                a.amountGranted = 0;
+            }
+        }
     }
 
     /**
@@ -791,10 +924,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             if (grantedChanged || activeChanged || isNew) {
                 changedIds.add(id);
             }
-            if (activeChanged && !nowActive) {
-                setAsideTitles.push(this.liveChangeProposalTitle(a));
-            } else if (activeChanged && nowActive) {
-                restoredTitles.push(this.liveChangeProposalTitle(a));
+            // Only toast for changes made by *other* people; the actor already has their
+            // own confirmation (and a live echo of their bulk action would otherwise show
+            // up as partial "N proposals set aside" toasts).
+            if (activeChanged && !this.isRecentSelfAllocationChange(id)) {
+                if (!nowActive) {
+                    setAsideTitles.push(this.liveChangeProposalTitle(a));
+                } else {
+                    restoredTitles.push(this.liveChangeProposalTitle(a));
+                }
             }
         }
 
@@ -824,13 +962,9 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         }, 1800);
     }
 
-    /** Show the "Live" indicator while a meeting is actively being set up or run. */
+    /** Show the "Live" indicator only while a meeting is actively running (not during setup). */
     get showLiveIndicator(): boolean {
-        return (
-            this.loaded &&
-            !!this.meeting &&
-            (this.meeting.status === 'setup' || this.meeting.status === 'in_progress')
-        );
+        return this.loaded && this.meeting?.status === 'in_progress';
     }
 
     /** Whether to run sync-eligible-proposals for the current meeting + role. */
@@ -872,6 +1006,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     private refreshSummaryIfCompleted(): void {
         if (this.meeting?.status === 'completed' && this.meeting._id) {
             this.loadSummary(this.meeting._id);
+            this.loadGrantEmailStatus(this.meeting._id);
         }
     }
 
@@ -912,8 +1047,13 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         });
     }
 
+    startingMeeting = false;
+
     startMeeting(): void {
-        if (!this.meeting) return;
+        if (!this.meeting || this.startingMeeting) return;
+
+        this.startingMeeting = true;
+        this._changeDetectorRef.markForCheck();
 
         const data: any = { status: 'in_progress' };
         if (this.totalBudget !== this.meeting.totalBudget) {
@@ -923,8 +1063,25 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             data.notes = this.meetingNotes;
         }
 
-        this.persistPendingAllocationsIfAny()
+        // Resolve each in-consideration proposal to its final amount (a positive per-proposal
+        // amount, otherwise the "amount each" default) and stage it, then persist all drafts
+        // (setup drafts aren't autosaved).
+        for (const alloc of this.meeting.allocations || []) {
+            if (!this.allocationIsActive(alloc)) {
+                continue;
+            }
+            const id = String(alloc._id);
+            const finalAmount = this.effectiveAllocationAmountForTotals(alloc);
+            if (Number(alloc.amountGranted || 0) !== finalAmount) {
+                this.pendingAllocations.set(id, finalAmount);
+            }
+        }
+
+        // Set-aside / restore were kept as local drafts during setup; reconcile the server's
+        // active state to the local plan before persisting amounts and starting the meeting.
+        this.reconcileSetupActiveState()
             .pipe(
+                switchMap(() => this.persistPendingAllocationsIfAny(true)),
                 switchMap((saved) => {
                     if (saved) {
                         this.applyAllocationSaveResponse(saved, { showSavedFlash: false });
@@ -945,22 +1102,27 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                         this.editingInProgressBudget = false;
                         this.recalcTotals();
                         this.clearSetupStepStorage();
+                        this.startingMeeting = false;
                         this.snackBar.open('Meeting started', 'Close', { duration: 3000 });
                         this._changeDetectorRef.markForCheck();
                     },
                     error: (err) => {
+                        this.startingMeeting = false;
                         const msg = err.error?.message || 'Error starting meeting';
                         this.snackBar.open(msg, 'Close', { duration: 5000 });
+                        this._changeDetectorRef.markForCheck();
                     }
                 });
             },
             error: (err) => {
+                this.startingMeeting = false;
                 const msg =
                     err.error?.message ||
                     (this.pendingAllocations.size > 0
                         ? 'Error saving allocations before start'
                         : 'Error syncing proposals before start');
                 this.snackBar.open(msg, 'Close', { duration: 5000 });
+                this._changeDetectorRef.markForCheck();
             },
         });
     }
@@ -1095,6 +1257,104 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.updateAllocationBudgetTotals();
     }
 
+    /** The flat "amount each" default (>= 0), or null when the field is empty/invalid. */
+    get amountEachValue(): number | null {
+        if (this.bulkAllocateAmount === null || this.bulkAllocateAmount === undefined) {
+            return null;
+        }
+        const n = Number(this.bulkAllocateAmount);
+        return Number.isFinite(n) && n >= 0 ? n : null;
+    }
+
+    /**
+     * Amount an active proposal will be allocated when the meeting starts: an explicit
+     * per-proposal draft wins, otherwise the flat "amount each" default (setup only),
+     * otherwise the already-saved grant.
+     */
+    private effectiveAllocationAmountForTotals(alloc: any): number {
+        // During setup, per-proposal amounts are not editable — every proposal simply gets the
+        // flat "amount each" default (falling back to any already-saved grant).
+        if (this.meeting?.status === 'setup') {
+            return this.amountEachValue != null ? this.amountEachValue : (alloc.amountGranted || 0);
+        }
+        // In progress / completed edit: an explicit draft (including 0) wins.
+        const pending = this.pendingAllocations.get(String(alloc._id));
+        return pending !== undefined ? pending : (alloc.amountGranted || 0);
+    }
+
+    /** Read-only amount shown per proposal during setup (everyone gets the flat default). */
+    setupRowAmount(alloc: any): number {
+        return this.effectiveAllocationAmountForTotals(alloc);
+    }
+
+    /** Count of in-consideration proposals that will receive a non-zero amount at start. */
+    get proposalsReceivingAmountCount(): number {
+        let n = 0;
+        for (const a of this.meeting?.allocations || []) {
+            if (this.allocationIsActive(a) && this.effectiveAllocationAmountForTotals(a) > 0) {
+                n += 1;
+            }
+        }
+        return n;
+    }
+
+    /** Recompute budget impact + persist the "amount each" default as the user types it. */
+    onAmountEachChange(): void {
+        this.updateAllocationBudgetTotals();
+        this.persistAmountEachDraft();
+        this._changeDetectorRef.markForCheck();
+    }
+
+    private amountEachStorageKey(meetingId?: string): string | null {
+        const id = meetingId ?? this.meeting?._id;
+        return id ? `meeting-detail-amount-each:${id}` : null;
+    }
+
+    /** Persist the "amount each" default so a refresh keeps it (setup only). */
+    private persistAmountEachDraft(): void {
+        if (this.meeting?.status !== 'setup') {
+            return;
+        }
+        const key = this.amountEachStorageKey();
+        if (!key) {
+            return;
+        }
+        try {
+            const value = this.amountEachValue;
+            if (value == null) {
+                sessionStorage.removeItem(key);
+            } else {
+                sessionStorage.setItem(key, String(value));
+            }
+        } catch {
+            // storage unavailable; value remains in memory only
+        }
+    }
+
+    private restoreAmountEachDraft(): void {
+        if (this.meeting?.status !== 'setup' || !this.isPresidentOrAdmin) {
+            return;
+        }
+        const key = this.amountEachStorageKey();
+        if (!key) {
+            return;
+        }
+        try {
+            const raw = sessionStorage.getItem(key);
+            if (raw == null || raw === '') {
+                return;
+            }
+            const n = Number(raw);
+            if (Number.isFinite(n) && n >= 0) {
+                this.bulkAllocateAmount = n;
+                this.updateAllocationBudgetTotals();
+                this._changeDetectorRef.markForCheck();
+            }
+        } catch {
+            // storage unavailable
+        }
+    }
+
     private captureAllocationInputSelection(input: HTMLInputElement): void {
         this.focusedAllocationInputSelection = {
             start: input.selectionStart ?? input.value.length,
@@ -1196,9 +1456,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             if (!this.allocationIsActive(alloc)) {
                 continue;
             }
-            const id = String(alloc._id);
-            const pending = this.pendingAllocations.get(id);
-            total += pending !== undefined ? pending : (alloc.amountGranted || 0);
+            total += this.effectiveAllocationAmountForTotals(alloc);
         }
         this.totalAllocated = total;
         this.remainingBudget = this.budgetForDisplay() - total;
@@ -1322,10 +1580,28 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     }
 
     private clearSetupStepStorage(): void {
-        const key = this.setupStepStorageKey();
-        if (key) {
-            sessionStorage.removeItem(key);
+        const id = this.meeting?._id;
+        const keys = [
+            this.setupStepStorageKey(),
+            this.amountEachStorageKey(),
+            this.setAsideDraftStorageKey(),
+        ];
+        // Also clear the legacy per-proposal draft store (no longer used) so stale amounts
+        // from older builds don't linger.
+        if (id) {
+            keys.push(`meeting-detail-setup-amounts:${id}`);
         }
+        for (const key of keys) {
+            if (key) {
+                try {
+                    sessionStorage.removeItem(key);
+                } catch {
+                    // ignore storage errors
+                }
+            }
+        }
+        this.setupSetAsideDraftIds.clear();
+        this.bulkAllocateAmount = null;
         this.setupStepIndex = 0;
         this.setupStepRestorePending = false;
     }
@@ -1487,7 +1763,58 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         return this.sortAllocationsBySubmittedAt(this.meeting.allocations, true);
     }
 
+    /** Funded allocations exceed the budget. Allowed; completion just asks for confirmation. */
+    get isOverBudget(): boolean {
+        return this.remainingBudget < 0;
+    }
+
     completeMeeting(): void {
+        if (!this.meeting) return;
+
+        // Over budget: allowed, but confirm since allocations exceed the budget.
+        if (this.isOverBudget) {
+            const ref = this.dialog.open(ConfirmDialogComponent, {
+                width: '460px',
+                data: {
+                    title: 'Complete while over budget?',
+                    message: `Allocations are ${this.formatMeetingMoney(-this.remainingBudget)} over the ${this.formatMeetingMoney(this.budgetForDisplay())} budget. Complete the meeting anyway?`,
+                    confirmText: 'Complete meeting',
+                    cancelText: 'Keep editing',
+                    warn: true,
+                },
+            });
+            ref.afterClosed().subscribe((confirmed) => {
+                if (confirmed) {
+                    this.executeCompleteMeeting();
+                }
+            });
+            return;
+        }
+
+        // Under budget: allowed, but confirm since there's money left unallocated.
+        if (this.remainingBudget > 0) {
+            const ref = this.dialog.open(ConfirmDialogComponent, {
+                width: '460px',
+                data: {
+                    title: 'Complete with unallocated budget?',
+                    message: `You have ${this.formatMeetingMoney(this.remainingBudget)} of the ${this.formatMeetingMoney(this.budgetForDisplay())} budget still unallocated. Complete the meeting anyway? Proposals with no grant will be moved to set aside.`,
+                    confirmText: 'Complete meeting',
+                    cancelText: 'Keep editing',
+                    warn: false,
+                },
+            });
+            ref.afterClosed().subscribe((confirmed) => {
+                if (confirmed) {
+                    this.executeCompleteMeeting();
+                }
+            });
+            return;
+        }
+
+        this.executeCompleteMeeting();
+    }
+
+    private executeCompleteMeeting(): void {
         if (!this.meeting) return;
 
         this.persistPendingAllocationsIfAny()
@@ -1587,14 +1914,28 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        this.persistPendingAllocationsIfAny().subscribe({
+        const hadPendingEdits = this.pendingAllocations.size > 0;
+        this.persistPendingAllocationsIfAny(true).subscribe({
             next: (saved) => {
                 if (saved) {
-                    this.applyAllocationSaveResponse(saved, { showSavedFlash: false });
+                    this.applyAllocationSaveResponse(saved, {
+                        showSavedFlash: false,
+                        suppressToast: true,
+                    });
                 }
+                const stillPending = this.pendingAllocations.size > 0;
                 this.editingCompletedMeeting = false;
                 this.clearAllocationSelections();
                 this.refreshSummaryIfCompleted();
+                if (stillPending) {
+                    this.snackBar.open(
+                        'Some changes could not be saved. Please try again.',
+                        'Close',
+                        { duration: 6000 }
+                    );
+                } else if (hadPendingEdits) {
+                    this.snackBar.open('Changes saved', 'Close', { duration: 3000 });
+                }
                 this._changeDetectorRef.markForCheck();
             },
             error: () => {
@@ -1668,9 +2009,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             if (!this.allocationIsActive(alloc)) {
                 continue;
             }
-            const id = String(alloc._id);
-            const pending = this.pendingAllocations.get(id);
-            total += pending !== undefined ? pending : (alloc.amountGranted || 0);
+            total += this.effectiveAllocationAmountForTotals(alloc);
         }
         this.totalAllocated = total;
         this.remainingBudget = cap - this.totalAllocated;
@@ -1786,6 +2125,52 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
 
     getStatusLabel(status: string): string {
         return meetingStatusLabel(status);
+    }
+
+    /** Count of grant notification emails already sent for this meeting (null = not yet checked). */
+    grantEmailsSentCount: number | null = null;
+
+    /** Number of funded proposals eligible for a grant notification. */
+    get fundedProposalCount(): number {
+        if ((this.summary?.totals?.fundedCount ?? 0) > 0) {
+            return this.summary.totals.fundedCount;
+        }
+        if ((this.summary?.funded?.length ?? 0) > 0) {
+            return this.summary.funded.length;
+        }
+        if (!this.meeting?.allocations?.length) {
+            return 0;
+        }
+        return this.meeting.allocations.filter(
+            (alloc: any) => alloc?.activeInMeeting !== false && (alloc.amountGranted ?? 0) > 0
+        ).length;
+    }
+
+    get hasSentGrantEmails(): boolean {
+        return (this.grantEmailsSentCount ?? 0) > 0;
+    }
+
+    /** Short label describing grant-email progress for the completed meeting header. */
+    get grantEmailStatusLabel(): string {
+        const sent = this.grantEmailsSentCount ?? 0;
+        if (sent === 0) {
+            return 'No grant emails sent';
+        }
+        return sent === 1 ? '1 grant email sent' : `${sent} grant emails sent`;
+    }
+
+    /** Pull the count of grant notifications sent so the meeting header can reflect it. */
+    private loadGrantEmailStatus(id: string): void {
+        this.outboundEmailService.getMeetingGrantEmails(id, 1, 1).subscribe({
+            next: (res) => {
+                this.grantEmailsSentCount = typeof res?.total === 'number' ? res.total : 0;
+                this._changeDetectorRef.markForCheck();
+            },
+            error: () => {
+                this.grantEmailsSentCount = null;
+                this._changeDetectorRef.markForCheck();
+            },
+        });
     }
 
     /** At least one active allocation with a grant — controls After meeting link. */
@@ -2013,6 +2398,157 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.confirmBulkSetAside(allocations);
     }
 
+    /** During setup, set-aside/restore are local drafts applied to the server only at start. */
+    private isSetupPlanningMode(): boolean {
+        return this.meeting?.status === 'setup' && this.isPresidentOrAdmin;
+    }
+
+    /**
+     * Apply a set-aside (active=false) / restore (active=true) locally as a setup draft,
+     * without touching the server. Updates selections, totals and the persisted draft.
+     */
+    private applyLocalBulkActive(ids: string[], active: boolean): void {
+        ids.forEach((rawId) => {
+            const id = String(rawId);
+            if (active) {
+                this.applyLocalActiveInMeeting(id, true);
+                this.setupSetAsideDraftIds.delete(id);
+                this.selectedSetAsideAllocationIds.delete(id);
+            } else {
+                this.applyLocalSetAside(id);
+                this.setupSetAsideDraftIds.add(id);
+                this.selectedActiveAllocationIds.delete(id);
+            }
+        });
+        this.hasUnsavedChanges = this.pendingAllocations.size > 0;
+        this.persistSetAsideDraft();
+        this.recalcTotals();
+        this._changeDetectorRef.markForCheck();
+    }
+
+    private setAsideDraftStorageKey(meetingId?: string): string | null {
+        const id = meetingId ?? this.meeting?._id;
+        return id ? `meeting-detail-set-aside:${id}` : null;
+    }
+
+    /** Persist the setup set-aside draft so a refresh keeps the planning work. */
+    private persistSetAsideDraft(): void {
+        if (!this.isSetupPlanningMode()) {
+            return;
+        }
+        const key = this.setAsideDraftStorageKey();
+        if (!key) {
+            return;
+        }
+        try {
+            const ids = [...this.setupSetAsideDraftIds];
+            if (!ids.length) {
+                sessionStorage.removeItem(key);
+                return;
+            }
+            sessionStorage.setItem(key, JSON.stringify(ids));
+        } catch {
+            // storage unavailable; draft stays in memory only
+        }
+    }
+
+    /** Re-apply the setup set-aside draft after a fresh meeting payload load. */
+    private restoreSetAsideDraft(): void {
+        if (!this.isSetupPlanningMode()) {
+            return;
+        }
+        const key = this.setAsideDraftStorageKey();
+        if (!key) {
+            return;
+        }
+        let parsed: string[] | null = null;
+        try {
+            const raw = sessionStorage.getItem(key);
+            parsed = raw ? JSON.parse(raw) : null;
+        } catch {
+            return;
+        }
+        if (!Array.isArray(parsed) || !parsed.length) {
+            return;
+        }
+        const validIds = new Set((this.meeting?.allocations || []).map((a: any) => String(a._id)));
+        let restored = 0;
+        for (const rawId of parsed) {
+            const id = String(rawId);
+            if (validIds.has(id)) {
+                this.applyLocalSetAside(id);
+                this.setupSetAsideDraftIds.add(id);
+                restored += 1;
+            }
+        }
+        if (restored > 0) {
+            this.recalcTotals();
+            this._changeDetectorRef.markForCheck();
+        }
+    }
+
+    /** In-consideration proposals that are NOT selected (would be set aside via "keep selected"). */
+    private unselectedActiveAllocations(): any[] {
+        return this.displayAllocations.filter(
+            (row) =>
+                this.allocationIsActive(row) &&
+                !this.selectedActiveAllocationIds.has(this.allocationRowId(row))
+        );
+    }
+
+    /** How many proposals would be set aside if the president keeps only the selected ones. */
+    get keepSelectedSetAsideCount(): number {
+        return this.unselectedActiveAllocations().length;
+    }
+
+    /**
+     * Invert the selection: keep the currently selected proposals in consideration and
+     * set aside everything else that's still active.
+     */
+    keepSelectedActiveAllocations(): void {
+        const toSetAside = this.unselectedActiveAllocations();
+        if (!toSetAside.length) {
+            return;
+        }
+        this.confirmKeepSelected(toSetAside, this.activeSelectionCount);
+    }
+
+    private confirmKeepSelected(allocations: any[], keepCount: number): void {
+        if (!this.meeting || !allocations.length) {
+            return;
+        }
+        const count = allocations.length;
+        const keepLabel = keepCount === 1 ? '1 proposal' : `${keepCount} proposals`;
+        const asideLabel =
+            count === 1
+                ? `“${this.allocationProposalTitle(allocations[0])}”`
+                : `the other ${count} proposals`;
+        const message =
+            count === 1
+                ? `Keep ${keepLabel} in consideration and set aside ${asideLabel}? Its grant amount will be set to $0 and it won’t count toward budget usage.`
+                : `Keep ${keepLabel} in consideration and set aside ${asideLabel}? Their grant amounts will be set to $0 and they won’t count toward budget usage.`;
+        const ref = this.dialog.open(ConfirmDialogComponent, {
+            width: '460px',
+            data: {
+                title:
+                    count === 1
+                        ? 'Set aside 1 proposal?'
+                        : `Set aside ${count} proposals?`,
+                message,
+                confirmText: 'Set aside the rest',
+                cancelText: 'Cancel',
+                warn: false,
+            },
+        });
+        ref.afterClosed().subscribe((confirmed) => {
+            if (confirmed) {
+                this.executeBulkSetAside(allocations);
+                // The kept proposals stay checked otherwise; clear them now that the rest are set aside.
+                this.clearActiveAllocationSelection();
+            }
+        });
+    }
+
     restoreSelectedSetAsideAllocations(): void {
         const allocations = this.selectedSetAsideAllocations();
         if (!allocations.length) {
@@ -2085,7 +2621,19 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
+        const ids = pending.map((a) => this.allocationRowId(a));
+
+        // Setup phase: keep it a local draft, applied to the server only when the meeting starts.
+        if (this.isSetupPlanningMode()) {
+            this.applyLocalBulkActive(ids, false);
+            if (options?.offerUndo !== false) {
+                this.offerBulkAllocationUndo(ids, 'setAside');
+            }
+            return;
+        }
+
         this.bulkAllocationActionInFlight = true;
+        this.markSelfAllocationChanges(ids, false);
         pending.forEach((allocation) => {
             const id = this.allocationRowId(allocation);
             this.applyLocalSetAside(id);
@@ -2095,65 +2643,40 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.recalcTotals();
         this._changeDetectorRef.markForCheck();
 
-        let failures = 0;
-        let backendUnreachable = false;
-        const succeededIds: string[] = [];
-        from(pending)
+        this.meetingService
+            .bulkSetAllocationsActive(this.meeting._id, ids, false)
             .pipe(
-                mergeMap(
-                    (allocation) => {
-                        const id = this.allocationRowId(allocation);
-                        if (backendUnreachable) {
-                            return of(null);
-                        }
-                        return this.meetingService.removeAllocation(this.meeting._id, allocation._id).pipe(
-                            tap((updated) => {
-                                if (updated) {
-                                    succeededIds.push(id);
-                                }
-                            }),
-                            catchError((err) => {
-                                failures += 1;
-                                this.applyLocalActiveInMeeting(id, true);
-                                this.recalcTotals();
-                                if (this.isBackendUnreachable(err)) {
-                                    backendUnreachable = true;
-                                }
-                                return of(null);
-                            })
-                        );
-                    },
-                    MeetingDetailComponent.BULK_ALLOCATION_CONCURRENCY
-                ),
-                last(),
                 finalize(() => {
-                    if (backendUnreachable) {
-                        this.revertBulkSetAsideOptimistic(pending, succeededIds);
-                    }
                     this.bulkAllocationActionInFlight = false;
                     this.clearActiveAllocationSelection();
-                    this.recalcTotals();
-                    this.refreshSummaryIfCompleted();
                     this._changeDetectorRef.markForCheck();
-                    if (backendUnreachable) {
-                        this.snackBar.open(
-                            'Could not reach the server. Set-aside changes were not saved.',
-                            'Close',
-                            { duration: 6000 }
-                        );
-                    } else if (failures > 0) {
-                        const msg =
-                            failures === 1
-                                ? '1 proposal could not be set aside'
-                                : `${failures} proposals could not be set aside`;
-                        this.snackBar.open(msg, 'Close', { duration: 5000 });
-                    }
-                    if (!backendUnreachable && options?.offerUndo !== false && succeededIds.length > 0) {
-                        this.offerBulkAllocationUndo(succeededIds, 'setAside');
-                    }
                 })
             )
-            .subscribe();
+            .subscribe({
+                next: (updated) => {
+                    this.meeting = updated;
+                    this.reconcileRecentSelfChanges();
+                    this.recalcTotals();
+                    this.refreshSummaryIfCompleted();
+                    if (options?.offerUndo !== false) {
+                        this.offerBulkAllocationUndo(ids, 'setAside');
+                    }
+                },
+                error: (err) => {
+                    ids.forEach((id) => {
+                        this.applyLocalActiveInMeeting(id, true);
+                        this.clearSelfAllocationChange(id);
+                    });
+                    this.recalcTotals();
+                    const msg = this.isBackendUnreachable(err)
+                        ? 'Could not reach the server. Set-aside changes were not saved.'
+                        : err?.error?.message ||
+                          (ids.length === 1
+                              ? '1 proposal could not be set aside'
+                              : `${ids.length} proposals could not be set aside`);
+                    this.snackBar.open(msg, 'Close', { duration: 6000 });
+                },
+            });
     }
 
     private executeBulkRestore(allocations: any[], options?: { offerUndo?: boolean }): void {
@@ -2168,7 +2691,19 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
+        const ids = pending.map((a) => this.allocationRowId(a));
+
+        // Setup phase: keep it a local draft, applied to the server only when the meeting starts.
+        if (this.isSetupPlanningMode()) {
+            this.applyLocalBulkActive(ids, true);
+            if (options?.offerUndo !== false) {
+                this.offerBulkAllocationUndo(ids, 'restore');
+            }
+            return;
+        }
+
         this.bulkAllocationActionInFlight = true;
+        this.markSelfAllocationChanges(ids, true);
         pending.forEach((allocation) => {
             const id = this.allocationRowId(allocation);
             this.applyLocalActiveInMeeting(id, true);
@@ -2177,91 +2712,44 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         this.recalcTotals();
         this._changeDetectorRef.markForCheck();
 
-        let failures = 0;
-        let backendUnreachable = false;
-        const succeededIds: string[] = [];
-        from(pending)
+        this.meetingService
+            .bulkSetAllocationsActive(this.meeting._id, ids, true)
             .pipe(
-                mergeMap(
-                    (allocation) => {
-                        const id = this.allocationRowId(allocation);
-                        if (backendUnreachable) {
-                            return of(null);
-                        }
-                        return this.meetingService
-                            .setAllocationActive(this.meeting._id, allocation._id, true)
-                            .pipe(
-                                tap((updated) => {
-                                    if (updated) {
-                                        succeededIds.push(id);
-                                    }
-                                }),
-                                catchError((err) => {
-                                    failures += 1;
-                                    this.applyLocalActiveInMeeting(id, false);
-                                    this.recalcTotals();
-                                    if (this.isBackendUnreachable(err)) {
-                                        backendUnreachable = true;
-                                    }
-                                    return of(null);
-                                })
-                            );
-                    },
-                    MeetingDetailComponent.BULK_ALLOCATION_CONCURRENCY
-                ),
-                last(),
                 finalize(() => {
-                    if (backendUnreachable) {
-                        this.revertBulkRestoreOptimistic(pending, succeededIds);
-                    }
                     this.bulkAllocationActionInFlight = false;
                     this.clearSetAsideAllocationSelection();
-                    this.recalcTotals();
-                    this.refreshSummaryIfCompleted();
                     this._changeDetectorRef.markForCheck();
-                    if (backendUnreachable) {
-                        this.snackBar.open(
-                            'Could not reach the server. Restore changes were not saved.',
-                            'Close',
-                            { duration: 6000 }
-                        );
-                    } else if (failures > 0) {
-                        const msg =
-                            failures === 1
-                                ? '1 proposal could not be restored'
-                                : `${failures} proposals could not be restored`;
-                        this.snackBar.open(msg, 'Close', { duration: 5000 });
-                    }
-                    if (!backendUnreachable && options?.offerUndo !== false && succeededIds.length > 0) {
-                        this.offerBulkAllocationUndo(succeededIds, 'restore');
-                    }
                 })
             )
-            .subscribe();
+            .subscribe({
+                next: (updated) => {
+                    this.meeting = updated;
+                    this.reconcileRecentSelfChanges();
+                    this.recalcTotals();
+                    this.refreshSummaryIfCompleted();
+                    if (options?.offerUndo !== false) {
+                        this.offerBulkAllocationUndo(ids, 'restore');
+                    }
+                },
+                error: (err) => {
+                    ids.forEach((id) => {
+                        this.applyLocalActiveInMeeting(id, false);
+                        this.clearSelfAllocationChange(id);
+                    });
+                    this.recalcTotals();
+                    const msg = this.isBackendUnreachable(err)
+                        ? 'Could not reach the server. Restore changes were not saved.'
+                        : err?.error?.message ||
+                          (ids.length === 1
+                              ? '1 proposal could not be restored'
+                              : `${ids.length} proposals could not be restored`);
+                    this.snackBar.open(msg, 'Close', { duration: 6000 });
+                },
+            });
     }
 
     private isBackendUnreachable(err: unknown): boolean {
         return err instanceof HttpErrorResponse && err.status === 0;
-    }
-
-    private revertBulkSetAsideOptimistic(pending: any[], succeededIds: string[]): void {
-        const succeeded = new Set(succeededIds);
-        pending.forEach((allocation) => {
-            const id = this.allocationRowId(allocation);
-            if (!succeeded.has(id)) {
-                this.applyLocalActiveInMeeting(id, true);
-            }
-        });
-    }
-
-    private revertBulkRestoreOptimistic(pending: any[], succeededIds: string[]): void {
-        const succeeded = new Set(succeededIds);
-        pending.forEach((allocation) => {
-            const id = this.allocationRowId(allocation);
-            if (!succeeded.has(id)) {
-                this.applyLocalActiveInMeeting(id, false);
-            }
-        });
     }
 
     private allocationsByIds(ids: string[]): any[] {
@@ -2351,7 +2839,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
+        // Setup phase: keep it a local draft, applied to the server only when the meeting starts.
+        if (this.isSetupPlanningMode()) {
+            this.applyLocalBulkActive([id], false);
+            this.offerBulkAllocationUndo([id], 'setAside');
+            return;
+        }
+
         this.allocationActiveToggleInFlight.add(id);
+        this.markSelfAllocationChanges([id], false);
         this.applyLocalSetAside(id);
         this.selectedActiveAllocationIds.delete(id);
         this.hasUnsavedChanges = this.pendingAllocations.size > 0;
@@ -2370,6 +2866,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 },
                 error: (err) => {
                     this.applyLocalActiveInMeeting(id, true);
+                    this.clearSelfAllocationChange(id);
                     this.recalcTotals();
                     const msg = err.error?.message || 'Could not set proposal aside';
                     this.snackBar.open(msg, 'Close', { duration: 5000 });
@@ -2409,7 +2906,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return;
         }
 
+        // Setup phase: keep it a local draft, applied to the server only when the meeting starts.
+        if (this.isSetupPlanningMode()) {
+            this.applyLocalBulkActive([id], true);
+            this.offerBulkAllocationUndo([id], 'restore');
+            return;
+        }
+
         this.allocationActiveToggleInFlight.add(id);
+        this.markSelfAllocationChanges([id], true);
         this.applyLocalActiveInMeeting(id, true);
         this.selectedSetAsideAllocationIds.delete(id);
         this.recalcTotals();
@@ -2427,6 +2932,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 },
                 error: (err) => {
                     this.applyLocalActiveInMeeting(id, false);
+                    this.clearSelfAllocationChange(id);
                     this.recalcTotals();
                     const msg = err.error?.message || 'Could not restore proposal';
                     this.snackBar.open(msg, 'Close', { duration: 5000 });
