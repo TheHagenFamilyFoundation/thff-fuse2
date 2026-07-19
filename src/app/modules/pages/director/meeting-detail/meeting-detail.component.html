@@ -739,7 +739,7 @@
                                     </div>
 
                                     <mat-paginator
-                                        *ngIf="setupTableRows.length > 25"
+                                        *ngIf="setupTableRows.length > setupTablePageSize"
                                         class="border-t border-gray-200 dark:border-gray-700"
                                         [length]="setupTableRows.length"
                                         [pageIndex]="setupTablePageIndex"
@@ -1040,7 +1040,7 @@
                     </mat-table>
 
                     <mat-paginator
-                        *ngIf="activeTableRows.length > 25"
+                        *ngIf="activeTableRows.length > activeTablePageSize"
                         class="border-t border-gray-200 dark:border-gray-700"
                         [length]="activeTableRows.length"
                         [pageIndex]="activeTablePageIndex"
