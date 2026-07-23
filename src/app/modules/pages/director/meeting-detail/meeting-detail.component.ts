@@ -374,7 +374,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             .subscribe({
                 next: (meeting) => {
                     if (meeting) {
-                        this.meeting = meeting;
+                        this.applyBudgetNotesSaveResponse(meeting);
                         this.recalcTotals();
                         this.flashSetupBudgetNotesSaved();
                         if (this.meeting.status === 'completed') {
@@ -1165,6 +1165,28 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
             return this.editingInProgressBudget;
         }
         return this.meeting.status === 'completed' && this.editingCompletedMeeting;
+    }
+
+    /**
+     * Apply a budget/notes save response. During setup, set-aside is only a local draft, so
+     * replacing the whole meeting with the server payload would reset every proposal back to
+     * active. Update just the scalar budget/notes fields and keep the in-memory allocations
+     * (which hold the local set-aside plan). Other statuses replace the meeting as usual.
+     */
+    private applyBudgetNotesSaveResponse(serverMeeting: any): void {
+        if (!serverMeeting) {
+            return;
+        }
+        if (this.isSetupPlanningMode() && this.meeting) {
+            this.meeting.totalBudget = serverMeeting.totalBudget;
+            this.meeting.originalBudget = serverMeeting.originalBudget;
+            this.meeting.totalAllocated = serverMeeting.totalAllocated;
+            this.meeting.notes = serverMeeting.notes;
+            this.meeting.updatedAt = serverMeeting.updatedAt;
+            this.meeting.events = serverMeeting.events;
+            return;
+        }
+        this.meeting = serverMeeting;
     }
 
     private persistSetupBudgetAndNotesIfChanged() {
