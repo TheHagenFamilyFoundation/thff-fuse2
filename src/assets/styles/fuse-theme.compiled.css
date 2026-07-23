@@ -2503,11 +2503,6 @@
       width: calc(var(--spacing) * 52) !important;
     }
   }
-  .sm\:w-56 {
-    @media (width >= 40rem) {
-      width: calc(var(--spacing) * 56) !important;
-    }
-  }
   .sm\:w-60 {
     @media (width >= 40rem) {
       width: calc(var(--spacing) * 60) !important;
@@ -2698,11 +2693,6 @@
         margin-inline-start: calc(calc(var(--spacing) * 3) * var(--tw-space-x-reverse)) !important;
         margin-inline-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-x-reverse))) !important;
       }
-    }
-  }
-  .sm\:self-center {
-    @media (width >= 40rem) {
-      align-self: center !important;
     }
   }
   .sm\:overflow-hidden {
