@@ -53,6 +53,11 @@ export class MeetingService {
         return this.http.post(`${this.apiUrl}/meeting/${id}/sync-eligible-proposals`, {});
     }
 
+    /** Hand-add a single proposal to the meeting regardless of its year. Idempotent. */
+    addProposalToMeeting(id: string, proposalId: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/meeting/${id}/allocation`, { proposalId });
+    }
+
     createMeeting(data: { submissionYear: string; year: number; totalBudget?: number; notes?: string }): Observable<any> {
         return this.http.post(`${this.apiUrl}/meeting`, data);
     }

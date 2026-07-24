@@ -39,6 +39,7 @@ import { SolicitationPreviewSendDialogComponent } from './solicitation-emails/so
 import { MeetingComponent } from './meeting/meeting.component';
 import { CreateMeetingDialogComponent } from './meeting/create-meeting-dialog.component';
 import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
+import { AddProposalDialogComponent } from './meeting-detail/add-proposal-dialog.component';
 import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
 import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
 import { GrantProposalEmailListComponent } from './meeting-after/grant-proposal-email-list.component';
@@ -46,7 +47,7 @@ import { SentGrantEmailViewDialogComponent } from './meeting-after/sent-grant-em
 import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 @NgModule({
-    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, CreateMeetingDialogComponent, MeetingDetailComponent, MeetingContactsComponent, MeetingAfterComponent, GrantProposalEmailListComponent, SentGrantEmailViewDialogComponent],
+    declarations: [DirectorComponent, OrganizationsComponent, ProposalsComponent, VotingComponent, SubmissionYearsComponent, ClosePortalDialogComponent, ReferralLinksComponent, SolicitationEmailsComponent, SolicitationEmailPreviewDialogComponent, SolicitationPreviewSendDialogComponent, MeetingComponent, CreateMeetingDialogComponent, MeetingDetailComponent, AddProposalDialogComponent, MeetingContactsComponent, MeetingAfterComponent, GrantProposalEmailListComponent, SentGrantEmailViewDialogComponent],
     imports: [
         RouterModule.forChild(directorRoutes),
         CommonModule,
