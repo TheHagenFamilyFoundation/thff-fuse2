@@ -35,6 +35,14 @@
                     </span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
+                    <button *ngIf="isPresidentOrAdmin"
+                            mat-stroked-button
+                            type="button"
+                            matTooltip="Add a specific proposal to this meeting (including one from another year)"
+                            (click)="openAddProposalDialog()">
+                        <mat-icon class="mr-1">playlist_add</mat-icon>
+                        Add proposal
+                    </button>
                     <span *ngIf="meeting.status === 'completed' && hasFundedProposals() && grantEmailsSentCount !== null"
                           class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
                           [ngClass]="hasSentGrantEmails

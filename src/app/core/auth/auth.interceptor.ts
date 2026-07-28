@@ -17,7 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
         // Public endpoints must work without a session (e.g. home page grant-cycle status).
-        const newReq = this._isPublicEndpoint(req.url) ? req : this._addToken(req);
+        const newReq = this._isPublicEndpoint(req) ? req : this._addToken(req);
 
         // Response
         return next.handle(newReq).pipe(
@@ -33,7 +33,7 @@ export class AuthInterceptor implements HttpInterceptor {
                         req.url.includes(endpoint)
                     );
 
-                    if (isSkipEndpoint || this._isPublicEndpoint(req.url)) {
+                    if (isSkipEndpoint || this._isPublicEndpoint(req)) {
                         return throwError(() => error);
                     }
 
@@ -47,12 +47,16 @@ export class AuthInterceptor implements HttpInterceptor {
     }
 
     /** Endpoints that must not require auth (landing page grant-cycle status, health checks, referral validate). */
-    private _isPublicEndpoint(url: string): boolean {
+    private _isPublicEndpoint(req: HttpRequest<any>): boolean {
+        const url = req.url;
         if (url.includes('/referral-code/validate/')) {
             return true;
         }
-        const publicEndpoints = ['/submission-year', '/health'];
-        return publicEndpoints.some((endpoint) => url.includes(endpoint));
+        // Only GET submission-year endpoints are public. PUT /toggle and POST / require auth.
+        if (url.includes('/submission-year')) {
+            return req.method === 'GET';
+        }
+        return url.includes('/health');
     }
 
     /**
