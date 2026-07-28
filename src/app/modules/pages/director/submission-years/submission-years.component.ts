@@ -62,7 +62,7 @@ export class SubmissionYearsComponent implements OnInit {
             dialogRef.afterClosed().subscribe((confirmed) => {
                 if (confirmed) {
                     this.submissionYearsService.toggleSubmissionYear(yearFound._id, false).subscribe({
-                        next: () => { this.loadSubmissionYears(); },
+                        next: (updated) => { this.applyToggleResult(updated, yearFound._id, false); },
                         error: (err) => {
                             console.error('toggleSubmissionYear error', err);
                             this._snackBar.open('Could not close the portal', 'Close', { duration: 5000 });
@@ -72,13 +72,32 @@ export class SubmissionYearsComponent implements OnInit {
             });
         } else {
             this.submissionYearsService.toggleSubmissionYear(yearFound._id, true).subscribe({
-                next: () => { this.loadSubmissionYears(); },
+                next: (updated) => { this.applyToggleResult(updated, yearFound._id, true); },
                 error: (err) => {
                     console.error('toggleSubmissionYear error', err);
                     this._snackBar.open('Could not open the portal', 'Close', { duration: 5000 });
                 }
             });
         }
+    }
+
+    /** Update the toggled row in place (no full table reload / loading flash). */
+    private applyToggleResult(updated: any, fallbackId: string, active: boolean): void {
+        const id = String(updated?._id ?? fallbackId);
+        const idx = this.years.findIndex((y) => String(y._id) === id);
+        if (idx !== -1) {
+            this.years[idx] = {
+                ...this.years[idx],
+                ...(updated || {}),
+                active: updated?.active ?? active,
+            };
+        }
+        this.dataSource.data = [...this.years];
+        if (this._sort) {
+            this.dataSource.sort = this._sort;
+        }
+        this.checkCurrentYearSubmissionYear();
+        this._cdr.markForCheck();
     }
 
     createSubmissionYear(): void {
