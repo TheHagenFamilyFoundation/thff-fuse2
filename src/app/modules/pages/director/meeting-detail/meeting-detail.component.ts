@@ -25,6 +25,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
+import { AddProposalDialogComponent } from './add-proposal-dialog.component';
 
 @Component({
     standalone: false,
@@ -1045,6 +1046,41 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 this._changeDetectorRef.markForCheck();
             }
         });
+    }
+
+    /**
+     * Open the "add a proposal" dialog so a president/admin can hand-pick a proposal
+     * (including one from another year) into this meeting. Applies the updated meeting
+     * returned by the dialog once it closes.
+     */
+    openAddProposalDialog(): void {
+        if (!this.meeting || !this.isPresidentOrAdmin) {
+            return;
+        }
+        const existingProposalIds = (this.meeting.allocations || [])
+            .map((a: any) => String(a?.proposal?._id ?? a?.proposal ?? ''))
+            .filter(Boolean);
+
+        this.dialog
+            .open(AddProposalDialogComponent, {
+                width: '36rem',
+                maxWidth: '95vw',
+                data: {
+                    meetingId: this.meeting._id,
+                    year: this.meeting.year,
+                    existingProposalIds,
+                },
+            })
+            .afterClosed()
+            .subscribe((updatedMeeting) => {
+                if (updatedMeeting) {
+                    this.applyMeetingResponse(updatedMeeting);
+                    if (updatedMeeting.status === 'completed') {
+                        this.loadSummary(updatedMeeting._id);
+                    }
+                    this._changeDetectorRef.markForCheck();
+                }
+            });
     }
 
     startingMeeting = false;
