@@ -25,7 +25,6 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 import { meetingStatusLabel } from '../meeting-status.labels';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
-import { AddProposalDialogComponent } from './add-proposal-dialog.component';
 
 @Component({
     standalone: false,
@@ -119,7 +118,7 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     /** Pre-meeting "amount each" default, applied to every proposal when the meeting starts. */
     bulkAllocateAmount: number | null = null;
 
-    private syncAllocationsInFlight = false;
+    syncAllocationsInFlight = false;
 
     /** Prevents double-clicks while set-aside / restore requests are in flight. */
     private readonly allocationActiveToggleInFlight = new Set<string>();
@@ -634,7 +633,9 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 switchMap(({ meeting, isPresident }) => {
                     this.isPresidentOrAdmin = !!isPresident;
                     this.applyMeetingResponse(meeting);
-                    if (this.shouldSyncEligibleProposals()) {
+                    // Auto-sync on load (president/admin). Completed meetings add
+                    // newly eligible proposals as set aside only.
+                    if (this.canSyncEligibleProposals) {
                         return this.meetingService.syncEligibleProposals(id).pipe(
                             catchError(() => {
                                 this.snackBar.open(
@@ -662,19 +663,22 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     });
                 })
             )
-            .subscribe((syncedMeeting) => {
-                if (syncedMeeting) {
-                    this.applyMeetingResponse(syncedMeeting);
-                }
-                if (this.meeting?.status === 'completed') {
-                    this.loadSummary(id);
-                    this.loadGrantEmailStatus(id);
-                }
-            }, () => {
-                this.meeting = null;
-                this.displayAllocations = [];
-                this.displayAllocationsSetAside = [];
-                this.setupTableRows = [];
+            .subscribe({
+                next: (syncedMeeting) => {
+                    if (syncedMeeting) {
+                        this.applyMeetingResponse(syncedMeeting);
+                    }
+                    if (this.meeting?.status === 'completed') {
+                        this.loadSummary(id);
+                        this.loadGrantEmailStatus(id);
+                    }
+                },
+                error: () => {
+                    this.meeting = null;
+                    this.displayAllocations = [];
+                    this.displayAllocationsSetAside = [];
+                    this.setupTableRows = [];
+                },
             });
     }
 
@@ -968,15 +972,16 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
         return this.loaded && this.meeting?.status === 'in_progress';
     }
 
-    /** Whether to run sync-eligible-proposals for the current meeting + role. */
-    private shouldSyncEligibleProposals(): boolean {
+    /**
+     * President/admin can sync during setup, a live meeting, or a completed
+     * meeting. Auto-runs on page load; the Sync button covers mid-meeting
+     * submissions. Completed meetings put newly synced proposals in set aside.
+     */
+    get canSyncEligibleProposals(): boolean {
         if (!this.meeting?._id || !this.isPresidentOrAdmin) {
             return false;
         }
         const st = this.meeting.status;
-        if (st === 'completed' && !this.editingCompletedMeeting) {
-            return false;
-        }
         return st === 'setup' || st === 'in_progress' || st === 'completed';
     }
 
@@ -1012,21 +1017,17 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     }
 
     /**
-     * President: merge in any new submitted proposals for the meeting year (excludes archived & composer drafts).
-     * Called after auth resolves, and when opening completed meeting for edit.
+     * On-demand sync: merge in any new submitted proposals for the meeting year
+     * (excludes archived & composer drafts). Completed meetings add them as set aside.
      */
-    maybeSyncEligibleProposals(): void {
-        if (!this.shouldSyncEligibleProposals()) {
+    syncEligibleProposals(): void {
+        if (!this.canSyncEligibleProposals || this.syncAllocationsInFlight) {
             return;
         }
-        if (this.syncAllocationsInFlight) {
-            return;
-        }
+        const previousCount = (this.meeting.allocations || []).length;
         this.syncAllocationsInFlight = true;
-        if (this.loaded) {
-            this.proposalsTableLoading = true;
-            this._changeDetectorRef.markForCheck();
-        }
+        this.proposalsTableLoading = true;
+        this._changeDetectorRef.markForCheck();
         this.meetingService.syncEligibleProposals(this.meeting._id).subscribe({
             next: (m) => {
                 this.syncAllocationsInFlight = false;
@@ -1035,6 +1036,15 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                     this.loadSummary(m._id);
                 }
                 this.proposalsTableLoading = false;
+                const added = Math.max(0, (m.allocations || []).length - previousCount);
+                this.snackBar.open(
+                    added > 0
+                        ? `Synced — ${added} new proposal${added === 1 ? '' : 's'} added` +
+                          (m.status === 'completed' ? ' (set aside)' : '')
+                        : 'Proposal list is up to date',
+                    'Close',
+                    { duration: 4000 }
+                );
                 this._changeDetectorRef.markForCheck();
             },
             error: () => {
@@ -1046,41 +1056,6 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
                 this._changeDetectorRef.markForCheck();
             }
         });
-    }
-
-    /**
-     * Open the "add a proposal" dialog so a president/admin can hand-pick a proposal
-     * (including one from another year) into this meeting. Applies the updated meeting
-     * returned by the dialog once it closes.
-     */
-    openAddProposalDialog(): void {
-        if (!this.meeting || !this.isPresidentOrAdmin) {
-            return;
-        }
-        const existingProposalIds = (this.meeting.allocations || [])
-            .map((a: any) => String(a?.proposal?._id ?? a?.proposal ?? ''))
-            .filter(Boolean);
-
-        this.dialog
-            .open(AddProposalDialogComponent, {
-                width: '36rem',
-                maxWidth: '95vw',
-                data: {
-                    meetingId: this.meeting._id,
-                    year: this.meeting.year,
-                    existingProposalIds,
-                },
-            })
-            .afterClosed()
-            .subscribe((updatedMeeting) => {
-                if (updatedMeeting) {
-                    this.applyMeetingResponse(updatedMeeting);
-                    if (updatedMeeting.status === 'completed') {
-                        this.loadSummary(updatedMeeting._id);
-                    }
-                    this._changeDetectorRef.markForCheck();
-                }
-            });
     }
 
     startingMeeting = false;
@@ -1964,7 +1939,6 @@ export class MeetingDetailComponent implements OnInit, AfterViewInit {
     startCompletedEdit(): void {
         this.editingCompletedMeeting = true;
         this.syncDisplayAllocations();
-        this.maybeSyncEligibleProposals();
     }
 
     finishCompletedEdit(): void {
