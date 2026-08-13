@@ -1,0 +1,45 @@
+---
+description: Git branch merge order — feature → develop → staging → master
+alwaysApply: true
+---
+
+# Git branch flow (THFF)
+
+Use this order for **thff-be** and **thff-fuse2**. Do not skip steps.
+
+## Branch roles
+
+| Branch | Purpose |
+|--------|---------|
+| `feature/*` | Work in progress |
+| `develop` | Integration / code review |
+| `staging` | Cloud deploy for QA |
+| `master` | Production |
+
+## Required merge order
+
+1. **Feature → `develop`** — open PR (or merge) from `feature/*` into `develop` first.
+2. **`develop` → `staging`** — after develop is good, promote with a PR from `develop` into `staging` for cloud testing.
+3. **`staging` → `master`** — only after staging QA passes.
+
+## Do not
+
+- Open PRs from `feature/*` directly to `staging` or `master`.
+- Merge the same feature to staging and develop in parallel as separate sources of truth.
+
+## Paired repos
+
+Backend and frontend changes that depend on each other should follow the same step (both merged to develop, then both develop → staging) so cloud environments stay in sync.
+
+## Creating PRs (agent workflow)
+
+When the user asks to ship work:
+
+1. Branch from `develop` (or current feature branch targeting develop).
+2. `gh pr create --base develop` for each affected repo.
+3. After merge to develop, `gh pr create --base develop --head develop` is wrong — use **`gh pr create --base staging --head develop`** to promote.
+4. Do not push feature branches straight to `staging` unless explicitly overriding this rule.
+
+## Commits
+
+Follow existing commit message style. Do not commit unless the user asks.
