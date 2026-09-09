@@ -91,7 +91,9 @@ export class GrantProposalEmailListComponent implements OnInit, OnChanges {
 
         this.outboundEmailService.getGrantEmailProposals(this.meetingId).subscribe({
             next: (res) => {
-                this.proposals = Array.isArray(res?.proposals) ? res.proposals : [];
+                this.proposals = Array.isArray(res?.proposals)
+                    ? (res.proposals as GrantProposalEmailRow[])
+                    : [];
                 this.counts =
                     res?.counts && typeof res.counts.ready === 'number'
                         ? res.counts
