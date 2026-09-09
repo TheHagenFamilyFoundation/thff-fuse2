@@ -4,58 +4,20 @@ import {
     Resolve,
     RouterStateSnapshot,
 } from '@angular/router';
-import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
-import { MessagesService } from 'app/layout/common/messages/messages.service';
-import { NavigationService } from 'app/core/navigation/navigation.service';
-import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.service';
-import { ShortcutsService } from 'app/layout/common/shortcuts/shortcuts.service';
-import { UserService } from 'app/core/services/user/user.service';
+import { Observable, of } from 'rxjs';
 
+/**
+ * Kept for route compatibility. Fuse demo shell data (messages, notifications,
+ * shortcuts, quick-chat, mock navigation) is no longer loaded.
+ */
 @Injectable({
     providedIn: 'root',
 })
-export class InitialDataResolver implements Resolve<any> {
-    /**
-     * Constructor
-     */
-    constructor(
-        private _messagesService: MessagesService,
-        private _navigationService: NavigationService,
-        private _notificationsService: NotificationsService,
-        private _quickChatService: QuickChatService,
-        private _shortcutsService: ShortcutsService,
-        private _userService: UserService
-    ) {}
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Use this resolver to resolve initial mock-api for the application
-     *
-     * @param route
-     * @param state
-     */
+export class InitialDataResolver implements Resolve<boolean> {
     resolve(
-        route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot
-    ): Observable<any> {
-        // Fork join multiple API endpoint calls to wait all of them to finish.
-        // Timeout + fallback so a hung or failing API cannot block authenticated layout forever.
-        return forkJoin([
-            this._navigationService.get(),
-            this._messagesService.getAll(),
-            this._notificationsService.getAll(),
-            this._quickChatService.getChats(),
-            this._shortcutsService.getAll(),
-        ]).pipe(
-            timeout(45000),
-            catchError(() =>
-                of([null, [], [], [], []] as const)
-            )
-        );
+        _route: ActivatedRouteSnapshot,
+        _state: RouterStateSnapshot
+    ): Observable<boolean> {
+        return of(true);
     }
 }

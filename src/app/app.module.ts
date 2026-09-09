@@ -6,10 +6,8 @@ import { ExtraOptions, PreloadAllModules, RouterModule } from '@angular/router';
 import { MarkdownModule } from 'ngx-markdown';
 import { FuseModule } from '@fuse';
 import { FuseConfigModule } from '@fuse/services/config';
-import { FuseMockApiModule } from '@fuse/lib/mock-api';
 import { CoreModule } from 'app/core/core.module';
 import { appConfig } from 'app/core/config/app.config';
-import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 
@@ -39,10 +37,9 @@ import { AuthModule } from './core/auth/auth.module';
         // RouterModule.forRoot(appRoutes, routerConfig),
         // RouterModule.forRoot(appHomeRoutes, routerConfig),
 
-        // Fuse, FuseConfig & FuseMockAPI
+        // Fuse & FuseConfig
         FuseModule,
         FuseConfigModule.forRoot(appConfig),
-        FuseMockApiModule.forRoot(mockApiServices),
 
         // Core module of your application
         CoreModule,
