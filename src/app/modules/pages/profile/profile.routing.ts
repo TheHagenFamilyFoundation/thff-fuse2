@@ -3,7 +3,7 @@ import { ProfileComponent } from 'app/modules/pages/profile/profile.component';
 
 export const profileRoutes: Route[] = [
     {
-        path: 'profile',
+        path: '',
         component: ProfileComponent,
     },
 ];

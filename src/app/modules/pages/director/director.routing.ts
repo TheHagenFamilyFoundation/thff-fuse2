@@ -13,47 +13,47 @@ import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
 
 export const directorRoutes: Route[] = [
     {
-        path: 'director',
+        path: '',
         component: DirectorComponent,
     },
     {
-        path: 'director/organizations',
+        path: 'organizations',
         component: OrganizationsComponent,
     },
     {
-        path: 'director/proposals',
+        path: 'proposals',
         component: ProposalsComponent,
     },
     {
-        path: 'director/voting',
+        path: 'voting',
         component: VotingComponent,
     },
     {
-        path: 'director/submission-years',
+        path: 'submission-years',
         component: SubmissionYearsComponent,
     },
     {
-        path: 'director/referral-links',
+        path: 'referral-links',
         component: ReferralLinksComponent,
     },
     {
-        path: 'director/solicitation-emails',
+        path: 'solicitation-emails',
         component: SolicitationEmailsComponent,
     },
     {
-        path: 'director/meeting',
+        path: 'meeting',
         component: MeetingComponent,
     },
     {
-        path: 'director/meeting/:id',
+        path: 'meeting/:id',
         component: MeetingDetailComponent,
     },
     {
-        path: 'director/meeting/:id/contacts',
+        path: 'meeting/:id/contacts',
         component: MeetingContactsComponent,
     },
     {
-        path: 'director/meeting/:id/after',
+        path: 'meeting/:id/after',
         component: MeetingAfterComponent,
     },
 ];
