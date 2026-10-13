@@ -20,7 +20,6 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule } from '@ngneat/transloco';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -79,7 +78,6 @@ import { Upload501c3DialogComponent } from './org-doc501c3/upload-501c3-dialog/u
         MatInputModule,
         MatSnackBarModule,
         MatSelectModule,
-        NgApexchartsModule,
         TranslocoModule,
         FuseCardModule,
         SharedModule,
