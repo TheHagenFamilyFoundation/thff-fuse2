@@ -3,7 +3,7 @@ import { SettingsComponent } from './settings.component';
 
 export const settingsRoutes: Route[] = [
     {
-        path     : 'settings',
-        component: SettingsComponent
-    }
+        path: '',
+        component: SettingsComponent,
+    },
 ];
