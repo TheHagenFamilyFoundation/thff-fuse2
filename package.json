@@ -26,7 +26,7 @@
     "@angular/core": "21.2.23",
     "@angular/forms": "21.2.23",
     "@angular/material": "21.2.14",
-    "@angular/platform-browser": "21.2.23",
+    "@angular/platform-browser": "22.2.3",
     "@angular/platform-browser-dynamic": "21.2.23",
     "@angular/router": "21.2.23",
     "@ngneat/edit-in-place": "1.6.1",
