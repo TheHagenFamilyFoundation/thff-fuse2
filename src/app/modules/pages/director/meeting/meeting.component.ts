@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -12,6 +12,7 @@ import { meetingStatusLabel } from '../meeting-status.labels';
 import { CreateMeetingDialogComponent } from './create-meeting-dialog.component';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-meeting',
     templateUrl: './meeting.component.html',

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,6 +9,7 @@ import { SolicitationEmailPreviewDialogComponent } from './solicitation-email-pr
 import { SolicitationPreviewSendDialogComponent } from './solicitation-preview-send-dialog.component';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-solicitation-emails',
     templateUrl: './solicitation-emails.component.html',

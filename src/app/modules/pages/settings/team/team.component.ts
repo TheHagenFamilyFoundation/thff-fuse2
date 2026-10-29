@@ -31,43 +31,43 @@ export class SettingsTeamComponent implements OnInit
         // Setup the team members
         this.members = [
             {
-                avatar: 'assets/images/avatars/male-01.jpg',
+                avatar: null,
                 name  : 'Dejesus Michael',
                 email : 'dejesusmichael@mail.org',
                 role  : 'admin'
             },
             {
-                avatar: 'assets/images/avatars/male-03.jpg',
+                avatar: null,
                 name  : 'Mclaughlin Steele',
                 email : 'mclaughlinsteele@mail.me',
                 role  : 'admin'
             },
             {
-                avatar: 'assets/images/avatars/female-02.jpg',
+                avatar: null,
                 name  : 'Laverne Dodson',
                 email : 'lavernedodson@mail.ca',
                 role  : 'write'
             },
             {
-                avatar: 'assets/images/avatars/female-03.jpg',
+                avatar: null,
                 name  : 'Trudy Berg',
                 email : 'trudyberg@mail.us',
                 role  : 'read'
             },
             {
-                avatar: 'assets/images/avatars/male-07.jpg',
+                avatar: null,
                 name  : 'Lamb Underwood',
                 email : 'lambunderwood@mail.me',
                 role  : 'read'
             },
             {
-                avatar: 'assets/images/avatars/male-08.jpg',
+                avatar: null,
                 name  : 'Mcleod Wagner',
                 email : 'mcleodwagner@mail.biz',
                 role  : 'read'
             },
             {
-                avatar: 'assets/images/avatars/female-07.jpg',
+                avatar: null,
                 name  : 'Shannon Kennedy',
                 email : 'shannonkennedy@mail.ca',
                 role  : 'read'

@@ -1,4 +1,5 @@
 import {
+    ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
     OnInit,
@@ -8,7 +9,7 @@ import {
     Input,
     Output,
     EventEmitter,
-    ViewChild,
+    ViewChild
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { thffEmailValidator, validateEmailControlOnBlur } from 'app/core/auth/auth-validators';
@@ -32,6 +33,7 @@ export type TeamTableRow = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-org-team',
     templateUrl: './org-team.component.html',
