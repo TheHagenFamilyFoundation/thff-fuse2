@@ -1,4 +1,5 @@
 import {
+    ChangeDetectionStrategy,
     AfterViewInit,
     ChangeDetectorRef,
     Component,
@@ -7,7 +8,7 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
-    ViewChild,
+    ViewChild
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -30,6 +31,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { UserPreferencesService } from 'app/core/services/user/user-preferences.service';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-org-proposals',
     templateUrl: './org-proposals.component.html',
