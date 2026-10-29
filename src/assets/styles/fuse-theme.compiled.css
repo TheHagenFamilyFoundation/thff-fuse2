@@ -82,6 +82,12 @@
     color: light-dark(var(--color-neutral-950), var(--color-white));
   }
 }
+.scheme-dark {
+  color-scheme: dark;
+}
+.scheme-light {
+  color-scheme: light;
+}
 @font-face {
   font-family: Geist;
   font-style: normal;
