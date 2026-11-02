@@ -1,4 +1,5 @@
 import {
+    ChangeDetectionStrategy,
     AfterViewInit,
     ChangeDetectorRef,
     Component,
@@ -7,7 +8,7 @@ import {
     HostListener,
     OnInit,
     ViewChild,
-    inject,
+    inject
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,6 +28,7 @@ import { meetingStatusLabel } from '../meeting-status.labels';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-meeting-detail',
     templateUrl: './meeting-detail.component.html',
