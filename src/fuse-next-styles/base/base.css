@@ -61,3 +61,11 @@
     color: light-dark(var(--color-neutral-950), var(--color-white));
   }
 }
+
+/* M3 light-dark() + color-scheme sync (was previously emitted by full TW utilities) */
+.scheme-dark {
+  color-scheme: dark;
+}
+.scheme-light {
+  color-scheme: light;
+}

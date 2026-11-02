@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,6 +8,7 @@ import { SubmissionYearsService } from 'app/core/services/admin/submission-years
 import { ClosePortalDialogComponent } from './close-portal-dialog.component';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-submission-years',
     templateUrl: './submission-years.component.html',

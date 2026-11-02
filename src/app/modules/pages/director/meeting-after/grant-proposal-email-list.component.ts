@@ -1,4 +1,5 @@
 import {
+    ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
     EventEmitter,
@@ -6,7 +7,7 @@ import {
     OnChanges,
     OnInit,
     Output,
-    SimpleChanges,
+    SimpleChanges
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -36,6 +37,7 @@ export interface GrantProposalEmailRow {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
     selector: 'app-grant-proposal-email-list',
     templateUrl: './grant-proposal-email-list.component.html',
