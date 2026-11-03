@@ -5,11 +5,7 @@ import { ProposalsComponent } from './proposals/proposals.component';
 import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
-import { SolicitationEmailsComponent } from './solicitation-emails/solicitation-emails.component';
 import { MeetingComponent } from './meeting/meeting.component';
-import { MeetingDetailComponent } from './meeting-detail/meeting-detail.component';
-import { MeetingContactsComponent } from './meeting-contacts/meeting-contacts.component';
-import { MeetingAfterComponent } from './meeting-after/meeting-after.component';
 
 export const directorRoutes: Route[] = [
     {
@@ -38,22 +34,24 @@ export const directorRoutes: Route[] = [
     },
     {
         path: 'solicitation-emails',
-        component: SolicitationEmailsComponent,
+        loadChildren: () =>
+            import('./solicitation-emails/solicitation-emails.module').then(
+                (m) => m.SolicitationEmailsModule
+            ),
     },
     {
         path: 'meeting',
         component: MeetingComponent,
     },
-    {
-        path: 'meeting/:id',
-        component: MeetingDetailComponent,
-    },
-    {
-        path: 'meeting/:id/contacts',
-        component: MeetingContactsComponent,
-    },
+    // More-specific meeting child routes before `meeting/:id`
     {
         path: 'meeting/:id/after',
-        component: MeetingAfterComponent,
+        loadChildren: () =>
+            import('./meeting-after/meeting-after.module').then((m) => m.MeetingAfterModule),
+    },
+    {
+        path: 'meeting/:id',
+        loadChildren: () =>
+            import('./meeting-detail/meeting-detail.module').then((m) => m.MeetingDetailModule),
     },
 ];

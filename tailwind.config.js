@@ -113,8 +113,8 @@ const config = {
                 '0': '0 0 auto'
             },
             fontFamily              : {
-                sans: `"Inter var", ${defaultTheme.fontFamily.sans.join(',')}`,
-                mono: `"IBM Plex Mono", ${defaultTheme.fontFamily.mono.join(',')}`
+                sans: `"Geist, system-ui", ${defaultTheme.fontFamily.sans.join(',')}`,
+                mono: `"Geist Mono", ${defaultTheme.fontFamily.mono.join(',')}`
             },
             opacity                 : {
                 12: '0.12',
