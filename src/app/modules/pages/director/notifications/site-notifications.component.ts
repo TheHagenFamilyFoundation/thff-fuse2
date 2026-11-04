@@ -17,6 +17,8 @@ type AutomaticNotice = {
     sendsOn: string;
     sentAt: string | null;
     sendsOnDate: Date | null;
+    savedSendsOn: string;
+    saving: boolean;
 };
 
 @Component({
@@ -42,7 +44,6 @@ export class SiteNotificationsComponent implements OnInit {
     scheduleYear: number | null = null;
     scheduleProjected = false;
     scheduleJobEnabled = false;
-    scheduleSaving = false;
     automaticNotices: AutomaticNotice[] = [];
     endsOnDate: Date | null = null;
     minEndDate = new Date();
@@ -94,10 +95,7 @@ export class SiteNotificationsComponent implements OnInit {
                 this.scheduleYear = res?.year ?? null;
                 this.scheduleProjected = !!res?.projected;
                 this.scheduleJobEnabled = !!res?.jobEnabled;
-                this.automaticNotices = (res?.notices || []).map((notice) => ({
-                    ...notice,
-                    sendsOnDate: this.dateFromDay(notice.sendsOn),
-                }));
+                this.automaticNotices = this.mapScheduleNotices(res?.notices);
                 this._cdr.markForCheck();
             },
             error: (err) => {
@@ -106,34 +104,43 @@ export class SiteNotificationsComponent implements OnInit {
         });
     }
 
-    saveSchedule(): void {
-        const byKey = (key: string) => this.dayFromDate(
-            this.automaticNotices.find((notice) => notice.key === key)?.sendsOnDate || null,
-        );
-        const portalOpenOn = byKey('portal-open');
-        const twoWeeksOn = byKey('two-weeks');
-        const weekOfOn = byKey('week-of');
+    isScheduleDirty(notice: AutomaticNotice): boolean {
+        return !notice.sentAt && this.dayFromDate(notice.sendsOnDate) !== notice.savedSendsOn;
+    }
+
+    saveScheduleDate(notice: AutomaticNotice): void {
+        const changed = this.dayFromDate(notice.sendsOnDate);
+        if (!changed) {
+            this._snack.open('Choose a send date', 'OK', { duration: 3000 });
+            return;
+        }
+        const saved = (key: string) => {
+            const item = this.automaticNotices.find((row) => row.key === key);
+            if (!item) {
+                return '';
+            }
+            return item.key === notice.key ? changed : item.savedSendsOn;
+        };
+        const portalOpenOn = saved('portal-open');
+        const twoWeeksOn = saved('two-weeks');
+        const weekOfOn = saved('week-of');
         if (!portalOpenOn || !twoWeeksOn || !weekOfOn) {
             this._snack.open('Each notice needs a send date', 'OK', { duration: 3000 });
             return;
         }
-        this.scheduleSaving = true;
+        notice.saving = true;
         this._notices.saveSchedule({ portalOpenOn, twoWeeksOn, weekOfOn }).subscribe({
             next: (res) => {
-                this.scheduleSaving = false;
                 this.scheduleYear = res?.year ?? this.scheduleYear;
                 this.scheduleProjected = !!res?.projected;
                 this.scheduleJobEnabled = !!res?.jobEnabled;
-                this.automaticNotices = (res?.notices || []).map((notice) => ({
-                    ...notice,
-                    sendsOnDate: this.dateFromDay(notice.sendsOn),
-                }));
-                this._snack.open('Send dates saved', 'OK', { duration: 3000 });
+                this.automaticNotices = this.mapScheduleNotices(res?.notices);
+                this._snack.open('Send date saved', 'OK', { duration: 3000 });
                 this._cdr.markForCheck();
             },
             error: (err) => {
-                this.scheduleSaving = false;
-                this._snack.open(err?.error?.message || 'Could not save the send dates', 'OK', { duration: 4000 });
+                notice.saving = false;
+                this._snack.open(err?.error?.message || 'Could not save the send date', 'OK', { duration: 4000 });
                 this._cdr.markForCheck();
             },
         });
@@ -229,8 +236,21 @@ export class SiteNotificationsComponent implements OnInit {
         });
     }
 
-    get canSaveSchedule(): boolean {
-        return this.automaticNotices.some((notice) => !notice.sentAt);
+    private mapScheduleNotices(notices: Array<{
+        key: string;
+        title: string;
+        audience: string;
+        subject: string;
+        summary: string;
+        sendsOn: string;
+        sentAt: string | null;
+    }> | undefined): AutomaticNotice[] {
+        return (notices || []).map((notice) => ({
+            ...notice,
+            sendsOnDate: this.dateFromDay(notice.sendsOn),
+            savedSendsOn: notice.sendsOn || '',
+            saving: false,
+        }));
     }
 
     private search(query: string): void {
