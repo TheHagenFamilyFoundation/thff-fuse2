@@ -45,13 +45,25 @@ export class FeatureAnnouncementService {
     }
 
     manage(): Observable<{
-        users: Array<{ id: string; email: string; name: string; role: string; organizations: string[] }>;
         notices: Array<FeatureAnnouncement & { startsOn: string; endsOn: string; audience: string }>;
     }> {
         return this._http.get<{
-            users: Array<{ id: string; email: string; name: string; role: string; organizations: string[] }>;
             notices: Array<FeatureAnnouncement & { startsOn: string; endsOn: string; audience: string }>;
         }>(`${environment.apiUrl}/feature-announcement/manage`);
+    }
+
+    recipientCount(): Observable<{ total: number }> {
+        return this._http.get<{ total: number }>(
+            `${environment.apiUrl}/feature-announcement/recipient-count`,
+        );
+    }
+
+    searchRecipients(q: string): Observable<{
+        users: Array<{ id: string; email: string; name: string; role: string; organizations: string[] }>;
+    }> {
+        return this._http.get<{
+            users: Array<{ id: string; email: string; name: string; role: string; organizations: string[] }>;
+        }>(`${environment.apiUrl}/feature-announcement/recipients`, { params: { q } });
     }
 
     send(payload: {
@@ -61,6 +73,7 @@ export class FeatureAnnouncementService {
         linkLabel?: string;
         bell: boolean;
         email: boolean;
+        allEmails?: boolean;
         recipients?: string[];
         endsOn?: string;
     }): Observable<{ bell: FeatureAnnouncement | null; bellRecipientCount: number; emailQueued: number }> {
