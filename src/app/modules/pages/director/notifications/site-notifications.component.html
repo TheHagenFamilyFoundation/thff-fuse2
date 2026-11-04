@@ -1,0 +1,188 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <div class="border-b bg-card">
+        <div class="mx-auto flex w-full max-w-screen-xl flex-col px-6 py-6 sm:px-8 sm:py-8">
+            <a routerLink="/pages/director" class="thff-link-nav mb-4">
+                <mat-icon class="icon-size-4">arrow_back</mat-icon>
+                Back to Director's Page
+            </a>
+            <h1 class="m-0 truncate text-2xl font-bold tracking-tight md:text-3xl">
+                Notifications
+            </h1>
+        </div>
+    </div>
+
+    <div class="mx-auto w-full max-w-screen-xl p-6 sm:p-8">
+
+        <div *ngIf="!loaded" class="flex justify-center py-16">
+            <mat-spinner [diameter]="40"></mat-spinner>
+        </div>
+
+        <fuse-card *ngIf="loaded && !allowed" class="p-6">
+            <p class="m-0 text-gray-600">Only a president or admin can send notifications.</p>
+        </fuse-card>
+
+        <div *ngIf="loaded && allowed" class="flex flex-col gap-10">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+            <fuse-card class="flex flex-col p-6">
+                <h2 class="m-0 mb-6 text-lg font-semibold">Create Notification</h2>
+
+                <div class="flex flex-col gap-4">
+                    <mat-form-field class="w-full">
+                        <mat-label>Title</mat-label>
+                        <input matInput [(ngModel)]="title" maxlength="140">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-full">
+                        <mat-label>Message</mat-label>
+                        <textarea matInput rows="6" [(ngModel)]="body" maxlength="4000"></textarea>
+                    </mat-form-field>
+
+                    <mat-checkbox [(ngModel)]="sendEmail">Also email these users</mat-checkbox>
+
+                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                        <div class="border-b border-gray-200 px-3 py-2">
+                            <input
+                                class="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+                                type="search"
+                                placeholder="Search name, email, or organization"
+                                [(ngModel)]="userQuery"
+                                aria-label="Search users">
+                        </div>
+                        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-3 py-2">
+                            <mat-checkbox
+                                [checked]="allSelected"
+                                [indeterminate]="someSelected"
+                                [disabled]="!filteredUsers.length"
+                                (change)="toggleAll($event.checked)">
+                                Select all
+                            </mat-checkbox>
+                            <span class="shrink-0 text-sm text-gray-500">
+                                {{ selectedCount }} of {{ users.length }}
+                            </span>
+                        </div>
+                        <p class="m-0 border-b border-gray-200 px-3 py-2 text-xs text-gray-500">
+                            Checked users see this in the bell<span *ngIf="sendEmail"> and get the email</span>.
+                        </p>
+                        <p *ngIf="!users.length" class="m-0 px-3 py-3 text-sm text-gray-500">
+                            No users to notify.
+                        </p>
+                        <p *ngIf="users.length && !filteredUsers.length" class="m-0 px-3 py-3 text-sm text-gray-500">
+                            No users match that search.
+                        </p>
+                        <ul *ngIf="filteredUsers.length" class="m-0 max-h-64 list-none overflow-y-auto p-0">
+                            <li
+                                *ngFor="let user of filteredUsers"
+                                class="border-b border-gray-100 px-3 py-2 last:border-b-0">
+                                <mat-checkbox
+                                    class="w-full"
+                                    [checked]="selectedUserIds.has(user.id)"
+                                    (change)="toggleOne(user.id, $event.checked)">
+                                    <span class="block text-sm font-medium">{{ user.name || user.email }}</span>
+                                    <span class="block break-all text-sm text-gray-500">
+                                        {{ user.role }}<span *ngIf="user.name"> · {{ user.email }}</span>
+                                    </span>
+                                    <span *ngIf="user.organizations.length" class="block text-sm text-gray-500">
+                                        {{ user.organizations.join(', ') }}
+                                    </span>
+                                </mat-checkbox>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <mat-form-field class="w-full max-w-xs">
+                        <mat-label>Keep on the bell until</mat-label>
+                        <input
+                            matInput
+                            [matDatepicker]="endPicker"
+                            [min]="minEndDate"
+                            [(ngModel)]="endsOnDate"
+                            (click)="endPicker.open()"
+                            readonly>
+                        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #endPicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <div>
+                        <button
+                            mat-flat-button
+                            color="primary"
+                            type="button"
+                            [disabled]="sending || !title.trim() || !body.trim()"
+                            (click)="submit()">
+                            {{ sending ? 'Sending…' : 'Send' }}
+                        </button>
+                    </div>
+                </div>
+            </fuse-card>
+
+            <fuse-card class="flex flex-col p-6">
+                <h2 class="m-0 text-lg font-semibold">On the bell</h2>
+                <p class="mb-4 mt-1 text-sm text-gray-500">
+                    These stay up until the end date. Removing one takes it off the bell. It does not unsend an email.
+                </p>
+
+                <p *ngIf="!notices.length" class="m-0 text-sm text-gray-500">No notices yet.</p>
+
+                <div *ngFor="let notice of notices" class="border-t border-gray-100 py-4 first:border-t-0">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="m-0 font-medium">{{ notice.title }}</p>
+                            <p class="mt-1 mb-0 text-sm text-gray-500">
+                                Through {{ notice.endsOn | date:'MMM d, y' }} · {{ notice.audience }}
+                            </p>
+                        </div>
+                        <button mat-stroked-button type="button" (click)="remove(notice)">Remove</button>
+                    </div>
+                </div>
+            </fuse-card>
+
+        </div>
+
+        <section>
+            <h2 class="m-0 text-lg font-semibold">Automatic emails</h2>
+            <p class="mt-1 mb-4 text-sm text-gray-500">
+                These emails are for the {{ scheduleYear }} grant year.
+                <span *ngIf="scheduleProjected"> The year is not open yet, so the dates assume the portal opens on January 1.</span>
+                <span *ngIf="!scheduleJobEnabled"> The daily job is off, so saving a date does not send mail.</span>
+            </p>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <fuse-card *ngFor="let notice of automaticNotices" class="flex flex-col p-6">
+                    <h3 class="m-0 text-base font-semibold">{{ notice.title }}</h3>
+                    <p class="mt-3 mb-0 text-xs font-semibold uppercase tracking-wide text-gray-500">Target</p>
+                    <p class="mt-1 mb-0 text-sm">{{ notice.audience }}</p>
+                    <p class="mt-3 mb-0 text-xs font-semibold uppercase tracking-wide text-gray-500">Subject</p>
+                    <p class="mt-1 mb-0 text-sm">{{ notice.subject }}</p>
+                    <p class="mt-3 mb-4 text-sm text-gray-600">{{ notice.summary }}</p>
+                    <p *ngIf="notice.sentAt" class="mt-0 mb-3 text-sm text-gray-500">
+                        Sent {{ notice.sentAt | date:'MMM d, y' }}. This date is locked.
+                    </p>
+                    <mat-form-field class="w-full">
+                        <mat-label>Send on</mat-label>
+                        <input
+                            matInput
+                            [matDatepicker]="sendPicker"
+                            [(ngModel)]="notice.sendsOnDate"
+                            [disabled]="!!notice.sentAt"
+                            (click)="notice.sentAt || sendPicker.open()"
+                            readonly>
+                        <mat-datepicker-toggle matSuffix [for]="sendPicker" [disabled]="!!notice.sentAt"></mat-datepicker-toggle>
+                        <mat-datepicker #sendPicker></mat-datepicker>
+                    </mat-form-field>
+                </fuse-card>
+            </div>
+
+            <button
+                mat-stroked-button
+                type="button"
+                class="mt-4"
+                [disabled]="scheduleSaving || !canSaveSchedule"
+                (click)="saveSchedule()">
+                {{ scheduleSaving ? 'Saving…' : 'Save dates' }}
+            </button>
+        </section>
+        </div>
+    </div>
+</div>
