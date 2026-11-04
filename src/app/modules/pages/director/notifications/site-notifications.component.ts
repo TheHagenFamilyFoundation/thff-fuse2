@@ -28,9 +28,12 @@ export class SiteNotificationsComponent implements OnInit {
     allowed = false;
     loaded = false;
     sending = false;
-    users: NoticeUser[] = [];
+    allEmails = false;
+    allEmailTotal: number | null = null;
     userQuery = '';
-    selectedUserIds = new Set<string>();
+    searching = false;
+    searchResults: NoticeUser[] = [];
+    addedUsers: NoticeUser[] = [];
     notices: ListedNotice[] = [];
 
     title = '';
@@ -52,6 +55,8 @@ export class SiteNotificationsComponent implements OnInit {
         private _cdr: ChangeDetectorRef,
     ) {}
 
+    private _searchTimer: ReturnType<typeof setTimeout> | null = null;
+
     ngOnInit(): void {
         this.minEndDate.setHours(0, 0, 0, 0);
         this.endsOnDate = new Date(this.minEndDate);
@@ -71,8 +76,6 @@ export class SiteNotificationsComponent implements OnInit {
     load(): void {
         this._notices.manage().subscribe({
             next: (res) => {
-                this.users = res?.users || [];
-                this.selectedUserIds = new Set(this.users.map((user) => user.id));
                 this.notices = res?.notices || [];
                 this.loaded = true;
                 this._cdr.markForCheck();
@@ -137,15 +140,19 @@ export class SiteNotificationsComponent implements OnInit {
     }
 
     submit(): void {
-        if (!this.selectedCount) {
-            this._snack.open('Choose at least one user', 'OK', { duration: 3000 });
+        if (!this.allEmails && !this.addedUsers.length) {
+            this._snack.open('Add someone, or check All emails', 'OK', { duration: 3000 });
+            return;
+        }
+        if (this.allEmails) {
+            this.confirmAllEmails();
             return;
         }
         if (this.sendEmail) {
             this._dialog.open(ConfirmDialogComponent, {
                 data: {
                     title: 'Email this notice?',
-                    message: `This sends one email to each of the ${this.selectedCount} selected users.`,
+                    message: `This sends one email to each of the ${this.addedUsers.length} selected users.`,
                     confirmText: 'Send email',
                     warn: true,
                 },
@@ -157,6 +164,57 @@ export class SiteNotificationsComponent implements OnInit {
             return;
         }
         this.send();
+    }
+
+    toggleAllEmails(checked: boolean): void {
+        this.allEmails = checked;
+        if (!checked) {
+            this._cdr.markForCheck();
+            return;
+        }
+        this.allEmailTotal = null;
+        this._notices.recipientCount().subscribe({
+            next: (res) => {
+                this.allEmailTotal = Number(res?.total || 0);
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                this.allEmails = false;
+                this._snack.open('Could not count emails', 'OK', { duration: 4000 });
+                this._cdr.markForCheck();
+            },
+        });
+    }
+
+    onUserQuery(value: string): void {
+        this.userQuery = value;
+        if (this._searchTimer) {
+            clearTimeout(this._searchTimer);
+        }
+        const query = value.trim();
+        if (query.length < 2) {
+            this.searching = false;
+            this.searchResults = [];
+            this._cdr.markForCheck();
+            return;
+        }
+        this.searching = true;
+        this._searchTimer = setTimeout(() => this.search(query), 250);
+    }
+
+    addUser(user: NoticeUser): void {
+        if (this.isAdded(user.id)) {
+            return;
+        }
+        this.addedUsers = [...this.addedUsers, user];
+    }
+
+    removeUser(id: string): void {
+        this.addedUsers = this.addedUsers.filter((user) => user.id !== id);
+    }
+
+    isAdded(id: string): boolean {
+        return this.addedUsers.some((user) => user.id === id);
     }
 
     remove(notice: ListedNotice): void {
@@ -171,57 +229,64 @@ export class SiteNotificationsComponent implements OnInit {
         });
     }
 
-    get filteredUsers(): NoticeUser[] {
-        const query = this.userQuery.trim().toLowerCase();
-        if (!query) {
-            return this.users;
-        }
-        return this.users.filter((user) => {
-            const haystack = [user.name, user.email, user.role, ...(user.organizations || [])]
-                .join(' ')
-                .toLowerCase();
-            return haystack.includes(query);
-        });
-    }
-
-    get selectedCount(): number {
-        return this.users.filter((user) => this.selectedUserIds.has(user.id)).length;
-    }
-
     get canSaveSchedule(): boolean {
         return this.automaticNotices.some((notice) => !notice.sentAt);
     }
 
-    get allSelected(): boolean {
-        return this.filteredUsers.length > 0
-            && this.filteredUsers.every((user) => this.selectedUserIds.has(user.id));
-    }
-
-    get someSelected(): boolean {
-        const selectedVisible = this.filteredUsers.filter((user) => this.selectedUserIds.has(user.id)).length;
-        return selectedVisible > 0 && selectedVisible < this.filteredUsers.length;
-    }
-
-    toggleAll(checked: boolean): void {
-        const next = new Set(this.selectedUserIds);
-        this.filteredUsers.forEach((user) => {
-            if (checked) {
-                next.add(user.id);
-            } else {
-                next.delete(user.id);
-            }
+    private search(query: string): void {
+        this._notices.searchRecipients(query).subscribe({
+            next: (res) => {
+                if (this.userQuery.trim() !== query) {
+                    return;
+                }
+                this.searching = false;
+                this.searchResults = res?.users || [];
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                if (this.userQuery.trim() !== query) {
+                    return;
+                }
+                this.searching = false;
+                this.searchResults = [];
+                this._snack.open('Could not search users', 'OK', { duration: 4000 });
+                this._cdr.markForCheck();
+            },
         });
-        this.selectedUserIds = next;
     }
 
-    toggleOne(id: string, checked: boolean): void {
-        const next = new Set(this.selectedUserIds);
-        if (checked) {
-            next.add(id);
-        } else {
-            next.delete(id);
+    private confirmAllEmails(): void {
+        const open = (total: number) => {
+            const emailLine = this.sendEmail
+                ? `This sends one email to each of the ${total} people.`
+                : `This goes on the bell for ${total} people.`;
+            this._dialog.open(ConfirmDialogComponent, {
+                data: {
+                    title: 'Send to all emails?',
+                    message: emailLine,
+                    confirmText: 'Send',
+                    warn: true,
+                },
+            }).afterClosed().subscribe((ok) => {
+                if (ok) {
+                    this.send();
+                }
+            });
+        };
+        if (this.allEmailTotal !== null) {
+            open(this.allEmailTotal);
+            return;
         }
-        this.selectedUserIds = next;
+        this._notices.recipientCount().subscribe({
+            next: (res) => {
+                this.allEmailTotal = Number(res?.total || 0);
+                this._cdr.markForCheck();
+                open(this.allEmailTotal);
+            },
+            error: () => {
+                this._snack.open('Could not count emails', 'OK', { duration: 4000 });
+            },
+        });
     }
 
     private dateFromDay(value: string): Date | null {
@@ -257,7 +322,8 @@ export class SiteNotificationsComponent implements OnInit {
             body: this.body.trim(),
             bell: true,
             email: this.sendEmail,
-            recipients: [...this.selectedUserIds],
+            allEmails: this.allEmails,
+            recipients: this.allEmails ? [] : this.addedUsers.map((user) => user.id),
             endsOn: this.endDateValue(),
         }).subscribe({
             next: (res) => {
@@ -265,6 +331,9 @@ export class SiteNotificationsComponent implements OnInit {
                 this.title = '';
                 this.body = '';
                 this.userQuery = '';
+                this.searchResults = [];
+                this.addedUsers = [];
+                this.allEmails = false;
                 const parts = [];
                 if (res.bell) {
                     parts.push(`It is on the bell for ${res.bellRecipientCount} users.`);
