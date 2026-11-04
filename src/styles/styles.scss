@@ -300,6 +300,20 @@ $thff-btn-cta-shadow:
     font-weight: 600 !important;
 }
 
+/* Organizations and Director title bars. One height, so the Director page
+   cannot grow taller than the Organizations header. */
+.thff-page-header {
+    box-sizing: border-box;
+    height: 4.75rem;
+    flex: 0 0 auto;
+}
+
+@media (min-width: 640px) {
+    .thff-page-header {
+        height: 5.25rem;
+    }
+}
+
 /* Header icon buttons (user cluster + primary nav Home): same squircle + hover wash */
 .header-user-actions .header-user-icon-btn.mat-mdc-icon-button,
 .modern-layout-top-nav a.modern-top-nav-link.mat-mdc-icon-button {
@@ -573,12 +587,74 @@ html#fuse .mat-mdc-paginator .mat-mdc-form-field.mat-focused {
     flex: 1 1 auto;
 }
 
+/* Profile tabs. Brand teal is set directly so the current tab stays visible. */
+.thff-profile-tab {
+    padding-bottom: 0.35rem;
+    color: rgba(17, 24, 39, 0.55);
+}
+
+.thff-profile-tab--active {
+    color: #0f766e;
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 #0f766e;
+}
+
+.scheme-dark .thff-profile-tab {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.scheme-dark .thff-profile-tab--active {
+    color: #5eead4;
+    box-shadow: inset 0 -2px 0 #5eead4;
+}
+
+/* The open settings section is a white row. The panel beside it is the card. */
+.thff-settings-menu .thff-settings-nav-item {
+    border-radius: 0.75rem;
+    color: rgba(17, 24, 39, 0.72);
+}
+
+.thff-settings-menu .thff-settings-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.55);
+}
+
+.thff-settings-menu .thff-settings-nav-item.thff-settings-nav-item--selected {
+    background-color: #fff;
+    color: #111827;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.06),
+        0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.thff-settings-menu .thff-settings-nav-item--selected .thff-settings-nav-title {
+    font-weight: 600;
+}
+
+.scheme-dark .thff-settings-menu .thff-settings-nav-item {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.scheme-dark .thff-settings-menu .thff-settings-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.scheme-dark .thff-settings-menu .thff-settings-nav-item.thff-settings-nav-item--selected {
+    background-color: #262626;
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
 /* Profile / Settings / quick-chat: ensure selected row uses brand primary in scheme-dark when
    bg-primary-50 would otherwise win over Tailwind dark: utilities (see fuse-theme.compiled.css). */
 .scheme-dark profile .thff-settings-nav-item.thff-settings-nav-item--selected,
 .scheme-dark settings .thff-settings-nav-item.thff-settings-nav-item--selected {
     background-color: var(--color-primary-800) !important;
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.scheme-dark .thff-settings-menu .thff-settings-nav-item.thff-settings-nav-item--selected {
+    background-color: #262626 !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
 }
 
 .scheme-dark profile .thff-settings-nav-item:not(.thff-settings-nav-item--selected):hover,

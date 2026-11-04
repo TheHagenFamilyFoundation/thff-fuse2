@@ -2,6 +2,8 @@ export interface Settings {
     userID: string;
     scheme?: string; // dark | light
     tablePageSize?: number;
+    emailGrantDeadlineReminders?: boolean;
+    emailPortalOpenNotices?: boolean;
 }
 
 export const TABLE_PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100] as const;

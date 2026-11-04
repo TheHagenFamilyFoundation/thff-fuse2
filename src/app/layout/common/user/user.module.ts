@@ -6,6 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import { SharedModule } from 'app/shared/shared.module';
 import { RouterModule } from '@angular/router';
+import { FeatureAnnouncementsComponent } from 'app/common/components/feature-announcements/feature-announcements.component';
 
 @NgModule({
     declarations: [UserComponent],
@@ -16,6 +17,7 @@ import { RouterModule } from '@angular/router';
         MatIconModule,
         MatMenuModule,
         SharedModule,
+        FeatureAnnouncementsComponent,
     ],
     exports: [UserComponent],
 })

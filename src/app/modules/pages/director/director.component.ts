@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { MeetingService } from 'app/core/services/admin/meeting.service';
+import { AuthService } from 'app/core/auth/auth.service';
 import { meetingStatusLabel } from './meeting-status.labels';
 
 @Component({
@@ -15,14 +16,20 @@ export class DirectorComponent implements OnInit {
     activeMeeting: any = null;
     /** True while loading meetings to find a live (non-completed) one. */
     meetingsLoading = true;
+    isPresident = false;
 
     constructor(
         private _router: Router,
         private _meetingService: MeetingService,
+        private _auth: AuthService,
         private _changeDetectorRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
+        this._auth.checkPresident().subscribe((isPresident) => {
+            this.isPresident = isPresident;
+            this._changeDetectorRef.markForCheck();
+        });
         this.meetingsLoading = true;
         this._meetingService
             .getMeetings()
@@ -65,6 +72,10 @@ export class DirectorComponent implements OnInit {
 
     goToSolicitationEmails(): void {
         this._router.navigate(['/pages/director/solicitation-emails']);
+    }
+
+    goToSiteNotices(): void {
+        this._router.navigate(['/pages/director/notifications']);
     }
 
     goToMeeting(): void {

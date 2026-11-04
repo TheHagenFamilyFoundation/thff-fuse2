@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, finalize } from 'rxjs';
 
 import { AuthService } from 'app/core/auth/auth.service';
@@ -21,6 +22,7 @@ import { dedupeUserOrganizations } from 'app/core/utilities/organization-access.
     standalone: false,
     selector: 'profile',
     templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.Default,
 })
@@ -46,26 +48,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
             id: 'account',
             icon: 'heroicons_outline:user-circle',
             title: 'Account',
+            pageTitle: 'Account settings',
             description: 'Manage your information',
         },
         {
             id: 'security',
             icon: 'heroicons_outline:lock-closed',
             title: 'Security',
+            pageTitle: 'Security settings',
             description: 'Manage your password.',
         },
         {
             id: 'preferences',
             icon: 'heroicons_outline:adjustments',
             title: 'Preferences',
+            pageTitle: 'Preferences',
             description: 'Table and display defaults',
         },
-        // {
-        //     id: 'notifications',
-        //     icon: 'heroicons_outline:bell',
-        //     title: 'Notifications',
-        //     description: "Manage when you'll be notified on which channels",
-        // },
+        {
+            id: 'notifications',
+            icon: 'heroicons_outline:bell',
+            title: 'Notifications',
+            pageTitle: 'Notification settings',
+            description: 'Grant portal emails',
+        },
     ];
 
     // Account form
@@ -87,6 +93,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     preferencesSavedFlash = false;
     preferencesAlert: { type: 'error'; message: string } | null = null;
 
+    emailGrantDeadlineReminders = true;
+    emailPortalOpenNotices = true;
+    private savedEmailGrantDeadlineReminders = true;
+    private savedEmailPortalOpenNotices = true;
+    notificationsSaving = false;
+    notificationsSavedFlash = false;
+    notificationsAlert: { type: 'error'; message: string } | null = null;
+    private notificationsSavedTimer: ReturnType<typeof setTimeout> | null = null;
+
     private preferencesSavedTimer: ReturnType<typeof setTimeout> | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -99,6 +114,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         private _formBuilder: FormBuilder,
         private _snackBar: MatSnackBar,
         private _changeDetectorRef: ChangeDetectorRef,
+        private _route: ActivatedRoute,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -144,10 +160,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
         });
 
         this.syncSavedAccountValues();
+        this.applySettingsDeepLink();
     }
 
     ngOnDestroy(): void {
         this.clearPreferencesSavedTimer();
+        this.clearNotificationsSavedTimer();
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
@@ -186,6 +204,23 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // @ Tab & Settings methods
     // -----------------------------------------------------------------------------------------------------
 
+    private applySettingsDeepLink(): void {
+        const tab = this._route.snapshot.queryParamMap.get('tab');
+        const panel = this._route.snapshot.queryParamMap.get('panel');
+        const knownPanels = ['account', 'security', 'preferences', 'notifications'];
+
+        if (tab === 'settings') {
+            this.activeTab = 'settings';
+        }
+        if (panel && knownPanels.includes(panel)) {
+            this.activeTab = 'settings';
+            this.selectedPanel = panel;
+        }
+        if (this.activeTab === 'settings') {
+            this.ensurePreferencesLoaded();
+        }
+    }
+
     setTab(tab: 'home' | 'settings'): void {
         this.activeTab = tab;
         if (tab === 'settings') {
@@ -195,7 +230,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     goToPanel(panelId: string): void {
         this.selectedPanel = panelId;
-        if (panelId === 'preferences') {
+        if (panelId === 'preferences' || panelId === 'notifications') {
             this.ensurePreferencesLoaded();
         }
     }
@@ -358,6 +393,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
                     this._userPreferences.initFromUserSettings(settings);
                     this.preferencesTablePageSize = this._userPreferences.tablePageSize;
                     this.syncSavedPreferencesValue();
+                    this.emailGrantDeadlineReminders = settings?.emailGrantDeadlineReminders !== false;
+                    this.emailPortalOpenNotices = settings?.emailPortalOpenNotices !== false;
+                    this.syncSavedNotificationValues();
                     this._changeDetectorRef.markForCheck();
                 },
                 error: () => {
@@ -386,6 +424,97 @@ export class ProfileComponent implements OnInit, OnDestroy {
                     };
                 },
             });
+    }
+
+    get notificationsChanged(): boolean {
+        return this.emailGrantDeadlineReminders !== this.savedEmailGrantDeadlineReminders
+            || this.emailPortalOpenNotices !== this.savedEmailPortalOpenNotices;
+    }
+
+    get showNotificationActions(): boolean {
+        return this.notificationsChanged || this.notificationsSaving || this.notificationsSavedFlash;
+    }
+
+    private syncSavedNotificationValues(): void {
+        this.savedEmailGrantDeadlineReminders = this.emailGrantDeadlineReminders;
+        this.savedEmailPortalOpenNotices = this.emailPortalOpenNotices;
+    }
+
+    switchStyle(on: boolean): Record<string, string> {
+        return {
+            display: 'inline-flex',
+            alignItems: 'center',
+            flex: '0 0 auto',
+            width: '46px',
+            height: '28px',
+            padding: '3px',
+            border: '0',
+            borderRadius: '999px',
+            background: on ? '#0f766e' : '#94a3b8',
+            cursor: 'pointer',
+        };
+    }
+
+    switchKnobStyle(on: boolean): Record<string, string> {
+        return {
+            display: 'block',
+            width: '22px',
+            height: '22px',
+            borderRadius: '999px',
+            background: '#ffffff',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.35)',
+            transform: on ? 'translateX(18px)' : 'none',
+            transition: 'transform 150ms ease',
+        };
+    }
+
+    saveNotifications(): void {
+        const userID = this.currentUser?.id ?? this.currentUser?._id;
+        if (!userID) {
+            this.notificationsAlert = { type: 'error', message: 'Sign in again to save notification settings.' };
+            return;
+        }
+
+        this.notificationsSaving = true;
+        this.notificationsAlert = null;
+        this.notificationsSavedFlash = false;
+
+        this._settingsService.saveSettings({
+            userID,
+            emailGrantDeadlineReminders: this.emailGrantDeadlineReminders,
+            emailPortalOpenNotices: this.emailPortalOpenNotices,
+        })
+            .pipe(finalize(() => this.notificationsSaving = false))
+            .subscribe({
+                next: () => {
+                    this.syncSavedNotificationValues();
+                    this.flashNotificationsSaved();
+                },
+                error: (err) => {
+                    this.notificationsAlert = {
+                        type: 'error',
+                        message: err?.error?.message || 'Error saving notification settings',
+                    };
+                },
+            });
+    }
+
+    private flashNotificationsSaved(): void {
+        this.clearNotificationsSavedTimer();
+        this.notificationsSavedFlash = true;
+        this._changeDetectorRef.markForCheck();
+        this.notificationsSavedTimer = setTimeout(() => {
+            this.notificationsSavedFlash = false;
+            this.notificationsSavedTimer = null;
+            this._changeDetectorRef.markForCheck();
+        }, 2000);
+    }
+
+    private clearNotificationsSavedTimer(): void {
+        if (this.notificationsSavedTimer !== null) {
+            clearTimeout(this.notificationsSavedTimer);
+            this.notificationsSavedTimer = null;
+        }
     }
 
     private flashPreferencesSaved(): void {

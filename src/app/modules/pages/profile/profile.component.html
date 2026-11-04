@@ -16,15 +16,15 @@
             <!-- Tab Menu -->
             <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
                 <a
-                    class="cursor-pointer"
-                    [ngClass]="activeTab === 'home' ? 'font-medium' : 'text-secondary'"
+                    class="thff-profile-tab cursor-pointer"
+                    [class.thff-profile-tab--active]="activeTab === 'home'"
                     (click)="setTab('home')"
                 >
                     Home
                 </a>
                 <a
-                    class="cursor-pointer"
-                    [ngClass]="activeTab === 'settings' ? 'font-medium' : 'text-secondary'"
+                    class="thff-profile-tab cursor-pointer"
+                    [class.thff-profile-tab--active]="activeTab === 'settings'"
                     (click)="setTab('settings')"
                 >
                     Settings
@@ -53,40 +53,24 @@
     <div *ngIf="activeTab === 'settings'" class="flex flex-col lg:flex-row w-full max-w-5xl mx-auto p-6 sm:p-8 gap-8">
         <!-- Settings Sidebar -->
         <div class="flex flex-col w-full lg:w-72 shrink-0">
-            <div class="text-2xl font-bold tracking-tight mb-6">Settings</div>
-            <div class="flex flex-col divide-y border-t border-b">
+            <div class="text-2xl font-bold tracking-tight mb-4">Settings</div>
+            <div class="thff-settings-menu flex flex-col gap-1">
                 <div
                     *ngFor="let panel of panels; trackBy: trackByFn"
-                    class="thff-settings-nav-item flex items-center px-4 py-4 cursor-pointer"
+                    class="thff-settings-nav-item flex items-center px-4 py-3 cursor-pointer"
                     [class.thff-settings-nav-item--selected]="selectedPanel === panel.id"
-                    [ngClass]="{
-                        'hover:bg-accent-100 dark:hover:bg-accent-500/20': selectedPanel !== panel.id,
-                        'bg-primary-50 dark:bg-primary-800 dark:ring-1 dark:ring-inset dark:ring-primary-300/35':
-                            selectedPanel === panel.id
-                    }"
+                    [attr.aria-current]="selectedPanel === panel.id ? 'page' : null"
                     (click)="goToPanel(panel.id)"
                 >
                     <mat-icon
-                        class="mr-3"
-                        [ngClass]="{
-                            'text-hint': selectedPanel !== panel.id,
-                            'text-primary dark:text-primary-50': selectedPanel === panel.id
-                        }"
+                        class="thff-settings-nav-icon mr-3"
                         [svgIcon]="panel.icon"
                     ></mat-icon>
                     <div>
-                        <div
-                            class="font-medium leading-6"
-                            [ngClass]="{
-                                'text-primary dark:text-white': selectedPanel === panel.id
-                            }"
-                        >
+                        <div class="thff-settings-nav-title font-medium leading-6">
                             {{ panel.title }}
                         </div>
-                        <div
-                            class="text-sm text-secondary mt-0.5"
-                            [class.dark:text-primary-50]="selectedPanel === panel.id"
-                        >
+                        <div class="text-sm text-secondary mt-0.5">
                             {{ panel.description }}
                         </div>
                     </div>
@@ -97,9 +81,13 @@
         <!-- Settings Content -->
         <div class="flex flex-col flex-auto">
             <fuse-card class="flex flex-col w-full p-6 sm:p-8">
-                <!-- Panel title -->
-                <div class="text-2xl font-bold tracking-tight mb-6">
-                    {{ getPanelInfo(selectedPanel).title }}
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold tracking-tight">
+                        {{ getPanelInfo(selectedPanel).pageTitle }}
+                    </h2>
+                    <div class="mt-1 text-secondary">
+                        {{ getPanelInfo(selectedPanel).description }}
+                    </div>
                 </div>
 
                 <!-- Panel content -->
@@ -322,9 +310,86 @@
                     </ng-container>
 
                     <!-- ===== NOTIFICATIONS PANEL ===== -->
-                    <!-- <ng-container *ngSwitchCase="'notifications'">
-                        <div class="text-secondary">Coming Soon</div>
-                    </ng-container> -->
+                    <ng-container *ngSwitchCase="'notifications'">
+                        <div class="w-full max-w-xl">
+                            <div *ngIf="notificationsAlert" class="mb-6">
+                                <fuse-alert
+                                    [type]="notificationsAlert.type"
+                                    appearance="outline"
+                                    [showIcon]="true"
+                                    [dismissible]="true"
+                                    (dismissedChanged)="notificationsAlert = null">
+                                    {{ notificationsAlert.message }}
+                                </fuse-alert>
+                            </div>
+
+                            <div class="text-secondary mb-8">
+                                These apply to the address on your account. Grant deadline reminders go to organizations with a draft or submitted proposal for that grant year. The portal-open note goes to every organization, a week after the portal opens.
+                            </div>
+
+                            <div class="flex flex-col gap-8">
+                                <div class="flex items-center justify-between gap-6">
+                                    <div class="flex-auto">
+                                        <div class="leading-6 font-medium">Grant deadline reminders</div>
+                                        <div class="text-secondary mt-1">
+                                            Two weeks before May 1, and again the week before that soft deadline.
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        [attr.aria-checked]="emailGrantDeadlineReminders"
+                                        aria-label="Grant deadline reminders"
+                                        [ngStyle]="switchStyle(emailGrantDeadlineReminders)"
+                                        (click)="emailGrantDeadlineReminders = !emailGrantDeadlineReminders">
+                                        <span [ngStyle]="switchKnobStyle(emailGrantDeadlineReminders)"></span>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-6">
+                                    <div class="flex-auto">
+                                        <div class="leading-6 font-medium">Portal open notice</div>
+                                        <div class="text-secondary mt-1">
+                                            A note that the grant portal is open, sent a week after it opens.
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        [attr.aria-checked]="emailPortalOpenNotices"
+                                        aria-label="Portal open notice"
+                                        [ngStyle]="switchStyle(emailPortalOpenNotices)"
+                                        (click)="emailPortalOpenNotices = !emailPortalOpenNotices">
+                                        <span [ngStyle]="switchKnobStyle(emailPortalOpenNotices)"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div *ngIf="showNotificationActions" class="flex items-center justify-end gap-4 mt-8">
+                                <app-autosave-status
+                                    size="sm"
+                                    [saving]="notificationsSaving"
+                                    [savedFlash]="notificationsSavedFlash"
+                                    savingLabel="Saving…"
+                                    savedLabel="Saved">
+                                </app-autosave-status>
+                                <button
+                                    *ngIf="notificationsChanged"
+                                    mat-flat-button
+                                    type="button"
+                                    [color]="'primary'"
+                                    [disabled]="notificationsSaving"
+                                    (click)="saveNotifications()">
+                                    <span *ngIf="!notificationsSaving">Save</span>
+                                    <mat-progress-spinner
+                                        *ngIf="notificationsSaving"
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'">
+                                    </mat-progress-spinner>
+                                </button>
+                            </div>
+                        </div>
+                    </ng-container>
 
                 </ng-container>
             </fuse-card>
