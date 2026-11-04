@@ -6,6 +6,7 @@ import { VotingComponent } from './voting/voting.component';
 import { SubmissionYearsComponent } from './submission-years/submission-years.component';
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
 import { MeetingComponent } from './meeting/meeting.component';
+import { SiteNotificationsComponent } from './notifications/site-notifications.component';
 
 export const directorRoutes: Route[] = [
     {
@@ -31,6 +32,10 @@ export const directorRoutes: Route[] = [
     {
         path: 'referral-links',
         component: ReferralLinksComponent,
+    },
+    {
+        path: 'notifications',
+        component: SiteNotificationsComponent,
     },
     {
         path: 'solicitation-emails',

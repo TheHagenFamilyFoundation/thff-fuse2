@@ -1,0 +1,41 @@
+<button
+    mat-icon-button
+    type="button"
+    class="header-user-icon-btn"
+    #notificationsOrigin
+    aria-label="Notifications"
+    [attr.aria-expanded]="false"
+    (click)="openPanel()">
+    <mat-icon>notifications</mat-icon>
+</button>
+<span
+    *ngIf="unreadCount > 0"
+    class="pointer-events-none absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white">
+    {{ unreadCount > 9 ? '9+' : unreadCount }}
+</span>
+
+<ng-template #notificationsPanel>
+    <div class="w-[22rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-card shadow-lg dark:border-neutral-700">
+        <div class="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800 dark:border-neutral-700 dark:text-white">
+            Notifications
+        </div>
+
+        <div *ngIf="!announcements.length" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            No notifications
+        </div>
+
+        <div *ngIf="announcements.length" class="max-h-96 overflow-y-auto">
+            <button
+                type="button"
+                *ngFor="let item of announcements"
+                class="block w-full border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50 dark:border-neutral-800 dark:hover:bg-neutral-800"
+                (click)="openAnnouncement(item)">
+                <span class="block text-sm font-semibold text-gray-800 dark:text-white">{{ item.title }}</span>
+                <span class="mt-1 block text-sm leading-5 text-gray-500 dark:text-gray-400">{{ item.body }}</span>
+                <span *ngIf="item.link" class="mt-2 block text-sm font-medium text-primary">
+                    {{ item.linkLabel || 'Notification settings' }}
+                </span>
+            </button>
+        </div>
+    </div>
+</ng-template>

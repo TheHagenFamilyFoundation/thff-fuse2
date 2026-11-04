@@ -1,9 +1,9 @@
 <div class="flex flex-col flex-auto min-w-0">
 
-    <!-- Header (matches Organizations page: same bar, padding, title scale) -->
-    <div class="bg-card border-b">
-        <div class="flex items-center justify-between w-full max-w-screen-xl mx-auto px-6 sm:px-8 py-6 sm:py-8">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight truncate m-0">
+    <!-- Header: same bar height as the Organizations page -->
+    <div class="thff-page-header shrink-0 border-b bg-card">
+        <div class="mx-auto flex h-full w-full max-w-screen-xl items-center justify-between px-6 sm:px-8">
+            <h1 class="m-0 truncate text-2xl font-bold leading-tight tracking-tight md:text-3xl">
                 Director's Page
             </h1>
         </div>
@@ -138,7 +138,6 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-                <!-- Submission Years -->
                 <fuse-card class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
                            (click)="goToSubmissionYears()">
                     <div class="flex items-center mb-3">
@@ -147,6 +146,18 @@
                     </div>
                     <p class="text-gray-500 m-0">
                         Manage grant cycle years and open or close the application portal.
+                    </p>
+                </fuse-card>
+
+                <fuse-card *ngIf="isPresident"
+                           class="flex flex-col p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                           (click)="goToSiteNotices()">
+                    <div class="flex items-center mb-3">
+                        <mat-icon class="text-thff-teal icon-size-8 mr-3">notifications</mat-icon>
+                        <h2 class="text-xl font-semibold m-0">Notifications</h2>
+                    </div>
+                    <p class="text-gray-500 m-0">
+                        Send a notification to the users you choose.
                     </p>
                 </fuse-card>
 
