@@ -188,17 +188,18 @@
                         <mat-datepicker-toggle matSuffix [for]="sendPicker" [disabled]="!!notice.sentAt"></mat-datepicker-toggle>
                         <mat-datepicker #sendPicker></mat-datepicker>
                     </mat-form-field>
+                    <div *ngIf="isScheduleDirty(notice)">
+                        <button
+                            mat-flat-button
+                            color="primary"
+                            type="button"
+                            [disabled]="notice.saving"
+                            (click)="saveScheduleDate(notice)">
+                            {{ notice.saving ? 'Saving…' : 'Save' }}
+                        </button>
+                    </div>
                 </fuse-card>
             </div>
-
-            <button
-                mat-stroked-button
-                type="button"
-                class="mt-4"
-                [disabled]="scheduleSaving || !canSaveSchedule"
-                (click)="saveSchedule()">
-                {{ scheduleSaving ? 'Saving…' : 'Save dates' }}
-            </button>
         </section>
         </div>
     </div>
