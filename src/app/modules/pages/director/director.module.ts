@@ -19,6 +19,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { DirectorComponent } from './director.component';
 import { directorRoutes } from './director.routing';
@@ -29,6 +31,7 @@ import { SubmissionYearsComponent } from './submission-years/submission-years.co
 import { ClosePortalDialogComponent } from './submission-years/close-portal-dialog.component';
 import { ReferralLinksComponent } from './referral-links/referral-links.component';
 import { MeetingComponent } from './meeting/meeting.component';
+import { SiteNotificationsComponent } from './notifications/site-notifications.component';
 import { CreateMeetingDialogComponent } from './meeting/create-meeting-dialog.component';
 import { AutosaveStatusComponent } from 'app/common/components/autosave-status/autosave-status.component';
 import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/confirm-dialog.component';
@@ -43,6 +46,7 @@ import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/con
         ClosePortalDialogComponent,
         ReferralLinksComponent,
         MeetingComponent,
+        SiteNotificationsComponent,
         CreateMeetingDialogComponent,
     ],
     imports: [
@@ -66,6 +70,8 @@ import { ConfirmDialogComponent } from 'app/common/components/confirm-dialog/con
         MatSnackBarModule,
         MatProgressSpinnerModule,
         MatProgressBarModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         AutosaveStatusComponent,
         ConfirmDialogComponent,
     ],

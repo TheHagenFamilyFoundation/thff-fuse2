@@ -86,8 +86,9 @@
                                 </button>
                                 <button mat-icon-button type="button"
                                         (click)="toggleCode(code)"
+                                        [attr.aria-label]="code.active ? 'Deactivate' : 'Activate'"
                                         [matTooltip]="code.active ? 'Deactivate' : 'Activate'">
-                                    <mat-icon class="icon-size-5">{{ code.active ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+                                    <mat-icon class="icon-size-5">{{ code.active ? 'close' : 'check' }}</mat-icon>
                                 </button>
                             </td>
                         </tr>
