@@ -1070,6 +1070,19 @@
     }
 }
 
+/* The chosen day stays a solid circle. Hover does not restyle it. */
+.mat-calendar-body-cell-content.mat-calendar-body-selected {
+    background-color: rgb(var(--fuse-primary-600-rgb)) !important;
+    border-color: rgb(var(--fuse-primary-600-rgb)) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.mat-calendar-body-cell:hover > .mat-calendar-body-cell-content.mat-calendar-body-selected {
+    background-color: rgb(var(--fuse-primary-600-rgb)) !important;
+    color: #fff !important;
+}
+
 /* ----------------------------------------------------------------------------------------------------- */
 /*  @ Icon
 /* ----------------------------------------------------------------------------------------------------- */
