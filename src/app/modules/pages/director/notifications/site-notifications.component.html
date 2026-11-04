@@ -42,53 +42,70 @@
                     <mat-checkbox [(ngModel)]="sendEmail">Also email these users</mat-checkbox>
 
                     <div class="overflow-hidden rounded-lg border border-gray-200">
-                        <div class="border-b border-gray-200 px-3 py-2">
-                            <input
-                                class="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-                                type="search"
-                                placeholder="Search name, email, or organization"
-                                [(ngModel)]="userQuery"
-                                aria-label="Search users">
-                        </div>
-                        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-3 py-2">
+                        <div class="border-b border-gray-200 px-3 py-3">
                             <mat-checkbox
-                                [checked]="allSelected"
-                                [indeterminate]="someSelected"
-                                [disabled]="!filteredUsers.length"
-                                (change)="toggleAll($event.checked)">
-                                Select all
+                                [checked]="allEmails"
+                                (change)="toggleAllEmails($event.checked)">
+                                All emails
                             </mat-checkbox>
-                            <span class="shrink-0 text-sm text-gray-500">
-                                {{ selectedCount }} of {{ users.length }}
-                            </span>
+                            <p *ngIf="allEmails" class="m-0 mt-1 pl-8 text-sm text-gray-500">
+                                <span *ngIf="allEmailTotal === null">Checking the total…</span>
+                                <span *ngIf="allEmailTotal !== null">{{ allEmailTotal | number }} people. Addresses stay hidden.</span>
+                            </p>
                         </div>
-                        <p class="m-0 border-b border-gray-200 px-3 py-2 text-xs text-gray-500">
-                            Checked users see this in the bell<span *ngIf="sendEmail"> and get the email</span>.
-                        </p>
-                        <p *ngIf="!users.length" class="m-0 px-3 py-3 text-sm text-gray-500">
-                            No users to notify.
-                        </p>
-                        <p *ngIf="users.length && !filteredUsers.length" class="m-0 px-3 py-3 text-sm text-gray-500">
-                            No users match that search.
-                        </p>
-                        <ul *ngIf="filteredUsers.length" class="m-0 max-h-64 list-none overflow-y-auto p-0">
-                            <li
-                                *ngFor="let user of filteredUsers"
-                                class="border-b border-gray-100 px-3 py-2 last:border-b-0">
-                                <mat-checkbox
-                                    class="w-full"
-                                    [checked]="selectedUserIds.has(user.id)"
-                                    (change)="toggleOne(user.id, $event.checked)">
-                                    <span class="block text-sm font-medium">{{ user.name || user.email }}</span>
-                                    <span class="block break-all text-sm text-gray-500">
-                                        {{ user.role }}<span *ngIf="user.name"> · {{ user.email }}</span>
+
+                        <div *ngIf="!allEmails">
+                            <div class="border-b border-gray-200 px-3 py-2">
+                                <input
+                                    class="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+                                    type="search"
+                                    placeholder="Search name, email, or organization"
+                                    [ngModel]="userQuery"
+                                    (ngModelChange)="onUserQuery($event)"
+                                    aria-label="Search users">
+                            </div>
+                            <p *ngIf="searching" class="m-0 px-3 py-3 text-sm text-gray-500">Searching…</p>
+                            <p *ngIf="!searching && userQuery.trim().length >= 2 && !searchResults.length" class="m-0 px-3 py-3 text-sm text-gray-500">
+                                No users match that search.
+                            </p>
+                            <ul *ngIf="searchResults.length" class="m-0 list-none p-0">
+                                <li
+                                    *ngFor="let user of searchResults"
+                                    class="flex items-center justify-between gap-3 border-b border-gray-100 px-3 py-2 last:border-b-0">
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-medium">{{ user.name || user.email }}</span>
+                                        <span class="block break-all text-sm text-gray-500">
+                                            {{ user.role }}<span *ngIf="user.name"> · {{ user.email }}</span>
+                                        </span>
+                                        <span *ngIf="user.organizations.length" class="block text-sm text-gray-500">
+                                            {{ user.organizations.join(', ') }}
+                                        </span>
                                     </span>
-                                    <span *ngIf="user.organizations.length" class="block text-sm text-gray-500">
-                                        {{ user.organizations.join(', ') }}
+                                    <button
+                                        mat-stroked-button
+                                        type="button"
+                                        class="shrink-0"
+                                        [disabled]="isAdded(user.id)"
+                                        (click)="addUser(user)">
+                                        {{ isAdded(user.id) ? 'Added' : 'Add' }}
+                                    </button>
+                                </li>
+                            </ul>
+                            <p *ngIf="!addedUsers.length" class="m-0 border-t border-gray-200 px-3 py-3 text-sm text-gray-500">
+                                Add people from the search, or check All emails.
+                            </p>
+                            <ul *ngIf="addedUsers.length" class="m-0 list-none border-t border-gray-200 p-0">
+                                <li
+                                    *ngFor="let user of addedUsers"
+                                    class="flex items-center justify-between gap-3 border-b border-gray-100 px-3 py-2 last:border-b-0">
+                                    <span class="min-w-0 text-sm">
+                                        <span class="font-medium">{{ user.name || user.email }}</span>
+                                        <span class="text-gray-500"> · {{ user.email }}</span>
                                     </span>
-                                </mat-checkbox>
-                            </li>
-                        </ul>
+                                    <button mat-button type="button" (click)="removeUser(user.id)">Remove</button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                     <mat-form-field class="w-full max-w-xs">
