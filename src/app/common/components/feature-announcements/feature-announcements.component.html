@@ -16,8 +16,29 @@
 
 <ng-template #notificationsPanel>
     <div class="w-[22rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-card shadow-lg dark:border-neutral-700">
-        <div class="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800 dark:border-neutral-700 dark:text-white">
-            Notifications
+        <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-neutral-700">
+            <div class="text-sm font-semibold text-gray-800 dark:text-white">
+                Notifications
+            </div>
+            <div class="flex items-center">
+                <button
+                    type="button"
+                    class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-neutral-800"
+                    aria-label="Notification settings"
+                    title="Notification settings"
+                    (click)="openSettings()">
+                    <mat-icon class="icon-size-5">settings</mat-icon>
+                </button>
+                <button
+                    *ngIf="canManage"
+                    type="button"
+                    class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-neutral-800"
+                    aria-label="Manage notifications"
+                    title="Manage notifications"
+                    (click)="openManage()">
+                    <mat-icon class="icon-size-5">campaign</mat-icon>
+                </button>
+            </div>
         </div>
 
         <div *ngIf="!announcements.length" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
