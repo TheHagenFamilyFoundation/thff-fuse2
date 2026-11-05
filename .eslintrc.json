@@ -7,7 +7,8 @@
     "ecmaVersion": 2018
   },
   "ignorePatterns": [
-    "projects/**/*"
+    "projects/**/*",
+    "**/*.json"
   ],
   "overrides": [
     {
@@ -17,12 +18,12 @@
       "parserOptions": {
         "project": [
           "tsconfig.json"
-        ],
-        "createDefaultProgram": true
+        ]
       },
       "extends": [
-        "plugin:@angular-eslint/ng-cli-compat",
-        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
@@ -42,7 +43,10 @@
             "style": "camelCase"
           }
         ],
+        "@angular-eslint/prefer-inject": "off",
+        "@angular-eslint/prefer-standalone": "off",
         "@typescript-eslint/dot-notation": "off",
+        "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/explicit-function-return-type": "error",
         "@typescript-eslint/explicit-member-accessibility": [
           "off",
@@ -62,7 +66,6 @@
           "off",
           "off"
         ],
-        "import/order": "off",
         "max-len": [
           "error",
           {
