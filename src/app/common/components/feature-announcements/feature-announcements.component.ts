@@ -25,6 +25,7 @@ export class FeatureAnnouncementsComponent implements OnInit, OnDestroy {
 
     announcements: FeatureAnnouncement[] = [];
     unreadCount = 0;
+    canManage = false;
 
     private _overlayRef: OverlayRef | null = null;
     private _seen = new Set<string>();
@@ -43,6 +44,10 @@ export class FeatureAnnouncementsComponent implements OnInit, OnDestroy {
         if (!this._auth.accessToken) {
             return;
         }
+        this._auth.checkPresident().subscribe((allowed) => {
+            this.canManage = allowed;
+            this._changeDetectorRef.markForCheck();
+        });
         this.load();
         this._updates = this._announcements.updates$.subscribe(() => this.load());
     }
@@ -114,6 +119,18 @@ export class FeatureAnnouncementsComponent implements OnInit, OnDestroy {
 
     closePanel(): void {
         this._overlayRef?.detach();
+    }
+
+    openSettings(): void {
+        this.closePanel();
+        this._router.navigate(['/pages/profile'], {
+            queryParams: { tab: 'settings', panel: 'notifications' },
+        });
+    }
+
+    openManage(): void {
+        this.closePanel();
+        this._router.navigate(['/pages/director/notifications']);
     }
 
     openAnnouncement(item: FeatureAnnouncement): void {

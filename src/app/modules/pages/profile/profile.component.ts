@@ -160,7 +160,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         });
 
         this.syncSavedAccountValues();
-        this.applySettingsDeepLink();
+        this._route.queryParamMap
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(() => this.applySettingsDeepLink());
     }
 
     ngOnDestroy(): void {
